@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Complaint Detail | LankaID CSR Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
+<style>
+  body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
+  textarea:focus, input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(6,182,212,0.15); border-color: #06b6d4 !important; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+    <a href="csr_dashboard.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>
+      Complaints
+    </a>
+    <div class="flex items-center gap-2 ml-2">
+      <span class="text-slate-600">|</span>
+      <span class="material-symbols-outlined text-cyan-400 text-base">feedback</span>
+      <span class="text-sm font-semibold text-white">Complaint Detail — CMP-2026-0102</span>
+    </div>
+    <div class="ml-auto flex items-center gap-2 text-sm font-semibold">
+      <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-slate-300 text-base">person</span>
+      </div>
+      <span class="text-slate-300">Amara Wijesinghe</span>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left: Complaint Thread -->
+    <div class="lg:col-span-2 space-y-4">
+
+      <!-- Complaint Header Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">High Priority</span>
+              <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Open</span>
+              <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Processing Delay</span>
+            </div>
+            <h1 class="text-lg font-bold text-slate-900">NIC application under review for 3 weeks — no status update</h1>
+            <p class="text-xs text-slate-500 mt-1">Ref: CMP-2026-0102 &nbsp;·&nbsp; Submitted: Aug 15, 2026 at 8:23 AM</p>
+          </div>
+          <div class="flex gap-2 flex-shrink-0">
+            <button onclick="escalate()" class="border border-red-300 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">flag</span>
+              Escalate
+            </button>
+            <button onclick="closeComplaint()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">task_alt</span>
+              Mark Resolved
+            </button>
+          </div>
+        </div>
+
+        <!-- Original Complaint -->
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-slate-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-slate-600 text-sm">person</span>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800">Kamal Perera</span>
+              <span class="text-xs text-slate-400 ml-2">Citizen &nbsp;·&nbsp; Aug 15, 2026 at 8:23 AM</span>
+            </div>
+          </div>
+          <p class="text-sm text-slate-700 leading-relaxed">My NIC application (reference: LK-NIC-2026-00097) has been under review for more than 3 weeks now. I have not received any status updates or communications from any officers. I need this urgently for employment purposes. Could you please provide an update on the timeline?</p>
+        </div>
+      </div>
+
+      <!-- Internal Notes / Communication Thread -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 class="font-semibold text-slate-800 text-sm mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-cyan-600">forum</span>
+          Communication Thread
+        </h2>
+
+        <div class="space-y-4 mb-5">
+          <!-- System Note -->
+          <div class="flex gap-3">
+            <div class="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-sky-600 text-sm">info</span>
+            </div>
+            <div class="flex-1 bg-sky-50 border border-sky-200 rounded-xl p-3 text-xs text-sky-700">
+              <span class="font-semibold">System</span> — Complaint auto-assigned to Amara Wijesinghe (CSR) · Aug 15, 2026 at 8:24 AM
+            </div>
+          </div>
+
+          <!-- CSR Internal Note -->
+          <div class="flex gap-3">
+            <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-white text-sm">person</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-bold text-slate-800">Amara Wijesinghe</span>
+                <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium">Internal Note</span>
+                <span class="text-xs text-slate-400">Aug 15, 2026 at 9:00 AM</span>
+              </div>
+              <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-sm text-slate-700">
+                Checked with NIC Officer — application LK-NIC-2026-00097 is flagged pending a document review. Escalated to Kumara Silva to provide status update to citizen.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reply Form -->
+        <div class="border-t border-slate-100 pt-4">
+          <h3 class="text-xs font-semibold text-slate-600 mb-2">Add Response or Note</h3>
+          <div class="flex gap-2 mb-3">
+            <button id="typePublic" onclick="setResponseType('public')" class="text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold">Reply to Citizen</button>
+            <button id="typeInternal" onclick="setResponseType('internal')" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Internal Note</button>
+          </div>
+          <textarea id="replyText" rows="4" placeholder="Type your response to the citizen here..." class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm resize-none"></textarea>
+
+          <!-- Canned Responses -->
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button onclick="insertCanned('We have received your complaint and are investigating the matter. You will receive an update within 2 business days.')" class="text-xs border border-slate-200 text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50">+Investigation started</button>
+            <button onclick="insertCanned('Your complaint has been resolved. Please check your application status on the LankaID portal.')" class="text-xs border border-slate-200 text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50">+Resolved</button>
+            <button onclick="insertCanned('We apologize for the delay. Your application is being expedited and you will receive a status update shortly.')" class="text-xs border border-slate-200 text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50">+Delay apology</button>
+          </div>
+
+          <div class="flex items-center justify-between mt-3">
+            <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+              <input type="checkbox" class="rounded" id="notifyEmail" checked/>
+              Notify citizen by email
+            </label>
+            <button onclick="sendReply()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-base">send</span>
+              Send Reply
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Complaint Info -->
+    <div class="space-y-4">
+
+      <!-- Citizen Info -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-cyan-600 text-lg">account_circle</span>
+          Citizen Information
+        </h3>
+        <div class="space-y-2.5 text-xs text-slate-600">
+          <div><p class="text-slate-400">Full Name</p><p class="font-semibold text-slate-800 mt-0.5">Kamal Sandesh Perera</p></div>
+          <div><p class="text-slate-400">NIC Number</p><p class="font-semibold text-slate-800 mt-0.5">200012349876</p></div>
+          <div><p class="text-slate-400">Email</p><p class="font-semibold text-slate-800 mt-0.5">kamal.p@gmail.com</p></div>
+          <div><p class="text-slate-400">Mobile</p><p class="font-semibold text-slate-800 mt-0.5">+94 77 234 5678</p></div>
+          <div><p class="text-slate-400">District</p><p class="font-semibold text-slate-800 mt-0.5">Colombo</p></div>
+        </div>
+        <hr class="my-3 border-slate-100"/>
+        <a href="application_tracking.html" class="text-xs text-sky-600 font-semibold hover:underline flex items-center gap-1">
+          View Citizen Applications
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Related Application -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-cyan-600 text-lg">assignment</span>
+          Related Application
+        </h3>
+        <div class="bg-slate-50 rounded-xl p-3 text-xs text-slate-700 space-y-2">
+          <div class="flex justify-between"><span class="text-slate-400">Reference</span><span class="font-mono font-bold text-sky-700">LK-NIC-2026-00097</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Type</span><span class="font-semibold">NIC — Lost/Damaged</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Submitted</span><span class="font-semibold">Jul 28, 2026</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Current Status</span><span class="text-red-600 font-semibold">Info Requested</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Assigned Officer</span><span class="font-semibold">Kumara Silva</span></div>
+        </div>
+      </div>
+
+      <!-- Status Actions -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h3 class="font-semibold text-slate-800 text-sm mb-3">Update Complaint Status</h3>
+        <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white mb-3">
+          <option value="open">Open</option>
+          <option value="inprogress">In Progress</option>
+          <option value="awaiting">Awaiting Citizen Response</option>
+          <option value="escalated">Escalated to Director</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+        <button class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-xl text-xs font-semibold transition-colors">Update Status</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Resolved Modal -->
+<div id="resolvedModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-7 text-center">
+    <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+      <span class="material-symbols-outlined text-emerald-600 text-3xl">task_alt</span>
+    </div>
+    <h2 class="text-lg font-bold text-slate-900 mb-1">Complaint Resolved</h2>
+    <p class="text-xs text-slate-500 mb-4">The citizen has been notified that their complaint is resolved.</p>
+    <button onclick="window.location.href='csr_dashboard.html'" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Back to Dashboard</button>
+  </div>
+</div>
+
+<script>
+let responseType = 'public';
+function setResponseType(type) {
+  responseType = type;
+  const pub = document.getElementById('typePublic');
+  const int = document.getElementById('typeInternal');
+  const txt = document.getElementById('replyText');
+  if (type === 'public') {
+    pub.className = 'text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold';
+    int.className = 'text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50';
+    txt.placeholder = 'Type your response to the citizen here...';
+  } else {
+    int.className = 'text-xs px-3 py-1.5 rounded-lg bg-purple-600 text-white font-semibold';
+    pub.className = 'text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50';
+    txt.placeholder = 'Add internal note (not visible to citizen)...';
+  }
+}
+function insertCanned(text) { document.getElementById('replyText').value = text; }
+function sendReply() {
+  const txt = document.getElementById('replyText').value;
+  if (!txt.trim()) { alert('Please enter a reply.'); return; }
+  alert('Reply sent!');
+  document.getElementById('replyText').value = '';
+}
+function closeComplaint() {
+  const m = document.getElementById('resolvedModal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+}
+function escalate() { alert('Complaint escalated to Director.'); }
+</script>
+</body>
+</html>

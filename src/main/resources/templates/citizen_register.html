@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create Account | LankaID Identity Portal</title>
+<meta name="description" content="Register for a LankaID account to access National Identity Card and Passport services online."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Public Sans', 'sans-serif'] },
+      colors: {
+        primary: '#0284C7',
+        'primary-dark': '#0369A1',
+        secondary: '#006398',
+        surface: '#f8f9ff',
+        'on-surface': '#0b1c30',
+        'surface-container': '#e5eeff',
+        'outline-variant': '#c6c6cd',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Public Sans', sans-serif; }
+  .step-active { background: #0284C7; color: white; }
+  .step-done { background: #0284C7; color: white; }
+  .step-pending { background: #e5eeff; color: #76777d; }
+  .field-error { border-color: #DC2626 !important; }
+  input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(2,132,199,0.15); border-color: #0284C7; }
+</style>
+</head>
+<body class="min-h-screen bg-slate-50 flex flex-col">
+
+<!-- Header -->
+<header class="w-full bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <a href="01_landing_page.html" class="flex items-center gap-2.5 group">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-lg">verified_user</span>
+      </div>
+      <span class="text-xl font-extrabold text-slate-900">Lanka<span class="text-sky-600">ID</span></span>
+    </a>
+    <div class="flex items-center gap-3 text-sm text-slate-500">
+      <span>Already have an account?</span>
+      <a href="02_login_portal.html" class="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-sky-700 transition-colors text-sm">Sign In</a>
+    </div>
+  </div>
+</header>
+
+<div class="flex-1 flex">
+  <!-- Left Panel -->
+  <div class="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-slate-900 via-sky-950 to-indigo-950 text-white flex-col justify-between p-12 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, #0284C7 0%, transparent 60%), radial-gradient(circle at 80% 20%, #6366F1 0%, transparent 40%)"></div>
+    <div class="relative z-10">
+      <div class="w-14 h-14 rounded-2xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center mb-8">
+        <span class="material-symbols-outlined text-sky-400 text-3xl">account_circle</span>
+      </div>
+      <h2 class="text-3xl font-bold mb-3 leading-tight">Create Your LankaID Account</h2>
+      <p class="text-slate-300 text-base leading-relaxed mb-8">Securely manage your national identity documents from anywhere in Sri Lanka.</p>
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-emerald-400 text-base">check</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Apply for NIC & Passport online</p>
+            <p class="text-slate-400 text-xs mt-0.5">Submit applications without visiting offices</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-emerald-400 text-base">check</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Track application status in real-time</p>
+            <p class="text-slate-400 text-xs mt-0.5">Know exactly where your application stands</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-emerald-400 text-base">check</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Book biometric appointments</p>
+            <p class="text-slate-400 text-xs mt-0.5">Choose a convenient centre and time slot</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-emerald-400 text-base">check</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Receive instant notifications</p>
+            <p class="text-slate-400 text-xs mt-0.5">Get updates at every stage of your application</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="relative z-10 border-t border-white/10 pt-6">
+      <p class="text-xs text-slate-400 flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-400 text-sm">shield</span>
+        256-bit encrypted · Official Government Portal · Department of Immigration & Emigration
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Panel – Registration Form -->
+  <div class="flex-1 flex items-start justify-center px-4 sm:px-8 py-8 overflow-y-auto">
+    <div class="w-full max-w-xl">
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Personal Information</h1>
+      <p class="text-slate-500 text-sm mb-6">Fill in your details exactly as they appear on your official documents.</p>
+
+      <!-- Progress Steps -->
+      <div class="flex items-center gap-2 mb-8">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full step-active flex items-center justify-center text-xs font-bold">1</div>
+          <span class="text-xs font-semibold text-sky-700 hidden sm:block">Personal Info</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-slate-200 mx-1"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full step-pending flex items-center justify-center text-xs font-bold">2</div>
+          <span class="text-xs font-medium text-slate-400 hidden sm:block">Contact Details</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-slate-200 mx-1"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full step-pending flex items-center justify-center text-xs font-bold">3</div>
+          <span class="text-xs font-medium text-slate-400 hidden sm:block">Security</span>
+        </div>
+      </div>
+
+      <form id="registrationForm" onsubmit="handleRegister(event)" novalidate>
+        <!-- Section: Personal Information -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-sky-600 text-lg">person</span>
+            <h2 class="font-semibold text-slate-800 text-sm">Personal Information</h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Full Name (As in Birth Certificate) <span class="text-red-500">*</span></label>
+              <input type="text" id="fullName" placeholder="e.g., Kamal Sandesh Perera" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">NIC Number <span class="text-red-500">*</span></label>
+              <input type="text" id="nicNumber" placeholder="e.g., 200012345678 or 901234567V" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+              <p class="text-xs text-slate-400 mt-1">New (12 digit) or old format (9 digit + V/X)</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Date of Birth <span class="text-red-500">*</span></label>
+              <input type="date" id="dob" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 transition-all"/>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Gender <span class="text-red-500">*</span></label>
+              <select id="gender" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 transition-all bg-white">
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nationality <span class="text-red-500">*</span></label>
+              <select id="nationality" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 transition-all bg-white">
+                <option value="Sri Lankan">Sri Lankan</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Contact Details -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-sky-600 text-lg">contact_mail</span>
+            <h2 class="font-semibold text-slate-800 text-sm">Contact Details</h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Address <span class="text-red-500">*</span></label>
+              <input type="email" id="email" placeholder="you@example.com" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+              <p class="text-xs text-slate-400 mt-1">All application notifications will be sent to this email</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Mobile Number <span class="text-red-500">*</span></label>
+              <div class="flex">
+                <span class="border border-r-0 border-slate-300 rounded-l-lg px-3 py-2.5 text-sm bg-slate-50 text-slate-500 font-medium">+94</span>
+                <input type="tel" id="mobile" placeholder="77 123 4567" required class="flex-1 border border-slate-300 rounded-r-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Alternate Phone</label>
+              <div class="flex">
+                <span class="border border-r-0 border-slate-300 rounded-l-lg px-3 py-2.5 text-sm bg-slate-50 text-slate-500 font-medium">+94</span>
+                <input type="tel" id="altPhone" placeholder="11 234 5678" class="flex-1 border border-slate-300 rounded-r-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+              </div>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Permanent Address <span class="text-red-500">*</span></label>
+              <textarea id="address" rows="2" placeholder="No. 45, Galle Road, Colombo 03" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all resize-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">District <span class="text-red-500">*</span></label>
+              <select id="district" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 bg-white transition-all">
+                <option value="">Select district</option>
+                <option>Colombo</option><option>Gampaha</option><option>Kalutara</option>
+                <option>Kandy</option><option>Matale</option><option>Nuwara Eliya</option>
+                <option>Galle</option><option>Matara</option><option>Hambantota</option>
+                <option>Jaffna</option><option>Kilinochchi</option><option>Mannar</option>
+                <option>Vavuniya</option><option>Mullaitivu</option><option>Batticaloa</option>
+                <option>Ampara</option><option>Trincomalee</option><option>Kurunegala</option>
+                <option>Puttalam</option><option>Anuradhapura</option><option>Polonnaruwa</option>
+                <option>Badulla</option><option>Moneragala</option><option>Ratnapura</option>
+                <option>Kegalle</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Postal Code</label>
+              <input type="text" id="postalCode" placeholder="00300" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Security -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-sky-600 text-lg">lock</span>
+            <h2 class="font-semibold text-slate-800 text-sm">Account Security</h2>
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input type="password" id="password" placeholder="Minimum 8 characters" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+                <button type="button" onclick="togglePwd('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <span class="material-symbols-outlined text-lg">visibility_off</span>
+                </button>
+              </div>
+              <div class="flex gap-1.5 mt-2" id="pwdStrength">
+                <div class="h-1 flex-1 rounded-full bg-slate-200" id="s1"></div>
+                <div class="h-1 flex-1 rounded-full bg-slate-200" id="s2"></div>
+                <div class="h-1 flex-1 rounded-full bg-slate-200" id="s3"></div>
+                <div class="h-1 flex-1 rounded-full bg-slate-200" id="s4"></div>
+              </div>
+              <p class="text-xs text-slate-400 mt-1" id="pwdHint">Use at least 8 characters, mix of letters, numbers & symbols</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Confirm Password <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input type="password" id="confirmPwd" placeholder="Re-enter your password" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-800 placeholder-slate-400 transition-all"/>
+                <button type="button" onclick="togglePwd('confirmPwd', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <span class="material-symbols-outlined text-lg">visibility_off</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <label class="flex items-start gap-3 mt-4 cursor-pointer">
+            <input type="checkbox" id="terms" required class="mt-0.5 rounded border-slate-300 text-sky-600"/>
+            <span class="text-xs text-slate-600 leading-relaxed">I agree to the <a href="#" class="text-sky-600 underline">Terms of Service</a> and <a href="#" class="text-sky-600 underline">Privacy Policy</a> of the LankaID National Portal. I confirm that the information provided is accurate and truthful.</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="registerBtn" class="w-full bg-sky-600 hover:bg-sky-700 active:scale-[0.99] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-sky-600/25">
+          <span class="material-symbols-outlined text-lg">how_to_reg</span>
+          Create LankaID Account
+        </button>
+        <p class="text-center text-xs text-slate-400 mt-3">Already have an account? <a href="02_login_portal.html" class="text-sky-600 font-semibold hover:underline">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-emerald-600 text-3xl">check_circle</span>
+    </div>
+    <h2 class="text-xl font-bold text-slate-900 mb-2">Account Created!</h2>
+    <p class="text-slate-500 text-sm mb-6">Your LankaID account has been created successfully. A verification email has been sent to your registered email address.</p>
+    <button onclick="window.location.href='02_login_portal.html'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
+      <span class="material-symbols-outlined text-lg">login</span>
+      Sign In to Your Account
+    </button>
+  </div>
+</div>
+
+<script>
+function togglePwd(fieldId, btn) {
+  const input = document.getElementById(fieldId);
+  const icon = btn.querySelector('.material-symbols-outlined');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.textContent = 'visibility';
+  } else {
+    input.type = 'password';
+    icon.textContent = 'visibility_off';
+  }
+}
+
+document.getElementById('password').addEventListener('input', function() {
+  const val = this.value;
+  const bars = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3'), document.getElementById('s4')];
+  const hint = document.getElementById('pwdHint');
+  bars.forEach(b => b.className = 'h-1 flex-1 rounded-full bg-slate-200');
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-emerald-500'];
+  const hints = ['Weak password', 'Fair password', 'Good password', 'Strong password'];
+  for (let i = 0; i < score; i++) bars[i].className = `h-1 flex-1 rounded-full ${colors[score-1]}`;
+  hint.textContent = score > 0 ? hints[score-1] : 'Use at least 8 characters, mix of letters, numbers & symbols';
+});
+
+function handleRegister(e) {
+  e.preventDefault();
+  const pwd = document.getElementById('password').value;
+  const confirm = document.getElementById('confirmPwd').value;
+  if (pwd !== confirm) {
+    alert('Passwords do not match. Please re-enter.');
+    return;
+  }
+  document.getElementById('successModal').classList.remove('hidden');
+  document.getElementById('successModal').classList.add('flex');
+}
+</script>
+</body>
+</html>

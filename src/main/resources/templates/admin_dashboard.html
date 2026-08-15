@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>System Administration | LankaID Identity Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
+<style>
+  body { font-family: 'Public Sans', sans-serif; background: #0f172a; color: #e2e8f0; }
+  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
+  .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+  .sidebar-link.active { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .sidebar-link .material-symbols-outlined { font-size: 20px; }
+  .card { background: rgba(30,41,59,0.8); border: 1px solid rgba(148,163,184,0.1); border-radius: 16px; }
+  input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(239,68,68,0.2); border-color: #ef4444 !important; }
+</style>
+</head>
+<body class="min-h-screen flex">
+
+<!-- Sidebar -->
+<aside class="w-64 min-h-screen bg-slate-950 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800">
+  <div class="p-5 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 to-orange-500 flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-white text-lg">shield</span>
+      </div>
+      <div>
+        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-red-400">ID</span></p>
+        <p class="text-xs text-slate-400 mt-0.5">Admin Portal</p>
+      </div>
+    </div>
+  </div>
+
+  <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+    <p class="text-xs font-semibold text-slate-500 uppercase px-3 py-2 mt-1">Administration</p>
+    <a href="#" onclick="showSection('users')" class="sidebar-link active" id="nav-users">
+      <span class="material-symbols-outlined">group</span>
+      User Management
+    </a>
+    <a href="#" onclick="showSection('roles')" class="sidebar-link" id="nav-roles">
+      <span class="material-symbols-outlined">manage_accounts</span>
+      Roles & Permissions
+    </a>
+    <a href="#" onclick="showSection('audit')" class="sidebar-link" id="nav-audit">
+      <span class="material-symbols-outlined">history_edu</span>
+      Audit Logs
+    </a>
+    <a href="#" onclick="showSection('settings')" class="sidebar-link" id="nav-settings">
+      <span class="material-symbols-outlined">settings</span>
+      System Settings
+    </a>
+    <p class="text-xs font-semibold text-slate-500 uppercase px-3 py-2 mt-2">Analytics</p>
+    <a href="director_dashboard.html" class="sidebar-link">
+      <span class="material-symbols-outlined">dashboard</span>
+      Director Dashboard
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="material-symbols-outlined">analytics</span>
+      Reports
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="material-symbols-outlined">health_metrics</span>
+      System Health
+    </a>
+    <a href="#" class="sidebar-link">
+      <span class="material-symbols-outlined">feedback</span>
+      All Complaints
+    </a>
+  </nav>
+
+  <div class="p-4 border-t border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-red-900/50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-red-300 text-xl">person</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-white leading-none truncate">Ravi Bandara</p>
+        <p class="text-xs text-slate-400 mt-0.5">System Administrator</p>
+      </div>
+      <a href="02_login_portal.html" class="text-slate-500 hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-lg">logout</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="ml-64 flex-1 flex flex-col">
+
+  <header class="border-b border-slate-800 h-16 flex items-center px-6 sticky top-0 z-20" style="background: rgba(15,23,42,0.95); backdrop-filter: blur(12px);">
+    <div class="flex-1">
+      <h1 class="text-base font-bold text-white" id="pageTitle">User Management</h1>
+      <p class="text-xs text-slate-400" id="pageSubtitle">Manage all system users, roles and access control</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="openAddUser()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-base">person_add</span>
+        Add User
+      </button>
+      <button class="relative text-slate-400 hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-xl">notifications</span>
+        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">2</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== USER MANAGEMENT ===== -->
+  <div id="section-users" class="p-6">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+      <div class="card p-4 text-center">
+        <p class="text-2xl font-bold text-white">1,247</p>
+        <p class="text-xs text-slate-400 mt-1">Citizens</p>
+        <div class="w-8 h-1 bg-sky-500 rounded-full mx-auto mt-2"></div>
+      </div>
+      <div class="card p-4 text-center">
+        <p class="text-2xl font-bold text-white">8</p>
+        <p class="text-xs text-slate-400 mt-1">NIC Officers</p>
+        <div class="w-8 h-1 bg-emerald-500 rounded-full mx-auto mt-2"></div>
+      </div>
+      <div class="card p-4 text-center">
+        <p class="text-2xl font-bold text-white">5</p>
+        <p class="text-xs text-slate-400 mt-1">Passport Officers</p>
+        <div class="w-8 h-1 bg-indigo-500 rounded-full mx-auto mt-2"></div>
+      </div>
+      <div class="card p-4 text-center">
+        <p class="text-2xl font-bold text-white">6</p>
+        <p class="text-xs text-slate-400 mt-1">CSR Staff</p>
+        <div class="w-8 h-1 bg-cyan-500 rounded-full mx-auto mt-2"></div>
+      </div>
+      <div class="card p-4 text-center">
+        <p class="text-2xl font-bold text-white">3</p>
+        <p class="text-xs text-slate-400 mt-1">Admins/Directors</p>
+        <div class="w-8 h-1 bg-red-500 rounded-full mx-auto mt-2"></div>
+      </div>
+    </div>
+
+    <!-- Table Controls -->
+    <div class="card p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div class="flex-1 min-w-48 relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+        <input type="text" placeholder="Search by name, email, NIC..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500"/>
+      </div>
+      <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200" id="roleFilter" onchange="filterUsers()">
+        <option value="">All Roles</option>
+        <option value="citizen">Citizen</option>
+        <option value="nic-officer">NIC Officer</option>
+        <option value="passport-officer">Passport Officer</option>
+        <option value="csr">CSR</option>
+        <option value="director">Director</option>
+        <option value="admin">System Admin</option>
+      </select>
+      <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200">
+        <option>All Status</option>
+        <option>Active</option>
+        <option>Suspended</option>
+        <option>Inactive</option>
+      </select>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card overflow-hidden">
+      <table class="w-full text-sm" id="usersTable">
+        <thead class="border-b border-slate-800">
+          <tr class="text-xs text-slate-500">
+            <th class="text-left px-4 py-3 font-semibold uppercase">User</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Role</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">NIC / ID</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Centre / District</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Status</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Last Login</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800 text-slate-300">
+          <tr class="hover:bg-slate-800/50 transition-colors" data-role="citizen">
+            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-sky-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-sky-400 text-base">person</span></div><div><p class="font-semibold text-white text-sm">Kamal Sandesh Perera</p><p class="text-xs text-slate-400">kamal.p@gmail.com</p></div></div></td>
+            <td class="px-4 py-3"><span class="text-xs bg-sky-900/50 text-sky-400 px-2 py-0.5 rounded-full border border-sky-800">Citizen</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400">200012349876</td>
+            <td class="px-4 py-3 text-xs text-slate-400">Colombo</td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
+            <td class="px-4 py-3"><div class="flex gap-1"><button onclick="editUser('Kamal Perera')" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button><button onclick="suspendUser(this)" class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400 transition-colors"><span class="material-symbols-outlined text-sm">block</span></button><button onclick="deleteUser(this)" class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50 transition-colors" data-role="nic-officer">
+            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-emerald-400 text-base">badge</span></div><div><p class="font-semibold text-white text-sm">Nimal Jayawardena</p><p class="text-xs text-slate-400">nimal.j@lankaid.gov.lk</p></div></div></td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800">NIC Officer</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-NIC-001</td>
+            <td class="px-4 py-3 text-xs text-slate-400">Colombo Main Centre</td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
+            <td class="px-4 py-3"><div class="flex gap-1"><button onclick="editUser('Nimal Jayawardena')" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400 transition-colors"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50 transition-colors" data-role="nic-officer">
+            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-emerald-400 text-base">badge</span></div><div><p class="font-semibold text-white text-sm">Kumara Silva</p><p class="text-xs text-slate-400">kumara.s@lankaid.gov.lk</p></div></div></td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800">NIC Officer</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-NIC-002</td>
+            <td class="px-4 py-3 text-xs text-slate-400">Colombo North Centre</td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-xs text-slate-400">Aug 14, 2026</td>
+            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50 transition-colors" data-role="passport-officer">
+            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-indigo-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-indigo-400 text-base">flight_takeoff</span></div><div><p class="font-semibold text-white text-sm">Dilani Rathnayake</p><p class="text-xs text-slate-400">dilani.r@lankaid.gov.lk</p></div></div></td>
+            <td class="px-4 py-3"><span class="text-xs bg-indigo-900/50 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-800">Passport Officer</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-PASS-001</td>
+            <td class="px-4 py-3 text-xs text-slate-400">Colombo Main Centre</td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
+            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50 transition-colors" data-role="csr">
+            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-cyan-400 text-base">support_agent</span></div><div><p class="font-semibold text-white text-sm">Amara Wijesinghe</p><p class="text-xs text-slate-400">amara.w@lankaid.gov.lk</p></div></div></td>
+            <td class="px-4 py-3"><span class="text-xs bg-cyan-900/50 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800">CSR</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-CSR-001</td>
+            <td class="px-4 py-3 text-xs text-slate-400">Colombo Main Centre</td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
+            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          </tr>
+          <tr class="hover:bg-slate-800/50 transition-colors" data-role="director">
+            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-purple-400 text-base">admin_panel_settings</span></div><div><p class="font-semibold text-white text-sm">Sunil Amarasinghe</p><p class="text-xs text-slate-400">sunil.a@lankaid.gov.lk</p></div></div></td>
+            <td class="px-4 py-3"><span class="text-xs bg-purple-900/50 text-purple-400 px-2 py-0.5 rounded-full border border-purple-800">Director</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-DIR-001</td>
+            <td class="px-4 py-3 text-xs text-slate-400">Head Office</td>
+            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
+            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 cursor-not-allowed opacity-40"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 cursor-not-allowed opacity-40"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== AUDIT LOGS ===== -->
+  <div id="section-audit" class="p-6 hidden">
+    <div class="card p-6">
+      <h2 class="font-bold text-white text-base mb-4">System Audit Logs</h2>
+      <div class="flex gap-3 mb-4">
+        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200">
+          <option>All Events</option>
+          <option>Login</option>
+          <option>Application Updated</option>
+          <option>User Created</option>
+          <option>User Deleted</option>
+          <option>Role Changed</option>
+        </select>
+        <input type="date" value="2026-08-15" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200"/>
+      </div>
+      <table class="w-full text-sm">
+        <thead><tr class="text-xs text-slate-500 border-b border-slate-800">
+          <th class="text-left py-2 font-semibold">Timestamp</th>
+          <th class="text-left py-2 font-semibold">User</th>
+          <th class="text-left py-2 font-semibold">Event</th>
+          <th class="text-left py-2 font-semibold">Details</th>
+          <th class="text-left py-2 font-semibold">IP Address</th>
+        </tr></thead>
+        <tbody class="divide-y divide-slate-800 text-slate-300 text-xs">
+          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-15 10:23:47</td><td class="py-2.5 text-white font-medium">Nimal Jayawardena</td><td class="py-2.5"><span class="bg-emerald-900/50 text-emerald-400 px-1.5 py-0.5 rounded">Approved</span></td><td class="py-2.5 text-slate-400">NIC Application LK-NIC-2026-00183</td><td class="py-2.5 font-mono text-slate-500">192.168.1.42</td></tr>
+          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-15 09:41:22</td><td class="py-2.5 text-white font-medium">Ravi Bandara</td><td class="py-2.5"><span class="bg-sky-900/50 text-sky-400 px-1.5 py-0.5 rounded">User Created</span></td><td class="py-2.5 text-slate-400">New CSR account: Amara Wijesinghe</td><td class="py-2.5 font-mono text-slate-500">10.0.0.5</td></tr>
+          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-15 08:33:10</td><td class="py-2.5 text-white font-medium">Kamal Perera</td><td class="py-2.5"><span class="bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Login</span></td><td class="py-2.5 text-slate-400">Citizen login successful</td><td class="py-2.5 font-mono text-slate-500">111.220.55.90</td></tr>
+          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-14 16:12:05</td><td class="py-2.5 text-white font-medium">Kumara Silva</td><td class="py-2.5"><span class="bg-red-900/50 text-red-400 px-1.5 py-0.5 rounded">Info Req.</span></td><td class="py-2.5 text-slate-400">Requested docs for LK-NIC-2026-00097</td><td class="py-2.5 font-mono text-slate-500">192.168.1.43</td></tr>
+          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-14 14:55:30</td><td class="py-2.5 text-white font-medium">Ravi Bandara</td><td class="py-2.5"><span class="bg-purple-900/50 text-purple-400 px-1.5 py-0.5 rounded">Role Changed</span></td><td class="py-2.5 text-slate-400">Changed Pradeep: Citizen → Passport Officer</td><td class="py-2.5 font-mono text-slate-500">10.0.0.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== SYSTEM SETTINGS ===== -->
+  <div id="section-settings" class="p-6 hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="card p-6 space-y-4">
+        <h2 class="font-bold text-white text-base">Application Processing Settings</h2>
+        <div><label class="block text-xs text-slate-400 mb-1.5">Max Review Time (Days)</label><input type="number" value="7" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
+        <div><label class="block text-xs text-slate-400 mb-1.5">Auto-escalate After (Days)</label><input type="number" value="14" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
+        <div><label class="block text-xs text-slate-400 mb-1.5">NIC Service Fee (LKR)</label><input type="number" value="1000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
+        <div><label class="block text-xs text-slate-400 mb-1.5">Passport Service Fee (LKR)</label><input type="number" value="3500" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
+        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">Save Settings</button>
+      </div>
+      <div class="card p-6 space-y-4">
+        <h2 class="font-bold text-white text-base">Notification Settings</h2>
+        <div class="flex items-center justify-between py-2 border-b border-slate-800"><span class="text-sm text-slate-300">Email Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <div class="flex items-center justify-between py-2 border-b border-slate-800"><span class="text-sm text-slate-300">SMS Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <div class="flex items-center justify-between py-2 border-b border-slate-800"><span class="text-sm text-slate-300">In-App Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <div class="flex items-center justify-between py-2"><span class="text-sm text-slate-300">Complaint Auto-Response</span><button class="w-11 h-6 bg-slate-700 rounded-full relative transition-colors"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ROLES ===== -->
+  <div id="section-roles" class="p-6 hidden">
+    <div class="card p-6">
+      <h2 class="font-bold text-white text-base mb-4">Roles & Permissions</h2>
+      <div class="space-y-3">
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span><span class="font-semibold text-white text-sm">Citizen</span></div><span class="text-xs text-slate-400">1,247 users</span></div><p class="text-xs text-slate-400">Can apply for NIC/Passport, track applications, book appointments, file complaints, receive notifications.</p></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-white text-sm">NIC Application Officer</span></div><span class="text-xs text-slate-400">8 users</span></div><p class="text-xs text-slate-400">Can review NIC applications, approve/reject/request-info, collect biometric data, view NIC queue.</p></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-white text-sm">Passport Application Officer</span></div><span class="text-xs text-slate-400">5 users</span></div><p class="text-xs text-slate-400">Can review Passport applications, approve/reject/request-info, collect biometric data, view Passport queue.</p></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span><span class="font-semibold text-white text-sm">Citizen Service Representative</span></div><span class="text-xs text-slate-400">6 users</span></div><p class="text-xs text-slate-400">Can manage complaints, respond to citizens, manage walk-in bookings, view appointment schedules.</p></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="font-semibold text-white text-sm">Identity Service Director</span></div><span class="text-xs text-slate-400">1 user</span></div><p class="text-xs text-slate-400">Can view all dashboards, system stats, officer performance, application metrics, and all complaints.</p></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span><span class="font-semibold text-white text-sm">System Administrator</span></div><span class="text-xs text-slate-400">2 users</span></div><p class="text-xs text-slate-400">Full system access: user management, role assignment, audit logs, system settings, all director views, security controls.</p></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-bold text-white text-base flex items-center gap-2">
+        <span class="material-symbols-outlined text-red-400">person_add</span>
+        Add New System User
+      </h2>
+      <button onclick="closeAddUser()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="sm:col-span-2"><label class="block text-xs text-slate-400 mb-1.5">Full Name <span class="text-red-400">*</span></label><input type="text" placeholder="Full legal name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label><input type="email" placeholder="user@lankaid.gov.lk" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">NIC Number <span class="text-red-400">*</span></label><input type="text" placeholder="200012345678" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">Assign Role <span class="text-red-400">*</span></label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option value="">Select Role</option><option>NIC Officer</option><option>Passport Officer</option><option>CSR</option><option>Director</option><option>System Admin</option></select></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">Centre / District</label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option>Colombo Main Centre</option><option>Colombo North Centre</option><option>Dehiwala Centre</option><option>Kandy Centre</option><option>Galle Centre</option><option>Head Office</option></select></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">Phone Number</label><input type="tel" placeholder="+94 77 123 4567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">Temporary Password <span class="text-red-400">*</span></label><input type="password" placeholder="Min 8 characters" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
+    </div>
+    <label class="flex items-center gap-2 mt-3 text-xs text-slate-400 cursor-pointer">
+      <input type="checkbox" class="rounded" checked/>
+      Send welcome email with login credentials
+    </label>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeAddUser()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+      <button onclick="createUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Create User</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showSection(s) {
+  ['users','roles','audit','settings'].forEach(t => {
+    const el = document.getElementById('section-'+t);
+    const nav = document.getElementById('nav-'+t);
+    if (el) el.classList.add('hidden');
+    if (nav) { nav.classList.remove('active'); }
+  });
+  const target = document.getElementById('section-'+s);
+  if (target) target.classList.remove('hidden');
+  const nav = document.getElementById('nav-'+s);
+  if (nav) { nav.classList.add('active'); }
+  const titles = { users: ['User Management','Manage all system users, roles and access control'], roles: ['Roles & Permissions','View and configure role-based access control'], audit: ['Audit Logs','Review all system actions and user activity'], settings: ['System Settings','Configure processing rules, fees and notifications'] };
+  if (titles[s]) {
+    document.getElementById('pageTitle').textContent = titles[s][0];
+    document.getElementById('pageSubtitle').textContent = titles[s][1];
+  }
+  return false;
+}
+
+function openAddUser() {
+  const m = document.getElementById('addUserModal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeAddUser() {
+  const m = document.getElementById('addUserModal');
+  m.classList.add('hidden'); m.classList.remove('flex');
+}
+function createUser() { alert('User created and welcome email sent!'); closeAddUser(); }
+function editUser(name) { alert('Edit user: ' + name); }
+function suspendUser(btn) { alert('User account suspended.'); }
+function deleteUser(btn) { if (confirm('Delete this user? This cannot be undone.')) { btn.closest('tr').remove(); } }
+
+function filterUsers() {
+  const role = document.getElementById('roleFilter').value;
+  document.querySelectorAll('#usersTable tbody tr').forEach(tr => {
+    tr.style.display = (!role || tr.dataset.role === role) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

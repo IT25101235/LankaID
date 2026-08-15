@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>02. Secure Access Portal (Login) | LankaID Identity Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "secondary": "#006398",
+                        "on-tertiary-container": "#818486",
+                        "primary-fixed": "#dae2fd",
+                        "primary": "#000000",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline-variant": "#c6c6cd",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-secondary-fixed-variant": "#004b73",
+                        "tertiary": "#000000",
+                        "secondary-fixed-dim": "#93ccff",
+                        "on-primary-container": "#7c839b",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#e0e3e5",
+                        "on-background": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "surface-tint": "#565e74",
+                        "on-secondary-fixed": "#001d31",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary-container": "#191c1e",
+                        "inverse-on-surface": "#eaf1ff",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#cce5ff",
+                        "on-secondary-container": "#00476e",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "secondary-container": "#5bb8fe",
+                        "outline": "#76777d",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#131b2e",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface-variant": "#45464d",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "max-width-content": "1200px",
+                        "container-padding-desktop": "2.5rem",
+                        "section-margin": "4rem",
+                        "base": "8px",
+                        "container-padding-mobile": "1rem",
+                        "stack-gap": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "display-lg": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "headline-md": ["Public Sans"],
+                        "headline-lg-mobile": ["Public Sans"],
+                        "caption": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-surface-dim font-body-md text-body-md text-on-surface flex items-center justify-center relative overflow-hidden antialiased">
+<!-- Ambient Background -->
+<div class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-multiply pointer-events-none" data-alt="A highly professional and subtle architectural background featuring clean lines and modern glass structures. The image is rendered in light grayscale with a soft, diffused lighting setup to evoke a sense of security, transparency, and government authority. The composition is expansive, utilizing negative space effectively to serve as a non-distracting, premium backdrop for a digital interface." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtr39VLxFnsxGhD6trsKxZpHMqu0CSP-T9odKgValTd9S576WX-xBOzIzqnlYwsz9UpMZmJVvItCfnA1jAbgqucd9vHCpvKL7evakJeLKXFuYFXPvtiGJ4txSKIf-BqcsbihqRdnWdTjCt-WCAPZ2AuV4NPf1xc8sjkWLMYdDfTP1fk96Gv6-sBqwgtjQZ-3vaZOh9LdFZc2oU2v55FmLrJYN5KicHUoIJXIzXP_72SVd42kCQL0j_')"></div>
+<!-- Login Container -->
+<main class="relative z-10 w-full max-w-[480px] mx-4 my-8 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-xl overflow-hidden border backdrop-blur-xl bg-surface-container-lowest/70 backdrop-blur-lg border-surface-container-lowest/20">
+<!-- Header Section -->
+<header class="pt-10 pb-6 px-8 flex flex-col items-center text-center border-b border-outline-variant/30 bg-transparent">
+<div class="h-14 w-14 rounded-full bg-surface-container-high flex items-center justify-center mb-4 border border-outline-variant/20 shadow-sm">
+<span class="material-symbols-outlined text-3xl text-secondary filled-icon">account_balance</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface mb-1">LankaID Services</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Civic Trust System Portal</p>
+</header>
+<!-- Interactive Tabs -->
+<div class="flex flex-row w-full border-b border-outline-variant/30 relative bg-transparent" id="loginTabs">
+<button id="tab-citizen" class="flex-1 py-4 font-label-sm text-label-sm text-secondary font-bold relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-secondary bg-surface-container-low/50 transition-colors" onclick="switchTab('citizen')">
+  Citizen
+</button>
+<button id="tab-officer" class="flex-1 py-4 font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer" onclick="switchTab('officer')">
+  Officer Portal
+</button>
+<button id="tab-register" class="flex-1 py-4 font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer" onclick="switchTab('register')">
+  Register
+</button>
+</div>
+
+<!-- CITIZEN LOGIN Form -->
+<section id="form-citizen" class="p-8 bg-transparent">
+<form onsubmit="handleLogin(event,'citizen')">
+  <div class="flex flex-col gap-stack-gap">
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface">NIC Number or Email</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 pointer-events-none">person</span>
+        <input class="w-full h-12 pl-10 pr-4 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all font-body-md text-body-md placeholder:text-on-surface-variant/50" placeholder="e.g., 200012345678 or email" type="text"/>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface">Password</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 pointer-events-none">lock</span>
+        <input class="w-full h-12 pl-10 pr-10 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all font-body-md text-body-md placeholder:text-on-surface-variant/50" placeholder="••••••••" type="password"/>
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
+      </div>
+    </div>
+    <div class="flex items-center justify-between">
+      <label class="flex items-center gap-2 cursor-pointer"><input class="w-4 h-4 rounded border-outline/40 text-secondary" type="checkbox"/><span class="font-body-md text-body-md text-on-surface-variant text-[14px]">Remember Me</span></label>
+      <a class="font-label-sm text-label-sm text-secondary hover:underline" href="#">Forgot Password?</a>
+    </div>
+    <button type="submit" class="w-full h-12 bg-secondary text-on-secondary rounded-lg font-label-sm text-label-sm font-bold tracking-wide hover:bg-secondary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm">
+      Sign In <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+    </button>
+    <p class="text-center text-sm text-on-surface-variant">Don't have an account? <button type="button" onclick="switchTab('register')" class="text-secondary font-semibold hover:underline">Register here</button></p>
+  </div>
+</form>
+</section>
+
+<!-- OFFICER PORTAL Form -->
+<section id="form-officer" class="p-8 bg-transparent hidden">
+<div class="bg-secondary/10 border border-secondary/20 rounded-xl p-3 mb-4 flex items-center gap-2 text-xs text-secondary font-medium">
+  <span class="material-symbols-outlined text-base">shield</span>
+  Government Staff & Officers Only. Unauthorized access is prohibited.
+</div>
+<form onsubmit="handleLogin(event,'officer')">
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface">Your Role</label>
+      <select id="officerRole" class="w-full h-12 px-3 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none text-sm font-medium">
+        <option value="">Select your role...</option>
+        <option value="nic-officer">NIC Application Officer</option>
+        <option value="passport-officer">Passport Application Officer</option>
+        <option value="csr">Citizen Service Representative</option>
+        <option value="director">Identity Service Director</option>
+        <option value="admin">System Administrator</option>
+      </select>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface">Staff Email</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 pointer-events-none">mail</span>
+        <input class="w-full h-12 pl-10 pr-4 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-sm placeholder:text-on-surface-variant/50" placeholder="name@lankaid.gov.lk" type="email"/>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface">Password</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 pointer-events-none">lock</span>
+        <input class="w-full h-12 pl-10 pr-10 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-sm placeholder:text-on-surface-variant/50" placeholder="••••••••" type="password"/>
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 hover:text-on-surface" type="button"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
+      </div>
+    </div>
+    <button type="submit" class="w-full h-12 bg-secondary text-on-secondary rounded-lg font-label-sm text-label-sm font-bold tracking-wide hover:bg-secondary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm">
+      Access Officer Portal <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+    </button>
+  </div>
+</form>
+</section>
+
+<!-- REGISTER Form -->
+<section id="form-register" class="p-8 bg-transparent hidden">
+<p class="text-sm text-on-surface-variant mb-4">Create a citizen account to apply for identity services online.</p>
+<div class="bg-secondary/10 border border-secondary/20 rounded-xl p-4 text-center">
+  <span class="material-symbols-outlined text-secondary text-3xl block mb-2">how_to_reg</span>
+  <p class="text-sm font-semibold text-on-surface mb-1">Register for a LankaID Account</p>
+  <p class="text-xs text-on-surface-variant mb-3">Fill in your personal details, contact information and set a secure password.</p>
+  <a href="citizen_register.html" class="inline-flex items-center gap-2 bg-secondary text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-secondary/90 transition-colors">
+    <span class="material-symbols-outlined text-lg">person_add</span>
+    Create New Account
+  </a>
+</div>
+<p class="text-center text-sm text-on-surface-variant mt-4">Already have an account? <button type="button" onclick="switchTab('citizen')" class="text-secondary font-semibold hover:underline">Sign In</button></p>
+</section>
+
+<!-- Security Footer -->
+</main>
+<script>
+function switchTab(tab) {
+  ['citizen','officer','register'].forEach(t => {
+    document.getElementById('form-' + t).classList.add('hidden');
+    const btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.remove('text-secondary','font-bold','bg-surface-container-low/50');
+  });
+  document.getElementById('form-' + tab).classList.remove('hidden');
+  const btn = document.getElementById('tab-' + tab);
+  if (btn) btn.classList.add('text-secondary','font-bold','bg-surface-container-low/50');
+}
+function handleLogin(e, type) {
+  e.preventDefault();
+  if (type === 'citizen') {
+    window.location.href = '03_citizen_dashboard.html';
+  } else {
+    const role = document.getElementById('officerRole').value;
+    const routes = {
+      'nic-officer': '08_nic_verification_queue.html',
+      'passport-officer': '10_passport_verification_queue.html',
+      'csr': 'csr_dashboard.html',
+      'director': 'director_dashboard.html',
+      'admin': 'admin_dashboard.html'
+    };
+    if (!role) { alert('Please select your role before signing in.'); return; }
+    window.location.href = routes[role] || '03_citizen_dashboard.html';
+  }
+}
+</script>
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+<!-- LANKAID OFFICIAL GOVERNMENT FOOTER -->
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+<div class="fixed bottom-5 right-5 z-[99999] font-sans" id="portal-quick-switcher">
+<button class="flex items-center gap-2 bg-slate-900 text-white hover:bg-sky-700 px-4 py-3 rounded-full shadow-2xl border border-slate-700/60 transition-all duration-200 hover:scale-105 active:scale-95 group" id="switcher-toggle-btn" onclick="togglePortalSwitcher()">
+<span class="material-symbols-outlined text-sky-400 group-hover:rotate-180 transition-transform duration-300">apps</span>
+<span class="text-xs font-bold tracking-wide">Portal Navigation</span>
+<span class="bg-sky-500/20 text-sky-300 text-[11px] px-2 py-0.5 rounded-full border border-sky-400/30">15 Pages</span>
+</button>
+<div class="hidden absolute bottom-14 right-0 w-[380px] max-h-[80vh] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 text-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200" id="switcher-drawer">
+<div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sky-400">verified_user</span>
+<div>
+<h3 class="text-sm font-bold text-white">LankaID Portal Index</h3>
+<p class="text-[11px] text-slate-400">Navigate all 15 connected pages</p>
+</div>
+</div>
+<button class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800" onclick="togglePortalSwitcher()">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="overflow-y-auto pr-1 flex-1 custom-scrollbar">
+<div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Citizen Journey</h4><div class="space-y-1">
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="01_landing_page.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">01</span>
+<span>LankaID Public Landing Page</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 bg-sky-600 text-white font-semibold shadow-md" href="02_login_portal.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">02</span>
+<span>Secure Access Portal (Login)</span>
+</div>
+<span class="ml-auto text-[10px] bg-sky-400 text-slate-950 font-bold px-1.5 py-0.5 rounded">ACTIVE</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="03_citizen_dashboard.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">03</span>
+<span>Citizen Services Dashboard</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="04_nic_document_upload.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">04</span>
+<span>NIC Application: Document Upload</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="05_passport_document_upload.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">05</span>
+<span>Passport Application: Document Upload</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="06_final_review_submission.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">06</span>
+<span>Application Review &amp; Submission</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="07_payment_gateway.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">07</span>
+<span>LankaID Payment Gateway</span>
+</div>
+</a>
+</div></div><div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Verification Officer Portal</h4><div class="space-y-1">
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="08_nic_verification_queue.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">08</span>
+<span>Officer Portal: NIC Verification Queue</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="09_nic_application_review.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">09</span>
+<span>Officer Portal: NIC Application Detailed Review</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="10_passport_verification_queue.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">10</span>
+<span>Officer Portal: Passport Verification Queue</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="11_passport_application_review.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">11</span>
+<span>Officer Portal: Passport Application Detailed Review</span>
+</div>
+</a>
+</div></div><div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Executive &amp; Administration</h4><div class="space-y-1">
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="12_admin_dashboard_overview.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">12</span>
+<span>Civic Trust: Admin Overview Dashboard</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="13_officer_management_panel.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">13</span>
+<span>Civic Trust: Officer Management Panel</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="14_director_command_center.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">14</span>
+<span>Director Operational Command Center</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="15_system_admin_dashboard.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">15</span>
+<span>System Administrator Dashboard</span>
+</div>
+</a>
+</div></div>
+</div>
+<div class="border-t border-slate-800 pt-2.5 mt-2 flex items-center justify-between text-[11px] text-slate-400">
+<span>LankaID Identity Management System</span>
+<a class="text-sky-400 hover:underline flex items-center gap-1 font-semibold" href="01_landing_page.html">
+<span>Home Page</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+</body></html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Walk-In Booking | LankaID CSR Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
+<style>
+  body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
+  input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(6,182,212,0.15); border-color: #06b6d4 !important; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+    <a href="csr_dashboard.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>
+      CSR Dashboard
+    </a>
+    <div class="flex items-center gap-2 ml-2">
+      <span class="text-slate-600">|</span>
+      <span class="material-symbols-outlined text-cyan-400 text-base">calendar_month</span>
+      <span class="text-sm font-semibold text-white">Register Walk-In Appointment</span>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+
+  <div class="mb-5">
+    <h1 class="text-2xl font-bold text-slate-900">Walk-In Appointment Registration</h1>
+    <p class="text-slate-500 text-sm mt-0.5">Register a citizen who has arrived at the centre without a prior online booking.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-5">
+
+      <!-- Citizen Lookup -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <span class="material-symbols-outlined text-cyan-600">person_search</span>
+          <h2 class="font-semibold text-slate-800">Citizen Lookup</h2>
+        </div>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Search by NIC Number or Full Name</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+              <input type="text" id="citizenSearch" placeholder="Enter NIC or citizen name..." class="w-full border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm"/>
+            </div>
+          </div>
+          <div class="flex items-end">
+            <button onclick="lookupCitizen()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors">Lookup</button>
+          </div>
+        </div>
+        <!-- Citizen Result (shown after lookup) -->
+        <div id="citizenResult" class="hidden mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-emerald-600">person</span>
+            </div>
+            <div>
+              <p class="font-bold text-slate-900">Kamal Sandesh Perera</p>
+              <p class="text-xs text-slate-500">NIC: 200012349876 · Colombo · kamal.p@gmail.com</p>
+            </div>
+            <div class="ml-auto">
+              <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-semibold border border-emerald-300">✓ Verified Citizen</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Details -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <span class="material-symbols-outlined text-cyan-600">assignment</span>
+          <h2 class="font-semibold text-slate-800">Service Details</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Service Type <span class="text-red-500">*</span></label>
+            <select required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+              <option value="">Select service...</option>
+              <option value="nic-bio">NIC — Biometric Collection</option>
+              <option value="pass-bio">Passport — Biometric Collection</option>
+              <option value="nic-submit">NIC — Document Submission (Walk-In)</option>
+              <option value="pass-submit">Passport — Document Submission (Walk-In)</option>
+              <option value="enquiry">General Enquiry</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Related Application Reference</label>
+            <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+              <option value="">None / Walk-in without application</option>
+              <option value="LK-NIC-2026-00183">LK-NIC-2026-00183 (Biometrics Due)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Date <span class="text-red-500">*</span></label>
+            <input type="date" value="2026-08-15" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Time Slot <span class="text-red-500">*</span></label>
+            <select required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+              <option value="">Select time...</option>
+              <option>8:00 AM</option><option>8:30 AM</option><option>9:00 AM</option>
+              <option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option>
+              <option>11:00 AM</option><option>11:30 AM</option><option>1:00 PM</option>
+              <option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option>
+              <option>3:00 PM</option><option>3:30 PM</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Assigned Counter / CSR</label>
+            <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+              <option>Counter 1 — Amara Wijesinghe (You)</option>
+              <option>Counter 2 — Pradeep Kumara</option>
+              <option>Counter 3 — Nadia Jayasuriya</option>
+              <option>Biometric Room A</option>
+              <option>Biometric Room B</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Priority</label>
+            <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+              <option value="normal">Normal</option>
+              <option value="senior">Senior Citizen / Disabled</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Notes / Remarks</label>
+            <textarea rows="2" placeholder="Any special notes for this walk-in..." class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+        <a href="csr_dashboard.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium flex items-center gap-1.5 transition-colors">
+          <span class="material-symbols-outlined text-lg">arrow_back</span>
+          Cancel
+        </a>
+        <button onclick="registerWalkIn()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-md">
+          <span class="material-symbols-outlined text-lg">event_available</span>
+          Register & Issue Token
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="space-y-4">
+      <!-- Current Queue Status -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-cyan-600 text-lg">format_list_numbered</span>
+          Today's Queue Status
+        </h3>
+        <div class="grid grid-cols-2 gap-3 text-center">
+          <div class="bg-slate-50 rounded-xl p-3"><p class="text-2xl font-bold text-slate-900">14</p><p class="text-xs text-slate-500">Registered</p></div>
+          <div class="bg-cyan-50 rounded-xl p-3"><p class="text-2xl font-bold text-cyan-700">6</p><p class="text-xs text-slate-500">Completed</p></div>
+          <div class="bg-amber-50 rounded-xl p-3"><p class="text-2xl font-bold text-amber-700">1</p><p class="text-xs text-slate-500">In Progress</p></div>
+          <div class="bg-slate-50 rounded-xl p-3"><p class="text-2xl font-bold text-slate-700">7</p><p class="text-xs text-slate-500">Remaining</p></div>
+        </div>
+        <hr class="my-3 border-slate-100"/>
+        <p class="text-xs text-slate-500 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-amber-500">schedule</span>
+          Next available slot: <strong class="text-slate-700">11:00 AM</strong>
+        </p>
+      </div>
+
+      <!-- Recent Registrations -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h3 class="font-semibold text-slate-800 text-sm mb-3">Recent Walk-Ins Today</h3>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+            <div><p class="font-semibold text-slate-800">Sanath Bandara</p><p class="text-slate-400">Token A-01 · 8:30 AM</p></div>
+            <span class="text-emerald-600 font-semibold">Done</span>
+          </div>
+          <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+            <div><p class="font-semibold text-slate-800">Priya Gunasekara</p><p class="text-slate-400">Token A-02 · 9:00 AM</p></div>
+            <span class="text-emerald-600 font-semibold">Done</span>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <div><p class="font-semibold text-slate-800">Kamal Perera</p><p class="text-slate-400">Token B-247 · 10:30 AM</p></div>
+            <span class="text-cyan-600 font-semibold">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Token Issued Modal -->
+<div id="tokenModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center">
+    <div class="w-20 h-20 rounded-full bg-cyan-100 flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-cyan-600 text-4xl">confirmation_number</span>
+    </div>
+    <p class="text-xs text-slate-500 uppercase font-semibold tracking-wider mb-1">Walk-In Token Issued</p>
+    <div class="text-5xl font-black text-slate-900 my-3 tracking-wider">A-06</div>
+    <div class="bg-slate-50 rounded-xl p-4 text-left mb-5 text-xs text-slate-600 space-y-2">
+      <div class="flex justify-between"><span class="text-slate-400">Citizen</span><span class="font-semibold">Kamal Sandesh Perera</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Service</span><span class="font-semibold">NIC Biometric Collection</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Time Slot</span><span class="font-semibold">10:30 AM</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Counter</span><span class="font-semibold">Biometric Room A</span></div>
+    </div>
+    <div class="flex gap-3">
+      <button class="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center justify-center gap-1">
+        <span class="material-symbols-outlined text-base">print</span>
+        Print Token
+      </button>
+      <button onclick="document.getElementById('tokenModal').classList.add('hidden'); document.getElementById('tokenModal').classList.remove('flex'); window.location.href='csr_dashboard.html'" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
+        Done
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function lookupCitizen() {
+  const val = document.getElementById('citizenSearch').value;
+  if (val.trim()) {
+    document.getElementById('citizenResult').classList.remove('hidden');
+  }
+}
+
+function registerWalkIn() {
+  const m = document.getElementById('tokenModal');
+  m.classList.remove('hidden'); m.classList.add('flex');
+}
+</script>
+</body>
+</html>
