@@ -32,6 +32,7 @@ public class UserController {
             return "login_portal";
         }
 
+
         model.addAttribute("successMessage",
                 "Login request received for " + loginRequest.getIdentifier() + ".");
         model.addAttribute("loginRequest", loginRequest);
