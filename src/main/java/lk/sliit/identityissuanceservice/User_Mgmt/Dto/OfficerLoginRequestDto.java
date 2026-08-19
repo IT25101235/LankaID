@@ -6,9 +6,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class OfficerLoginRequestDto {
 
     @NotBlank(message = "Please select your role")
@@ -24,7 +26,9 @@ public class OfficerLoginRequestDto {
 
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 100, message = "Password must be at least 8 characters")
+    @ToString.Exclude
     private String password;
 
     private boolean rememberMe;
 }
+

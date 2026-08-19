@@ -37,10 +37,9 @@ public class UserController {
             return "login_portal";
         }
 
-        model.addAttribute("successMessage",
-                "Login request received for " + loginRequest.getIdentifier() + ".");
-        model.addAttribute("loginRequest", loginRequest);
-        return "login_portal";
+        /*No Authentication Just for Testing*/
+
+        return "citizen_frontends/citizen_dashboard";
     }
 
     @PostMapping("/login/officer")
@@ -54,9 +53,17 @@ public class UserController {
             return "login_portal";
         }
 
-        model.addAttribute("officerSuccessMessage",
-                "Officer login request received for " + officerLoginRequest.getEmail() + ".");
-        model.addAttribute("officerLoginRequest", officerLoginRequest);
+        if (officerLoginRequest.getRole().equals("nic-officer")) {
+            return "officers_frontends/nic_officer_dashboard";
+        } else if (officerLoginRequest.getRole().equals("passport-officer")) {
+            return "officers_frontends/passport_officer_dashboard";
+        } else if (officerLoginRequest.getRole().equals("csr")) {
+            return "officers_frontends/csr_dashboard";
+        } else if (officerLoginRequest.getRole().equals("director")) {
+            return "officers_frontends/director_dashboard";
+        } else if (officerLoginRequest.getRole().equals("admin")) {
+            return "officers_frontends/admin_dashboard";
+        }
         return "login_portal";
     }
 }
