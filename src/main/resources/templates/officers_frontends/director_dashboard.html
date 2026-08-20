@@ -10,25 +10,26 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
 <style>
-  body { font-family: 'Public Sans', sans-serif; background: #0f172a; color: #e2e8f0; }
+  body { font-family: 'Public Sans', sans-serif; }
   .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
   .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
-  .sidebar-link.active { background: rgba(168,85,247,0.15); color: #c084fc; }
+  .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
   .sidebar-link .material-symbols-outlined { font-size: 20px; }
-  .metric-card { background: rgba(30,41,59,0.8); border: 1px solid rgba(148,163,184,0.1); border-radius: 16px; }
+  .metric-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.05); }
 </style>
+<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen flex officer-dashboard-shell">
 
 <!-- Sidebar -->
-<aside class="w-64 min-h-screen bg-slate-950 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800">
+<aside class="w-64 min-h-screen bg-slate-950 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
   <div class="p-5 border-b border-slate-800">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-md">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md officer-brand-icon">
         <span class="material-symbols-outlined text-white text-lg">admin_panel_settings</span>
       </div>
       <div>
-        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-purple-400">ID</span></p>
+        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p>
         <p class="text-xs text-slate-400 mt-0.5">Director Portal</p>
       </div>
     </div>
@@ -88,15 +89,15 @@
 </aside>
 
 <!-- Main -->
-<main class="ml-64 flex-1 flex flex-col">
+<main class="ml-64 flex-1 flex flex-col director-main">
 
-  <header class="border-b border-slate-800 h-16 flex items-center px-6 sticky top-0 z-20" style="background: rgba(15,23,42,0.9); backdrop-filter: blur(12px);">
+  <header class="border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20 officer-topbar">
     <div class="flex-1">
       <h1 class="text-base font-bold text-white" id="pageTitle">Executive Overview</h1>
       <p class="text-xs text-slate-400" id="pageSubtitle">LankaID Identity Issuance Service — Real-time Dashboard</p>
     </div>
     <div class="flex items-center gap-3">
-      <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300">
+      <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         System Operational
       </div>

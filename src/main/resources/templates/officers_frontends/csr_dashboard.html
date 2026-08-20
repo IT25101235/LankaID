@@ -16,18 +16,19 @@
   .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
   .sidebar-link .material-symbols-outlined { font-size: 20px; }
 </style>
+<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 flex">
+<body class="min-h-screen bg-slate-100 flex officer-dashboard-shell">
 
 <!-- Sidebar -->
-<aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800">
+<aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
   <div class="p-5 border-b border-slate-800">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md officer-brand-icon">
         <span class="material-symbols-outlined text-white text-lg">support_agent</span>
       </div>
       <div>
-        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400">ID</span></p>
+        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p>
         <p class="text-xs text-slate-400 mt-0.5">CSR Portal</p>
       </div>
     </div>
@@ -80,7 +81,7 @@
 <main class="ml-64 flex-1 flex flex-col">
 
   <!-- Top Bar -->
-  <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20">
+  <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20 officer-topbar">
     <div class="flex-1">
       <h1 class="text-lg font-bold text-slate-900" id="pageTitle">Overview</h1>
       <p class="text-xs text-slate-500" id="pageSubtitle">Welcome back, Amara. Today is Friday, Aug 15, 2026.</p>
