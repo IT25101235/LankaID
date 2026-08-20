@@ -103,90 +103,64 @@
 <style>
         body { font-family: 'Public Sans', sans-serif; }
     </style>
+<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
 </head>
-<body class="bg-background text-on-background h-full flex flex-col">
-<!-- TopNavBar Component -->
-<header class="bg-surface-container-lowest dark:bg-primary-container shadow-sm w-full h-16 shrink-0 z-10 relative">
-<div class="flex justify-between items-center max-w-[1200px] mx-auto px-container-padding-desktop w-full h-full">
-<div class="flex items-center gap-6 h-full">
-<div class="font-headline-md text-headline-md font-bold text-on-surface dark:text-surface-bright flex items-center gap-2">
-<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">shield_person</span>
-                    LankaID Services
-                </div>
-<nav class="hidden md:flex h-full gap-6 ml-6 font-body-md text-body-md font-label-sm text-label-sm items-end h-full">
-<!-- Nav Items -->
-<a class="text-on-surface-variant dark:text-outline-variant pb-1 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 flex items-center h-full border-b-2 border-transparent" href="#">
-                        Home
-                    </a>
-<a class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary dark:border-secondary-fixed pb-1 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 flex items-center h-full" href="#">
-                        Applications
-                    </a>
-<a class="text-on-surface-variant dark:text-outline-variant pb-1 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 flex items-center h-full border-b-2 border-transparent" href="#">
-                        Documents
-                    </a>
-<a class="text-on-surface-variant dark:text-outline-variant pb-1 hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 flex items-center h-full border-b-2 border-transparent" href="#">
-                        Appointments
-                    </a>
-</nav>
+<body class="bg-background text-on-background h-full flex officer-dashboard-shell">
+<!-- Officer Navigation -->
+<aside class="w-64 min-h-screen flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r officer-sidebar">
+<div class="p-5 border-b border-slate-800">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl flex items-center justify-center officer-brand-icon">
+<span class="material-symbols-outlined text-white text-lg">badge</span>
 </div>
-<div class="flex items-center gap-4">
-<button class="text-secondary dark:text-secondary-fixed hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 p-2 rounded-full hover:bg-surface-variant">
-<span class="material-symbols-outlined">notifications</span>
-</button>
-<button class="text-secondary dark:text-secondary-fixed hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 p-2 rounded-full hover:bg-surface-variant">
-<span class="material-symbols-outlined">settings</span>
-</button>
-<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover ml-2 border border-outline-variant" data-alt="A small circular avatar showing a professional portrait of a government official in a well-lit office setting. The lighting is soft and corporate, matching a modern light-mode UI aesthetic. Colors are muted with professional navy and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq4UPXzK_id-FCOOYuM1_ZEmh_-W5G5MTUIq56zp5M0FMbRnqr5A-3qiVUWYb2omj7v24Cb6Hdy4GBcSD3-2G3U7YueGOVfbOIwKHU2e_6hDtmwKjTFGQ-TR7FMi2JLmBdPghjKNCDqKb-wn3xxFy1CWsqT5DFapf5N3-YcsC0x1_teFq7zwLD3HXQsT639_bufPahUWVUK1qIf2qNdRPGmC_vdwnSvCggYCnxdlRjuzLW_GUjqD7e"/>
-</div>
-</div>
-</header>
-<!-- Main Content Area -->
-<main class="flex-1 flex overflow-hidden">
-<!-- Left Sidebar / Filters (3 columns on desktop) -->
-<aside class="hidden md:flex flex-col w-64 xl:w-72 bg-surface-container-lowest border-r border-outline-variant shrink-0 overflow-y-auto">
-<div class="p-6 flex flex-col gap-stack-gap">
 <div>
-<h2 class="font-headline-md text-headline-md mb-1 text-on-surface">Filters</h2>
-<p class="font-body-md text-body-md text-on-surface-variant mb-4">Refine verification queue</p>
+<p class="font-extrabold text-white text-base leading-none">Lanka<span class="officer-accent-text">ID</span></p>
+<p class="text-xs text-slate-400 mt-0.5">Passport Officer Portal</p>
 </div>
-<!-- Filter Section: Status -->
-<div class="flex flex-col gap-2">
-<h3 class="font-label-sm text-label-sm text-on-surface uppercase tracking-wider">Status</h3>
-<label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-surface-variant rounded-DEFAULT transition-colors">
-<input checked="" class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary focus:ring-offset-0 bg-surface h-5 w-5" type="checkbox"/>
-<span class="font-body-md text-body-md flex-1">Urgent Review</span>
-<span class="bg-error-container text-on-error-container font-caption text-caption px-2 py-0.5 rounded-full">12</span>
-</label>
-<label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-surface-variant rounded-DEFAULT transition-colors">
-<input checked="" class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary focus:ring-offset-0 bg-surface h-5 w-5" type="checkbox"/>
-<span class="font-body-md text-body-md flex-1">Flagged</span>
-<span class="bg-surface-container-high text-on-surface font-caption text-caption px-2 py-0.5 rounded-full">8</span>
-</label>
-<label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-surface-variant rounded-DEFAULT transition-colors">
-<input class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary focus:ring-offset-0 bg-surface h-5 w-5" type="checkbox"/>
-<span class="font-body-md text-body-md flex-1">Standard</span>
-<span class="bg-surface-container text-on-surface-variant font-caption text-caption px-2 py-0.5 rounded-full">45</span>
-</label>
 </div>
-<div class="h-px bg-outline-variant w-full my-2 opacity-50"></div>
-<!-- Filter Section: Application Type -->
-<div class="flex flex-col gap-2">
-<h3 class="font-label-sm text-label-sm text-on-surface uppercase tracking-wider">Application Type</h3>
-<select class="form-select w-full bg-surface border-outline-variant text-on-surface rounded-DEFAULT focus:ring-secondary focus:border-secondary h-12 font-body-md text-body-md"><option>All Types</option><option>New Passport</option><option>Renewal</option><option>Lost Passport</option></select>
 </div>
-<div class="h-px bg-outline-variant w-full my-2 opacity-50"></div>
-<!-- Filter Section: Date Range -->
-<div class="flex flex-col gap-2">
-<h3 class="font-label-sm text-label-sm text-on-surface uppercase tracking-wider">Submission Date</h3>
-<input class="form-input w-full bg-surface border-outline-variant text-on-surface rounded-DEFAULT focus:ring-secondary focus:border-secondary h-12 font-body-md text-body-md mb-2" type="date"/>
-<input class="form-input w-full bg-surface border-outline-variant text-on-surface rounded-DEFAULT focus:ring-secondary focus:border-secondary h-12 font-body-md text-body-md" type="date"/>
+<nav class="flex-1 p-3 space-y-1">
+<a class="officer-nav-link" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+Overview
+</a>
+<a class="officer-nav-link active" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+Verification Queue
+<span class="ml-auto bg-cyan-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold">65</span>
+</a>
+<a class="officer-nav-link" href="#">
+<span class="material-symbols-outlined">task_alt</span>
+Reviewed Applications
+</a>
+<a class="officer-nav-link" href="#">
+<span class="material-symbols-outlined">event_available</span>
+Appointments
+</a>
+<a class="officer-nav-link" href="#">
+<span class="material-symbols-outlined">notifications</span>
+Notifications
+<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-800">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-300 text-xl">person</span>
 </div>
-<button class="mt-4 bg-outline-variant text-on-surface font-label-sm text-label-sm h-12 rounded-DEFAULT hover:bg-outline transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-background">
-                    Clear Filters
-                </button>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold text-white leading-none truncate">Dilani Rathnayake</p>
+<p class="text-xs text-slate-400 mt-0.5">Passport Application Officer</p>
+</div>
+<a href="/login" class="text-slate-500 hover:text-white transition-colors" aria-label="Log out">
+<span class="material-symbols-outlined text-lg">logout</span>
+</a>
+</div>
 </div>
 </aside>
-<!-- Main Queue Area (9 columns) -->
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex h-screen overflow-hidden">
+<!-- Main Queue Area -->
 <section class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden relative">
 <!-- Decorative background element for modern feel without being distracting -->
 <div class="absolute top-0 right-0 w-[600px] h-[400px] bg-gradient-to-br from-surface-container-low to-transparent opacity-50 pointer-events-none -z-10 rounded-bl-full"></div>
@@ -202,8 +176,52 @@
 <input class="form-input w-full pl-10 pr-4 h-12 bg-surface-container-lowest border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary font-body-md text-body-md shadow-sm transition-shadow" placeholder="Search by Passport No. or Applicant Name..." type="text"/>
 </div>
 </div>
+<!-- Horizontal Filters -->
+<section class="officer-panel p-4 mb-stack-gap shrink-0" aria-labelledby="passport-filter-title">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">filter_alt</span>
+<h2 id="passport-filter-title" class="font-label-sm text-label-sm font-bold text-on-surface">Filter applications</h2>
+</div>
+<span class="font-caption text-caption text-on-surface-variant">Showing 65 pending applications</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-3 items-end">
+<fieldset class="xl:col-span-4">
+<legend class="font-caption text-caption font-semibold text-on-surface-variant mb-2">Status</legend>
+<div class="flex flex-wrap gap-2">
+<label class="flex items-center gap-2 px-3 h-10 bg-surface rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary" type="checkbox"/>
+<span class="font-label-sm text-label-sm">Urgent</span><span class="text-xs text-red-600">12</span>
+</label>
+<label class="flex items-center gap-2 px-3 h-10 bg-surface rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary" type="checkbox"/>
+<span class="font-label-sm text-label-sm">Flagged</span><span class="text-xs text-amber-600">8</span>
+</label>
+<label class="flex items-center gap-2 px-3 h-10 bg-surface rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+<input class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary" type="checkbox"/>
+<span class="font-label-sm text-label-sm">Standard</span><span class="text-xs text-slate-500">45</span>
+</label>
+</div>
+</fieldset>
+<label class="xl:col-span-2 flex flex-col gap-2">
+<span class="font-caption text-caption font-semibold text-on-surface-variant">Application Type</span>
+<select class="form-select h-10 w-full bg-surface border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary text-sm"><option>All Types</option><option>New Passport</option><option>Renewal</option><option>Lost Passport</option></select>
+</label>
+<label class="xl:col-span-2 flex flex-col gap-2">
+<span class="font-caption text-caption font-semibold text-on-surface-variant">From</span>
+<input class="form-input h-10 w-full bg-surface border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary text-sm" type="date"/>
+</label>
+<label class="xl:col-span-2 flex flex-col gap-2">
+<span class="font-caption text-caption font-semibold text-on-surface-variant">To</span>
+<input class="form-input h-10 w-full bg-surface border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary text-sm" type="date"/>
+</label>
+<button class="xl:col-span-2 h-10 border border-outline-variant bg-surface text-on-surface font-label-sm text-label-sm rounded-lg hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-secondary">
+Clear Filters
+</button>
+</div>
+</section>
 <!-- Data Table Container (Bento grid style wrap) -->
-<div class="flex-1 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.04)] border border-outline-variant overflow-hidden flex flex-col">
+<div class="flex-1 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.04)] border border-outline-variant overflow-hidden flex flex-col officer-panel">
 <div class="overflow-x-auto flex-1">
 <table class="w-full text-left border-collapse">
 <thead class="bg-surface-container-low sticky top-0 z-10 border-b border-outline-variant">
@@ -244,214 +262,4 @@
 </div>
 </section>
 </main>
-<!-- PORTAL QUICK SWITCHER WIDGET -->
-<script>
-function togglePortalSwitcher() {
-    const drawer = document.getElementById('switcher-drawer');
-    if (drawer) {
-        drawer.classList.toggle('hidden');
-    }
-}
-
-// Close switcher when clicking outside
-document.addEventListener('click', function(e) {
-    const switcher = document.getElementById('portal-quick-switcher');
-    if (switcher && !switcher.contains(e.target)) {
-        const drawer = document.getElementById('switcher-drawer');
-        if (drawer && !drawer.classList.contains('hidden')) {
-            drawer.classList.add('hidden');
-        }
-    }
-});
-</script>
-<!-- LANKAID OFFICIAL GOVERNMENT FOOTER -->
-<!-- PORTAL QUICK SWITCHER WIDGET -->
-<script>
-function togglePortalSwitcher() {
-    const drawer = document.getElementById('switcher-drawer');
-    if (drawer) {
-        drawer.classList.toggle('hidden');
-    }
-}
-
-// Close switcher when clicking outside
-document.addEventListener('click', function(e) {
-    const switcher = document.getElementById('portal-quick-switcher');
-    if (switcher && !switcher.contains(e.target)) {
-        const drawer = document.getElementById('switcher-drawer');
-        if (drawer && !drawer.classList.contains('hidden')) {
-            drawer.classList.add('hidden');
-        }
-    }
-});
-</script>
-<!-- LANKAID OFFICIAL GOVERNMENT FOOTER -->
-
-<!-- PORTAL QUICK SWITCHER WIDGET -->
-
-<script>
-function togglePortalSwitcher() {
-    const drawer = document.getElementById('switcher-drawer');
-    if (drawer) {
-        drawer.classList.toggle('hidden');
-    }
-}
-
-// Close switcher when clicking outside
-document.addEventListener('click', function(e) {
-    const switcher = document.getElementById('portal-quick-switcher');
-    if (switcher && !switcher.contains(e.target)) {
-        const drawer = document.getElementById('switcher-drawer');
-        if (drawer && !drawer.classList.contains('hidden')) {
-            drawer.classList.add('hidden');
-        }
-    }
-});
-</script>
-
-<!-- PORTAL QUICK SWITCHER WIDGET -->
-<div class="fixed bottom-5 right-5 z-[99999] font-sans" id="portal-quick-switcher">
-<button class="flex items-center gap-2 bg-slate-900 text-white hover:bg-sky-700 px-4 py-3 rounded-full shadow-2xl border border-slate-700/60 transition-all duration-200 hover:scale-105 active:scale-95 group" id="switcher-toggle-btn" onclick="togglePortalSwitcher()">
-<span class="material-symbols-outlined text-sky-400 group-hover:rotate-180 transition-transform duration-300">apps</span>
-<span class="text-xs font-bold tracking-wide">Portal Navigation</span>
-<span class="bg-sky-500/20 text-sky-300 text-[11px] px-2 py-0.5 rounded-full border border-sky-400/30">15 Pages</span>
-</button>
-<div class="hidden absolute bottom-14 right-0 w-[380px] max-h-[80vh] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 text-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200" id="switcher-drawer">
-<div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-sky-400">verified_user</span>
-<div>
-<h3 class="text-sm font-bold text-white">LankaID Portal Index</h3>
-<p class="text-[11px] text-slate-400">Navigate all 15 connected pages</p>
-</div>
-</div>
-<button class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800" onclick="togglePortalSwitcher()">
-<span class="material-symbols-outlined text-sm">close</span>
-</button>
-</div>
-<div class="overflow-y-auto pr-1 flex-1 custom-scrollbar">
-<div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Citizen Journey</h4><div class="space-y-1">
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="01_landing_page.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">01</span>
-<span>LankaID Public Landing Page</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="02_login_portal.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">02</span>
-<span>Secure Access Portal (Login)</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="03_citizen_dashboard.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">03</span>
-<span>Citizen Services Dashboard</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="04_nic_document_upload.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">04</span>
-<span>NIC Application: Document Upload</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="05_passport_document_upload.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">05</span>
-<span>Passport Application: Document Upload</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="06_final_review_submission.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">06</span>
-<span>Application Review &amp; Submission</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="07_payment_gateway.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">07</span>
-<span>LankaID Payment Gateway</span>
-</div>
-</a>
-</div></div><div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Verification Officer Portal</h4><div class="space-y-1">
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="08_nic_verification_queue.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">08</span>
-<span>Officer Portal: NIC Verification Queue</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="09_nic_application_review.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">09</span>
-<span>Officer Portal: NIC Application Detailed Review</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 bg-sky-600 text-white font-semibold shadow-md" href="10_passport_verification_queue.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">10</span>
-<span>Officer Portal: Passport Verification Queue</span>
-</div>
-<span class="ml-auto text-[10px] bg-sky-400 text-slate-950 font-bold px-1.5 py-0.5 rounded">ACTIVE</span>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="11_passport_application_review.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">11</span>
-<span>Officer Portal: Passport Application Detailed Review</span>
-</div>
-</a>
-</div></div><div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Executive &amp; Administration</h4><div class="space-y-1">
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="12_admin_dashboard_overview.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">12</span>
-<span>Civic Trust: Admin Overview Dashboard</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="13_officer_management_panel.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">13</span>
-<span>Civic Trust: Officer Management Panel</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="14_director_command_center.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">14</span>
-<span>Director Operational Command Center</span>
-</div>
-</a>
-<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="15_system_admin_dashboard.html">
-<div class="truncate mr-2">
-<span class="font-bold opacity-80 mr-1.5">15</span>
-<span>System Administrator Dashboard</span>
-</div>
-</a>
-</div></div>
-</div>
-<div class="border-t border-slate-800 pt-2.5 mt-2 flex items-center justify-between text-[11px] text-slate-400">
-<span>LankaID Identity Management System</span>
-<a class="text-sky-400 hover:underline flex items-center gap-1 font-semibold" href="01_landing_page.html">
-<span>Home Page</span>
-<span class="material-symbols-outlined text-xs">arrow_forward</span>
-</a>
-</div>
-</div>
-</div>
-<script>
-function togglePortalSwitcher() {
-    const drawer = document.getElementById('switcher-drawer');
-    if (drawer) {
-        drawer.classList.toggle('hidden');
-    }
-}
-
-// Close switcher when clicking outside
-document.addEventListener('click', function(e) {
-    const switcher = document.getElementById('portal-quick-switcher');
-    if (switcher && !switcher.contains(e.target)) {
-        const drawer = document.getElementById('switcher-drawer');
-        if (drawer && !drawer.classList.contains('hidden')) {
-            drawer.classList.add('hidden');
-        }
-    }
-});
-</script>
 </body></html>
