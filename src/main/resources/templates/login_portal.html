@@ -322,9 +322,9 @@ function validateCitizenLoginForm(event) {
 
 function validateOfficerLoginForm(event) {
   const form = event.target;
-  const role = form.querySelector('#officerRole');
-  const email = form.querySelector('#officerEmail');
-  const password = form.querySelector('#officerPassword');
+  const role = form.querySelector('[name="role"]');
+  const email = form.querySelector('[name="email"]');
+  const password = form.querySelector('[name="password"]');
   const roleError = document.getElementById('officerRoleError');
   const emailError = document.getElementById('officerEmailError');
   const passwordError = document.getElementById('officerPasswordError');
@@ -343,14 +343,14 @@ function validateOfficerLoginForm(event) {
   if (!roleValue) {
     if (roleError) roleError.textContent = 'Please select your role.';
     if (role) role.classList.add('border-red-500');
-    role.focus();
+    role?.focus();
     return false;
   }
 
   if (!emailValue) {
     if (emailError) emailError.textContent = 'Staff email is required.';
     if (email) email.classList.add('border-red-500');
-    email.focus();
+    email?.focus();
     return false;
   }
 
@@ -358,21 +358,21 @@ function validateOfficerLoginForm(event) {
   if (!validOfficerEmail) {
     if (emailError) emailError.textContent = 'Use your official @lankaid.gov.lk email address.';
     if (email) email.classList.add('border-red-500');
-    email.focus();
+    email?.focus();
     return false;
   }
 
   if (!passwordValue) {
     if (passwordError) passwordError.textContent = 'Password is required.';
     if (password) password.classList.add('border-red-500');
-    password.focus();
+    password?.focus();
     return false;
   }
 
   if (passwordValue.length < 8) {
     if (passwordError) passwordError.textContent = 'Password must be at least 8 characters.';
     if (password) password.classList.add('border-red-500');
-    password.focus();
+    password?.focus();
     return false;
   }
 
