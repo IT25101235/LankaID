@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>05. Passport Application: Document Upload | LankaID Identity Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#0b1c30",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#818486",
+                        "surface": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "outline-variant": "#c6c6cd",
+                        "primary-fixed-dim": "#bec6e0",
+                        "inverse-surface": "#213145",
+                        "surface-container": "#e5eeff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "secondary-container": "#5bb8fe",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-tint": "#565e74",
+                        "surface-bright": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-fixed-variant": "#004b73",
+                        "on-secondary-container": "#00476e",
+                        "on-secondary-fixed": "#001d31",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#cce5ff",
+                        "tertiary-container": "#191c1e",
+                        "background": "#f8f9ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "secondary": "#006398",
+                        "on-primary-container": "#7c839b",
+                        "on-background": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "secondary-fixed-dim": "#93ccff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#131b2e",
+                        "tertiary": "#000000",
+                        "primary-fixed": "#dae2fd",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#000000",
+                        "outline": "#76777d",
+                        "tertiary-fixed": "#e0e3e5"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "base": "8px",
+                        "stack-gap": "1.5rem",
+                        "section-margin": "4rem",
+                        "container-padding-mobile": "1rem",
+                        "max-width-content": "1200px",
+                        "container-padding-desktop": "2.5rem"
+                    },
+                    fontFamily: {
+                        "label-sm": ["Public Sans"],
+                        "headline-md": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "headline-lg-mobile": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "caption": ["Public Sans"],
+                        "display-lg": ["Public Sans"],
+                        "body-md": ["Public Sans"]
+                    },
+                    fontSize: {
+                        "label-sm": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "caption": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md h-full">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest shadow-sm w-full h-16 shrink-0">
+<div class="flex justify-between items-center max-w-[1200px] mx-auto px-container-padding-desktop w-full h-full">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">LankaID Services</span>
+<nav class="hidden md:flex gap-6 h-full items-end font-label-sm text-label-sm">
+<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="03_citizen_dashboard.html">Home</a>
+<a class="text-secondary font-bold border-b-2 border-secondary pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Applications</a>
+<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Documents</a>
+<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Appointments</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button aria-label="notifications" class="text-secondary hover:text-secondary/80 transition-colors cursor-pointer active:opacity-80 flex items-center justify-center p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="settings" class="text-secondary hover:text-secondary/80 transition-colors cursor-pointer active:opacity-80 flex items-center justify-center p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant shrink-0">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a person looking forward, neutral background, bright light mode aesthetic, corporate and clean visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9A7Y4CmFgDfCHnMjE4ORFLW1ovFloV-grU8iS0dhJuxt-4nGmiPf8coOe4H6F7jBW5aC1e9tLJsW2IiRPb57mqT4m2QBaBsfzGJ0PibDICjlmQZNFeJNeI7W4VFnS5BlO5AgkdTr8hY7xGDuSV0rcd2EVKzkjFcBKSZD7juZzU-9bUxHG3VZJgwMUL3WYLIeJROxQ41JpT3-YPjR2SRm0m3h1GrNqmODhSNnmBxZuiQk6h65pg2Ey"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 max-w-[1200px] mx-auto w-full px-container-padding-mobile md:px-container-padding-desktop py-8 flex flex-col gap-8">
+<!-- Header & Stepper -->
+<div class="flex flex-col gap-6">
+<div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Passport Document Upload</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Please provide the required documentation to verify your identity. Ensure all documents are clear, readable, and valid.</p>
+</div>
+<!-- Horizontal Stepper -->
+<div class="w-full">
+<ol class="flex items-center w-full">
+<li class="flex w-full items-center text-secondary after:content-[''] after:w-full after:h-1 after:border-b after:border-secondary after:border-4 after:inline-block">
+<span class="flex items-center justify-center w-8 h-8 bg-secondary rounded-full lg:h-10 lg:w-10 shrink-0">
+<span class="material-symbols-outlined text-on-secondary text-sm" data-icon="check">check</span>
+</span>
+<span class="font-label-sm text-label-sm text-on-surface ml-3 hidden sm:block mr-3">Personal Info</span>
+</li>
+<li class="flex w-full items-center text-secondary after:content-[''] after:w-full after:h-1 after:border-b after:border-surface-variant after:border-4 after:inline-block">
+<span class="flex items-center justify-center w-8 h-8 bg-secondary rounded-full lg:h-10 lg:w-10 shrink-0 outline outline-4 outline-secondary-fixed">
+<span class="font-label-sm text-label-sm text-on-secondary">2</span>
+</span>
+<span class="font-label-sm text-label-sm text-on-surface ml-3 hidden sm:block mr-3 font-bold">Documents</span>
+</li>
+<li class="flex w-full items-center text-surface-variant after:content-[''] after:w-full after:h-1 after:border-b after:border-surface-variant after:border-4 after:inline-block">
+<span class="flex items-center justify-center w-8 h-8 bg-surface-variant rounded-full lg:h-10 lg:w-10 shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">3</span>
+</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-3 hidden sm:block mr-3">Payment</span>
+</li>
+<li class="flex items-center">
+<span class="flex items-center justify-center w-8 h-8 bg-surface-variant rounded-full lg:h-10 lg:w-10 shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">4</span>
+</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-3 hidden sm:block">Review</span>
+</li>
+</ol>
+</div>
+</div>
+<!-- Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+<!-- Upload Cards Grid (Left/Main) -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Card 1: Birth Certificate (Missing) -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-surface-variant flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-sm text-label-sm text-on-surface text-base">Current NIC/Identity Card</h3>
+<p class="font-caption text-caption text-on-surface-variant mt-1">National Identity Card or equivalent government ID.</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-caption text-caption font-bold bg-error-container text-on-error-container">
+                            Missing
+                        </span>
+</div>
+<div class="border border-dashed border-outline-variant bg-surface-container-low rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-surface-container-high transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-secondary mb-3 group-hover:scale-110 transition-transform" data-icon="cloud_upload">cloud_upload</span>
+<p class="font-body-md text-body-md text-on-surface">Drag &amp; Drop file here or</p>
+<button class="mt-2 font-label-sm text-label-sm text-secondary hover:text-on-secondary-container transition-colors">Browse Files</button>
+<p class="font-caption text-caption text-on-surface-variant mt-2">National Identity Card or equivalent government ID.</p>
+</div>
+</div>
+<!-- Card 2: Current ID (Uploaded) -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-secondary flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-sm text-label-sm text-on-surface text-base">Previous Passport (if renewal)</h3>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Required for renewal applications. Skip if first-time applicant.</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-caption text-caption font-bold bg-secondary-fixed text-on-secondary-fixed">
+                            Uploaded
+                        </span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-4 flex items-center justify-between border border-surface-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface">drivers_license_front.jpg</p>
+<p class="font-caption text-caption text-on-surface-variant">Required for renewal applications. Skip if first-time applicant.</p>
+</div>
+</div>
+<button aria-label="Remove file" class="text-on-surface-variant hover:text-error transition-colors p-2 rounded-full hover:bg-error-container">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Proof of Address (Missing) -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-surface-variant flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-sm text-label-sm text-on-surface text-base">Proof of Citizenship</h3>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Birth certificate, naturalization certificate, or citizenship card.</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-caption text-caption font-bold bg-error-container text-on-error-container">
+                            Missing
+                        </span>
+</div>
+<div class="border border-dashed border-outline-variant bg-surface-container-low rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-surface-container-high transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-secondary mb-3 group-hover:scale-110 transition-transform" data-icon="cloud_upload">cloud_upload</span>
+<p class="font-body-md text-body-md text-on-surface">Drag &amp; Drop file here or</p>
+<button class="mt-2 font-label-sm text-label-sm text-secondary hover:text-on-secondary-container transition-colors">Browse Files</button>
+<p class="font-caption text-caption text-on-surface-variant mt-2">Birth certificate, naturalization certificate, or citizenship card.</p>
+</div>
+</div>
+</div>
+<!-- Guidelines Panel (Right/Sidebar) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-low rounded-lg p-6 border border-surface-variant sticky top-24">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="info">info</span>
+<h2 class="font-headline-md text-headline-md text-on-surface text-lg">Upload Guidelines</h2>
+</div>
+<ul class="space-y-4 font-body-md text-body-md text-on-surface-variant">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
+<span>Ensure all four corners of the document are visible.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
+<span>Text must be clear and legible; avoid glare or shadows.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
+<span>Files must be in PDF, JPG, or PNG format.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
+<span>Maximum file size is 5MB per document.</span>
+</li>
+</ul>
+<div class="mt-6 pt-6 border-t border-surface-variant">
+<p class="font-caption text-caption text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="lock">lock</span>
+                            Your documents are securely encrypted.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Navigation Buttons -->
+<div class="mt-8 pt-6 border-t border-surface-variant flex justify-between items-center pb-8">
+<button class="px-6 py-2.5 rounded-lg border border-secondary text-secondary font-label-sm text-label-sm hover:bg-secondary-fixed transition-colors focus:ring-2 focus:ring-secondary focus:outline-none" onclick="window.location.href='03_citizen_dashboard.html'">
+                Back
+            </button>
+<button class="px-6 py-2.5 rounded-lg bg-secondary text-on-secondary font-label-sm text-label-sm hover:bg-on-secondary-container transition-colors focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:outline-none flex items-center gap-2 opacity-50 cursor-not-allowed" onclick="window.location.href='06_final_review_submission.html'">
+                Next Step
+                <span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+<!-- LANKAID OFFICIAL GOVERNMENT FOOTER -->
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+<!-- LANKAID OFFICIAL GOVERNMENT FOOTER -->
+
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+
+<!-- PORTAL QUICK SWITCHER WIDGET -->
+<div class="fixed bottom-5 right-5 z-[99999] font-sans" id="portal-quick-switcher">
+<button class="flex items-center gap-2 bg-slate-900 text-white hover:bg-sky-700 px-4 py-3 rounded-full shadow-2xl border border-slate-700/60 transition-all duration-200 hover:scale-105 active:scale-95 group" id="switcher-toggle-btn" onclick="togglePortalSwitcher()">
+<span class="material-symbols-outlined text-sky-400 group-hover:rotate-180 transition-transform duration-300">apps</span>
+<span class="text-xs font-bold tracking-wide">Portal Navigation</span>
+<span class="bg-sky-500/20 text-sky-300 text-[11px] px-2 py-0.5 rounded-full border border-sky-400/30">15 Pages</span>
+</button>
+<div class="hidden absolute bottom-14 right-0 w-[380px] max-h-[80vh] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 text-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200" id="switcher-drawer">
+<div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sky-400">verified_user</span>
+<div>
+<h3 class="text-sm font-bold text-white">LankaID Portal Index</h3>
+<p class="text-[11px] text-slate-400">Navigate all 15 connected pages</p>
+</div>
+</div>
+<button class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800" onclick="togglePortalSwitcher()">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="overflow-y-auto pr-1 flex-1 custom-scrollbar">
+<div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Citizen Journey</h4><div class="space-y-1">
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="01_landing_page.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">01</span>
+<span>LankaID Public Landing Page</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="02_login_portal.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">02</span>
+<span>Secure Access Portal (Login)</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="03_citizen_dashboard.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">03</span>
+<span>Citizen Services Dashboard</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="04_nic_document_upload.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">04</span>
+<span>NIC Application: Document Upload</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 bg-sky-600 text-white font-semibold shadow-md" href="05_passport_document_upload.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">05</span>
+<span>Passport Application: Document Upload</span>
+</div>
+<span class="ml-auto text-[10px] bg-sky-400 text-slate-950 font-bold px-1.5 py-0.5 rounded">ACTIVE</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="06_final_review_submission.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">06</span>
+<span>Application Review &amp; Submission</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="07_payment_gateway.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">07</span>
+<span>LankaID Payment Gateway</span>
+</div>
+</a>
+</div></div><div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Verification Officer Portal</h4><div class="space-y-1">
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="08_nic_verification_queue.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">08</span>
+<span>Officer Portal: NIC Verification Queue</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="09_nic_application_review.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">09</span>
+<span>Officer Portal: NIC Application Detailed Review</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="10_passport_verification_queue.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">10</span>
+<span>Officer Portal: Passport Verification Queue</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="11_passport_application_review.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">11</span>
+<span>Officer Portal: Passport Application Detailed Review</span>
+</div>
+</a>
+</div></div><div class="mb-4"><h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Executive &amp; Administration</h4><div class="space-y-1">
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="12_admin_dashboard_overview.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">12</span>
+<span>Civic Trust: Admin Overview Dashboard</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="13_officer_management_panel.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">13</span>
+<span>Civic Trust: Officer Management Panel</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="14_director_command_center.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">14</span>
+<span>Director Operational Command Center</span>
+</div>
+</a>
+<a class="flex items-center justify-between px-3 py-2 text-xs rounded-lg transition-all duration-150 text-slate-200 hover:bg-slate-800 hover:text-white" href="15_system_admin_dashboard.html">
+<div class="truncate mr-2">
+<span class="font-bold opacity-80 mr-1.5">15</span>
+<span>System Administrator Dashboard</span>
+</div>
+</a>
+</div></div>
+</div>
+<div class="border-t border-slate-800 pt-2.5 mt-2 flex items-center justify-between text-[11px] text-slate-400">
+<span>LankaID Identity Management System</span>
+<a class="text-sky-400 hover:underline flex items-center gap-1 font-semibold" href="01_landing_page.html">
+<span>Home Page</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<script>
+function togglePortalSwitcher() {
+    const drawer = document.getElementById('switcher-drawer');
+    if (drawer) {
+        drawer.classList.toggle('hidden');
+    }
+}
+
+// Close switcher when clicking outside
+document.addEventListener('click', function(e) {
+    const switcher = document.getElementById('portal-quick-switcher');
+    if (switcher && !switcher.contains(e.target)) {
+        const drawer = document.getElementById('switcher-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+            drawer.classList.add('hidden');
+        }
+    }
+});
+</script>
+</body></html>
