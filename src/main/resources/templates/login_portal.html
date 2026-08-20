@@ -144,18 +144,18 @@
 <form th:action="@{/login}" th:object="${loginRequest}" method="post" novalidate onsubmit="return validateCitizenLoginForm(event)">
   <div class="flex flex-col gap-stack-gap">
     <div class="flex flex-col gap-2">
-      <label class="font-label-sm text-label-sm text-on-surface" for="identifier">NIC Number or Email</label>
+      <label class="font-label-sm text-label-sm text-on-surface" for="citizenEmail">Citizen Email</label>
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 pointer-events-none">person</span>
-        <input id="identifier"
-               th:field="*{identifier}"
+        <input id="citizenEmail"
+               th:field="*{email}"
                th:errorclass="border-red-500"
                class="w-full h-12 pl-10 pr-4 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all font-body-md text-body-md placeholder:text-on-surface-variant/50"
-               placeholder="e.g., 200012345678 or email"
-               type="text"
+               placeholder="name@example.com"
+               type="email"
                required />
       </div>
-      <p id="identifierError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('identifier')}" th:errors="*{identifier}"></p>
+      <p id="citizenEmailError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
     </div>
 
     <div class="flex flex-col gap-2">
@@ -212,7 +212,7 @@
         <option value="director">Identity Service Director</option>
         <option value="admin">System Administrator</option>
       </select>
-      <p id="officerRoleError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
+      <p id="officerRoleError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('role') ? #fields.errors('role')[0] : ''}"></p>
     </div>
     <div class="flex flex-col gap-2">
       <label class="font-label-sm text-label-sm text-on-surface" for="officerEmail">Staff Email</label>
@@ -220,7 +220,7 @@
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 pointer-events-none">mail</span>
         <input id="officerEmail" th:field="*{email}" th:errorclass="border-red-500" class="w-full h-12 pl-10 pr-4 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-sm placeholder:text-on-surface-variant/50" placeholder="name@lankaid.gov.lk" type="email" required />
       </div>
-      <p id="officerEmailError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+      <p id="officerEmailError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('email') ? #fields.errors('email')[0] : ''}"></p>
     </div>
     <div class="flex flex-col gap-2">
       <label class="font-label-sm text-label-sm text-on-surface" for="officerPassword">Password</label>
@@ -229,7 +229,7 @@
         <input id="officerPassword" th:field="*{password}" th:errorclass="border-red-500" class="w-full h-12 pl-10 pr-10 rounded-lg bg-surface border border-outline/30 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-sm placeholder:text-on-surface-variant/50" placeholder="••••••••" type="password" required />
         <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 hover:text-on-surface" type="button"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
       </div>
-      <p id="officerPasswordError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+      <p id="officerPasswordError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('password') ? #fields.errors('password')[0] : ''}"></p>
     </div>
     <div class="flex items-center justify-between">
       <label class="flex items-center gap-2 cursor-pointer">
@@ -251,7 +251,7 @@
   <span class="material-symbols-outlined text-secondary text-3xl block mb-2">how_to_reg</span>
   <p class="text-sm font-semibold text-on-surface mb-1">Register for a LankaID Account</p>
   <p class="text-xs text-on-surface-variant mb-3">Fill in your personal details, contact information and set a secure password.</p>
-  <a href="citizen_register.html" class="inline-flex items-center gap-2 bg-secondary text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-secondary/90 transition-colors">
+  <a th:href="@{/register}" class="inline-flex items-center gap-2 bg-secondary text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-secondary/90 transition-colors">
     <span class="material-symbols-outlined text-lg">person_add</span>
     Create New Account
   </a>
@@ -275,31 +275,31 @@ function switchTab(tab) {
 
 function validateCitizenLoginForm(event) {
   const form = event.target;
-  const identifier = form.querySelector('#identifier');
+  const email = form.querySelector('#citizenEmail');
   const password = form.querySelector('#password');
-  const identifierError = document.getElementById('identifierError');
+  const emailError = document.getElementById('citizenEmailError');
   const passwordError = document.getElementById('passwordError');
 
-  if (identifierError) identifierError.textContent = '';
+  if (emailError) emailError.textContent = '';
   if (passwordError) passwordError.textContent = '';
-  if (identifier) identifier.classList.remove('border-red-500');
+  if (email) email.classList.remove('border-red-500');
   if (password) password.classList.remove('border-red-500');
 
-  const identifierValue = identifier ? identifier.value.trim() : '';
+  const emailValue = email ? email.value.trim() : '';
   const passwordValue = password ? password.value.trim() : '';
 
-  if (!identifierValue) {
-    if (identifierError) identifierError.textContent = 'NIC number or email is required.';
-    if (identifier) identifier.classList.add('border-red-500');
-    identifier?.focus();
+  if (!emailValue) {
+    if (emailError) emailError.textContent = 'Citizen email is required.';
+    if (email) email.classList.add('border-red-500');
+    email?.focus();
     return false;
   }
 
-  const validIdentifier = /^(\d{10,12}|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})$/.test(identifierValue);
-  if (!validIdentifier) {
-    if (identifierError) identifierError.textContent = 'Enter a valid NIC number or email address.';
-    if (identifier) identifier.classList.add('border-red-500');
-    identifier?.focus();
+  const validEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(emailValue);
+  if (!validEmail) {
+    if (emailError) emailError.textContent = 'Enter a valid email address.';
+    if (email) email.classList.add('border-red-500');
+    email?.focus();
     return false;
   }
 
@@ -354,9 +354,9 @@ function validateOfficerLoginForm(event) {
     return false;
   }
 
-  const validOfficerEmail = /^[A-Za-z0-9._%+-]+@lankaid\.gov\.lk$/.test(emailValue);
+  const validOfficerEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
   if (!validOfficerEmail) {
-    if (emailError) emailError.textContent = 'Use your official @lankaid.gov.lk email address.';
+    if (emailError) emailError.textContent = 'Enter a valid email address.';
     if (email) email.classList.add('border-red-500');
     email?.focus();
     return false;

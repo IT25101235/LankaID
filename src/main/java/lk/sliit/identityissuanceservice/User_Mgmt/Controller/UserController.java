@@ -20,50 +20,101 @@ public class UserController {
 
     @GetMapping("/login")
     public String loginPage(Model model) {
-        model.addAttribute("loginRequest", new LoginRequestDto());
-        model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
-        model.addAttribute("activeTab", "citizen");
+        addLoginForms(model);
         return "login_portal";
     }
 
     @PostMapping("/login")
-    public String submitLogin(@Valid @ModelAttribute("loginRequest") LoginRequestDto loginRequest,
-                              BindingResult bindingResult,
-                              Model model) {
-
-        model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
-        model.addAttribute("activeTab", "citizen");
+    public String citizenLogin(
+            @Valid @ModelAttribute("loginRequest") LoginRequestDto loginRequest,
+            BindingResult bindingResult,
+            Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
+            model.addAttribute("activeTab", "citizen");
             return "login_portal";
         }
 
-        /*No Authentication Just for Testing*/
-
-        return "citizen_frontends/citizen_dashboard";
+        // Temporary flow: authenticate the credentials here after the database is connected.
+        return "redirect:/dashboard/citizen";
     }
 
     @PostMapping("/login/officer")
-    public String submitOfficerLogin(@Valid @ModelAttribute("officerLoginRequest") OfficerLoginRequestDto officerLoginRequest,
-                                     BindingResult bindingResult,
-                                     Model model) {
-
-        model.addAttribute("loginRequest", new LoginRequestDto());
-        model.addAttribute("activeTab", "officer");
+    public String officerLogin(
+            @Valid @ModelAttribute("officerLoginRequest") OfficerLoginRequestDto officerLoginRequest,
+            BindingResult bindingResult,
+            Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("loginRequest", new LoginRequestDto());
+            model.addAttribute("activeTab", "officer");
             return "login_portal";
         }
 
-        if (officerLoginRequest.getRole().equals("nic-officer")) {
-            return "officers_frontends/nic_verification_queue";
-        } else if (officerLoginRequest.getRole().equals("passport-officer")) {
-            return "officers_frontends/passport_verification_queue";
-        } else if (officerLoginRequest.getRole().equals("csr")) {
-            return "officers_frontends/csr_dashboard";
-        } else if (officerLoginRequest.getRole().equals("director")) {
-            return "officers_frontends/director_dashboard";
-        } else if (officerLoginRequest.getRole().equals("admin")) {
-            return "officers_frontends/admin_dashboard";
+        String dashboardPath = switch (officerLoginRequest.getRole()) {
+            case "nic-officer" -> "/dashboard/officer/nic";
+            case "passport-officer" -> "/dashboard/officer/passport";
+            case "csr" -> "/dashboard/officer/csr";
+            case "director" -> "/dashboard/officer/director";
+            case "admin" -> "/dashboard/officer/admin";
+            default -> null;
+        };
+
+        if (dashboardPath == null) {
+            bindingResult.rejectValue("role", "role.invalid", "Please select a valid officer role.");
+            model.addAttribute("loginRequest", new LoginRequestDto());
+            model.addAttribute("activeTab", "officer");
+            return "login_portal";
         }
-        return "login_portal";
+
+        // Temporary flow: authenticate the officer credentials here after the database is connected.
+        return "redirect:" + dashboardPath;
     }
+
+    @GetMapping("/register")
+    public String registrationPage() {
+        return "citizen_frontends/citizen_register";
+    }
+
+    @GetMapping("/dashboard/citizen")
+    public String citizenDashboard() {
+        return "citizen_frontends/citizen_dashboard";
+    }
+
+    @GetMapping("/dashboard/officer/nic")
+    public String nicOfficerDashboard() {
+        return "officers_frontends/nic_verification_queue";
+    }
+
+    @GetMapping("/dashboard/officer/passport")
+    public String passportOfficerDashboard() {
+        return "officers_frontends/passport_verification_queue";
+    }
+
+    @GetMapping("/dashboard/officer/csr")
+    public String csrDashboard() {
+        return "officers_frontends/csr_dashboard";
+    }
+
+    @GetMapping("/dashboard/officer/director")
+    public String directorDashboard() {
+        return "officers_frontends/director_dashboard";
+    }
+
+    @GetMapping("/dashboard/officer/admin")
+    public String adminDashboard() {
+        return "officers_frontends/system_admin_dashboard";
+    }
+
+    private void addLoginForms(Model model) {
+        if (!model.containsAttribute("loginRequest")) {
+            model.addAttribute("loginRequest", new LoginRequestDto());
+        }
+        if (!model.containsAttribute("officerLoginRequest")) {
+            model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
+        }
+        if (!model.containsAttribute("activeTab")) {
+            model.addAttribute("activeTab", "citizen");
+        }
+    }
+
 }

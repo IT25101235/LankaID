@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="light" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -40,7 +40,7 @@ tailwind.config = {
 <!-- Header -->
 <header class="w-full bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-    <a href="01_landing_page.html" class="flex items-center gap-2.5 group">
+    <a th:href="@{/}" class="flex items-center gap-2.5 group">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center shadow-md">
         <span class="material-symbols-outlined text-white text-lg">verified_user</span>
       </div>
@@ -48,7 +48,7 @@ tailwind.config = {
     </a>
     <div class="flex items-center gap-3 text-sm text-slate-500">
       <span>Already have an account?</span>
-      <a href="02_login_portal.html" class="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-sky-700 transition-colors text-sm">Sign In</a>
+      <a th:href="@{/login}" class="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-sky-700 transition-colors text-sm">Sign In</a>
     </div>
   </div>
 </header>
@@ -270,7 +270,7 @@ tailwind.config = {
           <span class="material-symbols-outlined text-lg">how_to_reg</span>
           Create LankaID Account
         </button>
-        <p class="text-center text-xs text-slate-400 mt-3">Already have an account? <a href="02_login_portal.html" class="text-sky-600 font-semibold hover:underline">Sign In</a></p>
+        <p class="text-center text-xs text-slate-400 mt-3">Already have an account? <a th:href="@{/login}" class="text-sky-600 font-semibold hover:underline">Sign In</a></p>
       </form>
     </div>
   </div>
@@ -284,7 +284,7 @@ tailwind.config = {
     </div>
     <h2 class="text-xl font-bold text-slate-900 mb-2">Account Created!</h2>
     <p class="text-slate-500 text-sm mb-6">Your LankaID account has been created successfully. A verification email has been sent to your registered email address.</p>
-    <button onclick="window.location.href='02_login_portal.html'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
+    <button th:onclick="|window.location.href='@{/login}'|" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
       <span class="material-symbols-outlined text-lg">login</span>
       Sign In to Your Account
     </button>
