@@ -54,9 +54,9 @@ public class UserController {
         }
 
         if (officerLoginRequest.getRole().equals("nic-officer")) {
-            return "officers_frontends/nic_officer_dashboard";
+            return "officers_frontends/nic_verification_queue";
         } else if (officerLoginRequest.getRole().equals("passport-officer")) {
-            return "officers_frontends/passport_officer_dashboard";
+            return "officers_frontends/passport_verification_queue";
         } else if (officerLoginRequest.getRole().equals("csr")) {
             return "officers_frontends/csr_dashboard";
         } else if (officerLoginRequest.getRole().equals("director")) {
