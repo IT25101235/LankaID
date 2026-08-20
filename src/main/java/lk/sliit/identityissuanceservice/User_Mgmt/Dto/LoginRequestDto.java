@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.User_Mgmt.DTO;
+package lk.sliit.identityissuanceservice.User_Mgmt.Dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
