@@ -1,279 +1,97 @@
 <!DOCTYPE html>
-
-<html class="h-full" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>04. NIC Application: Document Upload | LankaID Identity Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "on-surface": "#0b1c30",
-                        "on-secondary": "#ffffff",
-                        "on-tertiary-container": "#818486",
-                        "surface": "#f8f9ff",
-                        "on-tertiary": "#ffffff",
-                        "surface-dim": "#cbdbf5",
-                        "outline-variant": "#c6c6cd",
-                        "primary-fixed-dim": "#bec6e0",
-                        "inverse-surface": "#213145",
-                        "surface-container": "#e5eeff",
-                        "surface-container-highest": "#d3e4fe",
-                        "on-error-container": "#93000a",
-                        "on-tertiary-fixed": "#191c1e",
-                        "on-primary": "#ffffff",
-                        "on-surface-variant": "#45464d",
-                        "secondary-container": "#5bb8fe",
-                        "on-tertiary-fixed-variant": "#444749",
-                        "surface-tint": "#565e74",
-                        "surface-bright": "#f8f9ff",
-                        "error": "#ba1a1a",
-                        "surface-container-low": "#eff4ff",
-                        "surface-container-high": "#dce9ff",
-                        "on-secondary-fixed-variant": "#004b73",
-                        "on-secondary-container": "#00476e",
-                        "on-secondary-fixed": "#001d31",
-                        "on-error": "#ffffff",
-                        "secondary-fixed": "#cce5ff",
-                        "tertiary-container": "#191c1e",
-                        "background": "#f8f9ff",
-                        "inverse-on-surface": "#eaf1ff",
-                        "secondary": "#006398",
-                        "on-primary-container": "#7c839b",
-                        "on-background": "#0b1c30",
-                        "surface-variant": "#d3e4fe",
-                        "on-primary-fixed-variant": "#3f465c",
-                        "inverse-primary": "#bec6e0",
-                        "on-primary-fixed": "#131b2e",
-                        "secondary-fixed-dim": "#93ccff",
-                        "tertiary-fixed-dim": "#c4c7c9",
-                        "error-container": "#ffdad6",
-                        "primary-container": "#131b2e",
-                        "tertiary": "#000000",
-                        "primary-fixed": "#dae2fd",
-                        "surface-container-lowest": "#ffffff",
-                        "primary": "#000000",
-                        "outline": "#76777d",
-                        "tertiary-fixed": "#e0e3e5"
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    spacing: {
-                        "base": "8px",
-                        "stack-gap": "1.5rem",
-                        "section-margin": "4rem",
-                        "container-padding-mobile": "1rem",
-                        "max-width-content": "1200px",
-                        "container-padding-desktop": "2.5rem"
-                    },
-                    fontFamily: {
-                        "label-sm": ["Public Sans"],
-                        "headline-md": ["Public Sans"],
-                        "headline-lg": ["Public Sans"],
-                        "headline-lg-mobile": ["Public Sans"],
-                        "body-lg": ["Public Sans"],
-                        "caption": ["Public Sans"],
-                        "display-lg": ["Public Sans"],
-                        "body-md": ["Public Sans"]
-                    },
-                    fontSize: {
-                        "label-sm": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
-                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
-                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
-                        "caption": ["12px", { lineHeight: "16px", fontWeight: "400" }],
-                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
-                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }]
-                    }
-                }
-            }
-        }
-    </script>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>04. NIC Application: Document Upload | LankaID Identity Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Public Sans','sans-serif']}}}};</script>
+  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}</style>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md h-full">
-<!-- TopNavBar -->
-<header class="bg-surface-container-lowest shadow-sm w-full h-16 shrink-0">
-<div class="flex justify-between items-center max-w-[1200px] mx-auto px-container-padding-desktop w-full h-full">
-<div class="flex items-center gap-6">
-<span class="font-headline-md text-headline-md font-bold text-on-surface">LankaID Services</span>
-<nav class="hidden md:flex gap-6 h-full items-end font-label-sm text-label-sm">
-<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="03_citizen_dashboard.html">Home</a>
-<a class="text-secondary font-bold border-b-2 border-secondary pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Applications</a>
-<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Documents</a>
-<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Appointments</a>
-</nav>
-</div>
-<div class="flex items-center gap-4">
-<button aria-label="notifications" class="text-secondary hover:text-secondary/80 transition-colors cursor-pointer active:opacity-80 flex items-center justify-center p-2 rounded-full hover:bg-surface-variant">
-<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-</button>
-<button aria-label="settings" class="text-secondary hover:text-secondary/80 transition-colors cursor-pointer active:opacity-80 flex items-center justify-center p-2 rounded-full hover:bg-surface-variant">
-<span class="material-symbols-outlined" data-icon="settings">settings</span>
-</button>
-<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant shrink-0">
-<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a person looking forward, neutral background, bright light mode aesthetic, corporate and clean visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9A7Y4CmFgDfCHnMjE4ORFLW1ovFloV-grU8iS0dhJuxt-4nGmiPf8coOe4H6F7jBW5aC1e9tLJsW2IiRPb57mqT4m2QBaBsfzGJ0PibDICjlmQZNFeJNeI7W4VFnS5BlO5AgkdTr8hY7xGDuSV0rcd2EVKzkjFcBKSZD7juZzU-9bUxHG3VZJgwMUL3WYLIeJROxQ41JpT3-YPjR2SRm0m3h1GrNqmODhSNnmBxZuiQk6h65pg2Ey"/>
-</div>
-</div>
-</div>
+<body class="min-h-screen flex flex-col">
+<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-2 shrink-0">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center"><span class="material-symbols-outlined text-white text-sm">verified_user</span></div>
+      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span> Services</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium h-full"><a class="h-full flex items-center text-slate-600 hover:text-sky-600" href="03_citizen_dashboard.html">Home</a><a class="h-full flex items-center text-sky-600 font-semibold border-b-2 border-sky-600" href="#">Applications</a><a class="h-full flex items-center text-slate-600 hover:text-sky-600" href="#">Documents</a><a class="h-full flex items-center text-slate-600 hover:text-sky-600" href="#">Appointments</a></nav>
+    <div class="flex items-center gap-3 text-slate-500">
+      <button aria-label="notifications" class="hover:text-sky-600"><span class="material-symbols-outlined text-xl">notifications</span></button>
+      <button aria-label="settings" class="hidden sm:block hover:text-sky-600"><span class="material-symbols-outlined text-xl">settings</span></button>
+    </div>
+  </div>
 </header>
-<!-- Main Content Canvas -->
-<main class="flex-1 max-w-[1200px] mx-auto w-full px-container-padding-mobile md:px-container-padding-desktop py-8 flex flex-col gap-8">
-<!-- Header & Stepper -->
-<div class="flex flex-col gap-6">
-<div>
-<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">NIC Document Upload</h1>
-<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Please provide the required documentation to verify your identity. Ensure all documents are clear, readable, and valid.</p>
-</div>
-<!-- Horizontal Stepper -->
-<div class="w-full">
-<ol class="flex items-center w-full">
-<li class="flex w-full items-center text-secondary after:content-[''] after:w-full after:h-1 after:border-b after:border-secondary after:border-4 after:inline-block">
-<span class="flex items-center justify-center w-8 h-8 bg-secondary rounded-full lg:h-10 lg:w-10 shrink-0">
-<span class="material-symbols-outlined text-on-secondary text-sm" data-icon="check">check</span>
-</span>
-<span class="font-label-sm text-label-sm text-on-surface ml-3 hidden sm:block mr-3">Personal Info</span>
-</li>
-<li class="flex w-full items-center text-secondary after:content-[''] after:w-full after:h-1 after:border-b after:border-surface-variant after:border-4 after:inline-block">
-<span class="flex items-center justify-center w-8 h-8 bg-secondary rounded-full lg:h-10 lg:w-10 shrink-0 outline outline-4 outline-secondary-fixed">
-<span class="font-label-sm text-label-sm text-on-secondary">2</span>
-</span>
-<span class="font-label-sm text-label-sm text-on-surface ml-3 hidden sm:block mr-3 font-bold">Documents</span>
-</li>
-<li class="flex w-full items-center text-surface-variant after:content-[''] after:w-full after:h-1 after:border-b after:border-surface-variant after:border-4 after:inline-block">
-<span class="flex items-center justify-center w-8 h-8 bg-surface-variant rounded-full lg:h-10 lg:w-10 shrink-0">
-<span class="font-label-sm text-label-sm text-on-surface-variant">3</span>
-</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant ml-3 hidden sm:block mr-3">Payment</span>
-</li>
-<li class="flex items-center">
-<span class="flex items-center justify-center w-8 h-8 bg-surface-variant rounded-full lg:h-10 lg:w-10 shrink-0">
-<span class="font-label-sm text-label-sm text-on-surface-variant">4</span>
-</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant ml-3 hidden sm:block">Review</span>
-</li>
-</ol>
-</div>
-</div>
-<!-- Content Area -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
-<!-- Upload Cards Grid (Left/Main) -->
-<div class="lg:col-span-8 flex flex-col gap-6">
-<!-- Card 1: Birth Certificate (Missing) -->
-<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-surface-variant flex flex-col gap-4">
-<div class="flex justify-between items-start">
-<div>
-<h3 class="font-label-sm text-label-sm text-on-surface text-base">Birth Certificate</h3>
-<p class="font-caption text-caption text-on-surface-variant mt-1">Official government-issued birth certificate.</p>
-</div>
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-caption text-caption font-bold bg-error-container text-on-error-container">
-                            Missing
-                        </span>
-</div>
-<div class="border border-dashed border-outline-variant bg-surface-container-low rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-surface-container-high transition-colors cursor-pointer group">
-<span class="material-symbols-outlined text-4xl text-secondary mb-3 group-hover:scale-110 transition-transform" data-icon="cloud_upload">cloud_upload</span>
-<p class="font-body-md text-body-md text-on-surface">Drag &amp; Drop file here or</p>
-<button class="mt-2 font-label-sm text-label-sm text-secondary hover:text-on-secondary-container transition-colors">Browse Files</button>
-<p class="font-caption text-caption text-on-surface-variant mt-2">PDF, JPG, PNG (Max 5MB)</p>
-</div>
-</div>
-<!-- Card 2: Current ID (Uploaded) -->
-<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-secondary flex flex-col gap-4 relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
-<div class="flex justify-between items-start">
-<div>
-<h3 class="font-label-sm text-label-sm text-on-surface text-base">Recent Passport-sized Photo</h3>
-<p class="font-caption text-caption text-on-surface-variant mt-1">Clear, color photo taken within the last 6 months.</p>
-</div>
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-caption text-caption font-bold bg-secondary-fixed text-on-secondary-fixed">
-                            Uploaded
-                        </span>
-</div>
-<div class="bg-surface-container-low rounded-lg p-4 flex items-center justify-between border border-surface-variant">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
-<div>
-<p class="font-label-sm text-label-sm text-on-surface">passport_photo.jpg</p>
-<p class="font-caption text-caption text-on-surface-variant">Clear, color photo taken within the last 6 months.</p>
-</div>
-</div>
-<button aria-label="Remove file" class="text-on-surface-variant hover:text-error transition-colors p-2 rounded-full hover:bg-error-container">
-<span class="material-symbols-outlined" data-icon="delete">delete</span>
-</button>
-</div>
-</div>
-<!-- Card 3: Proof of Address (Missing) -->
-<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-surface-variant flex flex-col gap-4">
-<div class="flex justify-between items-start">
-<div>
-<h3 class="font-label-sm text-label-sm text-on-surface text-base">Proof of Address</h3>
-<p class="font-caption text-caption text-on-surface-variant mt-1">Utility bill or bank statement (issued within last 3 months).</p>
-</div>
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-caption text-caption font-bold bg-error-container text-on-error-container">
-                            Missing
-                        </span>
-</div>
-<div class="border border-dashed border-outline-variant bg-surface-container-low rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-surface-container-high transition-colors cursor-pointer group">
-<span class="material-symbols-outlined text-4xl text-secondary mb-3 group-hover:scale-110 transition-transform" data-icon="cloud_upload">cloud_upload</span>
-<p class="font-body-md text-body-md text-on-surface">Drag &amp; Drop file here or</p>
-<button class="mt-2 font-label-sm text-label-sm text-secondary hover:text-on-secondary-container transition-colors">Browse Files</button>
-<p class="font-caption text-caption text-on-surface-variant mt-2">PDF, JPG, PNG (Max 5MB)</p>
-</div>
-</div>
-</div>
-<!-- Guidelines Panel (Right/Sidebar) -->
-<div class="lg:col-span-4 flex flex-col gap-6">
-<div class="bg-surface-container-low rounded-lg p-6 border border-surface-variant sticky top-24">
-<div class="flex items-center gap-3 mb-4">
-<span class="material-symbols-outlined text-secondary" data-icon="info">info</span>
-<h2 class="font-headline-md text-headline-md text-on-surface text-lg">Upload Guidelines</h2>
-</div>
-<ul class="space-y-4 font-body-md text-body-md text-on-surface-variant">
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
-<span>Ensure all four corners of the document are visible.</span>
-</li>
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
-<span>Text must be clear and legible; avoid glare or shadows.</span>
-</li>
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
-<span>Files must be in PDF, JPG, or PNG format.</span>
-</li>
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-secondary shrink-0 mt-0.5 text-[20px]" data-icon="check_circle">check_circle</span>
-<span>Maximum file size is 5MB per document.</span>
-</li>
-</ul>
-<div class="mt-6 pt-6 border-t border-surface-variant">
-<p class="font-caption text-caption text-on-surface-variant flex items-center gap-2">
-<span class="material-symbols-outlined text-[16px]" data-icon="lock">lock</span>
-                            Your documents are securely encrypted.
-                        </p>
-</div>
-</div>
-</div>
-</div>
-<!-- Navigation Buttons -->
-<div class="mt-8 pt-6 border-t border-surface-variant flex justify-between items-center pb-8">
-<button class="px-6 py-2.5 rounded-lg border border-secondary text-secondary font-label-sm text-label-sm hover:bg-secondary-fixed transition-colors focus:ring-2 focus:ring-secondary focus:outline-none" onclick="window.location.href='03_citizen_dashboard.html'">
-                Back
-            </button>
-<button class="px-6 py-2.5 rounded-lg bg-secondary text-on-secondary font-label-sm text-label-sm hover:bg-on-secondary-container transition-colors focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:outline-none flex items-center gap-2 opacity-50 cursor-not-allowed" onclick="window.location.href='06_final_review_submission.html'">
-                Next Step
-                <span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
-</button>
-</div>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">NIC Document Upload</h1>
+    <p class="text-slate-500 text-sm mt-1 max-w-2xl">Please provide the required documentation to verify your identity. Ensure all documents are clear, readable, and valid.</p>
+  </div>
+
+  <ol class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-6 grid grid-cols-4 gap-2" aria-label="Application progress">
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-emerald-600 text-center"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></span><span class="text-xs font-semibold">Personal Info</span></li>
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-sky-700 text-center"><span class="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold ring-4 ring-sky-100">2</span><span class="text-xs font-semibold">Documents</span></li>
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-slate-400 text-center"><span class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">3</span><span class="text-xs font-semibold">Payment</span></li>
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-slate-400 text-center"><span class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">4</span><span class="text-xs font-semibold">Review</span></li>
+  </ol>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <section class="lg:col-span-2 space-y-4">
+      <article class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-sky-600">article</span></div><div><h3 class="font-bold text-slate-900">Birth Certificate</h3><p class="text-xs text-slate-500 mt-0.5">Official government-issued birth certificate.</p></div></div>
+          <span class="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold">Missing</span>
+        </div>
+        <div class="border-2 border-dashed border-slate-300 hover:border-sky-400 rounded-xl bg-slate-50 p-6 text-center">
+          <span class="material-symbols-outlined text-sky-500 text-3xl">cloud_upload</span>
+          <p class="text-sm font-semibold text-slate-700 mt-1">Drag &amp; Drop file here or</p>
+          <button class="mt-2 text-sm font-semibold text-sky-600 hover:text-sky-700">Browse Files</button>
+          <p class="text-xs text-slate-400 mt-2">PDF, JPG, PNG (Max 5MB)</p>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-2xl border border-emerald-200 shadow-sm p-5">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-emerald-600">photo_camera</span></div><div><h3 class="font-bold text-slate-900">Recent Passport-sized Photo</h3><p class="text-xs text-slate-500 mt-0.5">Clear, color photo taken within the last 6 months.</p></div></div>
+          <span class="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-semibold">Uploaded</span>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-3">
+          <span class="material-symbols-outlined text-emerald-600">description</span><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-slate-800 truncate">passport_photo.jpg</p><p class="text-xs text-slate-500">Clear, color photo taken within the last 6 months.</p></div>
+          <button aria-label="Remove file" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><span class="material-symbols-outlined">delete</span></button>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-indigo-600">home_pin</span></div><div><h3 class="font-bold text-slate-900">Proof of Address</h3><p class="text-xs text-slate-500 mt-0.5">Utility bill or bank statement (issued within last 3 months).</p></div></div>
+          <span class="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold">Missing</span>
+        </div>
+        <div class="border-2 border-dashed border-slate-300 hover:border-sky-400 rounded-xl bg-slate-50 p-6 text-center">
+          <span class="material-symbols-outlined text-sky-500 text-3xl">cloud_upload</span><p class="text-sm font-semibold text-slate-700 mt-1">Drag &amp; Drop file here or</p><button class="mt-2 text-sm font-semibold text-sky-600 hover:text-sky-700">Browse Files</button><p class="text-xs text-slate-400 mt-2">PDF, JPG, PNG (Max 5MB)</p>
+        </div>
+      </article>
+    </section>
+
+    <aside class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 lg:sticky lg:top-24">
+      <div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-sky-600">info</span><h2 class="font-bold text-slate-900">Upload Guidelines</h2></div>
+      <ul class="space-y-3 text-sm text-slate-600">
+        <li class="flex gap-2"><span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>Ensure all four corners of the document are visible.</li>
+        <li class="flex gap-2"><span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>Text must be clear and legible; avoid glare or shadows.</li>
+        <li class="flex gap-2"><span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>Files must be in PDF, JPG, or PNG format.</li>
+        <li class="flex gap-2"><span class="material-symbols-outlined text-emerald-500 text-lg">check_circle</span>Maximum file size is 5MB per document.</li>
+      </ul>
+      <div class="mt-5 pt-4 border-t border-slate-100 flex gap-2 text-xs text-slate-500"><span class="material-symbols-outlined text-sky-600 text-lg">lock</span>Your documents are securely encrypted.</div>
+    </aside>
+  </div>
+
+  <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-between gap-3">
+    <button class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50" onclick="window.location.href='03_citizen_dashboard.html'">Back</button>
+    <button class="px-5 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-semibold flex items-center justify-center gap-1.5 opacity-50 cursor-not-allowed" onclick="window.location.href='06_final_review_submission.html'">Next Step <span class="material-symbols-outlined text-base">arrow_forward</span></button>
+  </div>
 </main>
-</body></html>
+</body>
+</html>

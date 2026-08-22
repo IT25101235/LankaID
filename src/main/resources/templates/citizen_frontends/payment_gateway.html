@@ -1,268 +1,71 @@
 <!DOCTYPE html>
-
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>07. LankaID Payment Gateway | LankaID Identity Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "inverse-primary": "#bec6e0",
-                        "on-secondary-container": "#00476e",
-                        "primary-fixed": "#dae2fd",
-                        "surface-container-highest": "#d3e4fe",
-                        "primary-fixed-dim": "#bec6e0",
-                        "surface-container": "#e5eeff",
-                        "tertiary-fixed": "#e0e3e5",
-                        "surface": "#f8f9ff",
-                        "on-primary-fixed-variant": "#3f465c",
-                        "on-primary-container": "#7c839b",
-                        "error": "#ba1a1a",
-                        "on-secondary-fixed": "#001d31",
-                        "on-surface-variant": "#45464d",
-                        "error-container": "#ffdad6",
-                        "secondary-fixed": "#cce5ff",
-                        "outline-variant": "#c6c6cd",
-                        "surface-container-low": "#eff4ff",
-                        "on-secondary-fixed-variant": "#004b73",
-                        "on-primary-fixed": "#131b2e",
-                        "surface-tint": "#565e74",
-                        "on-tertiary-fixed": "#191c1e",
-                        "on-error": "#ffffff",
-                        "background": "#f8f9ff",
-                        "surface-dim": "#cbdbf5",
-                        "surface-bright": "#f8f9ff",
-                        "on-tertiary-container": "#818486",
-                        "secondary": "#006398",
-                        "inverse-surface": "#213145",
-                        "on-surface": "#0b1c30",
-                        "on-error-container": "#93000a",
-                        "on-tertiary-fixed-variant": "#444749",
-                        "secondary-fixed-dim": "#93ccff",
-                        "surface-container-lowest": "#ffffff",
-                        "inverse-on-surface": "#eaf1ff",
-                        "surface-variant": "#d3e4fe",
-                        "surface-container-high": "#dce9ff",
-                        "primary": "#000000",
-                        "on-tertiary": "#ffffff",
-                        "tertiary": "#000000",
-                        "primary-container": "#131b2e",
-                        "on-background": "#0b1c30",
-                        "outline": "#76777d",
-                        "tertiary-container": "#191c1e",
-                        "secondary-container": "#5bb8fe",
-                        "on-secondary": "#ffffff",
-                        "tertiary-fixed-dim": "#c4c7c9",
-                        "on-primary": "#ffffff"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "section-margin": "4rem",
-                        "container-padding-mobile": "1rem",
-                        "base": "8px",
-                        "stack-gap": "1.5rem",
-                        "max-width-content": "1200px",
-                        "container-padding-desktop": "2.5rem"
-                    },
-                    "fontFamily": {
-                        "display-lg": ["Public Sans"],
-                        "label-sm": ["Public Sans"],
-                        "body-md": ["Public Sans"],
-                        "headline-lg-mobile": ["Public Sans"],
-                        "headline-md": ["Public Sans"],
-                        "headline-lg": ["Public Sans"],
-                        "body-lg": ["Public Sans"],
-                        "caption": ["Public Sans"]
-                    },
-                    "fontSize": {
-                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-                        "label-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
-                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
-                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
-                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
-                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
-                    }
-                }
-            }
-        }
-    </script>
-<style type="text/tailwindcss">
-        @layer utilities {
-            .ambient-shadow {
-                box-shadow: 0px 4px 20px rgba(15, 23, 42, 0.08);
-            }
-        }
-    </style>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>07. LankaID Payment Gateway | LankaID Identity Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Public Sans','sans-serif']}}}};</script>
+  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}</style>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
 </head>
-<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased">
-<!-- Top Navigation (Transactional intent, mostly suppressed, but keeping a minimal brand anchor as per Digital Government Services requirements) -->
-<header class="w-full h-16 bg-surface-container-lowest shadow-sm flex justify-between items-center max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">account_balance</span>
-<span class="font-headline-md text-headline-md font-bold text-on-surface">LankaID Services</span>
-</div>
-<div class="flex items-center gap-4 hidden md:flex text-on-surface-variant font-label-sm text-label-sm">
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">lock</span> Secure Session</span>
-</div>
+<body class="min-h-screen flex flex-col">
+<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center"><span class="material-symbols-outlined text-white text-sm">account_balance</span></div><span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span> Services</span></div>
+    <span class="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500"><span class="material-symbols-outlined text-base text-emerald-600">lock</span>Secure Session</span>
+  </div>
 </header>
-<main class="flex-grow w-full max-w-max-width-content mx-auto px-container-padding-mobile md:px-container-padding-desktop py-stack-gap">
-<!-- Progress Stepper -->
-<div class="mb-section-margin max-w-3xl mx-auto">
-<div class="flex items-center justify-between relative">
-<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-outline-variant z-0"></div>
-<!-- Step 1 -->
-<div class="relative z-10 flex flex-col items-center gap-2 bg-background px-2">
-<div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[18px]">check</span>
-</div>
-<span class="font-label-sm text-label-sm text-on-surface">Identity</span>
-</div>
-<!-- Step 2 -->
-<div class="relative z-10 flex flex-col items-center gap-2 bg-background px-2">
-<div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[18px]">check</span>
-</div>
-<span class="font-label-sm text-label-sm text-on-surface">Details</span>
-</div>
-<!-- Step 3 (Current) -->
-<div class="relative z-10 flex flex-col items-center gap-2 bg-background px-2">
-<div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">
-                        3
-                    </div>
-<span class="font-label-sm text-label-sm text-on-surface font-bold">Payment</span>
-</div>
-<!-- Step 4 -->
-<div class="relative z-10 flex flex-col items-center gap-2 bg-background px-2">
-<div class="w-8 h-8 rounded-full bg-outline-variant text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm">
-                        4
-                    </div>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Confirmation</span>
-</div>
-</div>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-<!-- Left Column: Payment Form -->
-<div class="lg:col-span-8 space-y-stack-gap">
-<div>
-<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-2">Complete Payment</h1>
-<p class="font-body-md text-body-md text-on-surface-variant">Please select a payment method and provide your details to finalize your application.</p>
-</div>
-<div class="bg-surface-container-lowest rounded-lg ambient-shadow p-6 space-y-6">
-<!-- Payment Methods -->
-<fieldset>
-<legend class="font-label-sm text-label-sm text-on-surface mb-4">Select Payment Method</legend>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-<label class="relative border-2 border-secondary rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 hover:bg-surface-container-low transition-colors">
-<input checked="" class="peer sr-only" name="payment_method" type="radio" value="card"/>
-<span class="material-symbols-outlined text-secondary text-3xl">credit_card</span>
-<span class="font-label-sm text-label-sm text-on-surface">Credit / Debit Card</span>
-</label>
-<label class="relative border border-outline-variant rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 hover:bg-surface-container-low transition-colors opacity-70 hover:opacity-100">
-<input class="peer sr-only" name="payment_method" type="radio" value="bank"/>
-<span class="material-symbols-outlined text-on-surface-variant text-3xl">account_balance</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Bank Transfer</span>
-</label>
-<label class="relative border border-outline-variant rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 hover:bg-surface-container-low transition-colors opacity-70 hover:opacity-100">
-<input class="peer sr-only" name="payment_method" type="radio" value="wallet"/>
-<span class="material-symbols-outlined text-on-surface-variant text-3xl">account_balance_wallet</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Mobile Wallet</span>
-</label>
-</div>
-</fieldset>
-<hr class="border-outline-variant/30"/>
-<!-- Card Details Form -->
-<div class="space-y-4">
-<div class="flex items-center justify-between mb-2">
-<h2 class="font-label-sm text-label-sm text-on-surface">Card Details</h2>
-<div class="flex gap-2 text-on-surface-variant">
-<span class="material-symbols-outlined text-sm">lock</span>
-<span class="font-caption text-caption">Secure Encrypted Payment</span>
-</div>
-</div>
-<div class="grid grid-cols-1 gap-4">
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface" for="cardName">Cardholder Name</label>
-<input class="h-12 border border-outline-variant rounded-lg px-4 bg-surface-container-lowest focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-shadow" id="cardName" placeholder="e.g. Jane Doe" type="text"/>
-</div>
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface" for="cardNumber">Card Number</label>
-<div class="relative">
-<input class="h-12 w-full border border-outline-variant rounded-lg pl-4 pr-10 bg-surface-container-lowest focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-shadow tracking-widest font-mono" id="cardNumber" placeholder="0000 0000 0000 0000" type="text"/>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant">credit_card</span>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface" for="expiry">Expiry Date</label>
-<input class="h-12 border border-outline-variant rounded-lg px-4 bg-surface-container-lowest focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-shadow text-center font-mono" id="expiry" placeholder="MM/YY" type="text"/>
-</div>
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface" for="cvv">CVV</label>
-<div class="relative">
-<input class="h-12 w-full border border-outline-variant rounded-lg px-4 bg-surface-container-lowest focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-shadow text-center font-mono" id="cvv" maxlength="4" placeholder="***" type="password"/>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant cursor-help" title="3 or 4 digits usually found on the back of your card">info</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="flex items-center gap-4 pt-4">
-<button class="h-12 px-6 border-2 border-secondary text-secondary font-label-sm text-label-sm rounded-lg hover:bg-secondary-fixed/50 transition-colors flex items-center gap-2" onclick="window.location.href='06_final_review_submission.html'">
-<span class="material-symbols-outlined text-[18px]">arrow_back</span>
-                        Back
-                    </button>
-<button class="h-12 px-8 bg-secondary text-on-secondary font-label-sm text-label-sm rounded-lg hover:bg-secondary/90 transition-colors flex-grow flex justify-center items-center gap-2" onclick="alert('LankaID Payment of $150.00 successful! Application submitted successfully.'); window.location.href='03_citizen_dashboard.html';">
-<span class="material-symbols-outlined text-[18px]">lock</span>
-                        Pay Now - $150.00
-                    </button>
-</div>
-</div>
-<!-- Right Column: Order Summary -->
-<div class="lg:col-span-4">
-<div class="bg-surface-container-lowest rounded-lg ambient-shadow p-6 sticky top-8">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-6 border-b border-outline-variant/30 pb-4">Order Summary</h3>
-<div class="space-y-4 mb-6">
-<div class="flex justify-between items-start">
-<div>
-<p class="font-label-sm text-label-sm text-on-surface">Passport Renewal (10 Year)</p>
-<p class="font-caption text-caption text-on-surface-variant mt-1">Application ID: #APP-2023-8942</p>
-</div>
-<span class="font-body-md text-body-md text-on-surface">$150.00</span>
-</div>
-<div class="flex justify-between items-start text-on-surface-variant">
-<span class="font-body-md text-body-md">Processing Fee</span>
-<span class="font-body-md text-body-md">$0.00</span>
-</div>
-</div>
-<div class="border-t border-outline-variant/30 pt-4 mb-6">
-<div class="flex justify-between items-center">
-<span class="font-label-sm text-label-sm text-on-surface">Total Amount</span>
-<span class="font-headline-md text-headline-md text-on-surface font-bold">$150.00</span>
-</div>
-</div>
-<div class="bg-surface-container-low p-4 rounded-lg flex items-start gap-3">
-<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-<p class="font-caption text-caption text-on-surface-variant">
-                            Payments are processed securely through the Government Secure Payment Gateway. Your details are encrypted (SSL/TLS 256-bit) and never stored on our servers.
-                        </p>
-</div>
-</div>
-</div>
-</div>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+  <ol class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-6 grid grid-cols-4 gap-2 max-w-3xl mx-auto" aria-label="Payment progress">
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-emerald-600 text-center"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></span><span class="text-xs font-semibold">Identity</span></li>
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-emerald-600 text-center"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></span><span class="text-xs font-semibold">Details</span></li>
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-sky-700 text-center"><span class="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold ring-4 ring-sky-100">3</span><span class="text-xs font-semibold">Payment</span></li>
+    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-slate-400 text-center"><span class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">4</span><span class="text-xs font-semibold">Confirmation</span></li>
+  </ol>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <section class="lg:col-span-2">
+      <div class="mb-4"><h1 class="text-2xl font-bold text-slate-900">Complete Payment</h1><p class="text-slate-500 text-sm mt-1">Please select a payment method and provide your details to finalize your application.</p></div>
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+        <fieldset>
+          <legend class="text-sm font-bold text-slate-900 mb-3">Select Payment Method</legend>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="relative border-2 border-sky-500 bg-sky-50 rounded-xl p-4 cursor-pointer flex sm:flex-col items-center gap-2 text-center"><input checked class="peer sr-only" name="payment_method" type="radio" value="card"/><span class="material-symbols-outlined text-sky-600 text-2xl">credit_card</span><span class="text-sm font-semibold text-slate-900">Credit / Debit Card</span></label>
+            <label class="relative border border-slate-200 rounded-xl p-4 cursor-pointer flex sm:flex-col items-center gap-2 text-center hover:bg-slate-50"><input class="peer sr-only" name="payment_method" type="radio" value="bank"/><span class="material-symbols-outlined text-slate-500 text-2xl">account_balance</span><span class="text-sm font-semibold text-slate-600">Bank Transfer</span></label>
+            <label class="relative border border-slate-200 rounded-xl p-4 cursor-pointer flex sm:flex-col items-center gap-2 text-center hover:bg-slate-50"><input class="peer sr-only" name="payment_method" type="radio" value="wallet"/><span class="material-symbols-outlined text-slate-500 text-2xl">account_balance_wallet</span><span class="text-sm font-semibold text-slate-600">Mobile Wallet</span></label>
+          </div>
+        </fieldset>
+
+        <div class="mt-6 pt-5 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-4"><h2 class="text-sm font-bold text-slate-900">Card Details</h2><span class="flex items-center gap-1 text-xs text-slate-500"><span class="material-symbols-outlined text-sm text-emerald-600">lock</span>Secure Encrypted Payment</span></div>
+          <div class="space-y-4">
+            <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="cardName">Cardholder Name</label><input class="w-full h-12 border border-slate-300 rounded-xl px-4 bg-white focus:border-sky-500 focus:ring-sky-500" id="cardName" placeholder="e.g. Jane Doe" type="text"/></div>
+            <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="cardNumber">Card Number</label><div class="relative"><input class="w-full h-12 border border-slate-300 rounded-xl pl-4 pr-11 bg-white focus:border-sky-500 focus:ring-sky-500 tracking-widest font-mono" id="cardNumber" placeholder="0000 0000 0000 0000" type="text"/><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">credit_card</span></div></div>
+            <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="expiry">Expiry Date</label><input class="w-full h-12 border border-slate-300 rounded-xl px-4 bg-white focus:border-sky-500 focus:ring-sky-500 text-center font-mono" id="expiry" placeholder="MM/YY" type="text"/></div>
+              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="cvv">CVV</label><div class="relative"><input class="w-full h-12 border border-slate-300 rounded-xl px-4 pr-10 bg-white focus:border-sky-500 focus:ring-sky-500 text-center font-mono" id="cvv" maxlength="4" placeholder="***" type="password"/><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">info</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col-reverse sm:flex-row gap-3">
+          <button class="h-12 px-5 border border-slate-300 bg-white text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 flex items-center justify-center gap-2" onclick="window.location.href='06_final_review_submission.html'"><span class="material-symbols-outlined text-base">arrow_back</span>Back</button>
+          <button class="h-12 px-6 bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold rounded-xl flex-1 flex justify-center items-center gap-2" onclick="alert('LankaID Payment of $150.00 successful! Application submitted successfully.'); window.location.href='03_citizen_dashboard.html';"><span class="material-symbols-outlined text-base">lock</span>Pay Now - $150.00</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 lg:sticky lg:top-24">
+      <h3 class="font-bold text-slate-900 pb-4 border-b border-slate-100">Order Summary</h3>
+      <div class="py-4 border-b border-slate-100"><div class="flex justify-between gap-4"><div><p class="text-sm font-semibold text-slate-900">Passport Renewal (10 Year)</p><p class="text-xs text-slate-500 mt-1">Application ID: #APP-2023-8942</p></div><span class="text-sm font-bold text-slate-900">$150.00</span></div></div>
+      <dl class="py-4 space-y-3 text-sm"><div class="flex justify-between"><dt class="text-slate-500">Processing Fee</dt><dd class="font-semibold text-slate-700">$0.00</dd></div><div class="flex justify-between pt-3 border-t border-slate-100"><dt class="font-bold text-slate-900">Total Amount</dt><dd class="text-lg font-bold text-sky-700">$150.00</dd></div></dl>
+      <div class="rounded-xl bg-sky-50 border border-sky-200 p-4 flex gap-3"><span class="material-symbols-outlined text-sky-600">verified_user</span><p class="text-xs leading-5 text-sky-800">Payments are processed securely through the Government Secure Payment Gateway. Your details are encrypted (SSL/TLS 256-bit) and never stored on our servers.</p></div>
+    </aside>
+  </div>
 </main>
-</body></html>
+</body>
+</html>
