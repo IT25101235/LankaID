@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Processed Applications | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <style>body{font-family:'Public Sans',sans-serif}</style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+<header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="${queueRoute}" class="text-sm text-slate-300 hover:text-white flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>Pending queue</a><div class="h-6 w-px bg-slate-700"></div><h1 class="font-bold"><span th:text="${documentType}">NIC</span> Processed Applications</h1><a th:href="${biometricRoute}" class="ml-auto rounded-lg bg-cyan-600 hover:bg-cyan-700 px-4 py-2 text-xs font-bold">Biometric collection</a></div></header>
+<main class="max-w-7xl mx-auto p-5 sm:p-6">
+  <div class="flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-2xl font-bold">Review history</h2><p class="text-sm text-slate-500 mt-1">Applications already decided by this officer.</p></div><span class="text-xs bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full">Static demonstration data</span></div>
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mt-5">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <input id="search" oninput="filterRows()" class="rounded-xl border-slate-300 text-sm" placeholder="Search name or reference"/>
+      <select id="decision" onchange="filterRows()" class="rounded-xl border-slate-300 text-sm"><option value="all">All decisions</option><option value="approved">Approved</option><option value="correction">Correction requested</option><option value="rejected">Rejected</option></select>
+      <input type="date" class="rounded-xl border-slate-300 text-sm" value="2026-08-01"/>
+      <button onclick="alert('The filter has been reset for the prototype.')" class="rounded-xl border border-slate-300 text-sm font-semibold">Reset filters</button>
+    </div>
+  </section>
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-5 overflow-hidden">
+    <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="text-left p-4">Citizen</th><th class="text-left p-4">Reference</th><th class="text-left p-4">Type</th><th class="text-left p-4">Decision</th><th class="text-left p-4">Reviewed</th><th class="text-right p-4">Action</th></tr></thead>
+      <tbody id="rows" class="divide-y divide-slate-100">
+        <tr data-decision="approved"><td class="p-4 font-semibold">Kamal Perera</td><td class="p-4 font-mono text-xs">LK-2026-00183</td><td class="p-4">Renewal</td><td class="p-4"><span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Approved</span></td><td class="p-4 text-slate-500">22 Aug 2026</td><td class="p-4 text-right"><a th:href="${queueRoute + '/LK-2026-00183'}" class="text-sky-700 font-semibold text-xs">View</a></td></tr>
+        <tr data-decision="correction"><td class="p-4 font-semibold">Dilani Silva</td><td class="p-4 font-mono text-xs">LK-2026-00174</td><td class="p-4">Lost / damaged</td><td class="p-4"><span class="bg-amber-50 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">Correction requested</span></td><td class="p-4 text-slate-500">21 Aug 2026</td><td class="p-4 text-right"><a th:href="${queueRoute + '/LK-2026-00174'}" class="text-sky-700 font-semibold text-xs">View</a></td></tr>
+        <tr data-decision="rejected"><td class="p-4 font-semibold">Ruwan Fernando</td><td class="p-4 font-mono text-xs">LK-2026-00159</td><td class="p-4">New</td><td class="p-4"><span class="bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-bold">Rejected</span></td><td class="p-4 text-slate-500">19 Aug 2026</td><td class="p-4 text-right"><a th:href="${queueRoute + '/LK-2026-00159'}" class="text-sky-700 font-semibold text-xs">View</a></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</main>
+<script>function filterRows(){const q=document.getElementById('search').value.toLowerCase(),d=document.getElementById('decision').value;document.querySelectorAll('#rows tr').forEach(r=>r.style.display=(r.textContent.toLowerCase().includes(q)&&(d==='all'||r.dataset.decision===d))?'':'none')}</script>
+</body></html>

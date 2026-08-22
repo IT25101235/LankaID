@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Biometric Collection | LankaID Officer Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <style>body{font-family:'Public Sans',sans-serif}.scan-line{animation:scan 2s ease-in-out infinite}@keyframes scan{0%,100%{top:12%}50%{top:82%}}</style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+<header class="bg-slate-950 text-white border-b border-slate-800">
+  <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 flex items-center gap-4">
+    <a th:href="${queueRoute}" class="text-slate-300 hover:text-white flex gap-2 text-sm"><span class="material-symbols-outlined text-lg">arrow_back</span>Applications</a>
+    <div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold"><span th:text="${documentType}">NIC</span> Biometric Collection</p><p class="text-xs text-slate-400">Check in citizen and record collection</p></div>
+    <span class="ml-auto text-xs px-3 py-1 rounded-full bg-cyan-400/10 border border-cyan-300/30 text-cyan-300">QR or manual reference</span>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto p-4 sm:p-6">
+  <div class="grid lg:grid-cols-[380px_1fr] gap-6">
+    <div class="space-y-5">
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h1 class="text-lg font-bold">Find appointment</h1><p class="text-xs text-slate-500 mt-1">Use either method. Both find the same appointment record.</p>
+        <div class="grid grid-cols-2 bg-slate-100 rounded-xl p-1 mt-4">
+          <button id="qrTab" onclick="showLookup('qr')" class="rounded-lg bg-white shadow-sm py-2 text-xs font-bold text-sky-700">Scan QR</button>
+          <button id="manualTab" onclick="showLookup('manual')" class="rounded-lg py-2 text-xs font-semibold text-slate-500">Type reference</button>
+        </div>
+        <div id="qrPanel" class="mt-4">
+          <div class="relative aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-slate-900 border-4 border-slate-200 flex items-center justify-center">
+            <span class="material-symbols-outlined text-7xl text-slate-600">qr_code_scanner</span>
+            <div class="scan-line absolute left-5 right-5 h-0.5 bg-cyan-400 shadow-[0_0_12px_#22d3ee]"></div>
+          </div>
+          <button onclick="simulateQrScan()" class="w-full mt-4 bg-sky-600 hover:bg-sky-700 text-white rounded-xl py-2.5 text-sm font-bold">Start camera / Simulate scan</button>
+          <p class="text-[11px] text-slate-400 text-center mt-2">Browser camera permission will be connected with the QR library later.</p>
+        </div>
+        <div id="manualPanel" class="hidden mt-4">
+          <label class="text-xs font-semibold text-slate-600">Application or appointment reference</label>
+          <input id="referenceInput" th:placeholder="${sampleReference}" class="w-full mt-1.5 rounded-xl border-slate-300 font-mono text-sm uppercase"/>
+          <button onclick="manualLookup()" class="w-full mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl py-2.5 text-sm font-bold">Find appointment</button>
+          <p class="text-[11px] text-slate-400 mt-2">Demo reference: <span class="font-mono" th:text="${sampleReference}">LK-NIC-2026-00183</span></p>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl border border-slate-200 p-5">
+        <h2 class="font-bold text-sm">Today’s queue</h2>
+        <div class="mt-3 space-y-2 text-xs">
+          <button onclick="quickLookup('LK-2026-00180')" class="w-full p-3 rounded-xl bg-slate-50 hover:bg-sky-50 text-left flex justify-between"><span><b>10:00</b> · Sanath Bandara</span><span class="text-emerald-600">Done</span></button>
+          <button onclick="quickLookup('LK-2026-00183')" class="w-full p-3 rounded-xl bg-cyan-50 border border-cyan-200 text-left flex justify-between"><span><b>10:30</b> · Kamal Perera</span><span class="text-cyan-700">Due now</span></button>
+          <button onclick="quickLookup('LK-2026-00188')" class="w-full p-3 rounded-xl bg-slate-50 hover:bg-sky-50 text-left flex justify-between"><span><b>11:00</b> · Dilani Silva</span><span class="text-slate-500">Upcoming</span></button>
+        </div>
+      </section>
+    </div>
+
+    <section id="collectionPanel" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 opacity-60 pointer-events-none transition">
+      <div class="flex flex-wrap items-start justify-between gap-3 pb-5 border-b border-slate-100">
+        <div><p class="text-xs font-semibold uppercase text-sky-700">Verified appointment</p><h2 class="text-xl font-bold mt-1">Kamal Sandesh Perera</h2><p class="text-sm text-slate-500 mt-1"><span th:text="${documentType}">NIC</span> · <span id="foundReference" class="font-mono" th:text="${sampleReference}">LK-NIC-2026-00183</span></p></div>
+        <span id="checkinStatus" class="rounded-full bg-amber-50 text-amber-700 px-3 py-1 text-xs font-bold">Waiting for check-in</span>
+      </div>
+
+      <div class="grid sm:grid-cols-3 gap-3 mt-5 text-sm">
+        <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Appointment</p><p class="font-bold mt-1">23 Aug 2026 · 10:30 AM</p></div>
+        <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Centre</p><p class="font-bold mt-1">Colombo Main Centre</p></div>
+        <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Identity check</p><p class="font-bold mt-1 text-emerald-700">Documents matched</p></div>
+      </div>
+
+      <button id="checkinButton" onclick="checkInCitizen()" class="mt-5 w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">how_to_reg</span>Check in citizen</button>
+
+      <div id="captureSection" class="hidden mt-6 border-t border-slate-100 pt-6">
+        <h3 class="font-bold">Biometric collection checklist</h3><p class="text-xs text-slate-500 mt-1">Confirm each item after the external capture device finishes.</p>
+        <div class="grid sm:grid-cols-3 gap-3 mt-4">
+          <label class="cursor-pointer rounded-xl border border-slate-200 p-4 flex items-start gap-3"><input class="capture-item mt-1 rounded text-emerald-600" type="checkbox" onchange="updateProgress()"/><span><b class="text-sm block">Fingerprints</b><small class="text-slate-500">Both hands captured</small></span></label>
+          <label class="cursor-pointer rounded-xl border border-slate-200 p-4 flex items-start gap-3"><input class="capture-item mt-1 rounded text-emerald-600" type="checkbox" onchange="updateProgress()"/><span><b class="text-sm block">Photograph</b><small class="text-slate-500">Live photo accepted</small></span></label>
+          <label class="cursor-pointer rounded-xl border border-slate-200 p-4 flex items-start gap-3"><input class="capture-item mt-1 rounded text-emerald-600" type="checkbox" onchange="updateProgress()"/><span><b class="text-sm block">Signature</b><small class="text-slate-500">Digital signature saved</small></span></label>
+        </div>
+        <div class="mt-5 grid sm:grid-cols-2 gap-4">
+          <div><label class="text-xs font-semibold text-slate-600">Capture device reference</label><input class="w-full mt-1.5 rounded-xl border-slate-300 text-sm" placeholder="BIO-DEVICE-REF-001"/></div>
+          <div><label class="text-xs font-semibold text-slate-600">Attach exported biometric file</label><input type="file" class="w-full mt-1.5 rounded-xl border border-slate-300 text-xs p-2"/></div>
+        </div>
+        <label class="text-xs font-semibold text-slate-600 block mt-4">Officer notes</label><textarea rows="3" class="w-full mt-1.5 rounded-xl border-slate-300 text-sm" placeholder="Optional collection notes"></textarea>
+        <div class="mt-5 flex flex-wrap items-center gap-3"><button id="completeButton" disabled onclick="completeCollection()" class="bg-emerald-600 text-white rounded-xl px-5 py-3 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed">Complete & attach to application</button><span id="progressText" class="text-xs text-slate-500">0 of 3 items captured</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script th:inline="javascript">
+const sampleReference=/*[[${sampleReference}]]*/ 'LK-NIC-2026-00183';
+function showLookup(type){const qr=type==='qr';document.getElementById('qrPanel').classList.toggle('hidden',!qr);document.getElementById('manualPanel').classList.toggle('hidden',qr);document.getElementById('qrTab').className=qr?'rounded-lg bg-white shadow-sm py-2 text-xs font-bold text-sky-700':'rounded-lg py-2 text-xs font-semibold text-slate-500';document.getElementById('manualTab').className=!qr?'rounded-lg bg-white shadow-sm py-2 text-xs font-bold text-sky-700':'rounded-lg py-2 text-xs font-semibold text-slate-500';}
+function simulateQrScan(){setTimeout(()=>showAppointment(sampleReference),500)}
+function manualLookup(){const value=document.getElementById('referenceInput').value.trim();if(!value){alert('Enter an application or appointment reference.');return;}showAppointment(value.toUpperCase());}
+function quickLookup(value){showAppointment(value)}
+function showAppointment(reference){document.getElementById('foundReference').textContent=reference;const panel=document.getElementById('collectionPanel');panel.classList.remove('opacity-60','pointer-events-none');panel.scrollIntoView({behavior:'smooth',block:'start'});}
+function checkInCitizen(){document.getElementById('checkinStatus').textContent='Checked in';document.getElementById('checkinStatus').className='rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-xs font-bold';document.getElementById('checkinButton').classList.add('hidden');document.getElementById('captureSection').classList.remove('hidden');}
+function updateProgress(){const items=[...document.querySelectorAll('.capture-item')];const done=items.filter(i=>i.checked).length;document.getElementById('progressText').textContent=`${done} of ${items.length} items captured`;document.getElementById('completeButton').disabled=done!==items.length;}
+function completeCollection(){if(!confirm('Attach this biometric collection record and send the application to Ready for Printing?'))return;document.getElementById('captureSection').innerHTML='<div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800"><p class="font-bold">Biometric collection completed</p><p class="text-sm mt-1">The record is attached and the application is now Ready for Printing.</p></div>';}
+</script>
+</body>
+</html>

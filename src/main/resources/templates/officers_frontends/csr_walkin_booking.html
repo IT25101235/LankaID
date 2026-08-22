@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -17,7 +17,7 @@
 
 <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
-    <a href="csr_dashboard.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
+    <a th:href="@{/officer/csr/walk-ins}" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
       <span class="material-symbols-outlined text-lg">arrow_back</span>
       CSR Dashboard
     </a>
@@ -85,18 +85,20 @@
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Service Type <span class="text-red-500">*</span></label>
             <select required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
               <option value="">Select service...</option>
-              <option value="nic-bio">NIC — Biometric Collection</option>
-              <option value="pass-bio">Passport — Biometric Collection</option>
+              <option value="nic-new">NIC — New application assistance</option>
+              <option value="nic-renew">NIC — Renewal / replacement assistance</option>
+              <option value="pass-new">Passport — New application assistance</option>
+              <option value="pass-renew">Passport — Renewal / replacement assistance</option>
               <option value="nic-submit">NIC — Document Submission (Walk-In)</option>
               <option value="pass-submit">Passport — Document Submission (Walk-In)</option>
               <option value="enquiry">General Enquiry</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Related Application Reference</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Related Application Reference (optional)</label>
             <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
               <option value="">None / Walk-in without application</option>
-              <option value="LK-NIC-2026-00183">LK-NIC-2026-00183 (Biometrics Due)</option>
+              <option value="">Not required for a new physical application</option>
             </select>
           </div>
           <div>
@@ -120,8 +122,8 @@
               <option>Counter 1 — Amara Wijesinghe (You)</option>
               <option>Counter 2 — Pradeep Kumara</option>
               <option>Counter 3 — Nadia Jayasuriya</option>
-              <option>Biometric Room A</option>
-              <option>Biometric Room B</option>
+              <option>Citizen Service Counter 1</option>
+              <option>Citizen Service Counter 2</option>
             </select>
           </div>
           <div>
@@ -141,7 +143,7 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center justify-between bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
-        <a href="csr_dashboard.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium flex items-center gap-1.5 transition-colors">
+        <a th:href="@{/officer/csr/walk-ins}" class="text-slate-600 hover:text-slate-900 text-sm font-medium flex items-center gap-1.5 transition-colors">
           <span class="material-symbols-outlined text-lg">arrow_back</span>
           Cancel
         </a>
@@ -205,16 +207,16 @@
     <div class="text-5xl font-black text-slate-900 my-3 tracking-wider">A-06</div>
     <div class="bg-slate-50 rounded-xl p-4 text-left mb-5 text-xs text-slate-600 space-y-2">
       <div class="flex justify-between"><span class="text-slate-400">Citizen</span><span class="font-semibold">Kamal Sandesh Perera</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">Service</span><span class="font-semibold">NIC Biometric Collection</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Service</span><span class="font-semibold">NIC Application Assistance</span></div>
       <div class="flex justify-between"><span class="text-slate-400">Time Slot</span><span class="font-semibold">10:30 AM</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">Counter</span><span class="font-semibold">Biometric Room A</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Counter</span><span class="font-semibold">Citizen Service Counter 1</span></div>
     </div>
     <div class="flex gap-3">
       <button class="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-50 flex items-center justify-center gap-1">
         <span class="material-symbols-outlined text-base">print</span>
         Print Token
       </button>
-      <button onclick="document.getElementById('tokenModal').classList.add('hidden'); document.getElementById('tokenModal').classList.remove('flex'); window.location.href='csr_dashboard.html'" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
+      <button onclick="document.getElementById('tokenModal').classList.add('hidden'); document.getElementById('tokenModal').classList.remove('flex'); window.location.href='/officer/csr/walk-ins'" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">
         Done
       </button>
     </div>

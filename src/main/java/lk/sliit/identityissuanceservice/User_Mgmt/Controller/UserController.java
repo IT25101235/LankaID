@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class UserController {
@@ -36,7 +37,7 @@ public class UserController {
         }
 
         // Temporary flow: authenticate the credentials here after the database is connected.
-        return "redirect:/dashboard/citizen";
+        return "redirect:/citizen/dashboard";
     }
 
     @PostMapping("/login/officer")
@@ -51,11 +52,11 @@ public class UserController {
         }
 
         String dashboardPath = switch (officerLoginRequest.getRole()) {
-            case "nic-officer" -> "/dashboard/officer/nic";
-            case "passport-officer" -> "/dashboard/officer/passport";
-            case "csr" -> "/dashboard/officer/csr";
-            case "director" -> "/dashboard/officer/director";
-            case "admin" -> "/dashboard/officer/admin";
+            case "nic-officer" -> "/officer/nic/applications";
+            case "passport-officer" -> "/officer/passport/applications";
+            case "csr" -> "/officer/csr";
+            case "director" -> "/officer/director";
+            case "admin" -> "/officer/admin";
             default -> null;
         };
 
@@ -75,34 +76,27 @@ public class UserController {
         return "citizen_frontends/citizen_register";
     }
 
-    @GetMapping("/dashboard/citizen")
-    public String citizenDashboard() {
+    @GetMapping("/citizen/dashboard")
+    public String citizenDashboard(
+            @RequestParam(defaultValue = "new") String profile,
+            Model model) {
+        /*
+         * Temporary UI data only. Later these two values will come from the
+         * citizen's database record. The query parameter lets us demonstrate
+         * every dashboard state before the database is connected.
+         */
+        boolean hasNic = profile.equals("existing") || profile.equals("nic-only");
+        boolean hasPassport = profile.equals("existing");
+        model.addAttribute("hasNic", hasNic);
+        model.addAttribute("hasPassport", hasPassport);
+        model.addAttribute("demoProfile", profile);
         return "citizen_frontends/citizen_dashboard";
     }
 
-    @GetMapping("/dashboard/officer/nic")
-    public String nicOfficerDashboard() {
-        return "officers_frontends/nic_verification_queue";
-    }
-
-    @GetMapping("/dashboard/officer/passport")
-    public String passportOfficerDashboard() {
-        return "officers_frontends/passport_verification_queue";
-    }
-
-    @GetMapping("/dashboard/officer/csr")
-    public String csrDashboard() {
-        return "officers_frontends/csr_dashboard";
-    }
-
-    @GetMapping("/dashboard/officer/director")
-    public String directorDashboard() {
-        return "officers_frontends/director_dashboard";
-    }
-
-    @GetMapping("/dashboard/officer/admin")
-    public String adminDashboard() {
-        return "officers_frontends/system_admin_dashboard";
+    @GetMapping("/dashboard/citizen")
+    public String oldCitizenDashboardRoute() {
+        // Keeps old bookmarks working while the project moves to clean routes.
+        return "redirect:/citizen/dashboard";
     }
 
     private void addLoginForms(Model model) {
