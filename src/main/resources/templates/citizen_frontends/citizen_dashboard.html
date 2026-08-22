@@ -1,306 +1,176 @@
 <!DOCTYPE html>
-
-<html class="h-full" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Citizen - Dashboard</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "on-surface": "#0b1c30",
-                      "on-secondary": "#ffffff",
-                      "on-tertiary-container": "#818486",
-                      "surface": "#f8f9ff",
-                      "on-tertiary": "#ffffff",
-                      "surface-dim": "#cbdbf5",
-                      "outline-variant": "#c6c6cd",
-                      "primary-fixed-dim": "#bec6e0",
-                      "inverse-surface": "#213145",
-                      "surface-container": "#e5eeff",
-                      "surface-container-highest": "#d3e4fe",
-                      "on-error-container": "#93000a",
-                      "on-tertiary-fixed": "#191c1e",
-                      "on-primary": "#ffffff",
-                      "on-surface-variant": "#45464d",
-                      "secondary-container": "#5bb8fe",
-                      "on-tertiary-fixed-variant": "#444749",
-                      "surface-tint": "#565e74",
-                      "surface-bright": "#f8f9ff",
-                      "error": "#ba1a1a",
-                      "surface-container-low": "#eff4ff",
-                      "surface-container-high": "#dce9ff",
-                      "on-secondary-fixed-variant": "#004b73",
-                      "on-secondary-container": "#00476e",
-                      "on-secondary-fixed": "#001d31",
-                      "on-error": "#ffffff",
-                      "secondary-fixed": "#cce5ff",
-                      "tertiary-container": "#191c1e",
-                      "background": "#f8f9ff",
-                      "inverse-on-surface": "#eaf1ff",
-                      "secondary": "#006398",
-                      "on-primary-container": "#7c839b",
-                      "on-background": "#0b1c30",
-                      "surface-variant": "#d3e4fe",
-                      "on-primary-fixed-variant": "#3f465c",
-                      "inverse-primary": "#bec6e0",
-                      "on-primary-fixed": "#131b2e",
-                      "secondary-fixed-dim": "#93ccff",
-                      "tertiary-fixed-dim": "#c4c7c9",
-                      "error-container": "#ffdad6",
-                      "primary-container": "#131b2e",
-                      "tertiary": "#000000",
-                      "primary-fixed": "#dae2fd",
-                      "surface-container-lowest": "#ffffff",
-                      "primary": "#000000",
-                      "outline": "#76777d",
-                      "tertiary-fixed": "#e0e3e5"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.25rem",
-                      "lg": "0.5rem",
-                      "xl": "0.75rem",
-                      "full": "9999px"
-              },
-              "spacing": {
-                      "base": "8px",
-                      "stack-gap": "1.5rem",
-                      "section-margin": "4rem",
-                      "container-padding-mobile": "1rem",
-                      "max-width-content": "1200px",
-                      "container-padding-desktop": "2.5rem"
-              },
-              "fontFamily": {
-                      "label-sm": [
-                              "Public Sans"
-                      ],
-                      "headline-md": [
-                              "Public Sans"
-                      ],
-                      "headline-lg": [
-                              "Public Sans"
-                      ],
-                      "headline-lg-mobile": [
-                              "Public Sans"
-                      ],
-                      "body-lg": [
-                              "Public Sans"
-                      ],
-                      "caption": [
-                              "Public Sans"
-                      ],
-                      "display-lg": [
-                              "Public Sans"
-                      ],
-                      "body-md": [
-                              "Public Sans"
-                      ]
-              },
-              "fontSize": {
-                      "label-sm": [
-                              "14px",
-                              {
-                                      "lineHeight": "20px",
-                                      "letterSpacing": "0.01em",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "headline-md": [
-                              "24px",
-                              {
-                                      "lineHeight": "32px",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "headline-lg": [
-                              "32px",
-                              {
-                                      "lineHeight": "40px",
-                                      "letterSpacing": "-0.01em",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "headline-lg-mobile": [
-                              "24px",
-                              {
-                                      "lineHeight": "32px",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "body-lg": [
-                              "18px",
-                              {
-                                      "lineHeight": "28px",
-                                      "fontWeight": "400"
-                              }
-                      ],
-                      "caption": [
-                              "12px",
-                              {
-                                      "lineHeight": "16px",
-                                      "fontWeight": "400"
-                              }
-                      ],
-                      "display-lg": [
-                              "48px",
-                              {
-                                      "lineHeight": "56px",
-                                      "letterSpacing": "-0.02em",
-                                      "fontWeight": "700"
-                              }
-                      ],
-                      "body-md": [
-                              "16px",
-                              {
-                                      "lineHeight": "24px",
-                                      "fontWeight": "400"
-                              }
-                      ]
-              }
-            }
-          }
-        }
-    </script>
-<style>
-        body {
-            background-color: theme('colors.background');
-            color: theme('colors.on-background');
-        }
-    </style>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Citizen - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans', 'sans-serif'] } } } };
+  </script>
+  <style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }</style>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
 </head>
-<body class="h-full flex flex-col antialiased">
-<!-- TopNavBar (From JSON) -->
-<header class="w-full h-16 bg-surface-container-lowest shadow-sm flex-none z-50 relative">
-<div class="flex justify-between items-center max-w-[1200px] mx-auto px-container-padding-desktop w-full h-full">
-<div class="font-headline-md text-headline-md font-bold text-on-surface">LankaID Services</div>
-<nav class="hidden md:flex gap-8 items-center font-label-sm text-label-sm h-full pt-4">
-<a class="text-secondary font-bold border-b-2 border-secondary pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="01_landing_page.html">Home</a>
-<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="application_tracking.html">My Applications</a>
-<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="biometric_appointment_booking.html">Appointments</a>
-<a class="text-on-surface-variant pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-80" href="citizen_complaints.html">Complaints</a>
-</nav>
-<div class="flex items-center gap-4 text-secondary">
-<a href="citizen_notifications.html" class="relative">
-  <span class="material-symbols-outlined cursor-pointer active:opacity-80 hover:text-secondary transition-colors duration-200" data-icon="notifications">notifications</span>
-  <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">3</span>
-</a>
-<a href="citizen_complaints.html">
-  <span class="material-symbols-outlined cursor-pointer active:opacity-80 hover:text-secondary transition-colors duration-200" data-icon="feedback">feedback</span>
-</a>
-<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A clean, modern corporate headshot of a young professional individual smiling subtly, positioned in front of a slightly blurred bright modern office background with light cool-toned colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYCuwlnRQa6_NSU5PeloyjhoM7qNS6h8hPIIrqNniK8J1oFk5tJX2pdeOka6T3GGStz9Q1gy-Rv6t9XQFSLMJpb0UgOAn3yPvhAewCmeLZhwySk90OE0BwozysAOu4iYoaKUWYJ6DCDgMc_qqH0Rt7kK2bba5b3fmVFbdB0kmZ-qzqjbKqlSVWppoOXs9L0pcVNDG3TktKz5ueiBAX5ezreSQockwLsPexdNVr-3wPmo-V-BCwUGxp"/>
-</div>
-</div>
+<body class="min-h-screen flex flex-col antialiased">
+
+<!-- Header -->
+<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <a href="01_landing_page.html" class="flex items-center gap-2 shrink-0">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-sm">verified_user</span>
+      </div>
+      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span> Services</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium h-full" aria-label="Citizen navigation">
+      <a href="01_landing_page.html" class="h-full flex items-center text-sky-600 font-semibold border-b-2 border-sky-600">Home</a>
+      <a href="application_tracking.html" class="h-full flex items-center text-slate-600 hover:text-sky-600">My Applications</a>
+      <a href="biometric_appointment_booking.html" class="h-full flex items-center text-slate-600 hover:text-sky-600">Appointments</a>
+      <a href="citizen_complaints.html" class="h-full flex items-center text-slate-600 hover:text-sky-600">Complaints</a>
+    </nav>
+
+    <div class="flex items-center gap-3 sm:gap-4">
+      <a href="citizen_notifications.html" class="relative text-slate-500 hover:text-sky-600" aria-label="Notifications">
+        <span class="material-symbols-outlined text-xl">notifications</span>
+        <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">3</span>
+      </a>
+      <a href="citizen_complaints.html" class="hidden sm:flex text-slate-500 hover:text-sky-600" aria-label="Feedback">
+        <span class="material-symbols-outlined text-xl">feedback</span>
+      </a>
+      <img alt="User profile photo" class="w-8 h-8 rounded-full object-cover border border-slate-200" data-alt="A clean, modern corporate headshot of a young professional individual smiling subtly, positioned in front of a slightly blurred bright modern office background with light cool-toned colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYCuwlnRQa6_NSU5PeloyjhoM7qNS6h8hPIIrqNniK8J1oFk5tJX2pdeOka6T3GGStz9Q1gy-Rv6t9XQFSLMJpb0UgOAn3yPvhAewCmeLZhwySk90OE0BwozysAOu4iYoaKUWYJ6DCDgMc_qqH0Rt7kK2bba5b3fmVFbdB0kmZ-qzqjbKqlSVWppoOXs9L0pcVNDG3TktKz5ueiBAX5ezreSQockwLsPexdNVr-3wPmo-V-BCwUGxp"/>
+    </div>
+  </div>
 </header>
-<!-- Main Content -->
-<main class="flex-1 w-full max-w-max-width-content mx-auto px-container-padding-desktop py-section-margin flex flex-col gap-stack-gap">
-<!-- Welcome Hero -->
-<section class="bg-surface-container-lowest rounded-xl p-8 shadow-[0px_4px_20px_rgba(15,23,42,0.08)] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-<div class="flex flex-col gap-2">
-<h1 class="font-display-lg text-display-lg text-on-surface">Welcome back, {{user.first_name}}</h1>
-<p class="font-body-lg text-body-lg text-on-surface-variant">Here is an overview of your current government identity services.</p>
-</div>
-<div class="flex flex-col sm:flex-row gap-4">
-<button class="bg-secondary text-on-secondary px-6 py-3 rounded-lg font-label-sm text-label-sm flex items-center gap-2 hover:bg-on-secondary-fixed-variant transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" onclick="window.location.href='nic_application_form.html'">
-<span class="material-symbols-outlined text-[18px]">add_card</span>
-                    Apply for NIC
-                </button>
-<button class="bg-transparent border border-secondary text-secondary px-6 py-3 rounded-lg font-label-sm text-label-sm flex items-center gap-2 hover:bg-surface-container-low transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" onclick="window.location.href='passport_application_form.html'">
-<span class="material-symbols-outlined text-[18px]">flight_takeoff</span>
-                    Apply for Passport
-                </button>
-<button class="bg-transparent border border-orange-400 text-orange-600 px-6 py-3 rounded-lg font-label-sm text-label-sm flex items-center gap-2 hover:bg-orange-50 transition-colors focus:outline-none" onclick="window.location.href='application_tracking.html'">
-<span class="material-symbols-outlined text-[18px]">track_changes</span>
-                    Track Status
-                </button>
-</div>
-</section>
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-stack-gap">
-<!-- My Applications (Bento Grid Style) -->
-<section class="lg:col-span-2 flex flex-col gap-4">
-<h2 class="font-headline-lg text-headline-lg text-on-surface">My Applications</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<!-- Card 1 -->
-<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0px_4px_20px_rgba(15,23,42,0.08)] flex flex-col gap-4 border border-outline-variant/30">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined">badge</span>
-</div>
-<div>
-<h3 class="font-headline-md text-body-lg font-semibold text-on-surface">National ID Card (NIC)</h3>
-<p class="font-caption text-caption text-on-surface-variant">Ref: GID-2023-8942</p>
-</div>
-</div>
-<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-caption">Under Review</span>
-</div>
-<div class="pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
-<div class="flex justify-between font-label-sm text-caption">
-<span class="text-on-surface-variant">Submitted:</span>
-<span class="text-on-surface font-semibold">Oct 12, 2023</span>
-</div>
-<div class="w-full bg-surface-container h-2 rounded-full mt-2 overflow-hidden">
-<div class="bg-secondary h-full rounded-full" style="width: 60%;"></div>
-</div>
-<p class="font-caption text-caption text-on-surface-variant text-right">Step 3 of 5</p>
-</div>
-</div>
-<!-- Card 2 -->
-<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0px_4px_20px_rgba(15,23,42,0.08)] flex flex-col gap-4 border border-outline-variant/30">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-error-container/30 flex items-center justify-center text-error">
-<span class="material-symbols-outlined">fingerprint</span>
-</div>
-<div>
-<h3 class="font-headline-md text-body-lg font-semibold text-on-surface">Passport Renewal</h3>
-<p class="font-caption text-caption text-on-surface-variant">Ref: PPT-2023-1029</p>
-</div>
-</div>
-<span class="bg-error-container text-on-error-container px-3 py-1 rounded-full font-label-sm text-caption">Action Required</span>
-</div>
-<div class="pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
-<p class="font-body-md text-label-sm text-error">Pending Biometrics</p>
-<button class="w-full mt-2 bg-transparent border border-error text-error py-2 rounded-lg font-label-sm text-caption hover:bg-error-container/20 transition-colors">Schedule Appointment</button>
-</div>
-</div>
-</div>
-</section>
-<!-- Upcoming Appointments (Sidebar style) -->
-<section class="flex flex-col gap-4">
-<h2 class="font-headline-lg text-headline-lg text-on-surface">Upcoming Appointments</h2>
-<div class="bg-surface-container-low rounded-xl p-6 flex flex-col gap-6">
-<div class="flex gap-4">
-<div class="flex flex-col items-center justify-center bg-surface-container-lowest w-14 h-14 rounded-lg shadow-sm border border-outline-variant/20">
-<span class="font-label-sm text-caption text-error font-bold uppercase">Oct</span>
-<span class="font-headline-md text-headline-md text-on-surface leading-none">24</span>
-</div>
-<div class="flex flex-col justify-center">
-<h4 class="font-label-sm text-body-md font-semibold text-on-surface">Biometrics Collection</h4>
-<p class="font-caption text-caption text-on-surface-variant flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]">schedule</span> 10:30 AM
-                            </p>
-<p class="font-caption text-caption text-on-surface-variant flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]">location_on</span> City Center Hub
-                            </p>
-</div>
-</div>
-<hr class="border-outline-variant/20"/>
-<div class="flex flex-col gap-2">
-<div class="w-full h-32 rounded-lg overflow-hidden relative bg-surface-container-highest">
-<img class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="A clean, minimalist 2D vector map illustration showing a generic city grid with subtle blue routing lines and a distinct pinpoint marker on a central building block. The style is modern, flat, and corporate, using light cool greys and soft blues, completely devoid of text." data-location="City Center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2a_1MomlKBIEm-kFhA_HV1u1K-HGjDYPw9MOwKBG6ceg4wu7tb5VqDrKh4QTwmOpl8_CBPk_cOQbg4K1TIFaMz7WfQwUhOifdcaOFXZTVCN3c80GhEQKqyN08PcnGeL-0FW7b3tyqX4Hie8YuwN2tSRe9NpvU0Qfo5ytP_FEdDzx-S3qrPyMOwWDfMJM7jgv69ZTstQ64Rl6bDJ36gBsfB7BzXrOhD3ZTLdWxRBGdLTAoUb-rZw1q"/>
-</div>
-<button class="w-full bg-transparent text-secondary py-2 font-label-sm text-label-sm hover:underline flex justify-center items-center gap-1">
-                            Get Directions <span class="material-symbols-outlined text-[16px]">open_in_new</span>
-</button>
-</div>
-</div>
-</section>
-</div>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+  <!-- Welcome and quick actions -->
+  <section class="mb-6">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Welcome back, {{user.first_name}}</h1>
+        <p class="text-slate-500 text-sm mt-1">Here is an overview of your current government identity services.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <a href="nic_application_form.html" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-lg">add_card</span>
+          Apply for NIC
+        </a>
+        <a href="passport_application_form.html" class="bg-white hover:bg-slate-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-lg">flight_takeoff</span>
+          Apply for Passport
+        </a>
+        <a href="application_tracking.html" class="bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-lg">track_changes</span>
+          Track Status
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <!-- Applications -->
+    <section class="lg:col-span-2">
+      <h2 class="text-lg font-bold text-slate-900 mb-3">My Applications</h2>
+
+      <div class="space-y-4">
+        <!-- NIC application -->
+        <article class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-5">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div class="flex items-start gap-4 min-w-0">
+                <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-sky-600 text-2xl">badge</span>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-bold text-slate-900">National ID Card (NIC)</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Ref: GID-2023-8942</p>
+                </div>
+              </div>
+              <span class="self-start text-xs bg-sky-100 text-sky-700 px-3 py-1 rounded-full font-semibold border border-sky-200">Under Review</span>
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-slate-100">
+              <div class="flex items-center justify-between text-xs mb-2">
+                <span class="text-slate-500">Submitted:</span>
+                <span class="font-semibold text-slate-700">Oct 12, 2023</span>
+              </div>
+              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-sky-500 rounded-full" style="width: 60%;"></div>
+              </div>
+              <p class="text-xs text-slate-500 text-right mt-2">Step 3 of 5</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Passport application -->
+        <article class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
+          <div class="p-5">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div class="flex items-start gap-4 min-w-0">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-red-600 text-2xl">fingerprint</span>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-bold text-slate-900">Passport Renewal</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Ref: PPT-2023-1029</p>
+                </div>
+              </div>
+              <span class="self-start text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold border border-red-200">Action Required</span>
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-red-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p class="text-sm font-semibold text-red-700">Pending Biometrics</p>
+              </div>
+              <button class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">calendar_month</span>
+                Schedule Appointment
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Appointment -->
+    <section>
+      <h2 class="text-lg font-bold text-slate-900 mb-3">Upcoming Appointments</h2>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 flex items-center gap-4 border-b border-slate-100">
+          <div class="w-14 h-14 rounded-xl bg-sky-50 border border-sky-200 flex flex-col items-center justify-center shrink-0">
+            <span class="text-[10px] font-bold uppercase text-red-600">Oct</span>
+            <span class="text-xl leading-none font-bold text-slate-900">24</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Biometrics Collection</h3>
+            <p class="text-xs text-slate-500 flex items-center gap-1 mt-1">
+              <span class="material-symbols-outlined text-sm">schedule</span>
+              10:30 AM
+            </p>
+            <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-sm">location_on</span>
+              City Center Hub
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5">
+          <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+            <img class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="A clean, minimalist 2D vector map illustration showing a generic city grid with subtle blue routing lines and a distinct pinpoint marker on a central building block. The style is modern, flat, and corporate, using light cool greys and soft blues, completely devoid of text." data-location="City Center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2a_1MomlKBIEm-kFhA_HV1u1K-HGjDYPw9MOwKBG6ceg4wu7tb5VqDrKh4QTwmOpl8_CBPk_cOQbg4K1TIFaMz7WfQwUhOifdcaOFXZTVCN3c80GhEQKqyN08PcnGeL-0FW7b3tyqX4Hie8YuwN2tSRe9NpvU0Qfo5ytP_FEdDzx-S3qrPyMOwWDfMJM7jgv69ZTstQ64Rl6bDJ36gBsfB7BzXrOhD3ZTLdWxRBGdLTAoUb-rZw1q" alt="Map showing City Center Hub"/>
+          </div>
+          <button class="w-full mt-3 text-sky-600 hover:text-sky-700 hover:bg-sky-50 py-2 rounded-lg text-sm font-semibold flex justify-center items-center gap-1">
+            Get Directions
+            <span class="material-symbols-outlined text-base">open_in_new</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
 </main>
-</body></html>
+
+</body>
+</html>
