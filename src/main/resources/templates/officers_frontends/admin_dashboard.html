@@ -9,26 +9,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
 <style>
-  body { font-family: 'Public Sans', sans-serif; background: #0f172a; color: #e2e8f0; }
+  body { font-family: 'Public Sans', sans-serif; }
   .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
-  .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
-  .sidebar-link.active { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+  .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
   .sidebar-link .material-symbols-outlined { font-size: 20px; }
-  .card { background: rgba(30,41,59,0.8); border: 1px solid rgba(148,163,184,0.1); border-radius: 16px; }
-  input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(239,68,68,0.2); border-color: #ef4444 !important; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; }
+  input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(8,145,178,0.16); border-color: #0891b2 !important; }
+  .light-admin-table { background: #fff; color: #334155; }
+  .light-admin-table thead { background: #f8fafc; }
+  .light-admin-table thead tr, .light-admin-table th { color: #475569 !important; }
+  .light-admin-table tbody { color: #334155 !important; }
+  .light-admin-table tbody tr:hover { background: #f1f5f9 !important; }
+  .light-admin-table .text-white { color: #0f172a !important; }
+  .light-admin-table .text-slate-300,
+  .light-admin-table .text-slate-400,
+  .light-admin-table .text-slate-500 { color: #475569 !important; }
+  .light-admin-table .bg-slate-700 { background: #e2e8f0 !important; color: #334155 !important; }
+  .light-admin-table .hover\:bg-slate-600:hover { background: #cbd5e1 !important; }
+  .light-admin-table .hover\:bg-amber-900\/50:hover { background: #fef3c7 !important; }
+  .light-admin-table .hover\:bg-red-900\/50:hover { background: #fee2e2 !important; }
+  .light-admin-table .bg-sky-900\/50 { background: #e0f2fe !important; }
+  .light-admin-table .text-sky-400 { color: #0369a1 !important; }
+  .light-admin-table .border-sky-800 { border-color: #bae6fd !important; }
+  .light-admin-table .bg-emerald-900\/50 { background: #d1fae5 !important; }
+  .light-admin-table .text-emerald-400 { color: #047857 !important; }
+  .light-admin-table .border-emerald-800 { border-color: #a7f3d0 !important; }
+  .light-admin-table .bg-indigo-900\/50 { background: #e0e7ff !important; }
+  .light-admin-table .text-indigo-400 { color: #4338ca !important; }
+  .light-admin-table .border-indigo-800 { border-color: #c7d2fe !important; }
+  .light-admin-table .bg-cyan-900\/50 { background: #cffafe !important; }
+  .light-admin-table .text-cyan-400 { color: #0e7490 !important; }
+  .light-admin-table .border-cyan-800 { border-color: #a5f3fc !important; }
+  .light-admin-table .bg-purple-900\/50 { background: #f3e8ff !important; }
+  .light-admin-table .text-purple-400 { color: #7e22ce !important; }
+  .light-admin-table .border-purple-800 { border-color: #e9d5ff !important; }
 </style>
+<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen bg-slate-100 flex officer-dashboard-shell">
 
 <!-- Sidebar -->
-<aside class="w-64 min-h-screen bg-slate-950 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800">
+<aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
   <div class="p-5 border-b border-slate-800">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 to-orange-500 flex items-center justify-center shadow-md">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md officer-brand-icon">
         <span class="material-symbols-outlined text-white text-lg">shield</span>
       </div>
       <div>
-        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-red-400">ID</span></p>
+        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p>
         <p class="text-xs text-slate-400 mt-0.5">Admin Portal</p>
       </div>
     </div>
@@ -44,20 +73,16 @@
       <span class="material-symbols-outlined">manage_accounts</span>
       Roles & Permissions
     </a>
-    <a href="#" onclick="showSection('audit')" class="sidebar-link" id="nav-audit">
-      <span class="material-symbols-outlined">history_edu</span>
-      Audit Logs
-    </a>
     <a href="#" onclick="showSection('settings')" class="sidebar-link" id="nav-settings">
       <span class="material-symbols-outlined">settings</span>
       System Settings
     </a>
     <p class="text-xs font-semibold text-slate-500 uppercase px-3 py-2 mt-2">Citizen tools</p>
-    <a href="/officer/admin/citizens" class="sidebar-link">
+    <a href="#" onclick="return showSection('citizens')" class="sidebar-link" id="nav-citizens">
       <span class="material-symbols-outlined">groups</span>
       Citizen Accounts
     </a>
-    <a href="/officer/admin/notifications" class="sidebar-link">
+    <a href="#" onclick="return showSection('notifications')" class="sidebar-link" id="nav-notifications">
       <span class="material-symbols-outlined">campaign</span>
       Citizen Notifications
     </a>
@@ -65,30 +90,32 @@
 
   <div class="p-4 border-t border-slate-800">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-full bg-red-900/50 flex items-center justify-center">
-        <span class="material-symbols-outlined text-red-300 text-xl">person</span>
+      <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-slate-300 text-xl">person</span>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-semibold text-white leading-none truncate">Ravi Bandara</p>
+        <p class="text-sm font-semibold text-white leading-none truncate" th:text="${loggedInAdminEmail}">admin@gov.lk</p>
         <p class="text-xs text-slate-400 mt-0.5">System Administrator</p>
       </div>
-      <a href="/login" class="text-slate-500 hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-lg">logout</span>
-      </a>
+      <form th:action="@{/officer/admin/logout}" method="post">
+        <button type="submit" class="text-slate-500 hover:text-white transition-colors" aria-label="Sign out">
+          <span class="material-symbols-outlined text-lg">logout</span>
+        </button>
+      </form>
     </div>
   </div>
 </aside>
 
 <!-- Main -->
-<main class="ml-64 flex-1 flex flex-col">
+<main class="ml-64 flex-1 flex flex-col admin-dashboard-main">
 
-  <header class="border-b border-slate-800 h-16 flex items-center px-6 sticky top-0 z-20" style="background: rgba(15,23,42,0.95); backdrop-filter: blur(12px);">
+  <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20 officer-topbar">
     <div class="flex-1">
-      <h1 class="text-base font-bold text-white" id="pageTitle">Officer Credential Management</h1>
+      <h1 class="text-lg font-bold text-slate-900" id="pageTitle">Officer Credential Management</h1>
       <p class="text-xs text-slate-400" id="pageSubtitle">Create officer logins and manage their assigned roles</p>
     </div>
     <div class="flex items-center gap-3">
-      <button onclick="openAddUser()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors">
+      <button id="addOfficerButton" onclick="openAddUser()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors officer-primary-button">
         <span class="material-symbols-outlined text-base">person_add</span>
         Add Officer
       </button>
@@ -105,28 +132,28 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-white">1,247</p>
-        <p class="text-xs text-slate-400 mt-1">Citizens</p>
+        <p class="text-2xl font-bold text-slate-900">1,247</p>
+        <p class="text-xs text-slate-600 mt-1">Citizens</p>
         <div class="w-8 h-1 bg-sky-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-white">8</p>
-        <p class="text-xs text-slate-400 mt-1">NIC Officers</p>
+        <p class="text-2xl font-bold text-slate-900">8</p>
+        <p class="text-xs text-slate-600 mt-1">NIC Officers</p>
         <div class="w-8 h-1 bg-emerald-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-white">5</p>
-        <p class="text-xs text-slate-400 mt-1">Passport Officers</p>
+        <p class="text-2xl font-bold text-slate-900">5</p>
+        <p class="text-xs text-slate-600 mt-1">Passport Officers</p>
         <div class="w-8 h-1 bg-indigo-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-white">6</p>
-        <p class="text-xs text-slate-400 mt-1">CSR Staff</p>
+        <p class="text-2xl font-bold text-slate-900">6</p>
+        <p class="text-xs text-slate-600 mt-1">CSR Staff</p>
         <div class="w-8 h-1 bg-cyan-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-white">3</p>
-        <p class="text-xs text-slate-400 mt-1">Admins/Directors</p>
+        <p class="text-2xl font-bold text-slate-900">3</p>
+        <p class="text-xs text-slate-600 mt-1">Admins/Directors</p>
         <div class="w-8 h-1 bg-red-500 rounded-full mx-auto mt-2"></div>
       </div>
     </div>
@@ -155,7 +182,7 @@
 
     <!-- Users Table -->
     <div class="card overflow-hidden">
-      <table class="w-full text-sm" id="usersTable">
+      <table class="w-full text-sm light-admin-table" id="usersTable">
         <thead class="border-b border-slate-800">
           <tr class="text-xs text-slate-500">
             <th class="text-left px-4 py-3 font-semibold uppercase">User</th>
@@ -227,37 +254,78 @@
     </div>
   </div>
 
-  <!-- ===== AUDIT LOGS ===== -->
-  <div id="section-audit" class="p-6 hidden">
-    <div class="card p-6">
-      <h2 class="font-bold text-white text-base mb-4">System Audit Logs</h2>
-      <div class="flex gap-3 mb-4">
-        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200">
-          <option>All Events</option>
-          <option>Login</option>
-          <option>Application Updated</option>
-          <option>User Created</option>
-          <option>User Deleted</option>
-          <option>Role Changed</option>
-        </select>
-        <input type="date" value="2026-08-15" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200"/>
+  <!-- ===== CITIZEN ACCOUNTS ===== -->
+  <div id="section-citizens" class="p-6 hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Citizen accounts</p><p class="text-3xl font-bold text-slate-900 mt-1">1,247</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Active this month</p><p class="text-3xl font-bold text-emerald-700 mt-1">803</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Suspended</p><p class="text-3xl font-bold text-amber-700 mt-1">6</p></div>
+    </div>
+
+    <div class="card p-4 mb-4 flex flex-wrap gap-3">
+      <div class="relative flex-1 min-w-64">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg">search</span>
+        <input id="citizenSearch" oninput="filterCitizens()" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400" placeholder="Search name, account ID or application reference"/>
       </div>
-      <table class="w-full text-sm">
-        <thead><tr class="text-xs text-slate-500 border-b border-slate-800">
-          <th class="text-left py-2 font-semibold">Timestamp</th>
-          <th class="text-left py-2 font-semibold">User</th>
-          <th class="text-left py-2 font-semibold">Event</th>
-          <th class="text-left py-2 font-semibold">Details</th>
-          <th class="text-left py-2 font-semibold">IP Address</th>
-        </tr></thead>
-        <tbody class="divide-y divide-slate-800 text-slate-300 text-xs">
-          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-15 10:23:47</td><td class="py-2.5 text-white font-medium">Nimal Jayawardena</td><td class="py-2.5"><span class="bg-emerald-900/50 text-emerald-400 px-1.5 py-0.5 rounded">Approved</span></td><td class="py-2.5 text-slate-400">NIC Application LK-NIC-2026-00183</td><td class="py-2.5 font-mono text-slate-500">192.168.1.42</td></tr>
-          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-15 09:41:22</td><td class="py-2.5 text-white font-medium">Ravi Bandara</td><td class="py-2.5"><span class="bg-sky-900/50 text-sky-400 px-1.5 py-0.5 rounded">User Created</span></td><td class="py-2.5 text-slate-400">New CSR account: Amara Wijesinghe</td><td class="py-2.5 font-mono text-slate-500">10.0.0.5</td></tr>
-          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-15 08:33:10</td><td class="py-2.5 text-white font-medium">Kamal Perera</td><td class="py-2.5"><span class="bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Login</span></td><td class="py-2.5 text-slate-400">Citizen login successful</td><td class="py-2.5 font-mono text-slate-500">111.220.55.90</td></tr>
-          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-14 16:12:05</td><td class="py-2.5 text-white font-medium">Kumara Silva</td><td class="py-2.5"><span class="bg-red-900/50 text-red-400 px-1.5 py-0.5 rounded">Info Req.</span></td><td class="py-2.5 text-slate-400">Requested docs for LK-NIC-2026-00097</td><td class="py-2.5 font-mono text-slate-500">192.168.1.43</td></tr>
-          <tr><td class="py-2.5 text-slate-500 font-mono">2026-08-14 14:55:30</td><td class="py-2.5 text-white font-medium">Ravi Bandara</td><td class="py-2.5"><span class="bg-purple-900/50 text-purple-400 px-1.5 py-0.5 rounded">Role Changed</span></td><td class="py-2.5 text-slate-400">Changed Pradeep: Citizen → Passport Officer</td><td class="py-2.5 font-mono text-slate-500">10.0.0.5</td></tr>
-        </tbody>
-      </table>
+      <select id="citizenStatusFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
+        <option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option>
+      </select>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm light-admin-table">
+          <thead class="border-b border-slate-200"><tr>
+            <th class="p-4 text-left font-semibold uppercase text-xs">Citizen account</th><th class="p-4 text-left font-semibold uppercase text-xs">Account ID</th><th class="p-4 text-center font-semibold uppercase text-xs">NIC applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Passport applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Total</th><th class="p-4 text-left font-semibold uppercase text-xs">Status</th><th class="p-4 text-right font-semibold uppercase text-xs">Account action</th>
+          </tr></thead>
+          <tbody id="citizenRows" class="divide-y divide-slate-200 text-slate-700">
+            <tr data-status="active"><td class="p-4"><p class="font-semibold text-slate-900">Kamal Perera</p><p class="text-xs text-slate-600">kamal.p@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001247</td><td class="p-4 text-center">2</td><td class="p-4 text-center">1</td><td class="p-4 text-center font-bold text-slate-900">3</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Active</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-amber-700 text-xs font-semibold hover:underline">Suspend account</button></td></tr>
+            <tr data-status="active"><td class="p-4"><p class="font-semibold text-slate-900">Nadeesha Kumari</p><p class="text-xs text-slate-600">nadeesha.k@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001246</td><td class="p-4 text-center">1</td><td class="p-4 text-center">0</td><td class="p-4 text-center font-bold text-slate-900">1</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Active</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-amber-700 text-xs font-semibold hover:underline">Suspend account</button></td></tr>
+            <tr data-status="suspended"><td class="p-4"><p class="font-semibold text-slate-900">Ruwan Fernando</p><p class="text-xs text-slate-600">ruwan.f@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001198</td><td class="p-4 text-center">1</td><td class="p-4 text-center">2</td><td class="p-4 text-center font-bold text-slate-900">3</td><td class="p-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">Suspended</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-emerald-700 text-xs font-semibold hover:underline">Reactivate account</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="text-xs text-slate-600 mt-3">Account status and application counts only. Application personal data is not shown here.</p>
+  </div>
+
+  <!-- ===== CITIZEN NOTIFICATIONS ===== -->
+  <div id="section-notifications" class="p-6 hidden">
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
+      <form onsubmit="sendNotification(event)" class="card p-6">
+        <h2 class="font-bold text-slate-900 text-base">Compose Notification</h2>
+        <p class="text-xs text-slate-600 mt-1">Send a system announcement to everyone or a selected citizen group.</p>
+
+        <div class="mt-5">
+          <label class="text-xs font-semibold text-slate-700">Recipients</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+            <label class="notification-recipient border border-cyan-500 bg-cyan-50 rounded-xl p-4 cursor-pointer"><input onchange="changeAudience()" type="radio" name="audience" value="all" checked class="text-cyan-600"/><span class="ml-2 text-sm font-semibold text-slate-900">All citizens</span><p class="text-xs text-slate-600 mt-2">1,247 recipients</p></label>
+            <label class="notification-recipient border border-slate-200 bg-white rounded-xl p-4 cursor-pointer"><input onchange="changeAudience()" type="radio" name="audience" value="group" class="text-cyan-600"/><span class="ml-2 text-sm font-semibold text-slate-900">Citizen group</span><p class="text-xs text-slate-600 mt-2">Filter by district or service</p></label>
+            <label class="notification-recipient border border-slate-200 bg-white rounded-xl p-4 cursor-pointer"><input onchange="changeAudience()" type="radio" name="audience" value="selected" class="text-cyan-600"/><span class="ml-2 text-sm font-semibold text-slate-900">Selected citizens</span><p class="text-xs text-slate-600 mt-2">Account IDs or references</p></label>
+          </div>
+        </div>
+
+        <div id="groupFilters" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+          <div><label class="text-xs font-medium text-slate-600">District</label><select class="w-full mt-1 bg-white border border-slate-300 rounded-lg text-sm text-slate-900"><option>All districts</option><option>Colombo</option><option>Kandy</option><option>Galle</option></select></div>
+          <div><label class="text-xs font-medium text-slate-600">Application group</label><select class="w-full mt-1 bg-white border border-slate-300 rounded-lg text-sm text-slate-900"><option>All citizens</option><option>Awaiting biometrics</option><option>Appointment tomorrow</option><option>NIC applicants</option><option>Passport applicants</option></select></div>
+        </div>
+        <div id="selectedCitizens" class="hidden mt-4"><label class="text-xs font-medium text-slate-600">Citizen account IDs or application references</label><textarea rows="2" class="w-full mt-1 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="CTZ-001247, LK-NIC-2026-00183"></textarea></div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
+          <div class="sm:col-span-2"><label class="text-xs font-semibold text-slate-700">Notification title</label><input id="notificationTitle" required maxlength="80" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Service centre closure"/></div>
+          <div><label class="text-xs font-semibold text-slate-700">Category</label><select class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option>General announcement</option><option>Service interruption</option><option>Appointment reminder</option><option>Application information</option><option>Emergency alert</option></select></div>
+          <div><label class="text-xs font-semibold text-slate-700">Priority</label><select class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option>Normal</option><option>Important</option><option>Urgent</option></select></div>
+          <div class="sm:col-span-2"><label class="text-xs font-semibold text-slate-700">Message</label><textarea id="notificationMessage" required rows="6" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Write a clear message for citizens..."></textarea></div>
+          <div><label class="text-xs font-semibold text-slate-700">Send time</label><select class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option>Send now</option><option>Schedule for later</option></select></div>
+          <div><label class="text-xs font-semibold text-slate-700">Channels</label><div class="flex gap-4 mt-3 text-xs text-slate-700"><label><input type="checkbox" checked class="rounded text-cyan-600"/> In-app</label><label><input type="checkbox" checked class="rounded text-cyan-600"/> Email</label><label><input type="checkbox" class="rounded text-cyan-600"/> SMS</label></div></div>
+        </div>
+        <div class="flex justify-end gap-3 mt-6"><button type="button" onclick="previewNotification()" class="border border-slate-300 text-slate-700 rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-slate-50">Preview</button><button class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Review & Send</button></div>
+      </form>
+
+      <aside class="space-y-5">
+        <section class="card p-5"><h2 class="font-bold text-slate-900">Live Preview</h2><div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-4"><div class="flex gap-3"><span class="material-symbols-outlined text-cyan-700">campaign</span><div><p id="previewTitle" class="text-sm font-bold text-slate-900">Notification title</p><p id="previewMessage" class="text-xs text-slate-600 mt-1">Your message preview will appear here.</p><p class="text-[10px] text-slate-500 mt-2">Just now · LankaID Administration</p></div></div></div></section>
+        <section class="card p-5"><h2 class="font-bold text-slate-900">Recent Broadcasts</h2><div class="mt-4 space-y-4 text-xs"><div><p class="font-semibold text-slate-800">Colombo centre maintenance</p><p class="text-slate-600 mt-1">All citizens · 1,247 sent · 22 Aug</p></div><div class="border-t border-slate-200 pt-4"><p class="font-semibold text-slate-800">Biometric appointment reminder</p><p class="text-slate-600 mt-1">148 selected citizens · 21 Aug</p></div></div></section>
+      </aside>
     </div>
   </div>
 
@@ -265,19 +333,19 @@
   <div id="section-settings" class="p-6 hidden">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <div class="card p-6 space-y-4">
-        <h2 class="font-bold text-white text-base">Application Processing Settings</h2>
-        <div><label class="block text-xs text-slate-400 mb-1.5">Max Review Time (Days)</label><input type="number" value="7" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
-        <div><label class="block text-xs text-slate-400 mb-1.5">Auto-escalate After (Days)</label><input type="number" value="14" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
-        <div><label class="block text-xs text-slate-400 mb-1.5">NIC Service Fee (LKR)</label><input type="number" value="1000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
-        <div><label class="block text-xs text-slate-400 mb-1.5">Passport Service Fee (LKR)</label><input type="number" value="3500" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/></div>
-        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">Save Settings</button>
+        <h2 class="font-bold text-slate-900 text-base">Application Processing Settings</h2>
+        <div><label class="block text-xs font-medium text-slate-600 mb-1.5">Max Review Time (Days)</label><input type="number" value="7" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900"/></div>
+        <div><label class="block text-xs font-medium text-slate-600 mb-1.5">Auto-escalate After (Days)</label><input type="number" value="14" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900"/></div>
+        <div><label class="block text-xs font-medium text-slate-600 mb-1.5">NIC Service Fee (LKR)</label><input type="number" value="1000" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900"/></div>
+        <div><label class="block text-xs font-medium text-slate-600 mb-1.5">Passport Service Fee (LKR)</label><input type="number" value="3500" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900"/></div>
+        <button class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">Save Settings</button>
       </div>
       <div class="card p-6 space-y-4">
-        <h2 class="font-bold text-white text-base">Notification Settings</h2>
-        <div class="flex items-center justify-between py-2 border-b border-slate-800"><span class="text-sm text-slate-300">Email Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
-        <div class="flex items-center justify-between py-2 border-b border-slate-800"><span class="text-sm text-slate-300">SMS Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
-        <div class="flex items-center justify-between py-2 border-b border-slate-800"><span class="text-sm text-slate-300">In-App Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
-        <div class="flex items-center justify-between py-2"><span class="text-sm text-slate-300">Complaint Auto-Response</span><button class="w-11 h-6 bg-slate-700 rounded-full relative transition-colors"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <h2 class="font-bold text-slate-900 text-base">Notification Settings</h2>
+        <div class="flex items-center justify-between py-3 border-b border-slate-200"><span class="text-sm font-medium text-slate-700">Email Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors" aria-label="Toggle email notifications"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <div class="flex items-center justify-between py-3 border-b border-slate-200"><span class="text-sm font-medium text-slate-700">SMS Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors" aria-label="Toggle SMS notifications"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <div class="flex items-center justify-between py-3 border-b border-slate-200"><span class="text-sm font-medium text-slate-700">In-App Notifications</span><button class="w-11 h-6 bg-emerald-600 rounded-full relative transition-colors" aria-label="Toggle in-app notifications"><span class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
+        <div class="flex items-center justify-between py-3"><span class="text-sm font-medium text-slate-700">Complaint Auto-Response</span><button class="w-11 h-6 bg-slate-300 rounded-full relative transition-colors" aria-label="Toggle complaint auto-response"><span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow"></span></button></div>
       </div>
     </div>
   </div>
@@ -285,14 +353,14 @@
   <!-- ===== ROLES ===== -->
   <div id="section-roles" class="p-6 hidden">
     <div class="card p-6">
-      <h2 class="font-bold text-white text-base mb-4">Roles & Permissions</h2>
+      <h2 class="font-bold text-slate-900 text-base mb-4">Roles & Permissions</h2>
       <div class="space-y-3">
-        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span><span class="font-semibold text-white text-sm">Citizen</span></div><span class="text-xs text-slate-400">1,247 users</span></div><p class="text-xs text-slate-400">Can apply for NIC/Passport, track applications, book appointments, file complaints, receive notifications.</p></div>
-        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-white text-sm">NIC Application Officer</span></div><span class="text-xs text-slate-400">8 users</span></div><p class="text-xs text-slate-400">Can review NIC applications, approve/reject/request-info, collect biometric data, view NIC queue.</p></div>
-        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-white text-sm">Passport Application Officer</span></div><span class="text-xs text-slate-400">5 users</span></div><p class="text-xs text-slate-400">Can review Passport applications, approve/reject/request-info, collect biometric data, view Passport queue.</p></div>
-        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span><span class="font-semibold text-white text-sm">Citizen Service Representative</span></div><span class="text-xs text-slate-400">6 users</span></div><p class="text-xs text-slate-400">Can manage complaints, respond to citizens, manage walk-in bookings, view appointment schedules.</p></div>
-        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="font-semibold text-white text-sm">Identity Service Director</span></div><span class="text-xs text-slate-400">1 user</span></div><p class="text-xs text-slate-400">Can view all dashboards, system stats, officer performance, application metrics, and all complaints.</p></div>
-        <div class="bg-slate-800/50 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span><span class="font-semibold text-white text-sm">System Administrator</span></div><span class="text-xs text-slate-400">2 users</span></div><p class="text-xs text-slate-400">Full system access: user management, role assignment, audit logs, system settings, all director views, security controls.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen</span></div><span class="text-xs font-medium text-slate-600">1,247 users</span></div><p class="text-xs leading-5 text-slate-600">Can apply for NIC/Passport, track applications, book appointments, file complaints, receive notifications.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-slate-900 text-sm">NIC Application Officer</span></div><span class="text-xs font-medium text-slate-600">8 users</span></div><p class="text-xs leading-5 text-slate-600">Can review NIC applications, approve/reject/request-info, collect biometric data, view NIC queue.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-slate-900 text-sm">Passport Application Officer</span></div><span class="text-xs font-medium text-slate-600">5 users</span></div><p class="text-xs leading-5 text-slate-600">Can review Passport applications, approve/reject/request-info, collect biometric data, view Passport queue.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen Service Representative</span></div><span class="text-xs font-medium text-slate-600">6 users</span></div><p class="text-xs leading-5 text-slate-600">Can manage complaints, respond to citizens, manage walk-in bookings, view appointment schedules.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="font-semibold text-slate-900 text-sm">Identity Service Director</span></div><span class="text-xs font-medium text-slate-600">1 user</span></div><p class="text-xs leading-5 text-slate-600">Can view all dashboards, system stats, officer performance, application metrics, and all complaints.</p></div>
+        <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-600"></span><span class="font-semibold text-slate-900 text-sm">System Administrator</span></div><span class="text-xs font-medium text-slate-600">1 fixed account</span></div><p class="text-xs leading-5 text-slate-600">Full system access. This account is created by the system and cannot be created through the officer management form.</p></div>
       </div>
     </div>
   </div>
@@ -300,7 +368,7 @@
 </main>
 
 <!-- Add User Modal -->
-<div id="addUserModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+<div id="addUserModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
   <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
     <div class="flex items-center justify-between mb-5">
       <h2 class="font-bold text-white text-base flex items-center gap-2">
@@ -313,7 +381,7 @@
       <div class="sm:col-span-2"><label class="block text-xs text-slate-400 mb-1.5">Full Name <span class="text-red-400">*</span></label><input type="text" placeholder="Full legal name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
       <div><label class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label><input type="email" placeholder="user@lankaid.gov.lk" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
       <div><label class="block text-xs text-slate-400 mb-1.5">NIC Number <span class="text-red-400">*</span></label><input type="text" placeholder="200012345678" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">Assign Role <span class="text-red-400">*</span></label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option value="">Select Role</option><option>NIC Officer</option><option>Passport Officer</option><option>CSR</option><option>Director</option><option>System Admin</option></select></div>
+      <div><label class="block text-xs text-slate-400 mb-1.5">Assign Role <span class="text-red-400">*</span></label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option value="">Select Role</option><option>NIC Officer</option><option>Passport Officer</option><option>CSR</option><option>Director</option></select></div>
       <div><label class="block text-xs text-slate-400 mb-1.5">Centre / District</label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option>Colombo Main Centre</option><option>Colombo North Centre</option><option>Dehiwala Centre</option><option>Kandy Centre</option><option>Galle Centre</option><option>Head Office</option></select></div>
       <div><label class="block text-xs text-slate-400 mb-1.5">Phone Number</label><input type="tel" placeholder="+94 77 123 4567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
       <div><label class="block text-xs text-slate-400 mb-1.5">Temporary Password <span class="text-red-400">*</span></label><input type="password" placeholder="Min 8 characters" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
@@ -324,14 +392,16 @@
     </label>
     <div class="flex gap-3 mt-5">
       <button onclick="closeAddUser()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
-      <button onclick="createUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Create Officer</button>
+      <button onclick="createUser()" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Create Officer</button>
     </div>
   </div>
 </div>
 
 <script>
 function showSection(s) {
-  ['users','roles','audit','settings'].forEach(t => {
+  const sections = ['users','roles','settings','citizens','notifications'];
+  if (!sections.includes(s)) s = 'users';
+  sections.forEach(t => {
     const el = document.getElementById('section-'+t);
     const nav = document.getElementById('nav-'+t);
     if (el) el.classList.add('hidden');
@@ -341,11 +411,20 @@ function showSection(s) {
   if (target) target.classList.remove('hidden');
   const nav = document.getElementById('nav-'+s);
   if (nav) { nav.classList.add('active'); }
-  const titles = { users: ['User Management','Manage all system users, roles and access control'], roles: ['Roles & Permissions','View and configure role-based access control'], audit: ['Audit Logs','Review all system actions and user activity'], settings: ['System Settings','Configure processing rules, fees and notifications'] };
+  const titles = {
+    users: ['Officer Credential Management','Create officer logins and manage their assigned roles'],
+    roles: ['Roles & Permissions','View and configure role-based access control'],
+    settings: ['System Settings','Configure processing rules, fees and notifications'],
+    citizens: ['Citizen Accounts','Review account status and citizen application counts'],
+    notifications: ['Citizen Notifications','Compose and preview announcements without leaving the dashboard']
+  };
   if (titles[s]) {
     document.getElementById('pageTitle').textContent = titles[s][0];
     document.getElementById('pageSubtitle').textContent = titles[s][1];
   }
+  document.getElementById('addOfficerButton').classList.toggle('hidden', s !== 'users');
+  const nextUrl = s === 'users' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
+  window.history.replaceState(null, '', nextUrl);
   return false;
 }
 
@@ -368,6 +447,63 @@ function filterUsers() {
     tr.style.display = (!role || tr.dataset.role === role) ? '' : 'none';
   });
 }
+
+function filterCitizens() {
+  const query = document.getElementById('citizenSearch').value.toLowerCase().trim();
+  const status = document.getElementById('citizenStatusFilter').value;
+  document.querySelectorAll('#citizenRows tr').forEach(row => {
+    const matchesQuery = row.textContent.toLowerCase().includes(query);
+    const matchesStatus = !status || row.dataset.status === status;
+    row.style.display = matchesQuery && matchesStatus ? '' : 'none';
+  });
+}
+
+function toggleAccount(button) {
+  const row = button.closest('tr');
+  const badge = row.querySelector('td:nth-child(6) span');
+  const reactivate = row.dataset.status === 'suspended';
+  if (!confirm((reactivate ? 'Reactivate' : 'Suspend') + ' this citizen account?')) return;
+  row.dataset.status = reactivate ? 'active' : 'suspended';
+  badge.textContent = reactivate ? 'Active' : 'Suspended';
+  badge.className = reactivate
+    ? 'bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold'
+    : 'bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold';
+  button.textContent = reactivate ? 'Suspend account' : 'Reactivate account';
+  button.className = reactivate
+    ? 'text-amber-700 text-xs font-semibold hover:underline'
+    : 'text-emerald-700 text-xs font-semibold hover:underline';
+  filterCitizens();
+}
+
+function changeAudience() {
+  const selected = document.querySelector('[name="audience"]:checked');
+  if (!selected) return;
+  document.getElementById('groupFilters').classList.toggle('hidden', selected.value !== 'group');
+  document.getElementById('selectedCitizens').classList.toggle('hidden', selected.value !== 'selected');
+  document.querySelectorAll('.notification-recipient').forEach(card => {
+    card.className = 'notification-recipient border border-slate-200 bg-white rounded-xl p-4 cursor-pointer';
+  });
+  selected.closest('.notification-recipient').className = 'notification-recipient border border-cyan-500 bg-cyan-50 rounded-xl p-4 cursor-pointer';
+}
+
+function previewNotification() {
+  document.getElementById('previewTitle').textContent = document.getElementById('notificationTitle').value || 'Notification title';
+  document.getElementById('previewMessage').textContent = document.getElementById('notificationMessage').value || 'Your message preview will appear here.';
+}
+
+function sendNotification(event) {
+  event.preventDefault();
+  previewNotification();
+  const audience = document.querySelector('[name="audience"]:checked').value;
+  if (confirm('Send this notification to ' + (audience === 'all' ? 'all citizens' : audience + ' citizens') + '?')) {
+    alert('Notification prepared successfully. It will be delivered after the backend is connected.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const requestedSection = new URLSearchParams(window.location.search).get('section');
+  if (requestedSection) showSection(requestedSection);
+});
 </script>
 </body>
 </html>

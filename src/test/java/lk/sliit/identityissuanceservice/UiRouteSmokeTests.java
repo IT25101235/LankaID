@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,7 +21,7 @@ class UiRouteSmokeTests {
     void allUiPagesOpenSuccessfully() throws Exception {
         // Keep this list in sync with ROUTES.md when a new demonstration page is added.
         String[] routes = {
-                "/", "/login", "/register",
+                "/", "/login", "/register", "/chatbot",
                 "/citizen/dashboard?profile=new",
                 "/citizen/dashboard?profile=nic-only",
                 "/citizen/dashboard?profile=existing",
@@ -67,7 +68,21 @@ class UiRouteSmokeTests {
         };
 
         for (String route : routes) {
-            mockMvc.perform(get(route)).andExpect(status().isOk());
+            MockHttpServletRequestBuilder request = get(route);
+
+            if (route.startsWith("/citizen/")) {
+                request.sessionAttr("loggedInUserId", 1);
+            }
+            if (route.startsWith("/officer/admin")) {
+                request.sessionAttr("loggedInAdminId", 1);
+            }
+
+            if (route.equals("/officer/admin/citizens")
+                    || route.equals("/officer/admin/notifications")) {
+                mockMvc.perform(request).andExpect(status().is3xxRedirection());
+            } else {
+                mockMvc.perform(request).andExpect(status().isOk());
+            }
         }
     }
 }

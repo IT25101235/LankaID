@@ -40,7 +40,12 @@
       <a th:href="@{/citizen/support/new}" class="hidden sm:flex text-slate-500 hover:text-sky-600" aria-label="Feedback">
         <span class="material-symbols-outlined text-xl">feedback</span>
       </a>
-      <img alt="User profile photo" class="w-8 h-8 rounded-full object-cover border border-slate-200" data-alt="A clean, modern corporate headshot of a young professional individual smiling subtly, positioned in front of a slightly blurred bright modern office background with light cool-toned colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYCuwlnRQa6_NSU5PeloyjhoM7qNS6h8hPIIrqNniK8J1oFk5tJX2pdeOka6T3GGStz9Q1gy-Rv6t9XQFSLMJpb0UgOAn3yPvhAewCmeLZhwySk90OE0BwozysAOu4iYoaKUWYJ6DCDgMc_qqH0Rt7kK2bba5b3fmVFbdB0kmZ-qzqjbKqlSVWppoOXs9L0pcVNDG3TktKz5ueiBAX5ezreSQockwLsPexdNVr-3wPmo-V-BCwUGxp"/>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-700">
+          <span class="material-symbols-outlined text-lg">logout</span>
+          <span class="hidden sm:inline">Sign out</span>
+        </button>
+      </form>
     </div>
   </div>
 </header>
@@ -57,8 +62,8 @@
   <section class="mb-6">
     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Welcome back, Kamal</h1>
-        <p class="text-slate-500 text-sm mt-1">Here is an overview of your current government identity services.</p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Welcome back</h1>
+        <p class="text-slate-500 text-sm mt-1">Signed in as <span class="font-semibold" th:text="${loggedInUserEmail}">citizen@example.com</span></p>
       </div>
       <div class="flex flex-wrap gap-2">
         <a th:if="${!hasNic}" th:href="@{/citizen/applications/nic/new}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">

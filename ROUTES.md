@@ -24,6 +24,7 @@ public String newNicApplication(Model model) {
 | `/` | Landing page | User Management |
 | `/login` | Citizen/officer login | User Management |
 | `/register` | Citizen registration | User Management |
+| `/chatbot` | LankaID virtual assistant demo | Citizen Support Management |
 | `/citizen/dashboard` | Conditional citizen dashboard | User Management |
 | `/citizen/applications` | Application tracking | Citizen Application Management |
 | `/citizen/applications/nic/new` | New NIC form | Citizen Application Management |
@@ -81,8 +82,8 @@ Later, the database will replace this query parameter with the citizen's real NI
 | `/officer/director` | Statistics dashboard |
 | `/officer/director/printing` | Select records and prepare a printing export |
 | `/officer/admin` | Officer credential management |
-| `/officer/admin/citizens` | Citizen accounts and application counts |
-| `/officer/admin/notifications` | Universal or selected notification composer |
+| `/officer/admin?section=citizens` | Citizen accounts and application counts inside the admin dashboard |
+| `/officer/admin?section=notifications` | Universal or selected notification composer inside the admin dashboard |
 
 ## Before database integration
 
