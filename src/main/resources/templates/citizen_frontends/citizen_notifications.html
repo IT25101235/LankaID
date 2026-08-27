@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -18,7 +18,7 @@
 
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a href="03_citizen_dashboard.html" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
+    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
       <span class="material-symbols-outlined text-lg">arrow_back</span>
       Dashboard
     </a>
@@ -56,7 +56,7 @@
   <div class="space-y-2" id="notifList">
 
     <!-- Unread: Biometric reminder -->
-    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, 'biometric_appointment_booking.html')">
+    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, '/citizen/appointments/biometric')">
       <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-amber-600">fingerprint</span>
@@ -78,7 +78,7 @@
     </div>
 
     <!-- Unread: Application Approved -->
-    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, 'application_tracking.html')">
+    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, '/citizen/applications')">
       <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-emerald-600">verified</span>
@@ -97,7 +97,7 @@
     </div>
 
     <!-- Unread: Info Requested -->
-    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, 'application_tracking.html')">
+    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, '/citizen/applications/nic/LK-NIC-2026-00097/correct')">
       <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-red-600">warning</span>
@@ -119,7 +119,7 @@
     </div>
 
     <!-- Read: Passport Under Review -->
-    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="passport" data-read="true" onclick="openNotif(this, 'application_tracking.html')">
+    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="passport" data-read="true" onclick="openNotif(this, '/citizen/applications')">
       <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-sky-500">manage_search</span>
@@ -135,7 +135,7 @@
     </div>
 
     <!-- Read: Application Received -->
-    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="passport" data-read="true" onclick="openNotif(this, 'application_tracking.html')">
+    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="passport" data-read="true" onclick="openNotif(this, '/citizen/applications')">
       <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-indigo-500">task_alt</span>

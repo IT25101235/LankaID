@@ -176,6 +176,9 @@
 
 <form th:action="@{/login}" th:object="${loginRequest}" method="post" novalidate onsubmit="return validateCitizenLoginForm(event)">
   <div class="flex flex-col gap-stack-gap">
+    <div th:if="${#fields.hasGlobalErrors()}" class="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+      <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Invalid email or password.</p>
+    </div>
     <div class="flex flex-col gap-2">
       <label class="font-label-sm text-label-sm text-on-surface" for="citizenEmail">Citizen Email</label>
       <div>
@@ -232,6 +235,9 @@
 </div>
 <form th:action="@{/login/officer}" th:object="${officerLoginRequest}" method="post" novalidate onsubmit="return validateOfficerLoginForm(event)">
   <div class="flex flex-col gap-4">
+    <div th:if="${#fields.hasGlobalErrors()}" class="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+      <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Invalid administrator credentials.</p>
+    </div>
     <div class="flex flex-col gap-2">
       <label class="font-label-sm text-label-sm text-on-surface" for="officerRole">Your Role</label>
       <select id="officerRole" th:field="*{role}" th:errorclass="border-red-500" class="auth-field w-full h-12 px-3 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none text-sm font-medium">
@@ -277,7 +283,7 @@
 <p class="text-sm text-on-surface-variant mb-4">Create a citizen account to apply for identity services online.</p>
 <div class="border border-slate-300 rounded-md p-6">
   <p class="text-sm font-semibold text-on-surface mb-1">Citizen account registration</p>
-  <p class="text-sm text-on-surface-variant mb-5">You will be asked to provide your personal and contact information and create a secure password.</p>
+  <p class="text-sm text-on-surface-variant mb-5">You only need an email address, mobile number and password to create the account.</p>
   <a th:href="@{/register}" class="inline-flex items-center justify-center bg-cyan-700 text-white px-5 h-11 rounded-md font-semibold text-sm hover:bg-cyan-800 transition-colors">
     Continue to Registration
   </a>
@@ -354,13 +360,6 @@ function validateCitizenLoginForm(event) {
 
   if (!passwordValue) {
     if (passwordError) passwordError.textContent = 'Password is required.';
-    if (password) password.classList.add('border-red-500');
-    password?.focus();
-    return false;
-  }
-
-  if (passwordValue.length < 8) {
-    if (passwordError) passwordError.textContent = 'Password must be at least 8 characters.';
     if (password) password.classList.add('border-red-500');
     password?.focus();
     return false;

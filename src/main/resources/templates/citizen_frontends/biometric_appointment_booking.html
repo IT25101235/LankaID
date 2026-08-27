@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -21,7 +21,7 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,
 
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a href="application_tracking.html" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
+    <a th:href="@{/citizen/applications}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
       <span class="material-symbols-outlined text-lg">arrow_back</span>
       My Applications
     </a>
@@ -243,13 +243,21 @@ input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,
     </div>
     <h2 class="text-xl font-bold text-slate-900 mb-1">Appointment Confirmed!</h2>
     <p class="text-slate-500 text-sm mb-4">Your biometric appointment has been booked. A confirmation email and SMS has been sent to your registered contact details.</p>
+    <!-- Demonstration QR. A QR library will encode the reference after backend integration. -->
+    <div class="w-28 h-28 mx-auto mb-4 bg-white border border-slate-200 rounded-xl p-2 grid grid-cols-5 gap-1" aria-label="Appointment QR code preview">
+      <span class="bg-slate-900 col-span-2 row-span-2"></span><span></span><span class="bg-slate-900 col-span-2 row-span-2"></span>
+      <span></span><span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span>
+      <span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span>
+      <span class="bg-slate-900 col-span-2 row-span-2"></span><span></span><span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span>
+    </div>
     <div class="bg-slate-50 rounded-xl p-4 text-left mb-5 text-xs text-slate-600 space-y-2">
+      <div class="flex justify-between"><span class="text-slate-400">Reference</span><span class="font-mono font-bold text-sky-700">BIO-2026-00427</span></div>
       <div class="flex justify-between"><span class="text-slate-400">Centre</span><span class="font-semibold">Colombo Main Centre</span></div>
       <div class="flex justify-between"><span class="text-slate-400">Date</span><span class="font-semibold">Aug 20, 2026</span></div>
       <div class="flex justify-between"><span class="text-slate-400">Time</span><span class="font-semibold">10:30 AM</span></div>
       <div class="flex justify-between"><span class="text-slate-400">Token No.</span><span class="font-semibold text-sky-700">#B-247</span></div>
     </div>
-    <button onclick="window.location.href='application_tracking.html'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
+    <button onclick="window.location.href='/citizen/applications'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
       Back to My Applications
     </button>
   </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -16,7 +16,7 @@ input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px
 
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a href="03_citizen_dashboard.html" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
+    <a th:href="@{/citizen/support}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
       <span class="material-symbols-outlined text-lg">arrow_back</span>
       Dashboard
     </a>
@@ -192,7 +192,7 @@ input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px
 
         <!-- Submit -->
         <div class="flex gap-3">
-          <a href="03_citizen_dashboard.html" class="flex-1 border border-slate-300 text-slate-700 py-3 rounded-xl text-sm font-semibold text-center hover:bg-slate-50 transition-colors">
+          <a th:href="@{/citizen/support}" class="flex-1 border border-slate-300 text-slate-700 py-3 rounded-xl text-sm font-semibold text-center hover:bg-slate-50 transition-colors">
             Cancel
           </a>
           <button type="submit" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md">
@@ -261,7 +261,7 @@ input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px
       <div class="flex justify-between"><span class="text-slate-400">Reference No.</span><span class="font-bold text-sky-700">CMP-2026-0102</span></div>
       <div class="flex justify-between mt-1"><span class="text-slate-400">Expected Response</span><span class="font-semibold">Within 2 business days</span></div>
     </div>
-    <button onclick="window.location.href='03_citizen_dashboard.html'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
+    <button onclick="window.location.href='/citizen/support'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
       Back to Dashboard
     </button>
   </div>

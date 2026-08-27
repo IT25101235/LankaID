@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -15,7 +15,7 @@
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
     <div class="flex items-center gap-2 shrink-0"><div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center"><span class="material-symbols-outlined text-white text-sm">verified_user</span></div><span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span> Services</span></div>
-    <nav class="hidden md:flex items-center gap-6 text-sm font-medium h-full"><a class="h-full flex items-center text-slate-600 hover:text-sky-600" href="03_citizen_dashboard.html">Home</a><a class="h-full flex items-center text-sky-600 font-semibold border-b-2 border-sky-600" href="#">Applications</a><a class="h-full flex items-center text-slate-600 hover:text-sky-600" href="#">Documents</a><a class="h-full flex items-center text-slate-600 hover:text-sky-600" href="#">Appointments</a></nav>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium h-full"><a class="h-full flex items-center text-slate-600 hover:text-sky-600" th:href="@{/citizen/dashboard}">Home</a><a class="h-full flex items-center text-sky-600 font-semibold border-b-2 border-sky-600" th:href="@{/citizen/applications}">Applications</a><a class="h-full flex items-center text-slate-600 hover:text-sky-600" th:href="@{/citizen/notifications}">Notifications</a><a class="h-full flex items-center text-slate-600 hover:text-sky-600" th:href="@{/citizen/appointments/biometric}">Appointments</a></nav>
     <div class="flex items-center gap-3 text-slate-500"><button aria-label="notifications" class="hover:text-sky-600"><span class="material-symbols-outlined text-xl">notifications</span></button><button aria-label="settings" class="hidden sm:block hover:text-sky-600"><span class="material-symbols-outlined text-xl">settings</span></button></div>
   </div>
 </header>
@@ -55,7 +55,7 @@
     </aside>
   </div>
 
-  <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-between gap-3"><button class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50" onclick="window.location.href='03_citizen_dashboard.html'">Back</button><button class="px-5 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-semibold flex items-center justify-center gap-1.5 opacity-50 cursor-not-allowed" onclick="window.location.href='06_final_review_submission.html'">Next Step <span class="material-symbols-outlined text-base">arrow_forward</span></button></div>
+  <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-between gap-3"><button class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50" onclick="window.location.href='/citizen/dashboard'">Back</button><button class="px-5 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-semibold flex items-center justify-center gap-1.5" onclick="window.location.href='/citizen/applications/passport/review'">Next Step <span class="material-symbols-outlined text-base">arrow_forward</span></button></div>
 </main>
 </body>
 </html>

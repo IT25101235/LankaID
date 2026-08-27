@@ -1,17 +1,37 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Controller;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
+import lk.sliit.identityissuanceservice.User_Mgmt.Dto.CitizenRegistrationDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.LoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.OfficerLoginRequestDto;
+import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
+import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @Controller
 public class UserController {
+
+    private final UserAccountService userAccountService;
+    private final AdminAccountService adminAccountService;
+
+    public UserController(
+            UserAccountService userAccountService,
+            AdminAccountService adminAccountService) {
+        this.userAccountService = userAccountService;
+        this.adminAccountService = adminAccountService;
+    }
 
     @GetMapping("/")
     public String index() {
@@ -28,34 +48,98 @@ public class UserController {
     public String citizenLogin(
             @Valid @ModelAttribute("loginRequest") LoginRequestDto loginRequest,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            HttpSession session) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
             model.addAttribute("activeTab", "citizen");
             return "login_portal";
         }
 
-        // Temporary flow: authenticate the credentials here after the database is connected.
-        return "redirect:/dashboard/citizen";
+        Optional<UserAccount> authenticatedAccount = userAccountService.authenticateCitizen(
+                loginRequest.getEmail(),
+                loginRequest.getPassword()
+        );
+
+        if (authenticatedAccount.isEmpty()) {
+            bindingResult.reject("login.failed", "Invalid email or password.");
+            model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
+            model.addAttribute("activeTab", "citizen");
+            return "login_portal";
+        }
+
+        UserAccount account = authenticatedAccount.get();
+        session.setAttribute("loggedInUserId", account.getUserId());
+        session.setAttribute("loggedInUserEmail", account.getEmail());
+
+        int sessionTimeout = loginRequest.isRememberMe()
+                ? 7 * 24 * 60 * 60
+                : 30 * 60;
+        session.setMaxInactiveInterval(sessionTimeout);
+
+        return "redirect:/citizen/dashboard";
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+        session.invalidate();
+        redirectAttributes.addFlashAttribute("successMessage", "You have signed out successfully.");
+        return "redirect:/login";
     }
 
     @PostMapping("/login/officer")
     public String officerLogin(
             @Valid @ModelAttribute("officerLoginRequest") OfficerLoginRequestDto officerLoginRequest,
             BindingResult bindingResult,
-            Model model) {
+            Model model,
+            HttpSession session) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("loginRequest", new LoginRequestDto());
             model.addAttribute("activeTab", "officer");
             return "login_portal";
         }
 
+        if (officerLoginRequest.getRole().equals("admin")) {
+            Optional<UserAccount> authenticatedAdmin = adminAccountService.authenticateAdmin(
+                    officerLoginRequest.getEmail(),
+                    officerLoginRequest.getPassword()
+            );
+
+            if (authenticatedAdmin.isEmpty()) {
+                bindingResult.reject("admin.login.failed", "Invalid administrator email or password.");
+                model.addAttribute("loginRequest", new LoginRequestDto());
+                model.addAttribute("activeTab", "officer");
+                return "login_portal";
+            }
+
+            UserAccount admin = authenticatedAdmin.get();
+            session.setAttribute("loggedInAdminId", admin.getUserId());
+            session.setAttribute("loggedInAdminEmail", admin.getEmail());
+            session.setAttribute("loggedInAdminRole", "SYSTEM_ADMIN");
+
+            int sessionTimeout = officerLoginRequest.isRememberMe()
+                    ? 7 * 24 * 60 * 60
+                    : 30 * 60;
+            session.setMaxInactiveInterval(sessionTimeout);
+            return "redirect:/officer/admin";
+        }
+
+        if (session.getAttribute("loggedInAdminId") != null
+                || adminAccountService.isSystemAdminEmail(officerLoginRequest.getEmail())) {
+            bindingResult.reject(
+                    "admin.role.not.allowed",
+                    "The system administrator account can only use the System Administrator role."
+            );
+            model.addAttribute("loginRequest", new LoginRequestDto());
+            model.addAttribute("activeTab", "officer");
+            return "login_portal";
+        }
+
         String dashboardPath = switch (officerLoginRequest.getRole()) {
-            case "nic-officer" -> "/dashboard/officer/nic";
-            case "passport-officer" -> "/dashboard/officer/passport";
-            case "csr" -> "/dashboard/officer/csr";
-            case "director" -> "/dashboard/officer/director";
-            case "admin" -> "/dashboard/officer/admin";
+            case "nic-officer" -> "/officer/nic/applications";
+            case "passport-officer" -> "/officer/passport/applications";
+            case "csr" -> "/officer/csr";
+            case "director" -> "/officer/director";
             default -> null;
         };
 
@@ -71,38 +155,76 @@ public class UserController {
     }
 
     @GetMapping("/register")
-    public String registrationPage() {
+    public String registrationPage(Model model) {
+        if (!model.containsAttribute("registrationRequest")) {
+            model.addAttribute("registrationRequest", new CitizenRegistrationDto());
+        }
         return "citizen_frontends/citizen_register";
     }
 
-    @GetMapping("/dashboard/citizen")
-    public String citizenDashboard() {
+    @PostMapping("/register")
+    public String registerCitizen(
+            @Valid @ModelAttribute("registrationRequest") CitizenRegistrationDto registrationRequest,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        if (!Objects.equals(registrationRequest.getPassword(), registrationRequest.getConfirmPassword())) {
+            bindingResult.rejectValue(
+                    "confirmPassword",
+                    "password.mismatch",
+                    "Passwords do not match."
+            );
+        }
+
+        if (bindingResult.hasErrors()) {
+            return "citizen_frontends/citizen_register";
+        }
+
+        try {
+            userAccountService.registerCitizen(
+                    registrationRequest.getEmail(),
+                    registrationRequest.getPhone(),
+                    registrationRequest.getPassword()
+            );
+        } catch (IllegalArgumentException exception) {
+            bindingResult.reject("registration.failed", exception.getMessage());
+            return "citizen_frontends/citizen_register";
+        }
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Registration successful. You can now sign in."
+        );
+        return "redirect:/login";
+    }
+
+    @GetMapping("/citizen/dashboard")
+    public String citizenDashboard(
+            @RequestParam(defaultValue = "new") String profile,
+            Model model,
+            HttpSession session) {
+        if (session.getAttribute("loggedInUserId") == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("loggedInUserEmail", session.getAttribute("loggedInUserEmail"));
+
+        /*
+         * Temporary UI data only. Later these two values will come from the
+         * citizen's database record. The query parameter lets us demonstrate
+         * every dashboard state before the database is connected.
+         */
+        boolean hasNic = profile.equals("existing") || profile.equals("nic-only");
+        boolean hasPassport = profile.equals("existing");
+        model.addAttribute("hasNic", hasNic);
+        model.addAttribute("hasPassport", hasPassport);
+        model.addAttribute("demoProfile", profile);
         return "citizen_frontends/citizen_dashboard";
     }
 
-    @GetMapping("/dashboard/officer/nic")
-    public String nicOfficerDashboard() {
-        return "officers_frontends/nic_verification_queue";
-    }
-
-    @GetMapping("/dashboard/officer/passport")
-    public String passportOfficerDashboard() {
-        return "officers_frontends/passport_verification_queue";
-    }
-
-    @GetMapping("/dashboard/officer/csr")
-    public String csrDashboard() {
-        return "officers_frontends/csr_dashboard";
-    }
-
-    @GetMapping("/dashboard/officer/director")
-    public String directorDashboard() {
-        return "officers_frontends/director_dashboard";
-    }
-
-    @GetMapping("/dashboard/officer/admin")
-    public String adminDashboard() {
-        return "officers_frontends/system_admin_dashboard";
+    @GetMapping("/dashboard/citizen")
+    public String oldCitizenDashboardRoute() {
+        // Keeps old bookmarks working while the project moves to clean routes.
+        return "redirect:/citizen/dashboard";
     }
 
     private void addLoginForms(Model model) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -16,7 +16,7 @@
 <!-- Header -->
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a href="03_citizen_dashboard.html" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
+    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
       <span class="material-symbols-outlined text-lg">arrow_back</span>
       Dashboard
     </a>
@@ -26,7 +26,7 @@
       </div>
       <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span></span>
     </div>
-    <a href="citizen_notifications.html" class="relative text-slate-500 hover:text-sky-600">
+    <a th:href="@{/citizen/notifications}" class="relative text-slate-500 hover:text-sky-600">
       <span class="material-symbols-outlined text-xl">notifications</span>
       <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">3</span>
     </a>
@@ -42,7 +42,7 @@
       <p class="text-slate-500 text-sm mt-0.5">Track the status of your submitted identity document applications</p>
     </div>
     <div class="flex gap-2">
-      <a href="nic_application_form.html" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm">
+      <a th:href="@{/citizen/dashboard}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm">
         <span class="material-symbols-outlined text-base">add</span>
         New Application
       </a>
@@ -127,7 +127,7 @@
                   <span class="text-xs text-amber-600 font-semibold animate-pulse">Action Needed</span>
                 </div>
                 <p class="text-xs text-amber-700 mt-0.5 mb-2">Visit a LankaID centre to provide your fingerprints and photo.</p>
-                <a href="biometric_appointment_booking.html" class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                <a th:href="@{/citizen/appointments/biometric}" class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
                   <span class="material-symbols-outlined text-sm">calendar_month</span>
                   Book Appointment Now
                 </a>
@@ -267,9 +267,9 @@
             <p class="text-sm font-semibold text-red-800">Officer has requested additional information</p>
             <p class="text-xs text-red-600 mt-1">"Please upload a clear photo of the police report for the lost NIC and a recent utility bill as proof of address. Documents must not be older than 3 months."</p>
             <p class="text-xs text-slate-500 mt-1">— Officer Kumara Silva, Aug 14, 2026</p>
-            <a href="04_nic_document_upload.html" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg mt-2 transition-colors">
-              <span class="material-symbols-outlined text-sm">upload_file</span>
-              Upload Required Documents
+            <a th:href="@{/citizen/applications/nic/LK-NIC-2026-00097/correct}" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg mt-2 transition-colors">
+              <span class="material-symbols-outlined text-sm">edit_note</span>
+              Correct & Resubmit
             </a>
           </div>
         </div>

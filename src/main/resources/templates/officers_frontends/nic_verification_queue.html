@@ -120,27 +120,26 @@
 </div>
 </div>
 <nav class="flex-1 p-3 space-y-1">
-<a class="officer-nav-link" href="#">
+<a class="officer-nav-link" href="/officer/nic/biometrics">
 <span class="material-symbols-outlined">dashboard</span>
-Overview
+Biometric Collection
 </a>
-<a class="officer-nav-link active" href="#">
+<a class="officer-nav-link active" href="/officer/nic/applications">
 <span class="material-symbols-outlined">fact_check</span>
 Verification Queue
 <span class="ml-auto bg-cyan-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold">65</span>
 </a>
-<a class="officer-nav-link" href="#">
+<a class="officer-nav-link" href="/officer/nic/applications/processed">
 <span class="material-symbols-outlined">task_alt</span>
 Reviewed Applications
 </a>
-<a class="officer-nav-link" href="#">
+<a class="officer-nav-link" href="/officer/nic/appointments">
 <span class="material-symbols-outlined">event_available</span>
 Appointments
 </a>
-<a class="officer-nav-link" href="#">
-<span class="material-symbols-outlined">notifications</span>
-Notifications
-<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</span>
+<a class="officer-nav-link" href="/officer/nic/biometrics">
+<span class="material-symbols-outlined">fingerprint</span>
+Collection Workbench
 </a>
 </nav>
 <div class="p-4 border-t border-slate-800">
@@ -225,7 +224,11 @@ Clear Filters
 <div class="overflow-x-auto flex-1">
 <table class="w-full text-left border-collapse">
 <thead class="bg-surface-container-low sticky top-0 z-10 border-b border-outline-variant"><tr><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Applicant</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">NIC ID</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Type</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Submission Date</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Status</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold text-right">Action</th></tr></thead>
-<tbody class="divide-y divide-outline-variant/30 font-body-md text-body-md bg-surface-container-lowest"><tr class="hover:bg-surface-container transition-colors group" onclick="window.location.href='09_nic_application_review.html'" style="cursor: pointer;"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-sm text-label-sm shrink-0">ER</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors" onclick="window.location.href='09_nic_application_review.html'" style="cursor: pointer;">Elena Rodriguez</div><div class="font-caption text-caption text-on-surface-variant">DOB: 12/04/1985</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8891</td><td class="p-4 text-on-surface">Renewal</td><td class="p-4 text-on-surface-variant">Oct 24, 2023<br/><span class="font-caption text-caption">09:41 AM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-error"></span>Urgent</span></td><td class="p-4 text-right"><button class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT hover:bg-on-secondary-container transition-colors shadow-sm">Review</button></td></tr><tr class="hover:bg-surface-container transition-colors group bg-error-container/5" onclick="window.location.href='09_nic_application_review.html'" style="cursor: pointer;"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-label-sm text-label-sm shrink-0">JC</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors" onclick="window.location.href='09_nic_application_review.html'" style="cursor: pointer;">James Chen</div><div class="font-caption text-caption text-on-surface-variant">DOB: 03/15/1992</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8890</td><td class="p-4 text-on-surface">New NIC</td><td class="p-4 text-on-surface-variant">Oct 24, 2023<br/><span class="font-caption text-caption">08:15 AM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm border border-error/20"><span class="material-symbols-outlined text-[16px] text-error">flag</span>Flagged</span></td><td class="p-4 text-right"><button class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT hover:bg-on-secondary-container transition-colors shadow-sm">Review</button></td></tr><tr class="hover:bg-surface-container transition-colors group" onclick="window.location.href='09_nic_application_review.html'" style="cursor: pointer;"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-label-sm text-label-sm shrink-0">SM</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors" onclick="window.location.href='09_nic_application_review.html'" style="cursor: pointer;">Sarah Mitchell</div><div class="font-caption text-caption text-on-surface-variant">DOB: 07/22/1978</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8889</td><td class="p-4 text-on-surface">Lost NIC</td><td class="p-4 text-on-surface-variant">Oct 23, 2023<br/><span class="font-caption text-caption">16:45 PM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Standard</span></td><td class="p-4 text-right"><button class="bg-transparent border border-secondary text-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT hover:bg-secondary hover:text-on-secondary transition-colors">Review</button></td></tr></tbody>
+<tbody class="divide-y divide-outline-variant/30 font-body-md text-body-md bg-surface-container-lowest">
+<tr class="hover:bg-surface-container transition-colors group" style="cursor:pointer"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-sm text-label-sm shrink-0">ER</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors">Elena Rodriguez</div><div class="font-caption text-caption text-on-surface-variant">DOB: 12/04/1985</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8891</td><td class="p-4 text-on-surface">Renewal</td><td class="p-4 text-on-surface-variant">Oct 24, 2023<br/><span class="font-caption text-caption">09:41 AM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">Urgent</span></td><td class="p-4 text-right"><button class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT">Review</button></td></tr>
+<tr class="hover:bg-surface-container transition-colors group bg-error-container/5" style="cursor:pointer"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-label-sm text-label-sm shrink-0">JC</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors">James Chen</div><div class="font-caption text-caption text-on-surface-variant">DOB: 03/15/1992</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8890</td><td class="p-4 text-on-surface">New NIC</td><td class="p-4 text-on-surface-variant">Oct 24, 2023<br/><span class="font-caption text-caption">08:15 AM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Flagged</span></td><td class="p-4 text-right"><button class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT">Review</button></td></tr>
+<tr class="hover:bg-surface-container transition-colors group" style="cursor:pointer"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-label-sm text-label-sm shrink-0">SM</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors">Sarah Mitchell</div><div class="font-caption text-caption text-on-surface-variant">DOB: 07/22/1978</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8889</td><td class="p-4 text-on-surface">Lost NIC</td><td class="p-4 text-on-surface-variant">Oct 23, 2023<br/><span class="font-caption text-caption">16:45 PM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Standard</span></td><td class="p-4 text-right"><button class="bg-transparent border border-secondary text-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT">Review</button></td></tr>
+</tbody>
 </table>
 </div>
 <!-- Pagination Footer -->
@@ -244,4 +247,11 @@ Clear Filters
 </div>
 </section>
 </main>
+<script>
+// Each row opens the clean Spring route using the reference shown in column two.
+document.querySelectorAll('tbody tr').forEach(row => {
+  const reference = row.querySelector('td:nth-child(2)')?.textContent.trim();
+  if (reference) row.onclick = () => window.location.href = '/officer/nic/applications/' + encodeURIComponent(reference);
+});
+</script>
 </body></html>
