@@ -96,7 +96,7 @@ class CitizenApplicationServiceTests {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> service.prepareNicForm(25, "new")
+                () -> service.prepareNewNicForm(25)
         );
         assertTrue(exception.getMessage().contains("already have"));
     }
@@ -110,7 +110,7 @@ class CitizenApplicationServiceTests {
                 "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3}
         );
 
-        service.uploadDocument(25, 101, "PHOTOGRAPH", file);
+        service.uploadNewDocument(25, 101, "PHOTOGRAPH", file);
 
         ArgumentCaptor<ApplicationDocument> captor = ArgumentCaptor.forClass(ApplicationDocument.class);
         verify(documentRepository).save(captor.capture());
@@ -131,7 +131,7 @@ class CitizenApplicationServiceTests {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> service.submitApplication(25, 101)
+                () -> service.submitNewApplication(25, 101)
         );
         assertTrue(exception.getMessage().contains("BIRTH_CERTIFICATE"));
         assertTrue("DRAFT".equals(application.getCurrentStatus()));

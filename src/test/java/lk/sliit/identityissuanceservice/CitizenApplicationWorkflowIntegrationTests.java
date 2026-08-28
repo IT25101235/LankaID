@@ -104,6 +104,14 @@ class CitizenApplicationWorkflowIntegrationTests {
         assertEquals("NIC", application.getServiceType());
         assertEquals("NEW", application.getApplicationKind());
         assertTrue(nicRepository.existsById(application.getApplicationId()));
+
+        mockMvc.perform(get("/citizen/applications/nic/documents")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "/citizen/applications/nic/review?applicationId=" + application.getApplicationId()
+                )));
     }
 
     @Test
@@ -124,6 +132,36 @@ class CitizenApplicationWorkflowIntegrationTests {
         assertEquals("PASSPORT", application.getServiceType());
         assertEquals("NEW", application.getApplicationKind());
         assertTrue(passportRepository.existsById(application.getApplicationId()));
+    }
+
+    @Test
+    void nicRenewalIsCreatedByTheRenewalWorkflow() throws Exception {
+        UserAccount user = createCitizen(true);
+        MockHttpServletRequestBuilder request = validProfile(
+                post("/citizen/applications/nic/renewal").session(citizenSession(user))
+        ).param("lastNicNo", governmentRepository
+                .findByRegisteredEmailIgnoreCaseAndRegisteredPhone(user.getEmail(), user.getPhone())
+                .orElseThrow()
+                .getNicNo())
+                .param("lastIssuedDate", "2020-01-01");
+
+        mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/citizen/renewals/nic/documents?applicationId=*"));
+
+        CitizenApplication application = applicationRepository
+                .findAllByCitizenIdOrderByCreatedAtDesc(user.getUserId()).get(0);
+        assertEquals("NIC", application.getServiceType());
+        assertEquals("RENEWAL", application.getApplicationKind());
+        assertTrue(nicRepository.existsById(application.getApplicationId()));
+
+        mockMvc.perform(get("/citizen/renewals/nic/documents")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "/citizen/renewals/nic/review?applicationId=" + application.getApplicationId()
+                )));
     }
 
     private UserAccount createCitizen(boolean createGovernmentRecord) {
