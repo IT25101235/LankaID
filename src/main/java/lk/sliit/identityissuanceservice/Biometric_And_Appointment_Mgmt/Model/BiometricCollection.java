@@ -1,0 +1,42 @@
+package lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "BiometricCollection", schema = "dbo")
+public class BiometricCollection {
+
+    @Id
+    @Column(name = "application_id")
+    private Integer applicationId;
+
+    @Column(name = "staff_id", nullable = false)
+    private Integer staffId;
+
+    @Column(name = "collected_at")
+    private LocalDateTime collectedAt;
+
+    @Column(name = "collection_status", length = 20)
+    private String collectionStatus;
+
+    @PrePersist
+    private void applyDefaults() {
+        if (collectedAt == null) collectedAt = LocalDateTime.now();
+        if (collectionStatus == null) collectionStatus = "COLLECTED";
+    }
+
+    public Integer getApplicationId() { return applicationId; }
+    public void setApplicationId(Integer applicationId) { this.applicationId = applicationId; }
+    public Integer getStaffId() { return staffId; }
+    public void setStaffId(Integer staffId) { this.staffId = staffId; }
+    public LocalDateTime getCollectedAt() { return collectedAt; }
+    public void setCollectedAt(LocalDateTime collectedAt) { this.collectedAt = collectedAt; }
+    public String getCollectionStatus() { return collectionStatus; }
+    public void setCollectionStatus(String collectionStatus) { this.collectionStatus = collectionStatus; }
+}

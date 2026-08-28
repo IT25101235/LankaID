@@ -4,6 +4,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller.Citi
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,11 +30,16 @@ class CitizenApplicationControllerTests {
     @Mock
     private CitizenApplicationService applicationService;
 
+    @Mock
+    private NotificationService notificationService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = standaloneSetup(new CitizenApplicationController(applicationService)).build();
+        mockMvc = standaloneSetup(
+                new CitizenApplicationController(applicationService, notificationService)
+        ).build();
     }
 
     @Test

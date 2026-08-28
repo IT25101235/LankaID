@@ -4,6 +4,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Controller.AdminController;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
@@ -26,11 +27,13 @@ class AdminControllerSessionTests {
 
     private MockMvc mockMvc;
     private OfficerAccountService officerAccountService;
+    private ServiceCentreService serviceCentreService;
 
     @BeforeEach
     void setUp() {
         officerAccountService = mock(OfficerAccountService.class);
-        mockMvc = standaloneSetup(new AdminController(officerAccountService)).build();
+        serviceCentreService = mock(ServiceCentreService.class);
+        mockMvc = standaloneSetup(new AdminController(officerAccountService, serviceCentreService)).build();
     }
 
     @Test
@@ -124,5 +127,34 @@ class AdminControllerSessionTests {
                 .andExpect(flash().attribute("officerActionMessage", "Officer account deleted successfully."));
 
         verify(officerAccountService).removeOfficer(90);
+    }
+
+    @Test
+    void onlyLoggedInAdminCanAddServiceCentre() throws Exception {
+        mockMvc.perform(post("/officer/admin/centres")
+                        .param("centreName", "Kandy Service Centre")
+                        .param("street", "Peradeniya Road")
+                        .param("city", "Kandy")
+                        .param("district", "Kandy")
+                        .param("dailyCapacity", "120"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+
+        mockMvc.perform(post("/officer/admin/centres")
+                        .session(session)
+                        .param("centreName", "Kandy Service Centre")
+                        .param("street", "Peradeniya Road")
+                        .param("city", "Kandy")
+                        .param("district", "Kandy")
+                        .param("dailyCapacity", "120"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=centres"))
+                .andExpect(flash().attribute("centreMessage", "Service centre added successfully."));
+
+        verify(serviceCentreService).addCentre(
+                "Kandy Service Centre", "Peradeniya Road", "Kandy", "Kandy", 120);
     }
 }

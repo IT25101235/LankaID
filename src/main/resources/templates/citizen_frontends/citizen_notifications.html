@@ -1,224 +1,27 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Notifications | LankaID Identity Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
-.notif-unread { background: #eff6ff; border-left: 3px solid #2563eb; }
-.notif-read { background: #ffffff; border-left: 3px solid transparent; }
-</style>
-<link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notifications | LankaID</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}</style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen text-slate-800">
+<header class="bg-white border-b shadow-sm"><div class="max-w-3xl mx-auto h-16 px-4 flex items-center justify-between"><a th:href="@{/citizen/dashboard}" class="text-sm font-semibold text-slate-600 flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_back</span>Dashboard</a><span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span><form th:action="@{/citizen/notifications/read-all}" method="post"><button class="text-xs font-bold text-sky-700">Mark all read</button></form></div></header>
+<main class="max-w-3xl mx-auto px-4 py-7">
+  <div class="flex items-end justify-between"><div><h1 class="text-2xl font-extrabold">Notifications</h1><p class="text-sm text-slate-500 mt-1"><span th:text="${unreadCount}">0</span> unread</p></div><a th:href="@{/citizen/applications}" class="text-sm font-bold text-sky-700">My applications</a></div>
 
-<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-      Dashboard
-    </a>
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-sm">verified_user</span>
-      </div>
-      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span></span>
-    </div>
-    <button onclick="markAllRead()" class="text-xs text-sky-600 font-semibold hover:underline">Mark all read</button>
+  <div th:if="${#lists.isEmpty(notifications)}" class="mt-6 bg-white border border-dashed rounded-2xl p-10 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">notifications_none</span><p class="font-bold mt-2">No notifications yet</p><p class="text-sm text-slate-500 mt-1">Application, payment, appointment, and biometric updates will appear here.</p></div>
+
+  <div th:unless="${#lists.isEmpty(notifications)}" class="mt-6 space-y-3">
+    <article th:each="notification : ${notifications}" class="rounded-2xl border p-5 flex gap-4" th:classappend="${notification.read ? ' bg-white border-slate-200' : ' bg-sky-50 border-sky-200'}">
+      <span class="w-11 h-11 rounded-xl flex items-center justify-center material-symbols-outlined" th:classappend="${notification.read ? ' bg-slate-100 text-slate-500' : ' bg-sky-100 text-sky-700'}" th:text="${#strings.contains(notification.notificationType, 'PAYMENT') ? 'payments' : (#strings.contains(notification.notificationType, 'APPOINTMENT') ? 'event' : (#strings.contains(notification.notificationType, 'BIOMETRIC') ? 'fingerprint' : 'description'))}">notifications</span>
+      <div class="flex-1 min-w-0"><div class="flex flex-wrap justify-between gap-2"><p class="font-bold text-sm" th:text="${#strings.replace(notification.notificationType, '_', ' ')}">Update</p><time class="text-xs text-slate-400" th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy, HH:mm')}">Time</time></div><p class="text-sm text-slate-600 mt-2 leading-6" th:text="${notification.message}">Message</p><form th:unless="${notification.read}" th:action="@{/citizen/notifications/{id}/read(id=${notification.notificationId})}" method="post"><button class="text-xs text-sky-700 font-bold mt-3">Mark as read</button></form></div>
+    </article>
   </div>
-</header>
-
-<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-
-  <!-- Title -->
-  <div class="flex items-center justify-between mb-5">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900">Notifications</h1>
-      <p class="text-slate-500 text-sm mt-0.5"><span id="unreadCount">3</span> unread notifications</p>
-    </div>
-    <div class="flex gap-2">
-      <select onchange="filterNotifs(this.value)" class="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white text-slate-700 font-medium">
-        <option value="all">All</option>
-        <option value="unread">Unread Only</option>
-        <option value="nic">NIC</option>
-        <option value="passport">Passport</option>
-        <option value="complaint">Complaints</option>
-        <option value="appointment">Appointments</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Notifications List -->
-  <div class="space-y-2" id="notifList">
-
-    <!-- Unread: Biometric reminder -->
-    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, '/citizen/appointments/biometric')">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-amber-600">fingerprint</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-bold text-slate-900">Biometric Appointment Required</p>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-              <span class="text-xs text-slate-400">2 hours ago</span>
-            </div>
-          </div>
-          <p class="text-xs text-slate-600 mt-0.5">Your NIC application (LK-NIC-2026-00183) has been approved. Please book a biometric appointment at a LankaID centre to proceed.</p>
-          <span class="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 font-semibold hover:underline">
-            Book Now <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Unread: Application Approved -->
-    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, '/citizen/applications')">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-emerald-600">verified</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-bold text-slate-900">Application Approved</p>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-              <span class="text-xs text-slate-400">Aug 12, 2026</span>
-            </div>
-          </div>
-          <p class="text-xs text-slate-600 mt-0.5">Congratulations! Your NIC application (LK-NIC-2026-00183) has been approved by Officer Nimal Jayawardena. Proceed to book your biometric appointment.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Unread: Info Requested -->
-    <div class="notif-unread rounded-xl border border-blue-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="nic" data-read="false" onclick="openNotif(this, '/citizen/applications/nic/LK-NIC-2026-00097/correct')">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-red-600">warning</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-bold text-slate-900">Additional Documents Required</p>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-              <span class="text-xs text-slate-400">Aug 14, 2026</span>
-            </div>
-          </div>
-          <p class="text-xs text-slate-600 mt-0.5">Officer Kumara Silva has requested additional documents for your NIC Lost application (LK-NIC-2026-00097). Please upload a police report and recent utility bill.</p>
-          <span class="inline-flex items-center gap-1 mt-2 text-xs text-red-600 font-semibold hover:underline">
-            Upload Documents <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Read: Passport Under Review -->
-    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="passport" data-read="true" onclick="openNotif(this, '/citizen/applications')">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-sky-500">manage_search</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-700">Passport Application Under Review</p>
-            <span class="text-xs text-slate-400 flex-shrink-0">Aug 11, 2026</span>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">Your Passport renewal application (LK-PASS-2026-00041) is now being reviewed by Officer Dilani Rathnayake. This usually takes 3–5 business days.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Read: Application Received -->
-    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="passport" data-read="true" onclick="openNotif(this, '/citizen/applications')">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-indigo-500">task_alt</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-700">Passport Application Received</p>
-            <span class="text-xs text-slate-400 flex-shrink-0">Aug 5, 2026</span>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">Your Passport renewal application (LK-PASS-2026-00041) has been successfully submitted. Reference number: LK-PASS-2026-00041.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Read: Complaint Response -->
-    <div class="notif-read rounded-xl border border-slate-200 p-4 cursor-pointer hover:shadow-sm transition-all" data-type="complaint" data-read="true">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-orange-500">feedback</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-700">Complaint Resolved — CMP-2026-0034</p>
-            <span class="text-xs text-slate-400 flex-shrink-0">Jul 14, 2026</span>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">Your complaint about processing delay has been resolved. The officer's response: "Your application has been expedited. Please expect a status update within 2 days."</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Read: Welcome -->
-    <div class="notif-read rounded-xl border border-slate-200 p-4" data-type="system" data-read="true">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-slate-500">waving_hand</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-700">Welcome to LankaID Portal</p>
-            <span class="text-xs text-slate-400 flex-shrink-0">Jun 30, 2026</span>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">Your LankaID account has been created successfully. You can now apply for NIC, Passport, and other identity services online.</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-function openNotif(el, url) {
-  el.classList.remove('notif-unread','border-blue-200');
-  el.classList.add('notif-read','border-slate-200');
-  const dot = el.querySelector('.w-2.h-2.rounded-full.bg-blue-600');
-  if (dot) dot.remove();
-  el.dataset.read = 'true';
-  updateUnreadCount();
-  if (url) setTimeout(() => window.location.href = url, 200);
-}
-
-function updateUnreadCount() {
-  const unread = document.querySelectorAll('[data-read="false"]').length;
-  document.getElementById('unreadCount').textContent = unread;
-}
-
-function markAllRead() {
-  document.querySelectorAll('[data-read="false"]').forEach(el => {
-    el.classList.remove('notif-unread','border-blue-200');
-    el.classList.add('notif-read','border-slate-200');
-    const dot = el.querySelector('.w-2.h-2.rounded-full.bg-blue-600');
-    if (dot) dot.remove();
-    el.dataset.read = 'true';
-  });
-  updateUnreadCount();
-}
-
-function filterNotifs(type) {
-  document.querySelectorAll('#notifList > div').forEach(el => {
-    if (type === 'all') { el.style.display = ''; return; }
-    if (type === 'unread') { el.style.display = el.dataset.read === 'false' ? '' : 'none'; return; }
-    el.style.display = el.dataset.type === type ? '' : 'none';
-  });
-}
-</script>
+</main>
 </body>
 </html>

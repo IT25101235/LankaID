@@ -3,6 +3,7 @@ package lk.sliit.identityissuanceservice;
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.StaffAccount;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.StaffAccountRepository;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,47 @@ class AdminOfficerWorkflowIntegrationTests {
 
     @Autowired
     private StaffAccountRepository staffAccountRepository;
+
+    @Autowired
+    private CentreRepository centreRepository;
+
+    @Test
+    void onlyAdminCanAddAServiceCentre() throws Exception {
+        String suffix = String.valueOf(System.nanoTime());
+        String centreName = "Kandy Service Centre " + suffix;
+
+        mockMvc.perform(post("/officer/admin/centres")
+                        .param("centreName", centreName)
+                        .param("street", "Peradeniya Road")
+                        .param("city", "Kandy")
+                        .param("district", "Kandy")
+                        .param("dailyCapacity", "120"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        MockHttpSession adminSession = new MockHttpSession();
+        adminSession.setAttribute("loggedInAdminId", 1);
+        adminSession.setAttribute("loggedInAdminEmail", "admin@gov.lk");
+
+        mockMvc.perform(post("/officer/admin/centres")
+                        .session(adminSession)
+                        .param("centreName", centreName)
+                        .param("street", "Peradeniya Road")
+                        .param("city", "Kandy")
+                        .param("district", "Kandy")
+                        .param("dailyCapacity", "120"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=centres"));
+
+        assertTrue(centreRepository.existsByCentreNameIgnoreCaseAndCityIgnoreCase(centreName, "Kandy"));
+
+        mockMvc.perform(get("/officer/admin")
+                        .param("section", "centres")
+                        .session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(centreName)))
+                .andExpect(content().string(containsString("Daily capacity")));
+    }
 
     @Test
     void adminCreatesOfficerWhoAppearsAndCanLogin() throws Exception {

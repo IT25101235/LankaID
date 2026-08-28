@@ -144,7 +144,7 @@ public class PassportVerificationController {
                 verificationReviewService.reject(reference, "PASSPORT", staffId);
                 redirectAttributes.addFlashAttribute("verificationMessage", "Application rejected.");
             } else {
-                verificationReviewService.requestCorrection(reference, "PASSPORT", correctForm, documentIds);
+                verificationReviewService.requestCorrection(reference, "PASSPORT", correctForm, documentIds, staffId);
                 redirectAttributes.addFlashAttribute("verificationMessage", "Correction requested from the citizen.");
             }
             return "redirect:/officer/passport/applications";

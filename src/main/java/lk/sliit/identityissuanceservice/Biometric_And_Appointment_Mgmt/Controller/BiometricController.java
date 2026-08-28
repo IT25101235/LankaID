@@ -2,48 +2,137 @@ package lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controll
 
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BiometricService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class BiometricController {
 
-    @GetMapping("/officer/nic/biometrics")
-    public String nicBiometricCollection(Model model, HttpSession session) {
-        if (session.getAttribute("loggedInAdminId") != null) {
-            return "redirect:/officer/admin";
-        }
-        if (!canAccess(session, OfficerAccountService.NIC_OFFICER)) {
-            return "redirect:/login";
-        }
+    private final AppointmentService appointmentService;
+    private final BiometricService biometricService;
 
-        addBiometricPageData(model, "NIC", "LK-NIC-2026-00183", "/officer/nic/applications");
-        return "officers_frontends/biometric_collection";
+    public BiometricController(AppointmentService appointmentService, BiometricService biometricService) {
+        this.appointmentService = appointmentService;
+        this.biometricService = biometricService;
+    }
+
+    @GetMapping("/officer/nic/biometrics")
+    public String nicBiometricCollection(
+            @RequestParam(required = false) String reference,
+            @RequestParam(defaultValue = "REFERENCE_NUMBER") String checkInMethod,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        return biometricPage("NIC", reference, checkInMethod, model, session, redirectAttributes);
     }
 
     @GetMapping("/officer/passport/biometrics")
-    public String passportBiometricCollection(Model model, HttpSession session) {
-        if (session.getAttribute("loggedInAdminId") != null) {
-            return "redirect:/officer/admin";
-        }
-        if (!canAccess(session, OfficerAccountService.PASSPORT_OFFICER)) {
-            return "redirect:/login";
-        }
+    public String passportBiometricCollection(
+            @RequestParam(required = false) String reference,
+            @RequestParam(defaultValue = "REFERENCE_NUMBER") String checkInMethod,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        return biometricPage("PASSPORT", reference, checkInMethod, model, session, redirectAttributes);
+    }
 
-        addBiometricPageData(model, "Passport", "LK-PASS-2026-00041", "/officer/passport/applications");
+    @PostMapping("/officer/{service}/biometrics/{reference}/check-in")
+    public String checkIn(
+            @PathVariable String service,
+            @PathVariable String reference,
+            @RequestParam(defaultValue = "REFERENCE_NUMBER") String checkInMethod,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        String serviceType = serviceType(service);
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
+        try {
+            appointmentService.checkIn(reference, serviceType, officerId(session), checkInMethod);
+            redirectAttributes.addFlashAttribute("biometricMessage", "Citizen checked in successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+        }
+        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+    }
+
+    @PostMapping("/officer/{service}/biometrics/{reference}/complete")
+    public String completeBiometrics(
+            @PathVariable String service,
+            @PathVariable String reference,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        String serviceType = serviceType(service);
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
+        try {
+            biometricService.completeCollection(reference, serviceType, officerId(session));
+            redirectAttributes.addFlashAttribute(
+                    "biometricMessage",
+                    "Biometrics attached. The application is ready for printing."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+        }
+        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+    }
+
+    private String biometricPage(
+            String serviceType,
+            String reference,
+            String checkInMethod,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
+
+        addBiometricPageData(model, serviceType);
+        model.addAttribute("checkInMethod", "QR".equals(checkInMethod) ? "QR" : "REFERENCE_NUMBER");
+        model.addAttribute("appointments", appointmentService.getOfficerQueue(serviceType));
+        if (reference != null && !reference.isBlank()) {
+            try {
+                model.addAttribute("selectedAppointment", appointmentService.findForOfficer(reference, serviceType));
+            } catch (IllegalArgumentException exception) {
+                redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+                return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics";
+            }
+        }
         return "officers_frontends/biometric_collection";
     }
 
-    private void addBiometricPageData(Model model, String documentType, String sampleReference, String queueRoute) {
-        /* Mock values make QR/manual lookup demonstrable without storing biometric data yet. */
-        model.addAttribute("documentType", documentType);
-        model.addAttribute("sampleReference", sampleReference);
-        model.addAttribute("queueRoute", queueRoute);
+    private void addBiometricPageData(Model model, String serviceType) {
+        model.addAttribute("documentType", "PASSPORT".equals(serviceType) ? "Passport" : "NIC");
+        model.addAttribute("servicePath", serviceType.toLowerCase());
+        model.addAttribute("queueRoute", "/officer/" + serviceType.toLowerCase() + "/applications");
     }
 
-    private boolean canAccess(HttpSession session, String requiredRole) {
+    private String checkAccess(HttpSession session, String serviceType) {
+        if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         Object role = session.getAttribute("loggedInOfficerRole");
-        return requiredRole.equals(role) || OfficerAccountService.DIRECTOR.equals(role);
+        String requiredRole = "NIC".equals(serviceType)
+                ? OfficerAccountService.NIC_OFFICER
+                : OfficerAccountService.PASSPORT_OFFICER;
+        return requiredRole.equals(role) || OfficerAccountService.DIRECTOR.equals(role)
+                ? null : "redirect:/login";
+    }
+
+    private Integer officerId(HttpSession session) {
+        return session.getAttribute("loggedInOfficerId") instanceof Integer id ? id : null;
+    }
+
+    private String serviceType(String service) {
+        return "passport".equalsIgnoreCase(service) ? "PASSPORT" : "NIC";
     }
 }

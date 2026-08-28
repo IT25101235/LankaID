@@ -24,5 +24,11 @@ public interface CitizenApplicationRepository extends JpaRepository<CitizenAppli
             Integer citizenId
     );
 
+    Optional<CitizenApplication> findByApplicationNoIgnoreCase(String applicationNo);
+
     List<CitizenApplication> findAllByCitizenIdOrderByCreatedAtDesc(Integer citizenId);
+
+    List<CitizenApplication> findAllByCurrentStatusOrderByUpdatedAtAsc(String currentStatus);
+
+    List<CitizenApplication> findAllByCurrentStatusOrderByUpdatedAtDesc(String currentStatus);
 }

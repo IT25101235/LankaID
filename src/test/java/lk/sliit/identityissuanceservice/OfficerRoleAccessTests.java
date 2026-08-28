@@ -1,9 +1,14 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Controller.DirectorController;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.DirectorDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.PrintingExportService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controller.AppointmentController;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controller.BiometricController;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentPassService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BiometricService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller.CitizenSupportController;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.NicVerificationController;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.PassportVerificationController;
@@ -30,16 +35,23 @@ class OfficerRoleAccessTests {
     void setUp() {
         VerificationQueueService verificationQueueService = mock(VerificationQueueService.class);
         VerificationReviewService verificationReviewService = mock(VerificationReviewService.class);
+        AppointmentService appointmentService = mock(AppointmentService.class);
+        AppointmentPassService appointmentPassService = mock(AppointmentPassService.class);
+        BiometricService biometricService = mock(BiometricService.class);
+        PrintingExportService printingExportService = mock(PrintingExportService.class);
+        DirectorDashboardService directorDashboardService = mock(DirectorDashboardService.class);
+        when(printingExportService.getReadyApplications()).thenReturn(java.util.List.of());
+        when(printingExportService.getPrintedApplications()).thenReturn(java.util.List.of());
         when(verificationQueueService.getNicQueue()).thenReturn(java.util.List.of());
         when(verificationQueueService.getPassportQueue()).thenReturn(java.util.List.of());
 
         mockMvc = standaloneSetup(
                 new NicVerificationController(verificationQueueService, verificationReviewService),
                 new PassportVerificationController(verificationQueueService, verificationReviewService),
-                new BiometricController(),
-                new AppointmentController(),
+                new BiometricController(appointmentService, biometricService),
+                new AppointmentController(appointmentService, appointmentPassService),
                 new CitizenSupportController(),
-                new DirectorController()
+                new DirectorController(printingExportService, directorDashboardService)
         ).build();
     }
 

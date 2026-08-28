@@ -40,9 +40,11 @@ public String newNicForm(...) {
 | `/citizen/renewals/nic/documents?applicationId={id}` | NIC renewal/lost document upload | Document Renewal and Replacement Management |
 | `/citizen/renewals/passport/documents?applicationId={id}` | Passport renewal/lost document upload | Document Renewal and Replacement Management |
 | `/citizen/renewals/{service}/review?applicationId={id}` | Renewal/lost final review | Document Renewal and Replacement Management |
-| `/citizen/payment` | Demonstration payment | Payment Management |
+| `/citizen/payment?applicationId={id}` | Simulated NIC/passport payment | Payment Management |
 | `/citizen/notifications` | Citizen notifications | Notification Management |
-| `/citizen/appointments/biometric` | Biometric appointment booking | Biometric and Appointment Management |
+| `/citizen/appointments/biometric?applicationId={id}` | Biometric appointment booking | Biometric and Appointment Management |
+| `/citizen/appointments/{reference}/pass` | QR appointment pass | Biometric and Appointment Management |
+| `/citizen/appointments/{reference}/pass/download` | Downloadable PNG appointment pass | Biometric and Appointment Management |
 | `/citizen/appointments/walk-in` | Physical service visit booking | Biometric and Appointment Management |
 | `/citizen/support` | Complaint/inquiry history | Citizen Support Management |
 | `/citizen/support/new` | New complaint/inquiry | Citizen Support Management |
@@ -77,6 +79,8 @@ The dashboard has no demo-state parameter. It matches the logged-in citizen's em
 | `/officer/director` | Statistics dashboard |
 | `/officer/director/printing` | Select records and prepare a printing export |
 | `/officer/admin` | Officer credential management |
+| `/officer/admin?section=centres` | Administrator-only service centre management |
+| `POST /officer/admin/centres` | Add a service centre used for biometric appointments |
 | `/officer/admin?section=citizens` | Citizen accounts and application counts inside the admin dashboard |
 | `/officer/admin?section=notifications` | Universal or selected notification composer inside the admin dashboard |
 
@@ -92,4 +96,16 @@ The dashboard has no demo-state parameter. It matches the logged-in citizen's em
 
 The JPA models and repositories are shared because both workflows save to the same existing database tables. No duplicate entity or table is created.
 
-The QR, biometric, payment and some officer review screens remain separate later workflow stages.
+## Approval to biometric collection flow
+
+1. Officer approval creates a citizen notification and enables payment.
+2. Payment Management records LKR 2,000 for NIC or LKR 10,000 for Passport.
+3. The citizen selects a centre, date and 30-minute slot within the next 14 days.
+4. The confirmed appointment receives a `BIO-...` reference. Its QR contains only that reference.
+5. The citizen can display, print, or download the pass as a PNG.
+6. The matching NIC/Passport officer scans it with the browser webcam or types the reference.
+7. Check-in is recorded as `QR` or `REFERENCE_NUMBER`.
+8. The officer simulates fingerprint, photograph and signature capture, which creates the existing `BiometricCollection` record and changes the application to `BIOMETRIC_COLLECTED` (shown to the citizen as Ready for Printing).
+9. Payment, booking, check-in and biometric completion each create a real `Notification` and `UserNotification` record.
+
+The payment and biometric device are deliberately simulated for the student project. Card details and real biometric files are never stored. The workflow uses the existing SQL Server tables and does not alter the database schema.

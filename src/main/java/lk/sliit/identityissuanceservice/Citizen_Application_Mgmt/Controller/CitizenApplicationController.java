@@ -7,6 +7,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicAppli
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewPassportApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,9 +23,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CitizenApplicationController {
 
     private final CitizenApplicationService applicationService;
+    private final NotificationService notificationService;
 
-    public CitizenApplicationController(CitizenApplicationService applicationService) {
+    public CitizenApplicationController(
+            CitizenApplicationService applicationService,
+            NotificationService notificationService
+    ) {
         this.applicationService = applicationService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/citizen/dashboard")
@@ -48,6 +54,7 @@ public class CitizenApplicationController {
                 applicationService.hasActiveApplication(citizenId, CitizenApplicationService.PASSPORT)
         );
         model.addAttribute("applications", applicationService.getCitizenApplications(citizenId));
+        model.addAttribute("unreadNotificationCount", notificationService.getUnreadCount(citizenId));
         return "citizen_frontends/citizen_dashboard";
     }
 

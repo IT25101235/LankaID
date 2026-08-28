@@ -77,6 +77,10 @@
       <span class="material-symbols-outlined">settings</span>
       System Settings
     </a>
+    <a href="#" onclick="return showSection('centres')" class="sidebar-link" id="nav-centres">
+      <span class="material-symbols-outlined">location_city</span>
+      Service Centres
+    </a>
     <p class="text-xs font-semibold text-slate-500 uppercase px-3 py-2 mt-2">Citizen tools</p>
     <a href="#" onclick="return showSection('citizens')" class="sidebar-link" id="nav-citizens">
       <span class="material-symbols-outlined">groups</span>
@@ -326,6 +330,48 @@
     </div>
   </div>
 
+  <!-- ===== SERVICE CENTRES ===== -->
+  <div id="section-centres" class="p-6 hidden">
+    <div th:if="${centreMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${centreMessage}">Service centre added successfully.</div>
+    <div th:if="${centreError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${centreError}">Unable to add the service centre.</div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-5 items-start">
+      <form th:action="@{/officer/admin/centres}" method="post" class="card p-6">
+        <h2 class="font-bold text-slate-900 text-base">Add Service Centre</h2>
+        <p class="text-xs text-slate-600 mt-1">Only the system administrator can register centres used for biometric appointments.</p>
+
+        <div class="space-y-4 mt-5">
+          <div><label class="block text-xs font-semibold text-slate-700">Centre name</label><input required maxlength="100" name="centreName" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo Main Centre"/></div>
+          <div><label class="block text-xs font-semibold text-slate-700">Street address</label><input maxlength="150" name="street" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Street or building"/></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-xs font-semibold text-slate-700">City</label><input required maxlength="100" name="city" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Battaramulla"/></div>
+            <div><label class="block text-xs font-semibold text-slate-700">District</label><input required maxlength="100" name="district" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo"/></div>
+          </div>
+          <div><label class="block text-xs font-semibold text-slate-700">Daily appointment capacity</label><input required type="number" min="1" max="2000" name="dailyCapacity" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" value="100"/></div>
+        </div>
+        <button type="submit" class="w-full mt-5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">add_location_alt</span>Add Centre</button>
+      </form>
+
+      <div class="card overflow-hidden">
+        <div class="p-5 border-b border-slate-200"><h2 class="font-bold text-slate-900">Available Service Centres</h2><p class="text-xs text-slate-600 mt-1" th:text="|${#lists.size(centres)} centres available for citizen appointments|">Centres available for appointments</p></div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm light-admin-table">
+            <thead class="border-b border-slate-200"><tr><th class="p-4 text-left text-xs font-semibold uppercase">Centre</th><th class="p-4 text-left text-xs font-semibold uppercase">Location</th><th class="p-4 text-left text-xs font-semibold uppercase">District</th><th class="p-4 text-center text-xs font-semibold uppercase">Daily capacity</th></tr></thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr th:if="${#lists.isEmpty(centres)}"><td colspan="4" class="p-8 text-center text-slate-500">No service centres have been added yet.</td></tr>
+              <tr th:each="centre : ${centres}">
+                <td class="p-4"><p class="font-semibold text-slate-900" th:text="${centre.centreName}">Centre name</p><p class="text-xs text-slate-500 mt-0.5" th:text="${centre.street ?: 'Address not provided'}">Address</p></td>
+                <td class="p-4 text-slate-700" th:text="${centre.city}">City</td>
+                <td class="p-4 text-slate-700" th:text="${centre.district}">District</td>
+                <td class="p-4 text-center font-semibold text-slate-900" th:text="${centre.dailyCapacity}">100</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== SYSTEM SETTINGS ===== -->
   <div id="section-settings" class="p-6 hidden">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -462,7 +508,7 @@
 
 <script>
 function showSection(s) {
-  const sections = ['users','roles','settings','citizens','notifications'];
+  const sections = ['users','roles','settings','centres','citizens','notifications'];
   if (!sections.includes(s)) s = 'users';
   sections.forEach(t => {
     const el = document.getElementById('section-'+t);
@@ -478,6 +524,7 @@ function showSection(s) {
     users: ['Officer Credential Management','Create officer logins and manage their assigned roles'],
     roles: ['Roles & Permissions','View and configure role-based access control'],
     settings: ['System Settings','Configure processing rules, fees and notifications'],
+    centres: ['Service Centre Management','Add centres citizens can select for biometric appointments'],
     citizens: ['Citizen Accounts','Review account status and citizen application counts'],
     notifications: ['Citizen Notifications','Compose and preview announcements without leaving the dashboard']
   };

@@ -17,4 +17,8 @@ public interface GovernmentIdentityRecordRepository extends JpaRepository<Govern
     Optional<GovernmentIdentityRecord> findByRegisteredEmailIgnoreCase(String email);
 
     Optional<GovernmentIdentityRecord> findByRegisteredPhone(String phone);
+
+    boolean existsByNicNo(String nicNo);
+
+    boolean existsByPassportNo(String passportNo);
 }

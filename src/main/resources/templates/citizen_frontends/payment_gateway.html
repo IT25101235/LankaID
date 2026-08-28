@@ -1,70 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>07. LankaID Payment Gateway | LankaID Identity Portal</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Application Payment | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Public Sans','sans-serif']}}}};</script>
-  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
   <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}</style>
 </head>
-<body class="min-h-screen flex flex-col">
-<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center"><span class="material-symbols-outlined text-white text-sm">account_balance</span></div><span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span> Services</span></div>
-    <span class="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500"><span class="material-symbols-outlined text-base text-emerald-600">lock</span>Secure Session</span>
-  </div>
-</header>
+<body class="min-h-screen text-slate-800">
+<header class="bg-white border-b shadow-sm"><div class="max-w-5xl mx-auto h-16 px-4 flex items-center justify-between"><a th:href="@{/citizen/applications}" class="text-sm font-semibold text-slate-600 flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_back</span>My applications</a><span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span><span class="text-xs text-emerald-700 flex items-center gap-1"><span class="material-symbols-outlined text-base">lock</span>Secure demo</span></div></header>
 
-<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-  <ol class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-6 grid grid-cols-4 gap-2 max-w-3xl mx-auto" aria-label="Payment progress">
-    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-emerald-600 text-center"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></span><span class="text-xs font-semibold">Identity</span></li>
-    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-emerald-600 text-center"><span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></span><span class="text-xs font-semibold">Details</span></li>
-    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-sky-700 text-center"><span class="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-bold ring-4 ring-sky-100">3</span><span class="text-xs font-semibold">Payment</span></li>
-    <li class="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-slate-400 text-center"><span class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">4</span><span class="text-xs font-semibold">Confirmation</span></li>
-  </ol>
+<main class="max-w-5xl mx-auto px-4 py-7">
+  <div th:if="${paymentUnavailable}" class="bg-white border rounded-2xl p-8 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">payments</span><h1 class="font-bold text-xl mt-3">Select an approved application</h1><p class="text-sm text-slate-500 mt-1">Open My Applications and use the Pay &amp; book biometrics button.</p><a th:href="@{/citizen/applications}" class="inline-block mt-5 bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">My applications</a></div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-    <section class="lg:col-span-2">
-      <div class="mb-4"><h1 class="text-2xl font-bold text-slate-900">Complete Payment</h1><p class="text-slate-500 text-sm mt-1">Please select a payment method and provide your details to finalize your application.</p></div>
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-        <fieldset>
-          <legend class="text-sm font-bold text-slate-900 mb-3">Select Payment Method</legend>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <label class="relative border-2 border-sky-500 bg-sky-50 rounded-xl p-4 cursor-pointer flex sm:flex-col items-center gap-2 text-center"><input checked class="peer sr-only" name="payment_method" type="radio" value="card"/><span class="material-symbols-outlined text-sky-600 text-2xl">credit_card</span><span class="text-sm font-semibold text-slate-900">Credit / Debit Card</span></label>
-            <label class="relative border border-slate-200 rounded-xl p-4 cursor-pointer flex sm:flex-col items-center gap-2 text-center hover:bg-slate-50"><input class="peer sr-only" name="payment_method" type="radio" value="bank"/><span class="material-symbols-outlined text-slate-500 text-2xl">account_balance</span><span class="text-sm font-semibold text-slate-600">Bank Transfer</span></label>
-            <label class="relative border border-slate-200 rounded-xl p-4 cursor-pointer flex sm:flex-col items-center gap-2 text-center hover:bg-slate-50"><input class="peer sr-only" name="payment_method" type="radio" value="wallet"/><span class="material-symbols-outlined text-slate-500 text-2xl">account_balance_wallet</span><span class="text-sm font-semibold text-slate-600">Mobile Wallet</span></label>
+  <div th:if="${paymentSummary != null}">
+    <div class="mb-5"><p class="text-xs font-bold text-sky-700 uppercase tracking-wide">Step 1 of 2</p><h1 class="text-2xl font-extrabold mt-1">Complete payment</h1><p class="text-sm text-slate-500 mt-1">Payment is required before selecting a biometric appointment.</p></div>
+    <div th:if="${paymentError}" class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-semibold text-red-700" th:text="${paymentError}"></div>
+
+    <div class="grid lg:grid-cols-[1fr_330px] gap-5 items-start">
+      <section class="bg-white border rounded-2xl shadow-sm p-5 sm:p-6">
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3"><span class="material-symbols-outlined text-amber-700">science</span><div><p class="font-bold text-amber-900 text-sm">Simulated government payment</p><p class="text-xs text-amber-800 mt-1">No real card is charged and card details are not saved. This records a successful project payment in SQL Server.</p></div></div>
+
+        <div th:if="${paymentSummary.paid()}" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-5"><p class="font-bold text-emerald-800 flex items-center gap-2"><span class="material-symbols-outlined">check_circle</span>Payment already confirmed</p><p class="text-sm text-emerald-700 mt-2">Transaction: <span class="font-mono" th:text="${paymentSummary.payment.transactionReference}">PAY-REF</span></p><a th:href="@{/citizen/appointments/biometric(applicationId=${paymentSummary.application.applicationId})}" class="inline-flex mt-4 bg-emerald-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Select appointment</a></div>
+
+        <form th:unless="${paymentSummary.paid()}" th:action="@{/citizen/payment}" method="post" class="mt-5">
+          <input type="hidden" name="applicationId" th:value="${paymentSummary.application.applicationId}"/>
+          <h2 class="font-bold">Card details for simulation</h2>
+          <div class="grid sm:grid-cols-2 gap-4 mt-4">
+            <label class="sm:col-span-2 text-sm font-semibold">Cardholder name<input required autocomplete="off" class="w-full mt-1.5 rounded-xl border-slate-300" placeholder="Citizen name"/></label>
+            <label class="sm:col-span-2 text-sm font-semibold">Card number<input required inputmode="numeric" pattern="[0-9 ]{16,19}" autocomplete="off" class="w-full mt-1.5 rounded-xl border-slate-300 font-mono" placeholder="4111 1111 1111 1111"/></label>
+            <label class="text-sm font-semibold">Expiry<input required pattern="(0[1-9]|1[0-2])/[0-9]{2}" autocomplete="off" class="w-full mt-1.5 rounded-xl border-slate-300" placeholder="MM/YY"/></label>
+            <label class="text-sm font-semibold">CVV<input required inputmode="numeric" pattern="[0-9]{3,4}" type="password" autocomplete="off" class="w-full mt-1.5 rounded-xl border-slate-300" placeholder="123"/></label>
           </div>
-        </fieldset>
+          <button type="submit" class="w-full mt-6 bg-sky-600 hover:bg-sky-700 text-white rounded-xl py-3 font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined">payments</span>Simulate payment &amp; continue</button>
+        </form>
+      </section>
 
-        <div class="mt-6 pt-5 border-t border-slate-100">
-          <div class="flex items-center justify-between mb-4"><h2 class="text-sm font-bold text-slate-900">Card Details</h2><span class="flex items-center gap-1 text-xs text-slate-500"><span class="material-symbols-outlined text-sm text-emerald-600">lock</span>Secure Encrypted Payment</span></div>
-          <div class="space-y-4">
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="cardName">Cardholder Name</label><input class="w-full h-12 border border-slate-300 rounded-xl px-4 bg-white focus:border-sky-500 focus:ring-sky-500" id="cardName" placeholder="e.g. Jane Doe" type="text"/></div>
-            <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="cardNumber">Card Number</label><div class="relative"><input class="w-full h-12 border border-slate-300 rounded-xl pl-4 pr-11 bg-white focus:border-sky-500 focus:ring-sky-500 tracking-widest font-mono" id="cardNumber" placeholder="0000 0000 0000 0000" type="text"/><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">credit_card</span></div></div>
-            <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="expiry">Expiry Date</label><input class="w-full h-12 border border-slate-300 rounded-xl px-4 bg-white focus:border-sky-500 focus:ring-sky-500 text-center font-mono" id="expiry" placeholder="MM/YY" type="text"/></div>
-              <div><label class="block text-sm font-semibold text-slate-700 mb-1.5" for="cvv">CVV</label><div class="relative"><input class="w-full h-12 border border-slate-300 rounded-xl px-4 pr-10 bg-white focus:border-sky-500 focus:ring-sky-500 text-center font-mono" id="cvv" maxlength="4" placeholder="***" type="password"/><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">info</span></div></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col-reverse sm:flex-row gap-3">
-          <button class="h-12 px-5 border border-slate-300 bg-white text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 flex items-center justify-center gap-2" onclick="history.back()"><span class="material-symbols-outlined text-base">arrow_back</span>Back</button>
-          <button class="h-12 px-6 bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold rounded-xl flex-1 flex justify-center items-center gap-2" onclick="alert('Demo payment successful. Application submitted with reference LK-APP-2026-00214.'); window.location.href='/citizen/applications';"><span class="material-symbols-outlined text-base">lock</span>Pay & Submit</button>
-        </div>
-      </div>
-    </section>
-
-    <aside class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 lg:sticky lg:top-24">
-      <h3 class="font-bold text-slate-900 pb-4 border-b border-slate-100">Order Summary</h3>
-      <div class="py-4 border-b border-slate-100"><div class="flex justify-between gap-4"><div><p class="text-sm font-semibold text-slate-900">Passport Renewal (10 Year)</p><p class="text-xs text-slate-500 mt-1">Application ID: #APP-2023-8942</p></div><span class="text-sm font-bold text-slate-900">$150.00</span></div></div>
-      <dl class="py-4 space-y-3 text-sm"><div class="flex justify-between"><dt class="text-slate-500">Processing Fee</dt><dd class="font-semibold text-slate-700">$0.00</dd></div><div class="flex justify-between pt-3 border-t border-slate-100"><dt class="font-bold text-slate-900">Total Amount</dt><dd class="text-lg font-bold text-sky-700">$150.00</dd></div></dl>
-      <div class="rounded-xl bg-sky-50 border border-sky-200 p-4 flex gap-3"><span class="material-symbols-outlined text-sky-600">verified_user</span><p class="text-xs leading-5 text-sky-800">Payments are processed securely through the Government Secure Payment Gateway. Your details are encrypted (SSL/TLS 256-bit) and never stored on our servers.</p></div>
-    </aside>
+      <aside class="bg-white border rounded-2xl shadow-sm p-5">
+        <h2 class="font-bold">Payment summary</h2>
+        <dl class="mt-4 text-sm space-y-3"><div><dt class="text-xs text-slate-400">Application</dt><dd class="font-mono font-semibold mt-1" th:text="${paymentSummary.application.applicationNo}">APP</dd></div><div><dt class="text-xs text-slate-400">Service</dt><dd class="font-semibold mt-1" th:text="${paymentSummary.application.serviceType + ' ' + #strings.toLowerCase(paymentSummary.application.applicationKind)}">NIC</dd></div><div class="border-t pt-4 flex justify-between"><dt class="font-bold">Total</dt><dd class="text-xl font-extrabold text-sky-700" th:text="${'LKR ' + #numbers.formatDecimal(paymentSummary.amount, 1, 2)}">LKR 2,000.00</dd></div></dl>
+        <p class="mt-4 text-xs text-slate-500 leading-5">NIC fee: LKR 2,000.00<br/>Passport fee: LKR 10,000.00</p>
+      </aside>
+    </div>
   </div>
 </main>
 </body>

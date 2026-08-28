@@ -144,7 +144,7 @@ public class NicVerificationController {
                 verificationReviewService.reject(reference, "NIC", staffId);
                 redirectAttributes.addFlashAttribute("verificationMessage", "Application rejected.");
             } else {
-                verificationReviewService.requestCorrection(reference, "NIC", correctForm, documentIds);
+                verificationReviewService.requestCorrection(reference, "NIC", correctForm, documentIds, staffId);
                 redirectAttributes.addFlashAttribute("verificationMessage", "Correction requested from the citizen.");
             }
             return "redirect:/officer/nic/applications";

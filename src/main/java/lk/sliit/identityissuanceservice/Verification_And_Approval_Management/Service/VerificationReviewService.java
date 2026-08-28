@@ -6,12 +6,15 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.ApplicationDocumentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Dto.VerificationDocumentFile;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Dto.VerificationReviewDetails;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Model.ApplicationReview;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.ApplicationReviewRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.VerificationApplicationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -37,6 +40,8 @@ public class VerificationReviewService {
     private final UserAccountRepository userRepository;
     private final NicApplicationRepository nicRepository;
     private final PassportApplicationRepository passportRepository;
+    private final ApplicationReviewRepository reviewRepository;
+    private final NotificationService notificationService;
     private final Path uploadRoot;
 
     public VerificationReviewService(
@@ -46,6 +51,8 @@ public class VerificationReviewService {
             UserAccountRepository userRepository,
             NicApplicationRepository nicRepository,
             PassportApplicationRepository passportRepository,
+            ApplicationReviewRepository reviewRepository,
+            NotificationService notificationService,
             @Value("${app.upload.directory:uploads}") String uploadDirectory
     ) {
         this.applicationRepository = applicationRepository;
@@ -54,6 +61,8 @@ public class VerificationReviewService {
         this.userRepository = userRepository;
         this.nicRepository = nicRepository;
         this.passportRepository = passportRepository;
+        this.reviewRepository = reviewRepository;
+        this.notificationService = notificationService;
         this.uploadRoot = Path.of(uploadDirectory).toAbsolutePath().normalize();
     }
 
@@ -64,7 +73,15 @@ public class VerificationReviewService {
 
         if ("SUBMITTED".equals(status) || "RESUBMITTED".equals(status)) {
             application.setCurrentStatus("UNDER_REVIEW");
-            return applicationRepository.save(application);
+            application = applicationRepository.save(application);
+            notificationService.sendToCitizen(
+                    application.getCitizenId(),
+                    null,
+                    "APPLICATION_UNDER_REVIEW",
+                    application.getServiceType() + " application " + application.getApplicationNo()
+                            + " is now being reviewed by an application officer."
+            );
+            return application;
         }
         if ("UNDER_REVIEW".equals(status) || "CORRECTION_REQUIRED".equals(status)) {
             return application;
@@ -108,6 +125,15 @@ public class VerificationReviewService {
 
         application.setCurrentStatus("APPROVED");
         applicationRepository.save(application);
+        saveReview(application, staffId, "APPROVED", null);
+        String fee = NIC.equals(serviceType) ? "2,000" : "10,000";
+        notificationService.sendToCitizen(
+                application.getCitizenId(),
+                staffId,
+                "APPLICATION_APPROVED",
+                serviceType + " application " + application.getApplicationNo()
+                        + " was approved. Pay LKR " + fee + " to book biometric collection."
+        );
     }
 
     @Transactional
@@ -126,6 +152,13 @@ public class VerificationReviewService {
 
         application.setCurrentStatus("REJECTED");
         applicationRepository.save(application);
+        saveReview(application, staffId, "REJECTED", null);
+        notificationService.sendToCitizen(
+                application.getCitizenId(),
+                staffId,
+                "APPLICATION_REJECTED",
+                serviceType + " application " + application.getApplicationNo() + " was rejected."
+        );
     }
 
     @Transactional
@@ -133,7 +166,8 @@ public class VerificationReviewService {
             String reference,
             String serviceType,
             boolean correctForm,
-            List<Integer> documentIds
+            List<Integer> documentIds,
+            Integer staffId
     ) {
         CitizenApplication application = findApplicationUnderReview(reference, serviceType);
         List<Integer> selectedDocumentIds = documentIds == null ? List.of() : documentIds;
@@ -155,6 +189,40 @@ public class VerificationReviewService {
 
         application.setCurrentStatus("CORRECTION_REQUIRED");
         applicationRepository.save(application);
+
+        List<String> requestedItems = new java.util.ArrayList<>();
+        if (correctForm) requestedItems.add("application form");
+        documents.stream()
+                .filter(document -> selectedDocumentIds.contains(document.getDocumentId()))
+                .map(ApplicationDocument::getDocumentType)
+                .forEach(requestedItems::add);
+        String correctionMessage = "Correct: " + String.join(", ", requestedItems);
+        saveReview(application, staffId, "CORRECTION_REQUIRED", correctionMessage);
+        notificationService.sendToCitizen(
+                application.getCitizenId(),
+                staffId,
+                "CORRECTION_REQUIRED",
+                "Corrections are required for " + application.getApplicationNo() + ": "
+                        + String.join(", ", requestedItems) + ". Update and resubmit the same application."
+        );
+    }
+
+    private void saveReview(
+            CitizenApplication application,
+            Integer staffId,
+            String decision,
+            String correctionMessage
+    ) {
+        ApplicationReview review = new ApplicationReview();
+        review.setApplicationId(application.getApplicationId());
+        review.setStaffId(staffId);
+        review.setReviewSequence(reviewRepository
+                .findTopByApplicationIdOrderByReviewSequenceDesc(application.getApplicationId())
+                .map(previous -> previous.getReviewSequence() + 1)
+                .orElse(1));
+        review.setDecision(decision);
+        review.setCorrectionMessage(correctionMessage);
+        reviewRepository.save(review);
     }
 
     @Transactional(readOnly = true)

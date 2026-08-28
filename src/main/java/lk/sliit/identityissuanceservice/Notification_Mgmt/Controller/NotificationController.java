@@ -1,18 +1,55 @@
 package lk.sliit.identityissuanceservice.Notification_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.CitizenNotificationDto;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.List;
 
 @Controller
 public class NotificationController {
 
-    @GetMapping("/citizen/notifications")
-    public String citizenNotifications(HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
+    private final NotificationService notificationService;
 
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+
+    @GetMapping("/citizen/notifications")
+    public String citizenNotifications(HttpSession session, Model model) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+
+        List<CitizenNotificationDto> notifications = notificationService.getCitizenNotifications(citizenId);
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("unreadCount", notifications.stream().filter(item -> !item.read()).count());
         return "citizen_frontends/citizen_notifications";
+    }
+
+    @PostMapping("/citizen/notifications/{notificationId}/read")
+    public String markNotificationRead(@PathVariable Integer notificationId, HttpSession session) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+        notificationService.markAsRead(citizenId, notificationId);
+        return "redirect:/citizen/notifications";
+    }
+
+    @PostMapping("/citizen/notifications/read-all")
+    public String markAllNotificationsRead(HttpSession session) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+        notificationService.markAllAsRead(citizenId);
+        return "redirect:/citizen/notifications";
+    }
+
+    private Integer loggedInCitizenId(HttpSession session) {
+        Object userId = session.getAttribute("loggedInUserId");
+        Object role = session.getAttribute("loggedInUserRole");
+        return userId instanceof Integer id && "CITIZEN".equals(role) ? id : null;
     }
 }
