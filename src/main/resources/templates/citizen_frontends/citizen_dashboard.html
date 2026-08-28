@@ -77,7 +77,7 @@
         </div>
         <div class="flex items-center gap-3">
           <span class="text-xs bg-slate-100 text-slate-700 rounded-full px-3 py-1 font-bold" th:text="${#strings.replace(application.currentStatus, '_', ' ')}">DRAFT</span>
-          <a th:if="${application.currentStatus == 'DRAFT'}" th:href="@{/citizen/applications/{service}/documents(service=${#strings.toLowerCase(application.serviceType)},applicationId=${application.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
+          <a th:if="${application.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${application.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(application.serviceType)},applicationId=${application.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
         </div>
       </article>
     </div>

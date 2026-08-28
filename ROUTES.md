@@ -5,9 +5,9 @@ The project uses Spring MVC controllers, `HttpSession`, services and Spring Data
 ## How a route works
 
 ```java
-@GetMapping("/citizen/applications/nic/{formKind:new|renewal|replacement}")
-public String nicApplicationForm(@PathVariable String formKind, ...) {
-    // The service checks document ownership before returning the shared form.
+@GetMapping("/citizen/applications/nic/new")
+public String newNicForm(...) {
+    // Citizen Application Management handles only first-time applications.
     return "citizen_frontends/nic_application_form";
 }
 ```
@@ -28,15 +28,18 @@ public String nicApplicationForm(@PathVariable String formKind, ...) {
 | `/citizen/dashboard` | Eligibility and citizen application dashboard | Citizen Application Management |
 | `/citizen/applications` | Application tracking | Citizen Application Management |
 | `/citizen/applications/nic/new` | New NIC form | Citizen Application Management |
-| `/citizen/applications/nic/renewal` | NIC renewal form | Citizen Application Management |
-| `/citizen/applications/nic/replacement` | Lost NIC form | Citizen Application Management |
+| `/citizen/applications/nic/renewal` | NIC renewal form | Document Renewal and Replacement Management |
+| `/citizen/applications/nic/replacement` | Lost NIC form | Document Renewal and Replacement Management |
 | `/citizen/applications/passport/new` | New Passport form | Citizen Application Management |
-| `/citizen/applications/passport/renewal` | Passport renewal form | Citizen Application Management |
-| `/citizen/applications/passport/replacement` | Lost Passport form | Citizen Application Management |
+| `/citizen/applications/passport/renewal` | Passport renewal form | Document Renewal and Replacement Management |
+| `/citizen/applications/passport/replacement` | Lost Passport form | Document Renewal and Replacement Management |
 | `/citizen/applications/nic/documents?applicationId={id}` | NIC document upload | Citizen Application Management |
 | `/citizen/applications/passport/documents?applicationId={id}` | Passport document upload | Citizen Application Management |
 | `/citizen/applications/nic/review?applicationId={id}` | Citizen NIC review | Citizen Application Management |
 | `/citizen/applications/passport/review?applicationId={id}` | Citizen Passport review | Citizen Application Management |
+| `/citizen/renewals/nic/documents?applicationId={id}` | NIC renewal/lost document upload | Document Renewal and Replacement Management |
+| `/citizen/renewals/passport/documents?applicationId={id}` | Passport renewal/lost document upload | Document Renewal and Replacement Management |
+| `/citizen/renewals/{service}/review?applicationId={id}` | Renewal/lost final review | Document Renewal and Replacement Management |
 | `/citizen/payment` | Demonstration payment | Payment Management |
 | `/citizen/notifications` | Citizen notifications | Notification Management |
 | `/citizen/appointments/biometric` | Biometric appointment booking | Biometric and Appointment Management |
@@ -79,11 +82,14 @@ The dashboard has no demo-state parameter. It matches the logged-in citizen's em
 
 ## Citizen application save flow
 
-1. `CitizenApplicationController` checks the citizen's `HttpSession`.
-2. `CitizenApplicationService` checks email and phone eligibility.
-3. The common citizen details are saved in `CitizenAccount`.
-4. A base row is saved in `Application`, followed by its `NICApplication` or `PassportApplication` row.
-5. Uploaded files are stored in the local `uploads` folder, while `ApplicationDocument` stores only the relative file path.
-6. The application stays `DRAFT` until all required document types exist, then submission changes it to `SUBMITTED`.
+1. `CitizenApplicationController` and `CitizenApplicationService` handle only `NEW` NIC/passport applications.
+2. `DocumentRenewalReplacementController` and `DocumentRenewalReplacementService` handle only `RENEWAL` and `LOST` requests.
+3. Both workflows check the citizen's `HttpSession` and email/phone eligibility.
+4. The common citizen details are saved in `CitizenAccount`.
+5. A base row is saved in `Application`, followed by its `NICApplication` or `PassportApplication` row.
+6. Uploaded files are stored in the local `uploads` folder, while `ApplicationDocument` stores only the relative file path.
+7. A request stays `DRAFT` until all required documents exist, then submission changes it to `SUBMITTED`.
+
+The JPA models and repositories are shared because both workflows save to the same existing database tables. No duplicate entity or table is created.
 
 The QR, biometric, payment and some officer review screens remain separate later workflow stages.

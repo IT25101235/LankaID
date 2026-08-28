@@ -3,8 +3,8 @@ package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NicApplicationForm;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.PassportApplicationForm;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewPassportApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import org.springframework.stereotype.Controller;
@@ -30,9 +30,7 @@ public class CitizenApplicationController {
     @GetMapping("/citizen/dashboard")
     public String citizenDashboard(HttpSession session, Model model) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         CitizenEligibilityDto eligibility = applicationService.getEligibility(citizenId);
         model.addAttribute("loggedInUserEmail", session.getAttribute("loggedInUserEmail"));
@@ -45,20 +43,17 @@ public class CitizenApplicationController {
         return "citizen_frontends/citizen_dashboard";
     }
 
-    @GetMapping("/citizen/applications/nic/{formKind:new|renewal|replacement}")
-    public String nicApplicationForm(
-            @PathVariable String formKind,
+    @GetMapping("/citizen/applications/nic/new")
+    public String newNicForm(
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         try {
-            model.addAttribute("applicationForm", applicationService.prepareNicForm(citizenId, formKind));
-            addNicFormData(model, citizenId, formKind);
+            model.addAttribute("applicationForm", applicationService.prepareNewNicForm(citizenId));
+            addNewFormData(model, "NIC");
             return "citizen_frontends/nic_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -66,52 +61,41 @@ public class CitizenApplicationController {
         }
     }
 
-    @PostMapping("/citizen/applications/nic/{formKind:new|renewal|replacement}")
-    public String saveNicApplication(
-            @PathVariable String formKind,
-            @Valid @ModelAttribute("applicationForm") NicApplicationForm applicationForm,
+    @PostMapping("/citizen/applications/nic/new")
+    public String saveNewNic(
+            @Valid @ModelAttribute("applicationForm") NewNicApplicationForm form,
             BindingResult bindingResult,
             HttpSession session,
             Model model) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
-
+        if (citizenId == null) return "redirect:/login";
         if (bindingResult.hasErrors()) {
-            addNicFormData(model, citizenId, formKind);
+            addNewFormData(model, "NIC");
             return "citizen_frontends/nic_application_form";
         }
 
         try {
-            CitizenApplication application = applicationService.createNicApplication(
-                    citizenId,
-                    formKind,
-                    applicationForm
-            );
+            CitizenApplication application = applicationService.createNewNicApplication(citizenId, form);
             return "redirect:/citizen/applications/nic/documents?applicationId="
                     + application.getApplicationId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
-            addNicFormData(model, citizenId, formKind);
+            addNewFormData(model, "NIC");
             return "citizen_frontends/nic_application_form";
         }
     }
 
-    @GetMapping("/citizen/applications/passport/{formKind:new|renewal|replacement}")
-    public String passportApplicationForm(
-            @PathVariable String formKind,
+    @GetMapping("/citizen/applications/passport/new")
+    public String newPassportForm(
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         try {
-            model.addAttribute("applicationForm", applicationService.preparePassportForm(citizenId, formKind));
-            addPassportFormData(model, citizenId, formKind);
+            model.addAttribute("applicationForm", applicationService.prepareNewPassportForm(citizenId));
+            addNewFormData(model, "Passport");
             return "citizen_frontends/passport_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -119,52 +103,42 @@ public class CitizenApplicationController {
         }
     }
 
-    @PostMapping("/citizen/applications/passport/{formKind:new|renewal|replacement}")
-    public String savePassportApplication(
-            @PathVariable String formKind,
-            @Valid @ModelAttribute("applicationForm") PassportApplicationForm applicationForm,
+    @PostMapping("/citizen/applications/passport/new")
+    public String saveNewPassport(
+            @Valid @ModelAttribute("applicationForm") NewPassportApplicationForm form,
             BindingResult bindingResult,
             HttpSession session,
             Model model) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
-
+        if (citizenId == null) return "redirect:/login";
         if (bindingResult.hasErrors()) {
-            addPassportFormData(model, citizenId, formKind);
+            addNewFormData(model, "Passport");
             return "citizen_frontends/passport_application_form";
         }
 
         try {
-            CitizenApplication application = applicationService.createPassportApplication(
-                    citizenId,
-                    formKind,
-                    applicationForm
-            );
+            CitizenApplication application = applicationService.createNewPassportApplication(citizenId, form);
             return "redirect:/citizen/applications/passport/documents?applicationId="
                     + application.getApplicationId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
-            addPassportFormData(model, citizenId, formKind);
+            addNewFormData(model, "Passport");
             return "citizen_frontends/passport_application_form";
         }
     }
 
     @GetMapping("/citizen/applications/{service:nic|passport}/documents")
-    public String documentUploadPage(
+    public String newDocumentPage(
             @PathVariable String service,
             @RequestParam Integer applicationId,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         try {
-            addDocumentPageData(model, citizenId, applicationId, service);
+            addNewDocumentData(model, citizenId, applicationId, service);
             return "citizen_frontends/application_document_upload";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -173,7 +147,7 @@ public class CitizenApplicationController {
     }
 
     @PostMapping("/citizen/applications/{service:nic|passport}/documents")
-    public String uploadDocument(
+    public String uploadNewDocument(
             @PathVariable String service,
             @RequestParam Integer applicationId,
             @RequestParam String documentType,
@@ -181,39 +155,36 @@ public class CitizenApplicationController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         try {
-            checkService(applicationService.getApplication(citizenId, applicationId), service);
-            applicationService.uploadDocument(citizenId, applicationId, documentType, file);
+            checkService(applicationService.getNewApplication(citizenId, applicationId), service);
+            applicationService.uploadNewDocument(citizenId, applicationId, documentType, file);
             redirectAttributes.addFlashAttribute("documentMessage", "Document uploaded successfully.");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("documentError", exception.getMessage());
         }
-        return "redirect:/citizen/applications/" + service + "/documents?applicationId=" + applicationId;
+        return newDocumentRedirect(service, applicationId);
     }
 
     @GetMapping("/citizen/applications/{service:nic|passport}/review")
-    public String reviewApplication(
+    public String reviewNewApplication(
             @PathVariable String service,
             @RequestParam Integer applicationId,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         try {
-            CitizenApplication application = applicationService.getApplication(citizenId, applicationId);
+            CitizenApplication application = applicationService.getNewApplication(citizenId, applicationId);
             checkService(application, service);
-            model.addAttribute("application", application);
-            model.addAttribute("documents", applicationService.getDocuments(citizenId, applicationId));
-            model.addAttribute("requiredTypes", applicationService.requiredDocumentTypes(application));
+            model.addAttribute("currentApplication", application);
+            model.addAttribute("documents", applicationService.getNewDocuments(citizenId, applicationId));
+            model.addAttribute("requiredTypes", applicationService.requiredNewDocumentTypes(application));
             model.addAttribute("servicePath", service);
+            model.addAttribute("workflowPath", "applications");
             applicationService.getNicApplication(applicationId)
                     .ifPresent(value -> model.addAttribute("nicApplication", value));
             applicationService.getPassportApplication(applicationId)
@@ -226,19 +197,17 @@ public class CitizenApplicationController {
     }
 
     @PostMapping("/citizen/applications/{service:nic|passport}/submit")
-    public String submitApplication(
+    public String submitNewApplication(
             @PathVariable String service,
             @RequestParam Integer applicationId,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
-        if (citizenId == null) {
-            return "redirect:/login";
-        }
+        if (citizenId == null) return "redirect:/login";
 
         try {
-            checkService(applicationService.getApplication(citizenId, applicationId), service);
-            CitizenApplication application = applicationService.submitApplication(citizenId, applicationId);
+            checkService(applicationService.getNewApplication(citizenId, applicationId), service);
+            CitizenApplication application = applicationService.submitNewApplication(citizenId, applicationId);
             redirectAttributes.addFlashAttribute(
                     "applicationMessage",
                     "Application " + application.getApplicationNo() + " submitted successfully."
@@ -246,33 +215,29 @@ public class CitizenApplicationController {
             return "redirect:/citizen/dashboard";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("documentError", exception.getMessage());
-            return "redirect:/citizen/applications/" + service + "/documents?applicationId=" + applicationId;
+            return newDocumentRedirect(service, applicationId);
         }
     }
 
-    private void addNicFormData(Model model, Integer citizenId, String formKind) {
-        CitizenEligibilityDto eligibility = applicationService.getEligibility(citizenId);
-        model.addAttribute("formKind", formKind);
-        model.addAttribute("applicationKind", applicationKind(formKind));
-        model.addAttribute("pageTitle", title("NIC", formKind));
-        model.addAttribute("existingDocumentNo", eligibility.getNicNumber());
+    private void addNewFormData(Model model, String service) {
+        model.addAttribute("formKind", "new");
+        model.addAttribute("applicationKind", "NEW");
+        model.addAttribute("pageTitle", "New " + service + " Application");
+        model.addAttribute("existingDocumentNo", null);
     }
 
-    private void addPassportFormData(Model model, Integer citizenId, String formKind) {
-        CitizenEligibilityDto eligibility = applicationService.getEligibility(citizenId);
-        model.addAttribute("formKind", formKind);
-        model.addAttribute("applicationKind", applicationKind(formKind));
-        model.addAttribute("pageTitle", title("Passport", formKind));
-        model.addAttribute("existingDocumentNo", eligibility.getPassportNumber());
-    }
-
-    private void addDocumentPageData(Model model, Integer citizenId, Integer applicationId, String service) {
-        CitizenApplication application = applicationService.getApplication(citizenId, applicationId);
+    private void addNewDocumentData(
+            Model model,
+            Integer citizenId,
+            Integer applicationId,
+            String service) {
+        CitizenApplication application = applicationService.getNewApplication(citizenId, applicationId);
         checkService(application, service);
-        model.addAttribute("application", application);
-        model.addAttribute("documents", applicationService.getDocuments(citizenId, applicationId));
-        model.addAttribute("requiredTypes", applicationService.requiredDocumentTypes(application));
+        model.addAttribute("currentApplication", application);
+        model.addAttribute("documents", applicationService.getNewDocuments(citizenId, applicationId));
+        model.addAttribute("requiredTypes", applicationService.requiredNewDocumentTypes(application));
         model.addAttribute("servicePath", service);
+        model.addAttribute("workflowPath", "applications");
     }
 
     private void checkService(CitizenApplication application, String servicePath) {
@@ -281,22 +246,9 @@ public class CitizenApplicationController {
         }
     }
 
-    private String applicationKind(String formKind) {
-        return switch (formKind) {
-            case "new" -> "NEW";
-            case "renewal" -> "RENEWAL";
-            case "replacement" -> "LOST";
-            default -> throw new IllegalArgumentException("Invalid application type.");
-        };
-    }
-
-    private String title(String service, String formKind) {
-        return switch (formKind) {
-            case "new" -> "New " + service + " Application";
-            case "renewal" -> service + " Renewal Application";
-            case "replacement" -> "Lost " + service + " Replacement";
-            default -> service + " Application";
-        };
+    private String newDocumentRedirect(String service, Integer applicationId) {
+        return "redirect:/citizen/applications/" + service
+                + "/documents?applicationId=" + applicationId;
     }
 
     private Integer loggedInCitizenId(HttpSession session) {

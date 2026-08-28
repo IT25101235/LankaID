@@ -2,7 +2,7 @@ package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller.CitizenApplicationController;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NicApplicationForm;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,9 +61,7 @@ class CitizenApplicationControllerTests {
     @Test
     void eligibleCitizenCanOpenNewNicForm() throws Exception {
         MockHttpSession session = citizenSession();
-        when(applicationService.prepareNicForm(25, "new")).thenReturn(new NicApplicationForm());
-        when(applicationService.getEligibility(25))
-                .thenReturn(new CitizenEligibilityDto(false, false, false, null, null));
+        when(applicationService.prepareNewNicForm(25)).thenReturn(new NewNicApplicationForm());
 
         mockMvc.perform(get("/citizen/applications/nic/new").session(session))
                 .andExpect(status().isOk())
@@ -74,7 +72,7 @@ class CitizenApplicationControllerTests {
     @Test
     void directNewNicUrlIsBlockedWhenCitizenAlreadyHasNic() throws Exception {
         MockHttpSession session = citizenSession();
-        when(applicationService.prepareNicForm(25, "new"))
+        when(applicationService.prepareNewNicForm(25))
                 .thenThrow(new IllegalArgumentException("You already have this identity document."));
 
         mockMvc.perform(get("/citizen/applications/nic/new").session(session))
