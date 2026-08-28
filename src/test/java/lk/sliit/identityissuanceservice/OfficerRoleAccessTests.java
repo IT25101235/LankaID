@@ -8,6 +8,7 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Control
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.NicVerificationController;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.PassportVerificationController;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Service.VerificationQueueService;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Service.VerificationReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
@@ -28,12 +29,13 @@ class OfficerRoleAccessTests {
     @BeforeEach
     void setUp() {
         VerificationQueueService verificationQueueService = mock(VerificationQueueService.class);
+        VerificationReviewService verificationReviewService = mock(VerificationReviewService.class);
         when(verificationQueueService.getNicQueue()).thenReturn(java.util.List.of());
         when(verificationQueueService.getPassportQueue()).thenReturn(java.util.List.of());
 
         mockMvc = standaloneSetup(
-                new NicVerificationController(verificationQueueService),
-                new PassportVerificationController(verificationQueueService),
+                new NicVerificationController(verificationQueueService, verificationReviewService),
+                new PassportVerificationController(verificationQueueService, verificationReviewService),
                 new BiometricController(),
                 new AppointmentController(),
                 new CitizenSupportController(),

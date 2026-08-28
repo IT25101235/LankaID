@@ -78,6 +78,8 @@
         <div class="flex items-center gap-3">
           <span class="text-xs bg-slate-100 text-slate-700 rounded-full px-3 py-1 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
           <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
+          <a th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" th:href="@{/citizen/{workflow}/{service}/correction(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-amber-700">Correct form</a>
+          <a th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Documents</a>
         </div>
       </article>
     </div>

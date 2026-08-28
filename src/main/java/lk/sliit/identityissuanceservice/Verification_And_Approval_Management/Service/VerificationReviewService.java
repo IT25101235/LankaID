@@ -146,7 +146,7 @@ public class VerificationReviewService {
                 .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId());
         for (ApplicationDocument document : documents) {
             if (selectedDocumentIds.contains(document.getDocumentId())) {
-                document.setVerificationStatus("CORRECTION_REQUIRED");
+                document.setVerificationStatus("REJECTED");
                 document.setVerifiedByStaffId(null);
                 document.setVerifiedAt(null);
             }

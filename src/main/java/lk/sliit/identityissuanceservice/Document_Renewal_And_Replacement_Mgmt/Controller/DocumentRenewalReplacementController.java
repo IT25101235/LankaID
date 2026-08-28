@@ -212,6 +212,7 @@ public class DocumentRenewalReplacementController {
             model.addAttribute("requiredTypes", renewalService.requiredDocumentTypes(application));
             model.addAttribute("servicePath", service);
             model.addAttribute("workflowPath", "renewals");
+            model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
             renewalService.getNicRequest(applicationId)
                     .ifPresent(value -> model.addAttribute("nicApplication", value));
             renewalService.getPassportRequest(applicationId)

@@ -245,6 +245,7 @@ public class CitizenApplicationController {
             model.addAttribute("requiredTypes", applicationService.requiredNewDocumentTypes(application));
             model.addAttribute("servicePath", service);
             model.addAttribute("workflowPath", "applications");
+            model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
             applicationService.getNicApplication(applicationId)
                     .ifPresent(value -> model.addAttribute("nicApplication", value));
             applicationService.getPassportApplication(applicationId)

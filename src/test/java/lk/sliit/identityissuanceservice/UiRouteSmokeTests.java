@@ -70,7 +70,10 @@ class UiRouteSmokeTests {
                 request.sessionAttr("loggedInOfficerRole", "DIRECTOR");
             }
 
-            if (route.equals("/officer/admin/citizens")
+            if (route.equals("/officer/nic/applications/NIC-2023-8891")
+                    || route.equals("/officer/passport/applications/PP-2023-8891")) {
+                mockMvc.perform(request).andExpect(status().is3xxRedirection());
+            } else if (route.equals("/officer/admin/citizens")
                     || route.equals("/officer/admin/notifications")) {
                 mockMvc.perform(request).andExpect(status().is3xxRedirection());
             } else {
