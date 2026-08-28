@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,9 @@ public class AppointmentController {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
         }
+        if (!canAccess(session, OfficerAccountService.NIC_OFFICER)) {
+            return "redirect:/login";
+        }
 
         addAppointmentPageData(model, "NIC", "/officer/nic/applications", "/officer/nic/biometrics");
         return "officers_frontends/officer_appointments";
@@ -40,6 +44,9 @@ public class AppointmentController {
     public String passportAppointments(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
+        }
+        if (!canAccess(session, OfficerAccountService.PASSPORT_OFFICER)) {
+            return "redirect:/login";
         }
 
         addAppointmentPageData(model, "Passport", "/officer/passport/applications", "/officer/passport/biometrics");
@@ -51,6 +58,9 @@ public class AppointmentController {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
         }
+        if (!canAccess(session, OfficerAccountService.CSR)) {
+            return "redirect:/login";
+        }
 
         return "officers_frontends/walkin_management";
     }
@@ -60,6 +70,9 @@ public class AppointmentController {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
         }
+        if (!canAccess(session, OfficerAccountService.CSR)) {
+            return "redirect:/login";
+        }
 
         return "officers_frontends/csr_walkin_booking";
     }
@@ -68,5 +81,10 @@ public class AppointmentController {
         model.addAttribute("documentType", documentType);
         model.addAttribute("queueRoute", queueRoute);
         model.addAttribute("biometricRoute", biometricRoute);
+    }
+
+    private boolean canAccess(HttpSession session, String requiredRole) {
+        Object role = session.getAttribute("loggedInOfficerRole");
+        return requiredRole.equals(role) || OfficerAccountService.DIRECTOR.equals(role);
     }
 }

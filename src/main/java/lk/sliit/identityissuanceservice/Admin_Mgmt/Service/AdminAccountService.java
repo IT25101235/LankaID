@@ -1,7 +1,7 @@
 package lk.sliit.identityissuanceservice.Admin_Mgmt.Service;
 
-import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.AdminAccount;
-import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.AdminAccountRepository;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.StaffAccount;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.StaffAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,14 +21,14 @@ public class AdminAccountService {
     private static final String ADMIN_ROLE = "SYSTEM_ADMIN";
 
     private final UserAccountRepository userAccountRepository;
-    private final AdminAccountRepository adminAccountRepository;
+    private final StaffAccountRepository staffAccountRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public AdminAccountService(
             UserAccountRepository userAccountRepository,
-            AdminAccountRepository adminAccountRepository) {
+            StaffAccountRepository staffAccountRepository) {
         this.userAccountRepository = userAccountRepository;
-        this.adminAccountRepository = adminAccountRepository;
+        this.staffAccountRepository = staffAccountRepository;
     }
 
     @Transactional
@@ -45,14 +45,14 @@ public class AdminAccountService {
         adminUser.setPhoneVerified("Y");
         userAccountRepository.save(adminUser);
 
-        AdminAccount adminAccount = adminAccountRepository
+        StaffAccount adminAccount = staffAccountRepository
                 .findById(adminUser.getUserId())
-                .orElseGet(() -> new AdminAccount(adminUser.getUserId(), ADMIN_EMPLOYEE_NO));
+                .orElseGet(() -> new StaffAccount(adminUser.getUserId(), ADMIN_EMPLOYEE_NO));
 
         adminAccount.setEmployeeNo(ADMIN_EMPLOYEE_NO);
         adminAccount.setStaffRole(ADMIN_ROLE);
         adminAccount.setStaffStatus("ACTIVE");
-        adminAccountRepository.save(adminAccount);
+        staffAccountRepository.save(adminAccount);
     }
 
     public Optional<UserAccount> authenticateAdmin(String email, String password) {
@@ -60,7 +60,7 @@ public class AdminAccountService {
 
         return userAccountRepository
                 .findByEmailIgnoreCaseAndAccountStatus(normalizedEmail, "ACTIVE")
-                .filter(user -> adminAccountRepository.existsByUserIdAndStaffRoleAndStaffStatus(
+                .filter(user -> staffAccountRepository.existsByUserIdAndStaffRoleAndStaffStatus(
                         user.getUserId(),
                         ADMIN_ROLE,
                         "ACTIVE"

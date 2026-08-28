@@ -2,6 +2,8 @@ package lk.sliit.identityissuanceservice;
 
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.UserController;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
@@ -35,11 +37,18 @@ class UserControllerSessionTests {
     @Mock
     private AdminAccountService adminAccountService;
 
+    @Mock
+    private OfficerAccountService officerAccountService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = standaloneSetup(new UserController(userAccountService, adminAccountService)).build();
+        mockMvc = standaloneSetup(new UserController(
+                userAccountService,
+                adminAccountService,
+                officerAccountService
+        )).build();
     }
 
     @Test
@@ -123,5 +132,82 @@ class UserControllerSessionTests {
                 .andExpect(status().isOk())
                 .andExpect(view().name("login_portal"))
                 .andExpect(model().attributeHasErrors("officerLoginRequest"));
+    }
+
+    @Test
+    void officerLoginCreatesRoleSessionAndOpensOwnDashboard() throws Exception {
+        OfficerDetailsDto officer = new OfficerDetailsDto(
+                70,
+                "EMP-NIC-001",
+                "nic.officer@gov.lk",
+                "+94771234567",
+                OfficerAccountService.NIC_OFFICER,
+                "NIC Application Officer",
+                "nic-officer",
+                "ACTIVE"
+        );
+
+        when(officerAccountService.dashboardForRoleSelection("nic-officer"))
+                .thenReturn("/officer/nic/applications");
+        when(officerAccountService.authenticateOfficer(
+                "nic.officer@gov.lk",
+                "password123",
+                "nic-officer"
+        )).thenReturn(Optional.of(officer));
+
+        HttpSession session = mockMvc.perform(post("/login/officer")
+                        .param("role", "nic-officer")
+                        .param("email", "nic.officer@gov.lk")
+                        .param("password", "password123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/nic/applications"))
+                .andReturn()
+                .getRequest()
+                .getSession(false);
+
+        assertNotNull(session);
+        assertEquals(70, session.getAttribute("loggedInOfficerId"));
+        assertEquals(OfficerAccountService.NIC_OFFICER, session.getAttribute("loggedInOfficerRole"));
+        assertEquals("NIC Application Officer", session.getAttribute("loggedInOfficerRoleLabel"));
+        assertEquals("EMP-NIC-001", session.getAttribute("loggedInOfficerEmployeeNo"));
+        assertEquals("nic.officer@gov.lk", session.getAttribute("loggedInOfficerEmail"));
+    }
+
+    @Test
+    void directorCanChooseCsrDashboardAtLogin() throws Exception {
+        OfficerDetailsDto director = new OfficerDetailsDto(
+                71,
+                "EMP-DIR-001",
+                "director@gov.lk",
+                "+94771234568",
+                OfficerAccountService.DIRECTOR,
+                "Director",
+                "director",
+                "ACTIVE"
+        );
+
+        when(officerAccountService.dashboardForRoleSelection("csr"))
+                .thenReturn("/officer/csr");
+        when(officerAccountService.authenticateOfficer(
+                "director@gov.lk",
+                "password123",
+                "csr"
+        )).thenReturn(Optional.of(director));
+
+        HttpSession session = mockMvc.perform(post("/login/officer")
+                        .param("role", "csr")
+                        .param("email", "director@gov.lk")
+                        .param("password", "password123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/csr"))
+                .andReturn()
+                .getRequest()
+                .getSession(false);
+
+        assertNotNull(session);
+        assertEquals(OfficerAccountService.DIRECTOR, session.getAttribute("loggedInOfficerRole"));
+        assertEquals("Director", session.getAttribute("loggedInOfficerRoleLabel"));
+        assertEquals("EMP-DIR-001", session.getAttribute("loggedInOfficerEmployeeNo"));
+        assertEquals("director@gov.lk", session.getAttribute("loggedInOfficerEmail"));
     }
 }

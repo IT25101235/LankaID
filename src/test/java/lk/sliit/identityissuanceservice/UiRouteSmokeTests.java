@@ -75,6 +75,14 @@ class UiRouteSmokeTests {
             }
             if (route.startsWith("/officer/admin")) {
                 request.sessionAttr("loggedInAdminId", 1);
+            } else if (route.startsWith("/officer/nic")) {
+                request.sessionAttr("loggedInOfficerRole", "NIC_OFFICER");
+            } else if (route.startsWith("/officer/passport")) {
+                request.sessionAttr("loggedInOfficerRole", "PASSPORT_OFFICER");
+            } else if (route.startsWith("/officer/csr")) {
+                request.sessionAttr("loggedInOfficerRole", "CSR");
+            } else if (route.startsWith("/officer/director")) {
+                request.sessionAttr("loggedInOfficerRole", "DIRECTOR");
             }
 
             if (route.equals("/officer/admin/citizens")

@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "StaffAccount", schema = "dbo")
-public class AdminAccount {
+public class StaffAccount {
 
     @Id
     @Column(name = "user_id")
@@ -22,10 +22,10 @@ public class AdminAccount {
     @Column(name = "staff_status", nullable = false, length = 20)
     private String staffStatus;
 
-    public AdminAccount() {
+    public StaffAccount() {
     }
 
-    public AdminAccount(Integer userId, String employeeNo) {
+    public StaffAccount(Integer userId, String employeeNo) {
         this.userId = userId;
         this.employeeNo = employeeNo;
         this.staffRole = "SYSTEM_ADMIN";
