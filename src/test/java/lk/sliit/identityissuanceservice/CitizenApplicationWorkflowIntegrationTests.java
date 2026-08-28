@@ -14,8 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +29,10 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @Rollback
+@TestPropertySource(properties = "app.upload.directory=target/test-uploads")
 class CitizenApplicationWorkflowIntegrationTests {
 
     @Autowired private MockMvc mockMvc;
@@ -105,6 +110,23 @@ class CitizenApplicationWorkflowIntegrationTests {
         assertEquals("NEW", application.getApplicationKind());
         assertTrue(nicRepository.existsById(application.getApplicationId()));
 
+        mockMvc.perform(get("/citizen/dashboard").session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(application.getApplicationNo())))
+                .andExpect(content().string(not(containsString(">New NIC<"))))
+                .andExpect(content().string(containsString(
+                        "/citizen/applications/nic/documents?applicationId="
+                                + application.getApplicationId()
+                )));
+
+        mockMvc.perform(get("/citizen/applications").session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(application.getApplicationNo())))
+                .andExpect(content().string(containsString(
+                        "/citizen/applications/nic/documents?applicationId="
+                                + application.getApplicationId()
+                )));
+
         mockMvc.perform(get("/citizen/applications/nic/documents")
                         .param("applicationId", application.getApplicationId().toString())
                         .session(citizenSession(user)))
@@ -112,6 +134,52 @@ class CitizenApplicationWorkflowIntegrationTests {
                 .andExpect(content().string(containsString(
                         "/citizen/applications/nic/review?applicationId=" + application.getApplicationId()
                 )));
+
+        MockMultipartFile photograph = new MockMultipartFile(
+                "file",
+                "photograph.jpg",
+                "image/jpeg",
+                "test-image".getBytes()
+        );
+        mockMvc.perform(multipart("/citizen/applications/nic/documents")
+                        .file(photograph)
+                        .param("applicationId", application.getApplicationId().toString())
+                        .param("documentType", "PHOTOGRAPH")
+                        .session(citizenSession(user)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/citizen/applications/nic/documents?applicationId="
+                                + application.getApplicationId()
+                ));
+
+        mockMvc.perform(get("/citizen/applications/nic/documents")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("PHOTOGRAPH")))
+                .andExpect(content().string(containsString("Photograph (already uploaded)")))
+                .andExpect(content().string(containsString(application.getApplicationNo())));
+
+        MockMultipartFile duplicatePhotograph = new MockMultipartFile(
+                "file",
+                "another-photograph.jpg",
+                "image/jpeg",
+                "another-test-image".getBytes()
+        );
+        mockMvc.perform(multipart("/citizen/applications/nic/documents")
+                        .file(duplicatePhotograph)
+                        .param("applicationId", application.getApplicationId().toString())
+                        .param("documentType", "PHOTOGRAPH")
+                        .session(citizenSession(user)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute(
+                        "documentError",
+                        "That document type has already been uploaded."
+                ))
+                .andExpect(redirectedUrl(
+                        "/citizen/applications/nic/documents?applicationId="
+                                + application.getApplicationId()
+                ));
     }
 
     @Test

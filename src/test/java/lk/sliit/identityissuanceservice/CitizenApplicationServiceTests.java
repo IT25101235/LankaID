@@ -30,6 +30,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -99,6 +101,24 @@ class CitizenApplicationServiceTests {
                 () -> service.prepareNewNicForm(25)
         );
         assertTrue(exception.getMessage().contains("already have"));
+    }
+
+    @Test
+    void newNicFormIsRejectedWhenADraftAlreadyExists() {
+        stubAccountAndIdentity(Optional.empty(), Optional.empty(), Optional.empty());
+        when(applicationRepository.existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
+                eq(25),
+                eq("NIC"),
+                anyCollection()
+        )).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.prepareNewNicForm(25)
+        );
+
+        assertTrue(exception.getMessage().contains("already in progress"));
+        assertTrue(exception.getMessage().contains("Continue"));
     }
 
     @Test

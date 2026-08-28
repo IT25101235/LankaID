@@ -4,9 +4,10 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Controller.DirectorController
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controller.AppointmentController;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controller.BiometricController;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller.NIC_ApplicationController;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller.PassportApplicationController;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller.CitizenSupportController;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.NicVerificationController;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.PassportVerificationController;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Service.VerificationQueueService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
@@ -17,6 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class OfficerRoleAccessTests {
 
@@ -24,9 +27,13 @@ class OfficerRoleAccessTests {
 
     @BeforeEach
     void setUp() {
+        VerificationQueueService verificationQueueService = mock(VerificationQueueService.class);
+        when(verificationQueueService.getNicQueue()).thenReturn(java.util.List.of());
+        when(verificationQueueService.getPassportQueue()).thenReturn(java.util.List.of());
+
         mockMvc = standaloneSetup(
-                new NIC_ApplicationController(),
-                new PassportApplicationController(),
+                new NicVerificationController(verificationQueueService),
+                new PassportVerificationController(verificationQueueService),
                 new BiometricController(),
                 new AppointmentController(),
                 new CitizenSupportController(),
