@@ -43,12 +43,12 @@
         <p class="text-sm text-slate-500 mt-1">Signed in as <span class="font-semibold" th:text="${loggedInUserEmail}">citizen@example.com</span></p>
       </div>
       <div th:unless="${identityConflict}" class="flex flex-wrap gap-2">
-        <a th:if="${!hasNic}" th:href="@{/citizen/applications/nic/new}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">New NIC</a>
-        <a th:if="${hasNic}" th:href="@{/citizen/applications/nic/renewal}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">Renew NIC</a>
-        <a th:if="${hasNic}" th:href="@{/citizen/applications/nic/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost NIC</a>
-        <a th:if="${!hasPassport}" th:href="@{/citizen/applications/passport/new}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">New Passport</a>
-        <a th:if="${hasPassport}" th:href="@{/citizen/applications/passport/renewal}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">Renew Passport</a>
-        <a th:if="${hasPassport}" th:href="@{/citizen/applications/passport/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost Passport</a>
+        <a th:if="${!hasNic and !hasActiveNicApplication}" th:href="@{/citizen/applications/nic/new}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">New NIC</a>
+        <a th:if="${hasNic and !hasActiveNicApplication}" th:href="@{/citizen/applications/nic/renewal}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">Renew NIC</a>
+        <a th:if="${hasNic and !hasActiveNicApplication}" th:href="@{/citizen/applications/nic/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost NIC</a>
+        <a th:if="${!hasPassport and !hasActivePassportApplication}" th:href="@{/citizen/applications/passport/new}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">New Passport</a>
+        <a th:if="${hasPassport and !hasActivePassportApplication}" th:href="@{/citizen/applications/passport/renewal}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">Renew Passport</a>
+        <a th:if="${hasPassport and !hasActivePassportApplication}" th:href="@{/citizen/applications/passport/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost Passport</a>
       </div>
     </div>
   </section>
@@ -70,14 +70,14 @@
       <span class="material-symbols-outlined text-4xl text-slate-300">assignment_add</span><p class="font-bold mt-2">No applications yet</p><p class="text-sm text-slate-500 mt-1">Use one of the application buttons above to begin.</p>
     </div>
     <div th:unless="${#lists.isEmpty(applications)}" class="space-y-3">
-      <article th:each="application : ${applications}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <article th:each="citizenApplication : ${applications}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-start gap-4 min-w-0">
-          <span class="w-11 h-11 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${application.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
-          <div class="min-w-0"><p class="font-bold" th:text="${application.serviceType + ' ' + #strings.toLowerCase(application.applicationKind)}">NIC new</p><p class="text-xs text-slate-500 font-mono mt-1" th:text="${application.applicationNo}">LK-NIC-2026-123456</p><p class="text-xs text-slate-400 mt-1" th:text="${'Created ' + #temporals.format(application.createdAt, 'dd MMM yyyy, HH:mm')}">Created</p></div>
+          <span class="w-11 h-11 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
+          <div class="min-w-0"><p class="font-bold" th:text="${citizenApplication.serviceType + ' ' + #strings.toLowerCase(citizenApplication.applicationKind)}">NIC new</p><p class="text-xs text-slate-500 font-mono mt-1" th:text="${citizenApplication.applicationNo}">LK-NIC-2026-123456</p><p class="text-xs text-slate-400 mt-1" th:text="${'Created ' + #temporals.format(citizenApplication.createdAt, 'dd MMM yyyy, HH:mm')}">Created</p></div>
         </div>
         <div class="flex items-center gap-3">
-          <span class="text-xs bg-slate-100 text-slate-700 rounded-full px-3 py-1 font-bold" th:text="${#strings.replace(application.currentStatus, '_', ' ')}">DRAFT</span>
-          <a th:if="${application.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${application.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(application.serviceType)},applicationId=${application.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
+          <span class="text-xs bg-slate-100 text-slate-700 rounded-full px-3 py-1 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
+          <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
         </div>
       </article>
     </div>

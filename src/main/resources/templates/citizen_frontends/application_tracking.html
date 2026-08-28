@@ -30,18 +30,18 @@
   </div>
 
   <div th:unless="${#lists.isEmpty(applications)}" class="space-y-4 mt-6">
-    <article th:each="application : ${applications}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <article th:each="citizenApplication : ${applications}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div class="flex gap-4">
-          <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${application.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
-          <div><div class="flex flex-wrap items-center gap-2"><h2 class="font-bold text-lg" th:text="${application.serviceType == 'NIC' ? 'National Identity Card' : 'Passport'}">Document</h2><span class="text-xs rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-1 font-bold" th:text="${#strings.replace(application.applicationKind, '_', ' ')}">NEW</span></div><p class="font-mono text-xs text-slate-500 mt-1" th:text="${application.applicationNo}">Reference</p></div>
+          <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
+          <div><div class="flex flex-wrap items-center gap-2"><h2 class="font-bold text-lg" th:text="${citizenApplication.serviceType == 'NIC' ? 'National Identity Card' : 'Passport'}">Document</h2><span class="text-xs rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-1 font-bold" th:text="${#strings.replace(citizenApplication.applicationKind, '_', ' ')}">NEW</span></div><p class="font-mono text-xs text-slate-500 mt-1" th:text="${citizenApplication.applicationNo}">Reference</p></div>
         </div>
-        <span class="self-start text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1.5 font-bold" th:text="${#strings.replace(application.currentStatus, '_', ' ')}">DRAFT</span>
+        <span class="self-start text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1.5 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
       </div>
       <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="text-xs text-slate-500"><span th:text="${'Created: ' + #temporals.format(application.createdAt, 'dd MMM yyyy, HH:mm')}">Created</span><span th:if="${application.submittedAt != null}" th:text="${' • Submitted: ' + #temporals.format(application.submittedAt, 'dd MMM yyyy, HH:mm')}"></span></div>
-        <a th:if="${application.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${application.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(application.serviceType)},applicationId=${application.applicationId})}" class="bg-sky-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Continue draft</a>
-        <span th:unless="${application.currentStatus == 'DRAFT'}" class="text-sm font-semibold text-slate-500">Submitted for processing</span>
+        <div class="text-xs text-slate-500"><span th:text="${'Created: ' + #temporals.format(citizenApplication.createdAt, 'dd MMM yyyy, HH:mm')}">Created</span><span th:if="${citizenApplication.submittedAt != null}" th:text="${' • Submitted: ' + #temporals.format(citizenApplication.submittedAt, 'dd MMM yyyy, HH:mm')}"></span></div>
+        <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="bg-sky-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Continue draft</a>
+        <span th:unless="${citizenApplication.currentStatus == 'DRAFT'}" class="text-sm font-semibold text-slate-500">Submitted for processing</span>
       </div>
     </article>
   </div>
