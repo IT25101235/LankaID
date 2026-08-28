@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ApplicationDocumentRepository extends JpaRepository<ApplicationDocument, Integer> {
@@ -12,4 +13,9 @@ public interface ApplicationDocumentRepository extends JpaRepository<Application
     List<ApplicationDocument> findAllByApplicationIdOrderByUploadedAtAsc(Integer applicationId);
 
     boolean existsByApplicationIdAndDocumentType(Integer applicationId, String documentType);
+
+    Optional<ApplicationDocument> findByApplicationIdAndDocumentType(
+            Integer applicationId,
+            String documentType
+    );
 }

@@ -108,6 +108,7 @@ public class CitizenApplicationService {
     @Transactional
     public NewNicApplicationForm prepareNewNicForm(Integer citizenId) {
         checkNewEligibility(getEligibility(citizenId), NIC);
+        checkForActiveApplication(citizenId, NIC);
         NewNicApplicationForm form = new NewNicApplicationForm();
         CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
         return form;
@@ -117,11 +118,42 @@ public class CitizenApplicationService {
     public NewPassportApplicationForm prepareNewPassportForm(Integer citizenId) {
         CitizenEligibilityDto eligibility = getEligibility(citizenId);
         checkNewEligibility(eligibility, PASSPORT);
+        checkForActiveApplication(citizenId, PASSPORT);
         NewPassportApplicationForm form = new NewPassportApplicationForm();
         CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
         if (eligibility.isHasNic()) {
             form.setNicProofNo(eligibility.getNicNumber());
         }
+        return form;
+    }
+
+    @Transactional(readOnly = true)
+    public NewNicApplicationForm prepareNewNicCorrection(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getCorrectionApplication(citizenId, applicationId, NIC);
+        if (!NEW.equals(application.getApplicationKind())) {
+            throw new IllegalArgumentException("This correction is not a new NIC application.");
+        }
+
+        NewNicApplicationForm form = new NewNicApplicationForm();
+        CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
+        return form;
+    }
+
+    @Transactional(readOnly = true)
+    public NewPassportApplicationForm prepareNewPassportCorrection(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getCorrectionApplication(citizenId, applicationId, PASSPORT);
+        if (!NEW.equals(application.getApplicationKind())) {
+            throw new IllegalArgumentException("This correction is not a new passport application.");
+        }
+
+        NewPassportApplicationForm form = new NewPassportApplicationForm();
+        CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
+        PassportApplication passport = passportRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
+        form.setServiceLevel(passport.getServiceLevel());
+        form.setTravelDocumentType(passport.getTravelDocumentType());
+        form.setNicProofNo(passport.getNicProofNo());
+        form.setParentNicNo(passport.getParentNicNo());
         return form;
     }
 
@@ -166,9 +198,62 @@ public class CitizenApplicationService {
         return application;
     }
 
+    @Transactional
+    public CitizenApplication updateNewNicCorrection(
+            Integer citizenId,
+            Integer applicationId,
+            NewNicApplicationForm form
+    ) {
+        CitizenApplication application = getCorrectionApplication(citizenId, applicationId, NIC);
+        if (!NEW.equals(application.getApplicationKind())) {
+            throw new IllegalArgumentException("This correction is not a new NIC application.");
+        }
+        CitizenProfileMapper.validateConditionalFields(form);
+        CitizenAccount citizen = findCitizen(citizenId);
+        CitizenProfileMapper.updateCitizen(citizen, form);
+        citizenRepository.save(citizen);
+        return application;
+    }
+
+    @Transactional
+    public CitizenApplication updateNewPassportCorrection(
+            Integer citizenId,
+            Integer applicationId,
+            NewPassportApplicationForm form
+    ) {
+        CitizenApplication application = getCorrectionApplication(citizenId, applicationId, PASSPORT);
+        if (!NEW.equals(application.getApplicationKind())) {
+            throw new IllegalArgumentException("This correction is not a new passport application.");
+        }
+        CitizenProfileMapper.validateConditionalFields(form);
+        validatePassportProof(form.getNicProofNo(), form.getParentNicNo());
+
+        CitizenAccount citizen = findCitizen(citizenId);
+        CitizenProfileMapper.updateCitizen(citizen, form);
+        citizenRepository.save(citizen);
+
+        PassportApplication passport = passportRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
+        passport.setServiceLevel(CitizenProfileMapper.blankToNull(form.getServiceLevel()));
+        passport.setTravelDocumentType(CitizenProfileMapper.blankToNull(form.getTravelDocumentType()));
+        passport.setNicProofNo(CitizenProfileMapper.blankToNull(form.getNicProofNo()));
+        passport.setParentNicNo(CitizenProfileMapper.blankToNull(form.getParentNicNo()));
+        passportRepository.save(passport);
+        return application;
+    }
+
     @Transactional(readOnly = true)
     public List<CitizenApplication> getCitizenApplications(Integer citizenId) {
         return applicationRepository.findAllByCitizenIdOrderByCreatedAtDesc(citizenId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasActiveApplication(Integer citizenId, String serviceType) {
+        return applicationRepository.existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
+                citizenId,
+                serviceType,
+                ACTIVE_STATUSES
+        );
     }
 
     @Transactional(readOnly = true)
@@ -245,12 +330,10 @@ public class CitizenApplicationService {
     }
 
     private void checkForActiveApplication(Integer citizenId, String serviceType) {
-        if (applicationRepository.existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
-                citizenId,
-                serviceType,
-                ACTIVE_STATUSES)) {
+        if (hasActiveApplication(citizenId, serviceType)) {
             throw new IllegalArgumentException(
-                    "You already have an active " + serviceType + " application. Continue it from your dashboard."
+                    "An " + serviceType + " application is already in progress. "
+                            + "Use Continue on your dashboard."
             );
         }
     }
@@ -268,10 +351,13 @@ public class CitizenApplicationService {
             MultipartFile file) {
         String type = documentType == null ? "" : documentType.trim().toUpperCase(Locale.ROOT);
         validateDocument(type, file);
-        if (!"DRAFT".equals(application.getCurrentStatus())) {
-            throw new IllegalArgumentException("Documents can only be uploaded while the application is a draft.");
+        boolean correctionMode = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
+        if (!"DRAFT".equals(application.getCurrentStatus()) && !correctionMode) {
+            throw new IllegalArgumentException("Documents can only be uploaded for a draft or correction request.");
         }
-        if (documentRepository.existsByApplicationIdAndDocumentType(application.getApplicationId(), type)) {
+        Optional<ApplicationDocument> existingDocument = documentRepository
+                .findByApplicationIdAndDocumentType(application.getApplicationId(), type);
+        if (existingDocument.isPresent() && !correctionMode) {
             throw new IllegalArgumentException("That document type has already been uploaded.");
         }
 
@@ -290,18 +376,23 @@ public class CitizenApplicationService {
             throw new IllegalArgumentException("The document could not be saved.");
         }
 
-        ApplicationDocument document = new ApplicationDocument();
+        ApplicationDocument document = existingDocument.orElseGet(ApplicationDocument::new);
         document.setApplicationId(application.getApplicationId());
         document.setDocumentType(type);
         document.setFilePath(uploadRoot.relativize(destination).toString().replace('\\', '/'));
+        document.setUploadedAt(LocalDateTime.now());
+        document.setVerificationStatus("PENDING");
+        document.setVerifiedByStaffId(null);
+        document.setVerifiedAt(null);
         documentRepository.save(document);
     }
 
     private void submitWhenDocumentsComplete(
             CitizenApplication application,
             List<String> requiredTypes) {
-        if (!"DRAFT".equals(application.getCurrentStatus())) {
-            throw new IllegalArgumentException("Only draft applications can be submitted.");
+        boolean resubmission = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
+        if (!"DRAFT".equals(application.getCurrentStatus()) && !resubmission) {
+            throw new IllegalArgumentException("Only drafts or corrected applications can be submitted.");
         }
         Set<String> uploadedTypes = documentRepository
                 .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId())
@@ -316,9 +407,34 @@ public class CitizenApplicationService {
                     "Upload the required documents: " + String.join(", ", missingTypes)
             );
         }
-        application.setCurrentStatus("SUBMITTED");
+        if (resubmission) {
+            List<ApplicationDocument> documents = documentRepository
+                    .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId());
+            for (ApplicationDocument document : documents) {
+                document.setVerificationStatus("PENDING");
+                document.setVerifiedByStaffId(null);
+                document.setVerifiedAt(null);
+            }
+            documentRepository.saveAll(documents);
+        }
+        application.setCurrentStatus(resubmission ? "RESUBMITTED" : "SUBMITTED");
         application.setSubmittedAt(LocalDateTime.now());
         application.setDeclarationAccepted("Y");
+    }
+
+    private CitizenApplication getCorrectionApplication(
+            Integer citizenId,
+            Integer applicationId,
+            String serviceType
+    ) {
+        CitizenApplication application = findOwnedApplication(citizenId, applicationId);
+        if (!serviceType.equals(application.getServiceType())) {
+            throw new IllegalArgumentException("Application service type does not match.");
+        }
+        if (!"CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("This application is not open for corrections.");
+        }
+        return application;
     }
 
     private void validateDocument(String type, MultipartFile file) {
