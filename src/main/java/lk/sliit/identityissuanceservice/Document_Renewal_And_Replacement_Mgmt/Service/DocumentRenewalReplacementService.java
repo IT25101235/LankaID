@@ -88,6 +88,7 @@ public class DocumentRenewalReplacementService {
         String applicationKind = applicationKind(formKind);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
         checkExistingDocument(eligibility, NIC);
+        checkForActiveApplication(citizenId, NIC);
 
         NicRenewalReplacementForm form = new NicRenewalReplacementForm();
         CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
@@ -100,12 +101,43 @@ public class DocumentRenewalReplacementService {
         applicationKind(formKind);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
         checkExistingDocument(eligibility, PASSPORT);
+        checkForActiveApplication(citizenId, PASSPORT);
 
         PassportRenewalReplacementForm form = new PassportRenewalReplacementForm();
         CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
         if (eligibility.isHasNic()) {
             form.setNicProofNo(eligibility.getNicNumber());
         }
+        return form;
+    }
+
+    @Transactional(readOnly = true)
+    public NicRenewalReplacementForm prepareNicCorrection(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getCorrectionRequest(citizenId, applicationId, NIC);
+        NicApplication details = nicRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("NIC application details were not found."));
+
+        NicRenewalReplacementForm form = new NicRenewalReplacementForm();
+        CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
+        form.setLastNicNo(details.getLastNicNo());
+        form.setLastIssuedDate(details.getLastIssuedDate() == null ? null : details.getLastIssuedDate().toLocalDate());
+        form.setPoliceStation(details.getPoliceStation());
+        form.setPoliceReportDate(details.getPoliceReportDate() == null ? null : details.getPoliceReportDate().toLocalDate());
+        return form;
+    }
+
+    @Transactional(readOnly = true)
+    public PassportRenewalReplacementForm preparePassportCorrection(Integer citizenId, Integer applicationId) {
+        getCorrectionRequest(citizenId, applicationId, PASSPORT);
+        PassportApplication details = passportRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
+
+        PassportRenewalReplacementForm form = new PassportRenewalReplacementForm();
+        CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
+        form.setServiceLevel(details.getServiceLevel());
+        form.setTravelDocumentType(details.getTravelDocumentType());
+        form.setNicProofNo(details.getNicProofNo());
+        form.setParentNicNo(details.getParentNicNo());
         return form;
     }
 
@@ -157,6 +189,48 @@ public class DocumentRenewalReplacementService {
         return application;
     }
 
+    @Transactional
+    public CitizenApplication updateNicCorrection(
+            Integer citizenId,
+            Integer applicationId,
+            NicRenewalReplacementForm form
+    ) {
+        CitizenApplication application = getCorrectionRequest(citizenId, applicationId, NIC);
+        CitizenProfileMapper.validateConditionalFields(form);
+        validateNicDetails(application.getApplicationKind(), form);
+        saveCitizenProfile(citizenId, form);
+
+        NicApplication details = nicRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("NIC application details were not found."));
+        details.setLastNicNo(CitizenProfileMapper.blankToNull(form.getLastNicNo()));
+        details.setLastIssuedDate(CitizenProfileMapper.atStartOfDay(form.getLastIssuedDate()));
+        details.setPoliceStation(CitizenProfileMapper.blankToNull(form.getPoliceStation()));
+        details.setPoliceReportDate(CitizenProfileMapper.atStartOfDay(form.getPoliceReportDate()));
+        nicRepository.save(details);
+        return application;
+    }
+
+    @Transactional
+    public CitizenApplication updatePassportCorrection(
+            Integer citizenId,
+            Integer applicationId,
+            PassportRenewalReplacementForm form
+    ) {
+        CitizenApplication application = getCorrectionRequest(citizenId, applicationId, PASSPORT);
+        CitizenProfileMapper.validateConditionalFields(form);
+        validatePassportProof(form.getNicProofNo(), form.getParentNicNo());
+        saveCitizenProfile(citizenId, form);
+
+        PassportApplication details = passportRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
+        details.setServiceLevel(CitizenProfileMapper.blankToNull(form.getServiceLevel()));
+        details.setTravelDocumentType(CitizenProfileMapper.blankToNull(form.getTravelDocumentType()));
+        details.setNicProofNo(CitizenProfileMapper.blankToNull(form.getNicProofNo()));
+        details.setParentNicNo(CitizenProfileMapper.blankToNull(form.getParentNicNo()));
+        passportRepository.save(details);
+        return application;
+    }
+
     @Transactional(readOnly = true)
     public CitizenApplication getRequest(Integer citizenId, Integer applicationId) {
         CitizenApplication application = applicationRepository
@@ -194,10 +268,13 @@ public class DocumentRenewalReplacementService {
         CitizenApplication application = getRequest(citizenId, applicationId);
         String type = documentType == null ? "" : documentType.trim().toUpperCase(Locale.ROOT);
         validateDocument(type, file);
-        if (!"DRAFT".equals(application.getCurrentStatus())) {
-            throw new IllegalArgumentException("Documents can only be uploaded while the request is a draft.");
+        boolean correctionMode = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
+        if (!"DRAFT".equals(application.getCurrentStatus()) && !correctionMode) {
+            throw new IllegalArgumentException("Documents can only be uploaded for a draft or correction request.");
         }
-        if (documentRepository.existsByApplicationIdAndDocumentType(applicationId, type)) {
+        Optional<ApplicationDocument> existingDocument = documentRepository
+                .findByApplicationIdAndDocumentType(applicationId, type);
+        if (existingDocument.isPresent() && !correctionMode) {
             throw new IllegalArgumentException("That document type has already been uploaded.");
         }
 
@@ -216,18 +293,23 @@ public class DocumentRenewalReplacementService {
             throw new IllegalArgumentException("The document could not be saved.");
         }
 
-        ApplicationDocument document = new ApplicationDocument();
+        ApplicationDocument document = existingDocument.orElseGet(ApplicationDocument::new);
         document.setApplicationId(applicationId);
         document.setDocumentType(type);
         document.setFilePath(uploadRoot.relativize(destination).toString().replace('\\', '/'));
+        document.setUploadedAt(LocalDateTime.now());
+        document.setVerificationStatus("PENDING");
+        document.setVerifiedByStaffId(null);
+        document.setVerifiedAt(null);
         documentRepository.save(document);
     }
 
     @Transactional
     public CitizenApplication submitRequest(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getRequest(citizenId, applicationId);
-        if (!"DRAFT".equals(application.getCurrentStatus())) {
-            throw new IllegalArgumentException("Only draft requests can be submitted.");
+        boolean resubmission = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
+        if (!"DRAFT".equals(application.getCurrentStatus()) && !resubmission) {
+            throw new IllegalArgumentException("Only drafts or corrected requests can be submitted.");
         }
 
         Set<String> uploadedTypes = documentRepository
@@ -244,10 +326,36 @@ public class DocumentRenewalReplacementService {
             );
         }
 
-        application.setCurrentStatus("SUBMITTED");
+        if (resubmission) {
+            List<ApplicationDocument> documents = documentRepository
+                    .findAllByApplicationIdOrderByUploadedAtAsc(applicationId);
+            for (ApplicationDocument document : documents) {
+                document.setVerificationStatus("PENDING");
+                document.setVerifiedByStaffId(null);
+                document.setVerifiedAt(null);
+            }
+            documentRepository.saveAll(documents);
+        }
+
+        application.setCurrentStatus(resubmission ? "RESUBMITTED" : "SUBMITTED");
         application.setSubmittedAt(LocalDateTime.now());
         application.setDeclarationAccepted("Y");
         return applicationRepository.save(application);
+    }
+
+    private CitizenApplication getCorrectionRequest(
+            Integer citizenId,
+            Integer applicationId,
+            String serviceType
+    ) {
+        CitizenApplication application = getRequest(citizenId, applicationId);
+        if (!serviceType.equals(application.getServiceType())) {
+            throw new IllegalArgumentException("Application service type does not match.");
+        }
+        if (!"CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("This application is not open for corrections.");
+        }
+        return application;
     }
 
     public List<String> requiredDocumentTypes(CitizenApplication application) {
