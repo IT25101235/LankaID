@@ -10,34 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class NIC_ApplicationController {
 
-    @GetMapping("/citizen/applications/nic/new")
-    public String newNicApplication(Model model, HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        model.addAttribute("applicationType", "new");
-        return "citizen_frontends/nic_application_form";
-    }
-
-    @GetMapping("/citizen/applications/nic/documents")
-    public String nicDocumentUpload(HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        return "citizen_frontends/nic_document_upload";
-    }
-
-    @GetMapping("/citizen/applications/nic/review")
-    public String citizenNicReview(HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        return "citizen_frontends/nic_application_review";
-    }
-
     @GetMapping("/officer/nic/applications")
     public String nicApplicationQueue(HttpSession session, Model model) {
         if (session.getAttribute("loggedInAdminId") != null) {

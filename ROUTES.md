@@ -1,21 +1,21 @@
 # LankaID UI Route Guide
 
-This project currently uses simple Spring MVC `GET` routes. The pages contain demonstration data because the database and authentication are not connected yet.
+The project uses Spring MVC controllers, `HttpSession`, services and Spring Data JPA repositories. Citizen application pages read and save data through the existing SQL Server schema.
 
 ## How a route works
 
 ```java
-@GetMapping("/citizen/applications/nic/new")
-public String newNicApplication(Model model) {
-    model.addAttribute("applicationType", "new");
+@GetMapping("/citizen/applications/nic/{formKind:new|renewal|replacement}")
+public String nicApplicationForm(@PathVariable String formKind, ...) {
+    // The service checks document ownership before returning the shared form.
     return "citizen_frontends/nic_application_form";
 }
 ```
 
 - `@GetMapping` is the URL opened by the browser.
-- `Model` passes small display values to Thymeleaf.
+- `Model` passes the form and database values to Thymeleaf.
 - The returned string is the HTML file inside `src/main/resources/templates` without `.html`.
-- No route saves data yet. Form buttons only demonstrate the intended next screen.
+- `POST` routes call `CitizenApplicationService` to validate and save the application.
 
 ## Public and citizen routes
 
@@ -25,20 +25,18 @@ public String newNicApplication(Model model) {
 | `/login` | Citizen/officer login | User Management |
 | `/register` | Citizen registration | User Management |
 | `/chatbot` | LankaID virtual assistant demo | Citizen Support Management |
-| `/citizen/dashboard` | Conditional citizen dashboard | User Management |
+| `/citizen/dashboard` | Eligibility and citizen application dashboard | Citizen Application Management |
 | `/citizen/applications` | Application tracking | Citizen Application Management |
 | `/citizen/applications/nic/new` | New NIC form | Citizen Application Management |
-| `/citizen/applications/nic/renewal` | NIC renewal form | Renewal and Replacement Management |
-| `/citizen/applications/nic/replacement` | Lost/damaged NIC form | Renewal and Replacement Management |
+| `/citizen/applications/nic/renewal` | NIC renewal form | Citizen Application Management |
+| `/citizen/applications/nic/replacement` | Lost NIC form | Citizen Application Management |
 | `/citizen/applications/passport/new` | New Passport form | Citizen Application Management |
-| `/citizen/applications/passport/renewal` | Passport renewal form | Renewal and Replacement Management |
-| `/citizen/applications/passport/replacement` | Lost/damaged Passport form | Renewal and Replacement Management |
-| `/citizen/applications/nic/documents` | NIC upload | Citizen Application Management |
-| `/citizen/applications/passport/documents` | Passport upload | Citizen Application Management |
-| `/citizen/applications/nic/review` | Citizen NIC review | Citizen Application Management |
-| `/citizen/applications/passport/review` | Citizen Passport review | Citizen Application Management |
-| `/citizen/applications/nic/{reference}/correct` | Correct returned NIC fields | Citizen Application Management |
-| `/citizen/applications/passport/{reference}/correct` | Correct returned Passport fields | Citizen Application Management |
+| `/citizen/applications/passport/renewal` | Passport renewal form | Citizen Application Management |
+| `/citizen/applications/passport/replacement` | Lost Passport form | Citizen Application Management |
+| `/citizen/applications/nic/documents?applicationId={id}` | NIC document upload | Citizen Application Management |
+| `/citizen/applications/passport/documents?applicationId={id}` | Passport document upload | Citizen Application Management |
+| `/citizen/applications/nic/review?applicationId={id}` | Citizen NIC review | Citizen Application Management |
+| `/citizen/applications/passport/review?applicationId={id}` | Citizen Passport review | Citizen Application Management |
 | `/citizen/payment` | Demonstration payment | Payment Management |
 | `/citizen/notifications` | Citizen notifications | Notification Management |
 | `/citizen/appointments/biometric` | Biometric appointment booking | Biometric and Appointment Management |
@@ -46,13 +44,7 @@ public String newNicApplication(Model model) {
 | `/citizen/support` | Complaint/inquiry history | Citizen Support Management |
 | `/citizen/support/new` | New complaint/inquiry | Citizen Support Management |
 
-The dashboard supports temporary demo states:
-
-- `/citizen/dashboard?profile=new`
-- `/citizen/dashboard?profile=nic-only`
-- `/citizen/dashboard?profile=existing`
-
-Later, the database will replace this query parameter with the citizen's real NIC and Passport ownership.
+The dashboard has no demo-state parameter. It matches the logged-in citizen's email and phone against `GovernmentIdentityRecord`. No existing document shows the new application action. An existing NIC or passport shows only renewal and lost replacement actions. The service repeats this check when a form URL is opened or submitted.
 
 ## NIC and Passport officer routes
 
@@ -85,10 +77,13 @@ Later, the database will replace this query parameter with the citizen's real NI
 | `/officer/admin?section=citizens` | Citizen accounts and application counts inside the admin dashboard |
 | `/officer/admin?section=notifications` | Universal or selected notification composer inside the admin dashboard |
 
-## Before database integration
+## Citizen application save flow
 
-- Keep controllers as page-routing controllers only.
-- Do not treat JavaScript success messages as saved records.
-- QR scan buttons are simulations; later a QR library should decode only an appointment/reference value.
-- Biometric files must eventually be stored securely by a backend service, not in browser JavaScript.
-- Officer roles are selected on the temporary login screen only for demonstrating each dashboard.
+1. `CitizenApplicationController` checks the citizen's `HttpSession`.
+2. `CitizenApplicationService` checks email and phone eligibility.
+3. The common citizen details are saved in `CitizenAccount`.
+4. A base row is saved in `Application`, followed by its `NICApplication` or `PassportApplication` row.
+5. Uploaded files are stored in the local `uploads` folder, while `ApplicationDocument` stores only the relative file path.
+6. The application stays `DRAFT` until all required document types exist, then submission changes it to `SUBMITTED`.
+
+The QR, biometric, payment and some officer review screens remain separate later workflow stages.

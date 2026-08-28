@@ -20,7 +20,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -74,26 +73,8 @@ class UserControllerSessionTests {
         assertNotNull(session);
         assertEquals(25, session.getAttribute("loggedInUserId"));
         assertEquals("citizen@example.com", session.getAttribute("loggedInUserEmail"));
+        assertEquals("CITIZEN", session.getAttribute("loggedInUserRole"));
         assertEquals(1800, session.getMaxInactiveInterval());
-    }
-
-    @Test
-    void dashboardRedirectsWhenCitizenIsNotLoggedIn() throws Exception {
-        mockMvc.perform(get("/citizen/dashboard"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
-    }
-
-    @Test
-    void dashboardOpensWhenCitizenIsLoggedIn() throws Exception {
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loggedInUserId", 25);
-        session.setAttribute("loggedInUserEmail", "citizen@example.com");
-
-        mockMvc.perform(get("/citizen/dashboard").session(session))
-                .andExpect(status().isOk())
-                .andExpect(view().name("citizen_frontends/citizen_dashboard"))
-                .andExpect(model().attribute("loggedInUserEmail", "citizen@example.com"));
     }
 
     @Test

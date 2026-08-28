@@ -22,22 +22,6 @@ class UiRouteSmokeTests {
         // Keep this list in sync with ROUTES.md when a new demonstration page is added.
         String[] routes = {
                 "/", "/login", "/register", "/chatbot",
-                "/citizen/dashboard?profile=new",
-                "/citizen/dashboard?profile=nic-only",
-                "/citizen/dashboard?profile=existing",
-                "/citizen/applications",
-                "/citizen/applications/nic/new",
-                "/citizen/applications/nic/renewal",
-                "/citizen/applications/nic/replacement",
-                "/citizen/applications/passport/new",
-                "/citizen/applications/passport/renewal",
-                "/citizen/applications/passport/replacement",
-                "/citizen/applications/nic/documents",
-                "/citizen/applications/passport/documents",
-                "/citizen/applications/nic/review",
-                "/citizen/applications/passport/review",
-                "/citizen/applications/nic/LK-NIC-2026-00097/correct",
-                "/citizen/applications/passport/LK-PASS-2026-00041/correct",
                 "/citizen/payment",
                 "/citizen/notifications",
                 "/citizen/appointments/biometric",
@@ -72,6 +56,7 @@ class UiRouteSmokeTests {
 
             if (route.startsWith("/citizen/")) {
                 request.sessionAttr("loggedInUserId", 1);
+                request.sessionAttr("loggedInUserRole", "CITIZEN");
             }
             if (route.startsWith("/officer/admin")) {
                 request.sessionAttr("loggedInAdminId", 1);

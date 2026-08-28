@@ -16,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Objects;
@@ -76,6 +75,7 @@ public class UserController {
         UserAccount account = authenticatedAccount.get();
         session.setAttribute("loggedInUserId", account.getUserId());
         session.setAttribute("loggedInUserEmail", account.getEmail());
+        session.setAttribute("loggedInUserRole", "CITIZEN");
 
         int sessionTimeout = loginRequest.isRememberMe()
                 ? 7 * 24 * 60 * 60
@@ -218,30 +218,6 @@ public class UserController {
                 "Registration successful. You can now sign in."
         );
         return "redirect:/login";
-    }
-
-    @GetMapping("/citizen/dashboard")
-    public String citizenDashboard(
-            @RequestParam(defaultValue = "new") String profile,
-            Model model,
-            HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        model.addAttribute("loggedInUserEmail", session.getAttribute("loggedInUserEmail"));
-
-        /*
-         * Temporary UI data only. Later these two values will come from the
-         * citizen's database record. The query parameter lets us demonstrate
-         * every dashboard state before the database is connected.
-         */
-        boolean hasNic = profile.equals("existing") || profile.equals("nic-only");
-        boolean hasPassport = profile.equals("existing");
-        model.addAttribute("hasNic", hasNic);
-        model.addAttribute("hasPassport", hasPassport);
-        model.addAttribute("demoProfile", profile);
-        return "citizen_frontends/citizen_dashboard";
     }
 
     @GetMapping("/dashboard/citizen")

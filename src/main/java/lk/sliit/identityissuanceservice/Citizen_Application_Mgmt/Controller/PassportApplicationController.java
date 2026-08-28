@@ -10,34 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class PassportApplicationController {
 
-    @GetMapping("/citizen/applications/passport/new")
-    public String newPassportApplication(Model model, HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        model.addAttribute("applicationType", "new");
-        return "citizen_frontends/passport_application_form";
-    }
-
-    @GetMapping("/citizen/applications/passport/documents")
-    public String passportDocumentUpload(HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        return "citizen_frontends/passport_document_upload";
-    }
-
-    @GetMapping("/citizen/applications/passport/review")
-    public String citizenPassportReview(HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        return "citizen_frontends/passport_application_review";
-    }
-
     @GetMapping("/officer/passport/applications")
     public String passportApplicationQueue(HttpSession session, Model model) {
         if (session.getAttribute("loggedInAdminId") != null) {

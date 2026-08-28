@@ -1,202 +1,87 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Citizen - Dashboard</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <title>Citizen Dashboard | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-  <script>
-    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans', 'sans-serif'] } } } };
-  </script>
-  <style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }</style>
   <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }</style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
-
-<!-- Header -->
+<body class="min-h-screen flex flex-col text-slate-800">
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-    <a th:href="@{/}" class="flex items-center gap-2 shrink-0">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-sm">verified_user</span>
-      </div>
-      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span> Services</span>
+    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center material-symbols-outlined">verified_user</span>
+      <span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span>
     </a>
-
-    <nav class="hidden md:flex items-center gap-6 text-sm font-medium h-full" aria-label="Citizen navigation">
-      <a th:href="@{/citizen/dashboard}" class="h-full flex items-center text-sky-600 font-semibold border-b-2 border-sky-600">Home</a>
-      <a th:href="@{/citizen/applications}" class="h-full flex items-center text-slate-600 hover:text-sky-600">My Applications</a>
-      <a th:href="@{/citizen/appointments/biometric}" class="h-full flex items-center text-slate-600 hover:text-sky-600">Appointments</a>
-      <a th:href="@{/citizen/support}" class="h-full flex items-center text-slate-600 hover:text-sky-600">Support</a>
+    <nav class="hidden md:flex gap-6 text-sm font-semibold">
+      <a th:href="@{/citizen/dashboard}" class="text-sky-600">Home</a>
+      <a th:href="@{/citizen/applications}" class="text-slate-600 hover:text-sky-600">My Applications</a>
+      <a th:href="@{/citizen/support}" class="text-slate-600 hover:text-sky-600">Support</a>
     </nav>
-
-    <div class="flex items-center gap-3 sm:gap-4">
-      <a th:href="@{/citizen/notifications}" class="relative text-slate-500 hover:text-sky-600" aria-label="Notifications">
-        <span class="material-symbols-outlined text-xl">notifications</span>
-        <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">3</span>
-      </a>
-      <a th:href="@{/citizen/support/new}" class="hidden sm:flex text-slate-500 hover:text-sky-600" aria-label="Feedback">
-        <span class="material-symbols-outlined text-xl">feedback</span>
-      </a>
-      <form th:action="@{/logout}" method="post">
-        <button type="submit" class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-700">
-          <span class="material-symbols-outlined text-lg">logout</span>
-          <span class="hidden sm:inline">Sign out</span>
-        </button>
-      </form>
-    </div>
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="rounded-lg border px-3 py-2 text-xs font-semibold hover:bg-red-50 hover:text-red-700">Sign out</button>
+    </form>
   </div>
 </header>
 
-<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-  <!-- Remove this demo switch after document ownership comes from the database. -->
-  <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex flex-wrap items-center gap-2 text-xs">
-    <span class="font-bold text-amber-800">Demo citizen state:</span>
-    <a th:href="@{/citizen/dashboard(profile='new')}" th:classappend="${demoProfile == 'new'} ? ' bg-amber-600 text-white' : ' bg-white text-amber-800'" class="rounded-lg border border-amber-300 px-3 py-1.5 font-semibold">New citizen</a>
-    <a th:href="@{/citizen/dashboard(profile='nic-only')}" th:classappend="${demoProfile == 'nic-only'} ? ' bg-amber-600 text-white' : ' bg-white text-amber-800'" class="rounded-lg border border-amber-300 px-3 py-1.5 font-semibold">Has NIC only</a>
-    <a th:href="@{/citizen/dashboard(profile='existing')}" th:classappend="${demoProfile == 'existing'} ? ' bg-amber-600 text-white' : ' bg-white text-amber-800'" class="rounded-lg border border-amber-300 px-3 py-1.5 font-semibold">Has NIC & Passport</a>
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-7 w-full flex-1">
+  <div th:if="${applicationMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${applicationMessage}"></div>
+  <div th:if="${applicationError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${applicationError}"></div>
+  <div th:if="${identityConflict}" class="mb-5 rounded-xl border border-red-300 bg-red-50 p-4">
+    <p class="font-bold text-red-800">Identity details need to be checked</p>
+    <p class="text-sm text-red-700 mt-1">Your registered email and phone number match different government records. New applications are blocked until Citizen Support verifies the account.</p>
   </div>
-  <!-- Welcome and quick actions -->
-  <section class="mb-6">
+
+  <section class="mb-7">
     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Welcome back</h1>
-        <p class="text-slate-500 text-sm mt-1">Signed in as <span class="font-semibold" th:text="${loggedInUserEmail}">citizen@example.com</span></p>
+        <h1 class="text-3xl font-extrabold text-slate-900">Welcome back</h1>
+        <p class="text-sm text-slate-500 mt-1">Signed in as <span class="font-semibold" th:text="${loggedInUserEmail}">citizen@example.com</span></p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <a th:if="${!hasNic}" th:href="@{/citizen/applications/nic/new}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">
-          <span class="material-symbols-outlined text-lg">add_card</span>
-          New NIC
-        </a>
-        <a th:if="${hasNic}" th:href="@{/citizen/applications/nic/renewal}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold">Renew NIC</a>
-        <a th:if="${hasNic}" th:href="@{/citizen/applications/nic/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-semibold">Lost / Damaged NIC</a>
-        <a th:if="${!hasPassport}" th:href="@{/citizen/applications/passport/new}" class="bg-white hover:bg-slate-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">
-          <span class="material-symbols-outlined text-lg">flight_takeoff</span>
-          New Passport
-        </a>
-        <a th:if="${hasPassport}" th:href="@{/citizen/applications/passport/renewal}" class="bg-white hover:bg-slate-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-semibold">Renew Passport</a>
-        <a th:if="${hasPassport}" th:href="@{/citizen/applications/passport/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-semibold">Lost / Damaged Passport</a>
-        <a th:href="@{/citizen/applications}" class="bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm">
-          <span class="material-symbols-outlined text-lg">track_changes</span>
-          Track Status
-        </a>
+      <div th:unless="${identityConflict}" class="flex flex-wrap gap-2">
+        <a th:if="${!hasNic}" th:href="@{/citizen/applications/nic/new}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">New NIC</a>
+        <a th:if="${hasNic}" th:href="@{/citizen/applications/nic/renewal}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">Renew NIC</a>
+        <a th:if="${hasNic}" th:href="@{/citizen/applications/nic/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost NIC</a>
+        <a th:if="${!hasPassport}" th:href="@{/citizen/applications/passport/new}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">New Passport</a>
+        <a th:if="${hasPassport}" th:href="@{/citizen/applications/passport/renewal}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">Renew Passport</a>
+        <a th:if="${hasPassport}" th:href="@{/citizen/applications/passport/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost Passport</a>
       </div>
     </div>
   </section>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-    <!-- Applications -->
-    <section class="lg:col-span-2">
-      <h2 class="text-lg font-bold text-slate-900 mb-3">My Applications</h2>
+  <section class="grid sm:grid-cols-2 gap-4 mb-7">
+    <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex gap-4">
+      <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined">badge</span>
+      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">NIC record</p><p th:if="${hasNic}" class="font-bold mt-1" th:text="${nicNumber}">200012345678</p><p th:unless="${hasNic}" class="text-sm text-slate-500 mt-1">No existing NIC found</p></div>
+    </article>
+    <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex gap-4">
+      <span class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center material-symbols-outlined">flight_takeoff</span>
+      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Passport record</p><p th:if="${hasPassport}" class="font-bold mt-1" th:text="${passportNumber}">N1234567</p><p th:unless="${hasPassport}" class="text-sm text-slate-500 mt-1">No existing passport found</p></div>
+    </article>
+  </section>
 
-      <div th:if="${hasNic or hasPassport}" class="space-y-4">
-        <!-- NIC application -->
-        <article class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="p-5">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div class="flex items-start gap-4 min-w-0">
-                <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-sky-600 text-2xl">badge</span>
-                </div>
-                <div class="min-w-0">
-                  <h3 class="font-bold text-slate-900">National ID Card (NIC)</h3>
-                  <p class="text-xs text-slate-500 mt-0.5">Ref: GID-2023-8942</p>
-                </div>
-              </div>
-              <span class="self-start text-xs bg-sky-100 text-sky-700 px-3 py-1 rounded-full font-semibold border border-sky-200">Under Review</span>
-            </div>
-
-            <div class="mt-5 pt-4 border-t border-slate-100">
-              <div class="flex items-center justify-between text-xs mb-2">
-                <span class="text-slate-500">Submitted:</span>
-                <span class="font-semibold text-slate-700">Oct 12, 2023</span>
-              </div>
-              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-sky-500 rounded-full" style="width: 60%;"></div>
-              </div>
-              <p class="text-xs text-slate-500 text-right mt-2">Step 3 of 5</p>
-            </div>
-          </div>
-        </article>
-
-        <!-- Passport application -->
-        <article class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
-          <div class="p-5">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div class="flex items-start gap-4 min-w-0">
-                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-red-600 text-2xl">fingerprint</span>
-                </div>
-                <div class="min-w-0">
-                  <h3 class="font-bold text-slate-900">Passport Renewal</h3>
-                  <p class="text-xs text-slate-500 mt-0.5">Ref: PPT-2023-1029</p>
-                </div>
-              </div>
-              <span class="self-start text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold border border-red-200">Action Required</span>
-            </div>
-
-            <div class="mt-5 pt-4 border-t border-red-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <p class="text-sm font-semibold text-red-700">Pending Biometrics</p>
-              </div>
-              <a th:href="@{/citizen/appointments/biometric}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-1.5">
-                <span class="material-symbols-outlined text-sm">calendar_month</span>
-                Schedule Appointment
-              </a>
-            </div>
-          </div>
-        </article>
-      </div>
-      <div th:unless="${hasNic or hasPassport}" class="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center">
-        <span class="material-symbols-outlined text-4xl text-slate-300">assignment_add</span>
-        <p class="font-bold mt-2">No applications yet</p><p class="text-sm text-slate-500 mt-1">Choose New NIC or New Passport above to begin.</p>
-      </div>
-    </section>
-
-    <!-- Appointment -->
-    <section>
-      <h2 class="text-lg font-bold text-slate-900 mb-3">Upcoming Appointments</h2>
-
-      <div th:if="${hasNic or hasPassport}" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-5 flex items-center gap-4 border-b border-slate-100">
-          <div class="w-14 h-14 rounded-xl bg-sky-50 border border-sky-200 flex flex-col items-center justify-center shrink-0">
-            <span class="text-[10px] font-bold uppercase text-red-600">Oct</span>
-            <span class="text-xl leading-none font-bold text-slate-900">24</span>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-slate-900">Biometrics Collection</h3>
-            <p class="text-xs text-slate-500 flex items-center gap-1 mt-1">
-              <span class="material-symbols-outlined text-sm">schedule</span>
-              10:30 AM
-            </p>
-            <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-              <span class="material-symbols-outlined text-sm">location_on</span>
-              City Center Hub
-            </p>
-          </div>
+  <section>
+    <div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold text-slate-900">My Applications</h2><a th:href="@{/citizen/applications}" class="text-sm font-semibold text-sky-700">View all</a></div>
+    <div th:if="${#lists.isEmpty(applications)}" class="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+      <span class="material-symbols-outlined text-4xl text-slate-300">assignment_add</span><p class="font-bold mt-2">No applications yet</p><p class="text-sm text-slate-500 mt-1">Use one of the application buttons above to begin.</p>
+    </div>
+    <div th:unless="${#lists.isEmpty(applications)}" class="space-y-3">
+      <article th:each="application : ${applications}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-start gap-4 min-w-0">
+          <span class="w-11 h-11 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${application.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
+          <div class="min-w-0"><p class="font-bold" th:text="${application.serviceType + ' ' + #strings.toLowerCase(application.applicationKind)}">NIC new</p><p class="text-xs text-slate-500 font-mono mt-1" th:text="${application.applicationNo}">LK-NIC-2026-123456</p><p class="text-xs text-slate-400 mt-1" th:text="${'Created ' + #temporals.format(application.createdAt, 'dd MMM yyyy, HH:mm')}">Created</p></div>
         </div>
-
-        <div class="p-5">
-          <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
-            <img class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="A clean, minimalist 2D vector map illustration showing a generic city grid with subtle blue routing lines and a distinct pinpoint marker on a central building block. The style is modern, flat, and corporate, using light cool greys and soft blues, completely devoid of text." data-location="City Center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2a_1MomlKBIEm-kFhA_HV1u1K-HGjDYPw9MOwKBG6ceg4wu7tb5VqDrKh4QTwmOpl8_CBPk_cOQbg4K1TIFaMz7WfQwUhOifdcaOFXZTVCN3c80GhEQKqyN08PcnGeL-0FW7b3tyqX4Hie8YuwN2tSRe9NpvU0Qfo5ytP_FEdDzx-S3qrPyMOwWDfMJM7jgv69ZTstQ64Rl6bDJ36gBsfB7BzXrOhD3ZTLdWxRBGdLTAoUb-rZw1q" alt="Map showing City Center Hub"/>
-          </div>
-          <button class="w-full mt-3 text-sky-600 hover:text-sky-700 hover:bg-sky-50 py-2 rounded-lg text-sm font-semibold flex justify-center items-center gap-1">
-            Get Directions
-            <span class="material-symbols-outlined text-base">open_in_new</span>
-          </button>
+        <div class="flex items-center gap-3">
+          <span class="text-xs bg-slate-100 text-slate-700 rounded-full px-3 py-1 font-bold" th:text="${#strings.replace(application.currentStatus, '_', ' ')}">DRAFT</span>
+          <a th:if="${application.currentStatus == 'DRAFT'}" th:href="@{/citizen/applications/{service}/documents(service=${#strings.toLowerCase(application.serviceType)},applicationId=${application.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
         </div>
-      </div>
-      <div th:unless="${hasNic or hasPassport}" class="bg-white rounded-2xl border border-dashed border-slate-300 p-5 text-center">
-        <p class="text-sm font-bold">No appointments</p><p class="text-xs text-slate-500 mt-1">Biometric appointments appear after an application is approved.</p>
-      </div>
-      <a th:href="@{/citizen/appointments/walk-in}" class="mt-4 block bg-white rounded-2xl border border-sky-200 p-5 hover:bg-sky-50 transition-colors">
-        <div class="flex gap-3"><span class="material-symbols-outlined text-sky-600">support_agent</span><div><p class="text-sm font-bold">Prefer a physical application?</p><p class="text-xs text-slate-500 mt-1">Book a centre visit for help from a citizen service officer.</p></div></div>
-      </a>
-    </section>
-  </div>
+      </article>
+    </div>
+  </section>
 </main>
-
 </body>
 </html>
