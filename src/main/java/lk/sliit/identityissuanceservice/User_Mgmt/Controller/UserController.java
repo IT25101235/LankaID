@@ -2,7 +2,9 @@ package lk.sliit.identityissuanceservice.User_Mgmt.Controller;
 
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.CitizenRegistrationDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.LoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.OfficerLoginRequestDto;
@@ -25,12 +27,15 @@ public class UserController {
 
     private final UserAccountService userAccountService;
     private final AdminAccountService adminAccountService;
+    private final OfficerAccountService officerAccountService;
 
     public UserController(
             UserAccountService userAccountService,
-            AdminAccountService adminAccountService) {
+            AdminAccountService adminAccountService,
+            OfficerAccountService officerAccountService) {
         this.userAccountService = userAccountService;
         this.adminAccountService = adminAccountService;
+        this.officerAccountService = officerAccountService;
     }
 
     @GetMapping("/")
@@ -135,13 +140,7 @@ public class UserController {
             return "login_portal";
         }
 
-        String dashboardPath = switch (officerLoginRequest.getRole()) {
-            case "nic-officer" -> "/officer/nic/applications";
-            case "passport-officer" -> "/officer/passport/applications";
-            case "csr" -> "/officer/csr";
-            case "director" -> "/officer/director";
-            default -> null;
-        };
+        String dashboardPath = officerAccountService.dashboardForRoleSelection(officerLoginRequest.getRole());
 
         if (dashboardPath == null) {
             bindingResult.rejectValue("role", "role.invalid", "Please select a valid officer role.");
@@ -150,7 +149,31 @@ public class UserController {
             return "login_portal";
         }
 
-        // Temporary flow: authenticate the officer credentials here after the database is connected.
+        Optional<OfficerDetailsDto> authenticatedOfficer = officerAccountService.authenticateOfficer(
+                officerLoginRequest.getEmail(),
+                officerLoginRequest.getPassword(),
+                officerLoginRequest.getRole()
+        );
+
+        if (authenticatedOfficer.isEmpty()) {
+            bindingResult.reject("officer.login.failed", "Invalid officer email, password or selected role.");
+            model.addAttribute("loginRequest", new LoginRequestDto());
+            model.addAttribute("activeTab", "officer");
+            return "login_portal";
+        }
+
+        OfficerDetailsDto officer = authenticatedOfficer.get();
+        session.setAttribute("loggedInOfficerId", officer.getUserId());
+        session.setAttribute("loggedInOfficerEmail", officer.getEmail());
+        session.setAttribute("loggedInOfficerRole", officer.getRoleCode());
+        session.setAttribute("loggedInOfficerRoleLabel", officer.getRoleLabel());
+        session.setAttribute("loggedInOfficerEmployeeNo", officer.getEmployeeNo());
+
+        int sessionTimeout = officerLoginRequest.isRememberMe()
+                ? 7 * 24 * 60 * 60
+                : 30 * 60;
+        session.setMaxInactiveInterval(sessionTimeout);
+
         return "redirect:" + dashboardPath;
     }
 

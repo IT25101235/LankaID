@@ -129,32 +129,37 @@
   <!-- ===== USER MANAGEMENT ===== -->
   <div id="section-users" class="p-6">
 
+    <div th:if="${officerCreatedMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${officerCreatedMessage}">
+      Officer account created successfully.
+    </div>
+    <div th:if="${officerActionMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${officerActionMessage}">
+      Officer account updated successfully.
+    </div>
+    <div th:if="${officerActionError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${officerActionError}">
+      Unable to update the officer account.
+    </div>
+
     <!-- Stats -->
-    <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-slate-900">1,247</p>
-        <p class="text-xs text-slate-600 mt-1">Citizens</p>
-        <div class="w-8 h-1 bg-sky-500 rounded-full mx-auto mt-2"></div>
-      </div>
-      <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-slate-900">8</p>
-        <p class="text-xs text-slate-600 mt-1">NIC Officers</p>
+        <p class="text-2xl font-bold text-slate-900" th:text="${nicOfficerCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">NIC Application Officers</p>
         <div class="w-8 h-1 bg-emerald-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-slate-900">5</p>
-        <p class="text-xs text-slate-600 mt-1">Passport Officers</p>
+        <p class="text-2xl font-bold text-slate-900" th:text="${passportOfficerCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Passport Application Officers</p>
         <div class="w-8 h-1 bg-indigo-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-slate-900">6</p>
-        <p class="text-xs text-slate-600 mt-1">CSR Staff</p>
+        <p class="text-2xl font-bold text-slate-900" th:text="${csrCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">CSR Officers</p>
         <div class="w-8 h-1 bg-cyan-500 rounded-full mx-auto mt-2"></div>
       </div>
       <div class="card p-4 text-center">
-        <p class="text-2xl font-bold text-slate-900">3</p>
-        <p class="text-xs text-slate-600 mt-1">Admins/Directors</p>
-        <div class="w-8 h-1 bg-red-500 rounded-full mx-auto mt-2"></div>
+        <p class="text-2xl font-bold text-slate-900" th:text="${directorCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Directors</p>
+        <div class="w-8 h-1 bg-purple-500 rounded-full mx-auto mt-2"></div>
       </div>
     </div>
 
@@ -162,21 +167,19 @@
     <div class="card p-4 mb-4 flex flex-wrap gap-3 items-center">
       <div class="flex-1 min-w-48 relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-        <input type="text" placeholder="Search by name, email, NIC..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500"/>
+        <input id="officerSearch" type="text" placeholder="Search by email, phone or employee ID" oninput="filterUsers()" class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500"/>
       </div>
       <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200" id="roleFilter" onchange="filterUsers()">
         <option value="">All Roles</option>
-        <option value="nic-officer">NIC Officer</option>
-        <option value="passport-officer">Passport Officer</option>
+        <option value="nic-officer">NIC Application Officer</option>
+        <option value="passport-officer">Passport Application Officer</option>
         <option value="csr">CSR</option>
         <option value="director">Director</option>
-        <option value="admin">System Admin</option>
       </select>
-      <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200">
-        <option>All Status</option>
-        <option>Active</option>
-        <option>Suspended</option>
-        <option>Inactive</option>
+      <select id="statusFilter" onchange="filterUsers()" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="suspended">Suspended</option>
       </select>
     </div>
 
@@ -185,69 +188,63 @@
       <table class="w-full text-sm light-admin-table" id="usersTable">
         <thead class="border-b border-slate-800">
           <tr class="text-xs text-slate-500">
-            <th class="text-left px-4 py-3 font-semibold uppercase">User</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Email</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Role</th>
-            <th class="text-left px-4 py-3 font-semibold uppercase">NIC / ID</th>
-            <th class="text-left px-4 py-3 font-semibold uppercase">Centre / District</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Employee ID</th>
+            <th class="text-left px-4 py-3 font-semibold uppercase">Phone</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Status</th>
-            <th class="text-left px-4 py-3 font-semibold uppercase">Last Login</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-800 text-slate-300">
-          <tr class="hidden" data-role="citizen">
-            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-sky-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-sky-400 text-base">person</span></div><div><p class="font-semibold text-white text-sm">Kamal Sandesh Perera</p><p class="text-xs text-slate-400">kamal.p@gmail.com</p></div></div></td>
-            <td class="px-4 py-3"><span class="text-xs bg-sky-900/50 text-sky-400 px-2 py-0.5 rounded-full border border-sky-800">Citizen</span></td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-400">200012349876</td>
-            <td class="px-4 py-3 text-xs text-slate-400">Colombo</td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
-            <td class="px-4 py-3"><div class="flex gap-1"><button onclick="editUser('Kamal Perera')" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button><button onclick="suspendUser(this)" class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400 transition-colors"><span class="material-symbols-outlined text-sm">block</span></button><button onclick="deleteUser(this)" class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          <tr th:if="${#lists.isEmpty(officers)}">
+            <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">No officer accounts have been created yet.</td>
           </tr>
-          <tr class="hover:bg-slate-800/50 transition-colors" data-role="nic-officer">
-            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-emerald-400 text-base">badge</span></div><div><p class="font-semibold text-white text-sm">Nimal Jayawardena</p><p class="text-xs text-slate-400">nimal.j@lankaid.gov.lk</p></div></div></td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800">NIC Officer</span></td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-NIC-001</td>
-            <td class="px-4 py-3 text-xs text-slate-400">Colombo Main Centre</td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
-            <td class="px-4 py-3"><div class="flex gap-1"><button onclick="editUser('Nimal Jayawardena')" class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400 transition-colors"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400 transition-colors"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
-          </tr>
-          <tr class="hover:bg-slate-800/50 transition-colors" data-role="nic-officer">
-            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-emerald-400 text-base">badge</span></div><div><p class="font-semibold text-white text-sm">Kumara Silva</p><p class="text-xs text-slate-400">kumara.s@lankaid.gov.lk</p></div></div></td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800">NIC Officer</span></td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-NIC-002</td>
-            <td class="px-4 py-3 text-xs text-slate-400">Colombo North Centre</td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Aug 14, 2026</td>
-            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
-          </tr>
-          <tr class="hover:bg-slate-800/50 transition-colors" data-role="passport-officer">
-            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-indigo-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-indigo-400 text-base">flight_takeoff</span></div><div><p class="font-semibold text-white text-sm">Dilani Rathnayake</p><p class="text-xs text-slate-400">dilani.r@lankaid.gov.lk</p></div></div></td>
-            <td class="px-4 py-3"><span class="text-xs bg-indigo-900/50 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-800">Passport Officer</span></td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-PASS-001</td>
-            <td class="px-4 py-3 text-xs text-slate-400">Colombo Main Centre</td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
-            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
-          </tr>
-          <tr class="hover:bg-slate-800/50 transition-colors" data-role="csr">
-            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-cyan-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-cyan-400 text-base">support_agent</span></div><div><p class="font-semibold text-white text-sm">Amara Wijesinghe</p><p class="text-xs text-slate-400">amara.w@lankaid.gov.lk</p></div></div></td>
-            <td class="px-4 py-3"><span class="text-xs bg-cyan-900/50 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800">CSR</span></td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-CSR-001</td>
-            <td class="px-4 py-3 text-xs text-slate-400">Colombo Main Centre</td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
-            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
-          </tr>
-          <tr class="hover:bg-slate-800/50 transition-colors" data-role="director">
-            <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-purple-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-purple-400 text-base">admin_panel_settings</span></div><div><p class="font-semibold text-white text-sm">Sunil Amarasinghe</p><p class="text-xs text-slate-400">sunil.a@lankaid.gov.lk</p></div></div></td>
-            <td class="px-4 py-3"><span class="text-xs bg-purple-900/50 text-purple-400 px-2 py-0.5 rounded-full border border-purple-800">Director</span></td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-400">EMP-DIR-001</td>
-            <td class="px-4 py-3 text-xs text-slate-400">Head Office</td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Active</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Aug 15, 2026</td>
-            <td class="px-4 py-3"><div class="flex gap-1"><button class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300"><span class="material-symbols-outlined text-sm">edit</span></button><button class="p-1.5 rounded-lg bg-slate-700 cursor-not-allowed opacity-40"><span class="material-symbols-outlined text-sm">block</span></button><button class="p-1.5 rounded-lg bg-slate-700 cursor-not-allowed opacity-40"><span class="material-symbols-outlined text-sm">delete</span></button></div></td>
+          <tr th:each="officer : ${officers}"
+              class="hover:bg-slate-800/50 transition-colors officer-row"
+              th:attr="data-role=${officer.roleFilter},data-status=${#strings.toLowerCase(officer.status)},data-search=${#strings.toLowerCase(officer.email + ' ' + officer.phone + ' ' + officer.employeeNo)}">
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-cyan-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-cyan-400 text-base">badge</span></div>
+                <p class="font-semibold text-white text-sm" th:text="${officer.email}">officer@gov.lk</p>
+              </div>
+            </td>
+            <td class="px-4 py-3"><span class="text-xs bg-cyan-900/50 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800" th:text="${officer.roleLabel}">Officer</span></td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-400" th:text="${officer.employeeNo}">EMP-001</td>
+            <td class="px-4 py-3 text-xs text-slate-400" th:text="${officer.phone}">+94770000000</td>
+            <td class="px-4 py-3">
+              <span th:if="${officer.status == 'ACTIVE'}" class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full" th:text="${officer.status}">ACTIVE</span>
+              <span th:if="${officer.status == 'SUSPENDED'}" class="text-xs bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full" th:text="${officer.status}">SUSPENDED</span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex gap-1">
+                <button type="button"
+                        onclick="openEditOfficer(this)"
+                        th:attr="data-user-id=${officer.userId},data-email=${officer.email},data-phone=${officer.phone},data-role=${officer.roleFilter}"
+                        title="Edit officer"
+                        class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+
+                <form th:if="${officer.status == 'ACTIVE'}" th:action="@{/officer/admin/officers/{id}/status(id=${officer.userId})}" method="post" onsubmit="return confirm('Disable this officer account?');">
+                  <button type="submit" title="Disable officer" class="p-1.5 rounded-lg bg-slate-700 hover:bg-amber-900/50 text-slate-300 hover:text-amber-400 transition-colors">
+                    <span class="material-symbols-outlined text-sm">block</span>
+                  </button>
+                </form>
+
+                <form th:if="${officer.status == 'SUSPENDED'}" th:action="@{/officer/admin/officers/{id}/status(id=${officer.userId})}" method="post" onsubmit="return confirm('Reactivate this officer account?');">
+                  <button type="submit" title="Reactivate officer" class="p-1.5 rounded-lg bg-slate-700 hover:bg-emerald-900/50 text-slate-300 hover:text-emerald-400 transition-colors">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                  </button>
+                </form>
+
+                <form th:action="@{/officer/admin/officers/{id}/delete(id=${officer.userId})}" method="post" onsubmit="return confirm('Delete this officer account? This action cannot be undone from the dashboard.');">
+                  <button type="submit" title="Delete officer" class="p-1.5 rounded-lg bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-400 transition-colors">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                </form>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -356,11 +353,11 @@
       <h2 class="font-bold text-slate-900 text-base mb-4">Roles & Permissions</h2>
       <div class="space-y-3">
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen</span></div><span class="text-xs font-medium text-slate-600">1,247 users</span></div><p class="text-xs leading-5 text-slate-600">Can apply for NIC/Passport, track applications, book appointments, file complaints, receive notifications.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-slate-900 text-sm">NIC Application Officer</span></div><span class="text-xs font-medium text-slate-600">8 users</span></div><p class="text-xs leading-5 text-slate-600">Can review NIC applications, approve/reject/request-info, collect biometric data, view NIC queue.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-slate-900 text-sm">Passport Application Officer</span></div><span class="text-xs font-medium text-slate-600">5 users</span></div><p class="text-xs leading-5 text-slate-600">Can review Passport applications, approve/reject/request-info, collect biometric data, view Passport queue.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen Service Representative</span></div><span class="text-xs font-medium text-slate-600">6 users</span></div><p class="text-xs leading-5 text-slate-600">Can manage complaints, respond to citizens, manage walk-in bookings, view appointment schedules.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="font-semibold text-slate-900 text-sm">Identity Service Director</span></div><span class="text-xs font-medium text-slate-600">1 user</span></div><p class="text-xs leading-5 text-slate-600">Can view all dashboards, system stats, officer performance, application metrics, and all complaints.</p></div>
-        <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-600"></span><span class="font-semibold text-slate-900 text-sm">System Administrator</span></div><span class="text-xs font-medium text-slate-600">1 fixed account</span></div><p class="text-xs leading-5 text-slate-600">Full system access. This account is created by the system and cannot be created through the officer management form.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-slate-900 text-sm">NIC Application Officer</span></div><span class="text-xs font-medium text-slate-600" th:text="|${nicOfficerCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can review NIC applications, approve/reject/request-info, collect biometric data, view NIC queue.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-slate-900 text-sm">Passport Application Officer</span></div><span class="text-xs font-medium text-slate-600" th:text="|${passportOfficerCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can review Passport applications, approve/reject/request-info, collect biometric data, view Passport queue.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen Service Representative</span></div><span class="text-xs font-medium text-slate-600" th:text="|${csrCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can manage complaints, respond to citizens, manage walk-in bookings, view appointment schedules.</p></div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="font-semibold text-slate-900 text-sm">Identity Service Director</span></div><span class="text-xs font-medium text-slate-600" th:text="|${directorCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can access the Director, NIC, Passport and CSR dashboards.</p></div>
+        <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-600"></span><span class="font-semibold text-slate-900 text-sm">System Administrator</span></div><span class="text-xs font-medium text-slate-600">1 fixed account</span></div><p class="text-xs leading-5 text-slate-600">Manages accounts and system settings through the Admin Portal. This account cannot open operational officer dashboards or be created through the form.</p></div>
       </div>
     </div>
   </div>
@@ -368,33 +365,99 @@
 </main>
 
 <!-- Add User Modal -->
-<div id="addUserModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
-  <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+<div id="addUserModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal" th:attr="data-open=${openOfficerModal}">
+  <form th:action="@{/officer/admin/officers}" th:object="${officerRegistration}" method="post" class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
     <div class="flex items-center justify-between mb-5">
       <h2 class="font-bold text-white text-base flex items-center gap-2">
         <span class="material-symbols-outlined text-red-400">person_add</span>
         Create Officer Credentials
       </h2>
-      <button onclick="closeAddUser()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+      <button type="button" onclick="closeAddUser()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
     </div>
+
+    <p class="mb-4 text-xs text-slate-400">Employee ID will be generated automatically after the role is selected.</p>
+
+    <div th:if="${#fields.hasGlobalErrors()}" class="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+      <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to create officer.</p>
+    </div>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="sm:col-span-2"><label class="block text-xs text-slate-400 mb-1.5">Full Name <span class="text-red-400">*</span></label><input type="text" placeholder="Full legal name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label><input type="email" placeholder="user@lankaid.gov.lk" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">NIC Number <span class="text-red-400">*</span></label><input type="text" placeholder="200012345678" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">Assign Role <span class="text-red-400">*</span></label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option value="">Select Role</option><option>NIC Officer</option><option>Passport Officer</option><option>CSR</option><option>Director</option></select></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">Centre / District</label><select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"><option>Colombo Main Centre</option><option>Colombo North Centre</option><option>Dehiwala Centre</option><option>Kandy Centre</option><option>Galle Centre</option><option>Head Office</option></select></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">Phone Number</label><input type="tel" placeholder="+94 77 123 4567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
-      <div><label class="block text-xs text-slate-400 mb-1.5">Temporary Password <span class="text-red-400">*</span></label><input type="password" placeholder="Min 8 characters" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/></div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label>
+        <input type="email" th:field="*{email}" required maxlength="100" placeholder="officer@gov.lk" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">Phone Number <span class="text-red-400">*</span></label>
+        <input type="tel" th:field="*{phone}" required maxlength="15" pattern="\+?[0-9]{10,14}" placeholder="+94771234567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1.5">Assign Role <span class="text-red-400">*</span></label>
+        <select th:field="*{role}" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white">
+          <option value="">Select Role</option>
+          <option value="director">Director</option>
+          <option value="csr">Citizen Service Representative</option>
+          <option value="nic-officer">NIC Application Officer</option>
+          <option value="passport-officer">Passport Application Officer</option>
+        </select>
+        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs text-slate-400 mb-1.5">Temporary Password <span class="text-red-400">*</span></label>
+        <input type="password" th:field="*{password}" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimum 8 characters" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+      </div>
     </div>
-    <label class="flex items-center gap-2 mt-3 text-xs text-slate-400 cursor-pointer">
-      <input type="checkbox" class="rounded" checked/>
-      Send welcome email with login credentials
-    </label>
     <div class="flex gap-3 mt-5">
-      <button onclick="closeAddUser()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
-      <button onclick="createUser()" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Create Officer</button>
+      <button type="button" onclick="closeAddUser()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+      <button type="submit" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Create Officer</button>
     </div>
-  </div>
+  </form>
+</div>
+
+<!-- Edit Officer Modal -->
+<div id="editOfficerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
+  <form id="editOfficerForm" method="post" class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-bold text-white text-base flex items-center gap-2">
+        <span class="material-symbols-outlined text-cyan-400">edit</span>
+        Edit Officer Credentials
+      </h2>
+      <button type="button" onclick="closeEditOfficer()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+    </div>
+
+    <p class="mb-4 text-xs text-slate-400">Leave the new password empty to keep the current password.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label for="editOfficerEmail" class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label>
+        <input id="editOfficerEmail" name="email" type="email" required maxlength="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
+      </div>
+      <div>
+        <label for="editOfficerPhone" class="block text-xs text-slate-400 mb-1.5">Phone Number <span class="text-red-400">*</span></label>
+        <input id="editOfficerPhone" name="phone" type="tel" required maxlength="15" pattern="\+?[0-9]{10,14}" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
+      </div>
+      <div>
+        <label for="editOfficerRole" class="block text-xs text-slate-400 mb-1.5">Role <span class="text-red-400">*</span></label>
+        <select id="editOfficerRole" name="role" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white">
+          <option value="director">Director</option>
+          <option value="csr">Citizen Service Representative</option>
+          <option value="nic-officer">NIC Application Officer</option>
+          <option value="passport-officer">Passport Application Officer</option>
+        </select>
+      </div>
+      <div>
+        <label for="editOfficerPassword" class="block text-xs text-slate-400 mb-1.5">New Password</label>
+        <input id="editOfficerPassword" name="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Optional" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-5">
+      <button type="button" onclick="closeEditOfficer()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+      <button type="submit" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Save Changes</button>
+    </div>
+  </form>
 </div>
 
 <script>
@@ -436,15 +499,35 @@ function closeAddUser() {
   const m = document.getElementById('addUserModal');
   m.classList.add('hidden'); m.classList.remove('flex');
 }
-function createUser() { alert('User created and welcome email sent!'); closeAddUser(); }
-function editUser(name) { alert('Edit user: ' + name); }
-function suspendUser(btn) { alert('User account suspended.'); }
-function deleteUser(btn) { if (confirm('Delete this user? This cannot be undone.')) { btn.closest('tr').remove(); } }
+
+function openEditOfficer(button) {
+  const form = document.getElementById('editOfficerForm');
+  form.action = '/officer/admin/officers/' + button.dataset.userId + '/edit';
+  document.getElementById('editOfficerEmail').value = button.dataset.email;
+  document.getElementById('editOfficerPhone').value = button.dataset.phone;
+  document.getElementById('editOfficerRole').value = button.dataset.role;
+  document.getElementById('editOfficerPassword').value = '';
+
+  const modal = document.getElementById('editOfficerModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeEditOfficer() {
+  const modal = document.getElementById('editOfficerModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
 
 function filterUsers() {
   const role = document.getElementById('roleFilter').value;
-  document.querySelectorAll('#usersTable tbody tr').forEach(tr => {
-    tr.style.display = (!role || tr.dataset.role === role) ? '' : 'none';
+  const status = document.getElementById('statusFilter').value;
+  const query = document.getElementById('officerSearch').value.toLowerCase().trim();
+  document.querySelectorAll('#usersTable tbody tr.officer-row').forEach(tr => {
+    const matchesRole = !role || tr.dataset.role === role;
+    const matchesStatus = !status || tr.dataset.status === status;
+    const matchesSearch = !query || tr.dataset.search.includes(query);
+    tr.style.display = matchesRole && matchesStatus && matchesSearch ? '' : 'none';
   });
 }
 
@@ -503,6 +586,8 @@ function sendNotification(event) {
 document.addEventListener('DOMContentLoaded', () => {
   const requestedSection = new URLSearchParams(window.location.search).get('section');
   if (requestedSection) showSection(requestedSection);
+  const officerModal = document.getElementById('addUserModal');
+  if (officerModal && officerModal.dataset.open === 'true') openAddUser();
 });
 </script>
 </body>

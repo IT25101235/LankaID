@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,11 +39,15 @@ public class NIC_ApplicationController {
     }
 
     @GetMapping("/officer/nic/applications")
-    public String nicApplicationQueue(HttpSession session) {
+    public String nicApplicationQueue(HttpSession session, Model model) {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
         }
+        if (!canAccessNicOfficerPages(session)) {
+            return "redirect:/login";
+        }
 
+        addLoggedInOfficer(model, session);
         return "officers_frontends/nic_verification_queue";
     }
 
@@ -50,6 +55,9 @@ public class NIC_ApplicationController {
     public String processedNicApplications(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
+        }
+        if (!canAccessNicOfficerPages(session)) {
+            return "redirect:/login";
         }
 
         addOfficerPageData(model, "NIC", "/officer/nic/applications", "/officer/nic/biometrics");
@@ -60,6 +68,9 @@ public class NIC_ApplicationController {
     public String reviewNicApplication(@PathVariable String reference, Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
+        }
+        if (!canAccessNicOfficerPages(session)) {
+            return "redirect:/login";
         }
 
         addOfficerPageData(model, "NIC", "/officer/nic/applications", "/officer/nic/biometrics");
@@ -72,5 +83,17 @@ public class NIC_ApplicationController {
         model.addAttribute("documentType", documentType);
         model.addAttribute("queueRoute", queueRoute);
         model.addAttribute("biometricRoute", biometricRoute);
+    }
+
+    private boolean canAccessNicOfficerPages(HttpSession session) {
+        Object role = session.getAttribute("loggedInOfficerRole");
+        return OfficerAccountService.NIC_OFFICER.equals(role)
+                || OfficerAccountService.DIRECTOR.equals(role);
+    }
+
+    private void addLoggedInOfficer(Model model, HttpSession session) {
+        model.addAttribute("loggedInOfficerRoleLabel", session.getAttribute("loggedInOfficerRoleLabel"));
+        model.addAttribute("loggedInOfficerEmployeeNo", session.getAttribute("loggedInOfficerEmployeeNo"));
+        model.addAttribute("loggedInOfficerEmail", session.getAttribute("loggedInOfficerEmail"));
     }
 }

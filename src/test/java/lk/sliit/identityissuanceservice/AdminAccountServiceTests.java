@@ -1,7 +1,7 @@
 package lk.sliit.identityissuanceservice;
 
-import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.AdminAccount;
-import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.AdminAccountRepository;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.StaffAccount;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.StaffAccountRepository;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
@@ -28,7 +28,7 @@ class AdminAccountServiceTests {
     private UserAccountRepository userAccountRepository;
 
     @Mock
-    private AdminAccountRepository adminAccountRepository;
+    private StaffAccountRepository staffAccountRepository;
 
     @Test
     void createsTheFixedAdminWithAHashedPassword() {
@@ -39,11 +39,11 @@ class AdminAccountServiceTests {
             user.setUserId(50);
             return user;
         });
-        when(adminAccountRepository.findById(50)).thenReturn(Optional.empty());
+        when(staffAccountRepository.findById(50)).thenReturn(Optional.empty());
 
         AdminAccountService service = new AdminAccountService(
                 userAccountRepository,
-                adminAccountRepository
+                staffAccountRepository
         );
 
         service.createDefaultAdminAccount();
@@ -57,8 +57,8 @@ class AdminAccountServiceTests {
         assertEquals("Y", savedUser.getEmailVerified());
         assertTrue(new BCryptPasswordEncoder().matches("admin12345", savedUser.getPasswordHash()));
 
-        ArgumentCaptor<AdminAccount> adminCaptor = ArgumentCaptor.forClass(AdminAccount.class);
-        verify(adminAccountRepository).save(adminCaptor.capture());
+        ArgumentCaptor<StaffAccount> adminCaptor = ArgumentCaptor.forClass(StaffAccount.class);
+        verify(staffAccountRepository).save(adminCaptor.capture());
         assertEquals(50, adminCaptor.getValue().getUserId());
         assertEquals("ADMIN-001", adminCaptor.getValue().getEmployeeNo());
         assertEquals("SYSTEM_ADMIN", adminCaptor.getValue().getStaffRole());
@@ -75,7 +75,7 @@ class AdminAccountServiceTests {
                 "admin@gov.lk",
                 "ACTIVE"
         )).thenReturn(Optional.of(user));
-        when(adminAccountRepository.existsByUserIdAndStaffRoleAndStaffStatus(
+        when(staffAccountRepository.existsByUserIdAndStaffRoleAndStaffStatus(
                 50,
                 "SYSTEM_ADMIN",
                 "ACTIVE"
@@ -83,7 +83,7 @@ class AdminAccountServiceTests {
 
         AdminAccountService service = new AdminAccountService(
                 userAccountRepository,
-                adminAccountRepository
+                staffAccountRepository
         );
 
         assertTrue(service.authenticateAdmin("ADMIN@gov.lk", "admin12345").isPresent());
