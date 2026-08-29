@@ -1,6 +1,8 @@
 package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -31,4 +33,22 @@ public interface CitizenApplicationRepository extends JpaRepository<CitizenAppli
     List<CitizenApplication> findAllByCurrentStatusOrderByUpdatedAtAsc(String currentStatus);
 
     List<CitizenApplication> findAllByCurrentStatusOrderByUpdatedAtDesc(String currentStatus);
+
+    Page<CitizenApplication> findAllByOrderByUpdatedAtDesc(Pageable pageable);
+
+    Page<CitizenApplication> findAllByServiceTypeOrderByUpdatedAtDesc(
+            String serviceType,
+            Pageable pageable
+    );
+
+    Page<CitizenApplication> findAllByApplicationNoContainingIgnoreCaseOrderByUpdatedAtDesc(
+            String applicationNo,
+            Pageable pageable
+    );
+
+    Page<CitizenApplication> findAllByServiceTypeAndApplicationNoContainingIgnoreCaseOrderByUpdatedAtDesc(
+            String serviceType,
+            String applicationNo,
+            Pageable pageable
+    );
 }

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Application Tracking | LankaID Officer Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <style>
+    body{font-family:'Public Sans',sans-serif}
+    th{white-space:nowrap}
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+<header class="bg-slate-950 text-white border-b border-slate-800">
+  <div class="max-w-[1600px] mx-auto min-h-16 px-4 sm:px-6 py-3 flex flex-wrap items-center gap-4">
+    <a th:href="${backRoute}" class="text-sm text-slate-300 hover:text-white flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>Back
+    </a>
+    <div class="h-6 w-px bg-slate-700"></div>
+    <div>
+      <p class="font-bold">Application Tracking</p>
+      <p class="text-xs text-cyan-400" th:text="${scopeLabel}">Application scope</p>
+    </div>
+    <div class="ml-auto text-right">
+      <p class="text-xs font-semibold" th:text="${loggedInOfficerRoleLabel}">Officer</p>
+      <p class="text-[11px] text-slate-400" th:text="${loggedInOfficerEmployeeNo + ' · ' + loggedInOfficerEmail}">Employee</p>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1600px] mx-auto p-4 sm:p-6">
+  <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold">Track applications</h1>
+      <p class="text-sm text-slate-500 mt-1">Showing 15 applications at a time for faster loading.</p>
+    </div>
+    <form th:action="@{/officer/application-tracking}" method="get" class="flex gap-2 w-full lg:w-auto">
+      <input name="search" th:value="${search}" class="rounded-xl border-slate-300 text-sm w-full lg:w-80" placeholder="Search application reference"/>
+      <button class="rounded-xl bg-sky-600 text-white px-5 py-2.5 text-sm font-bold">Search</button>
+      <a th:if="${!#strings.isEmpty(search)}" th:href="@{/officer/application-tracking}" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold">Clear</a>
+    </form>
+  </div>
+
+  <div class="mt-5 flex items-center justify-between gap-3 text-sm">
+    <p class="text-slate-500">
+      <span class="font-bold text-slate-800" th:text="${totalApplications}">0</span>
+      <span th:text="${totalApplications == 1 ? ' application' : ' applications'}"> applications</span>
+    </p>
+    <p th:if="${totalPages > 0}" class="text-slate-500" th:text="${'Page ' + (currentPage + 1) + ' of ' + totalPages}">Page 1 of 1</p>
+  </div>
+
+  <div th:if="${#lists.isEmpty(trackingItems)}" class="mt-4 bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+    <span class="material-symbols-outlined text-5xl text-slate-300">manage_search</span>
+    <p class="font-bold mt-2">No applications found</p>
+    <p class="text-sm text-slate-500 mt-1">Check the application reference and try again.</p>
+  </div>
+
+  <section th:unless="${#lists.isEmpty(trackingItems)}" class="mt-4 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1350px] text-left text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+        <tr>
+          <th class="px-4 py-3">Application</th>
+          <th class="px-4 py-3">Citizen</th>
+          <th class="px-4 py-3">Service</th>
+          <th class="px-4 py-3">Application status</th>
+          <th class="px-4 py-3">Verification</th>
+          <th class="px-4 py-3">Payment</th>
+          <th class="px-4 py-3">Appointment</th>
+          <th class="px-4 py-3">Biometrics</th>
+          <th class="px-4 py-3">Delivery / Collection</th>
+          <th class="px-4 py-3">Last updated</th>
+        </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+        <tr th:each="item : ${trackingItems}" class="align-top hover:bg-sky-50/40">
+          <td class="px-4 py-4">
+            <p class="font-mono text-xs font-bold text-sky-700" th:text="${item.application.applicationNo}">APP-001</p>
+            <p class="text-xs text-slate-500 mt-1" th:text="${#strings.replace(item.application.applicationKind, '_', ' ')}">NEW</p>
+          </td>
+          <td class="px-4 py-4">
+            <p class="font-semibold whitespace-nowrap" th:text="${item.citizenName}">Citizen</p>
+            <p class="text-xs text-slate-500 mt-1" th:text="${item.citizenEmail}">Email</p>
+          </td>
+          <td class="px-4 py-4">
+            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold"
+                  th:classappend="${item.application.serviceType == 'NIC' ? ' bg-sky-100 text-sky-700' : ' bg-indigo-100 text-indigo-700'}"
+                  th:text="${item.application.serviceType}">NIC</span>
+          </td>
+          <td class="px-4 py-4">
+            <span class="inline-flex rounded-full bg-slate-100 text-slate-700 px-2.5 py-1 text-xs font-bold whitespace-nowrap"
+                  th:text="${#strings.replace(item.application.currentStatus, '_', ' ')}">SUBMITTED</span>
+          </td>
+          <td class="px-4 py-4">
+            <p class="font-semibold whitespace-nowrap" th:text="${item.latestReview == null ? 'Waiting for review' : #strings.replace(item.latestReview.decision, '_', ' ')}">Waiting</p>
+            <p th:if="${item.latestReview != null and item.latestReview.reviewedAt != null}" class="text-xs text-slate-500 mt-1"
+               th:text="${#temporals.format(item.latestReview.reviewedAt, 'dd MMM yyyy, HH:mm')}">Reviewed</p>
+          </td>
+          <td class="px-4 py-4">
+            <p th:if="${item.payment == null}" class="text-slate-500">Not paid</p>
+            <div th:if="${item.payment != null}">
+              <p class="font-semibold text-emerald-700" th:text="${item.payment.paymentStatus}">PAID</p>
+              <p class="text-xs text-slate-500 mt-1" th:text="${'LKR ' + #numbers.formatDecimal(item.payment.amount, 1, 2)}">LKR 0.00</p>
+            </div>
+          </td>
+          <td class="px-4 py-4">
+            <p th:if="${item.appointment == null}" class="text-slate-500">Not booked</p>
+            <div th:if="${item.appointment != null}">
+              <p class="font-semibold whitespace-nowrap" th:text="${#strings.replace(item.appointment.appointmentStatus, '_', ' ')}">BOOKED</p>
+              <p th:if="${item.appointment.scheduledAt != null}" class="text-xs text-slate-500 mt-1 whitespace-nowrap"
+                 th:text="${#temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, HH:mm')}">Date</p>
+            </div>
+          </td>
+          <td class="px-4 py-4">
+            <p class="font-semibold whitespace-nowrap"
+               th:text="${item.biometric == null ? 'Not collected' : #strings.replace(item.biometric.collectionStatus, '_', ' ')}">Not collected</p>
+          </td>
+          <td class="px-4 py-4">
+            <p th:if="${item.delivery == null}" class="text-slate-500">Not selected</p>
+            <div th:if="${item.delivery != null}">
+              <p class="font-semibold whitespace-nowrap" th:text="${#strings.replace(item.delivery.deliveryStatus, '_', ' ')}">PREPARING</p>
+              <p class="text-xs text-slate-500 mt-1" th:text="${#strings.replace(item.delivery.deliveryMethod, '_', ' ')}">Method</p>
+              <p th:if="${item.delivery.trackingReference != null}" class="font-mono text-[11px] text-slate-400 mt-1" th:text="${item.delivery.trackingReference}">Reference</p>
+            </div>
+          </td>
+          <td class="px-4 py-4 text-xs text-slate-500 whitespace-nowrap"
+              th:text="${item.application.updatedAt == null ? 'Unavailable' : #temporals.format(item.application.updatedAt, 'dd MMM yyyy, HH:mm')}">Updated</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav th:if="${totalPages > 1}" class="mt-5 flex items-center justify-between gap-3" aria-label="Application pages">
+    <a th:if="${hasPrevious}"
+       th:href="@{/officer/application-tracking(page=${currentPage - 1},search=${search})}"
+       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold hover:bg-slate-50">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>Previous 15
+    </a>
+    <span th:unless="${hasPrevious}"></span>
+
+    <span class="text-sm text-slate-500" th:text="${'Page ' + (currentPage + 1) + ' of ' + totalPages}">Page</span>
+
+    <a th:if="${hasNext}"
+       th:href="@{/officer/application-tracking(page=${currentPage + 1},search=${search})}"
+       class="inline-flex items-center gap-2 rounded-xl bg-sky-600 text-white px-4 py-2.5 text-sm font-bold hover:bg-sky-700">
+      Load next 15<span class="material-symbols-outlined text-lg">arrow_forward</span>
+    </a>
+    <span th:unless="${hasNext}"></span>
+  </nav>
+</main>
+</body>
+</html>

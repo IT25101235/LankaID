@@ -41,12 +41,13 @@
   </div>
 
   <div th:if="${applicationMessage}" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${applicationMessage}"></div>
+  <div th:if="${applicationError}" class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${applicationError}"></div>
   <div th:if="${#lists.isEmpty(applications)}" class="mt-6 bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center">
     <span class="material-symbols-outlined text-5xl text-slate-300">description</span><p class="font-bold mt-2">No applications found</p><p class="text-sm text-slate-500 mt-1">Return to the dashboard to start a NIC or passport application.</p>
   </div>
 
   <div th:unless="${#lists.isEmpty(applications)}" class="space-y-4 mt-6">
-    <article th:each="citizenApplication : ${applications}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <article th:each="citizenApplication : ${applications}" th:with="deliveryInfo=${deliveryByApplicationId.get(citizenApplication.applicationId)}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div class="flex gap-4">
           <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
@@ -54,15 +55,16 @@
         </div>
         <span class="self-start text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1.5 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
       </div>
-      <div class="application-progress mt-6 overflow-x-auto pb-1" th:attr="data-status=${citizenApplication.currentStatus}">
+      <div class="application-progress mt-6 overflow-x-auto pb-1" th:attr="data-status=${citizenApplication.currentStatus},data-delivery-status=${deliveryInfo == null ? '' : deliveryInfo.delivery.deliveryStatus}">
         <div class="application-progress-line"></div>
-        <div class="grid grid-cols-6 min-w-[600px]">
+        <div class="grid grid-cols-7 min-w-[680px]">
           <div class="progress-step"><span class="progress-dot">1</span><span class="block text-[10px] mt-2">Application</span></div>
           <div class="progress-step"><span class="progress-dot">2</span><span class="block text-[10px] mt-2">Verification</span></div>
           <div class="progress-step"><span class="progress-dot">3</span><span class="block text-[10px] mt-2">Approved</span></div>
           <div class="progress-step"><span class="progress-dot">4</span><span class="block text-[10px] mt-2">Appointment</span></div>
           <div class="progress-step"><span class="progress-dot">5</span><span class="block text-[10px] mt-2">Biometrics</span></div>
           <div class="progress-step"><span class="progress-dot">6</span><span class="block text-[10px] mt-2">Printed</span></div>
+          <div class="progress-step"><span class="progress-dot">7</span><span class="block text-[10px] mt-2">Delivery</span></div>
         </div>
       </div>
       <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -72,24 +74,42 @@
         <a th:if="${citizenApplication.currentStatus == 'APPROVED'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Pay &amp; book biometrics</a>
         <a th:if="${citizenApplication.currentStatus == 'APPOINTMENT_BOOKED'}" th:href="@{/citizen/appointments/biometric(applicationId=${citizenApplication.applicationId})}" class="bg-sky-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">View appointment pass</a>
         <span th:if="${citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED'}" class="text-sm font-bold text-purple-700">Biometrics collected · Ready for printing</span>
-        <span th:if="${citizenApplication.currentStatus == 'PRINTED'}" class="text-sm font-bold text-emerald-700">Document printed</span>
-        <span th:if="${citizenApplication.currentStatus != 'DRAFT' and citizenApplication.currentStatus != 'CORRECTION_REQUIRED' and citizenApplication.currentStatus != 'APPROVED' and citizenApplication.currentStatus != 'APPOINTMENT_BOOKED' and citizenApplication.currentStatus != 'BIOMETRIC_COLLECTED' and citizenApplication.currentStatus != 'PRINTED'}" class="text-sm font-semibold text-slate-500">Submitted for processing</span>
+        <a th:if="${deliveryInfo == null and (citizenApplication.currentStatus == 'APPOINTMENT_BOOKED' or citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED' or citizenApplication.currentStatus == 'ISSUED')}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-orange-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Choose delivery</a>
+        <span th:if="${citizenApplication.currentStatus == 'ISSUED' and deliveryInfo == null}" class="text-sm font-bold text-emerald-700">Document printed</span>
+        <form th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' and deliveryInfo.delivery.deliveryStatus == 'DISPATCHED'}" th:action="@{/citizen/deliveries/confirm}" method="post" onsubmit="return confirm('Confirm that you have received your document?')">
+          <input type="hidden" name="applicationId" th:value="${citizenApplication.applicationId}"/>
+          <button type="submit" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold">Confirm delivery received</button>
+        </form>
+        <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'READY_FOR_COLLECTION'}" class="text-sm font-bold text-emerald-700">Ready for collection</span>
+        <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'COLLECTED'}" class="text-sm font-bold text-emerald-700">Document handed over</span>
+        <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'DELIVERED'}" class="text-sm font-bold text-emerald-700">Delivered</span>
+        <span th:if="${citizenApplication.currentStatus != 'DRAFT' and citizenApplication.currentStatus != 'CORRECTION_REQUIRED' and citizenApplication.currentStatus != 'APPROVED' and citizenApplication.currentStatus != 'APPOINTMENT_BOOKED' and citizenApplication.currentStatus != 'BIOMETRIC_COLLECTED' and citizenApplication.currentStatus != 'ISSUED'}" class="text-sm font-semibold text-slate-500">Submitted for processing</span>
+      </div>
+      <div th:if="${deliveryInfo != null}" class="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-900">
+        <div class="flex flex-wrap justify-between gap-2"><span class="font-bold" th:text="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' ? 'Home delivery' : 'Service-centre collection'}">Method</span><span class="font-mono font-bold" th:text="${deliveryInfo.delivery.trackingReference}">DEL-REF</span></div>
+        <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY'}" th:text="${deliveryInfo.delivery.deliveryAddress}">Address</p>
+        <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'CENTRE_COLLECTION'}" th:text="${deliveryInfo.centreName + ' — ' + deliveryInfo.centreAddress}">Centre</p>
+        <p class="mt-2 font-semibold" th:text="${'Status: ' + #strings.replace(deliveryInfo.delivery.deliveryStatus, '_', ' ')}">Status</p>
       </div>
     </article>
   </div>
 </main>
 <script>
-const progressByStatus = {DRAFT:0,SUBMITTED:1,RESUBMITTED:1,UNDER_REVIEW:1,CORRECTION_REQUIRED:1,REJECTED:1,APPROVED:2,APPOINTMENT_BOOKED:3,BIOMETRIC_COLLECTED:4,PRINTED:5,ISSUED:5};
+const progressByStatus = {DRAFT:0,SUBMITTED:1,RESUBMITTED:1,UNDER_REVIEW:1,CORRECTION_REQUIRED:1,REJECTED:1,APPROVED:2,APPOINTMENT_BOOKED:3,BIOMETRIC_COLLECTED:4,ISSUED:5};
 document.querySelectorAll('.application-progress').forEach(path => {
   const status = path.dataset.status;
-  const current = progressByStatus[status] ?? 0;
-  path.querySelectorAll('.progress-step').forEach((step, index) => {
-    if (index < current) step.classList.add('complete');
-    if (index === current) step.classList.add('current');
+  const deliveryStatus = path.dataset.deliveryStatus;
+  const deliveryComplete = deliveryStatus === 'COLLECTED' || deliveryStatus === 'DELIVERED';
+  let current = progressByStatus[status] ?? 0;
+  if (status === 'ISSUED' && deliveryStatus && deliveryStatus !== 'PREPARING') current = 6;
+  const steps = path.querySelectorAll('.progress-step');
+  steps.forEach((step, index) => {
+    if (index < current || deliveryComplete) step.classList.add('complete');
+    if (index === current && !deliveryComplete) step.classList.add('current');
   });
   if (status === 'CORRECTION_REQUIRED') path.classList.add('correction');
   if (status === 'REJECTED') path.classList.add('rejected');
-  setTimeout(() => path.style.setProperty('--progress', (current * 20) + '%'), 120);
+  setTimeout(() => path.style.setProperty('--progress', deliveryComplete ? '100%' : (current * 100 / (steps.length - 1)) + '%'), 120);
 });
 </script>
 </body>

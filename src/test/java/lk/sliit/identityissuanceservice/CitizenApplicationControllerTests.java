@@ -3,7 +3,9 @@ package lk.sliit.identityissuanceservice;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller.CitizenApplicationController;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,12 +37,15 @@ class CitizenApplicationControllerTests {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private DocumentDeliveryService deliveryService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(
-                new CitizenApplicationController(applicationService, notificationService)
+                new CitizenApplicationController(applicationService, notificationService, deliveryService)
         ).build();
     }
 
@@ -52,16 +59,26 @@ class CitizenApplicationControllerTests {
     @Test
     void dashboardUsesRealEligibilityAndApplicationData() throws Exception {
         MockHttpSession session = citizenSession();
+        CitizenApplication application = new CitizenApplication();
+        application.setApplicationId(42);
+        application.setApplicationNo("NIC-2026-000042");
+        application.setServiceType("NIC");
+        application.setApplicationKind("NEW");
+        application.setCurrentStatus("UNDER_REVIEW");
+        application.setCreatedAt(LocalDateTime.of(2026, 8, 29, 10, 30));
+
         when(applicationService.getEligibility(25))
                 .thenReturn(new CitizenEligibilityDto(true, false, false, "200012345678", null));
-        when(applicationService.getCitizenApplications(25)).thenReturn(List.of());
+        when(applicationService.getCitizenApplications(25)).thenReturn(List.of(application));
+        when(deliveryService.getCitizenDeliveryMap(25)).thenReturn(Map.of());
 
         mockMvc.perform(get("/citizen/dashboard").session(session))
                 .andExpect(status().isOk())
                 .andExpect(view().name("citizen_frontends/citizen_dashboard"))
                 .andExpect(model().attribute("hasNic", true))
                 .andExpect(model().attribute("hasPassport", false))
-                .andExpect(model().attribute("nicNumber", "200012345678"));
+                .andExpect(model().attribute("nicNumber", "200012345678"))
+                .andExpect(model().attribute("applications", List.of(application)));
     }
 
     @Test

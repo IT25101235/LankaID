@@ -2,6 +2,7 @@ package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,13 +13,16 @@ public class ApplicationTrackingController {
 
     private final CitizenApplicationService applicationService;
     private final NotificationService notificationService;
+    private final DocumentDeliveryService deliveryService;
 
     public ApplicationTrackingController(
             CitizenApplicationService applicationService,
-            NotificationService notificationService
+            NotificationService notificationService,
+            DocumentDeliveryService deliveryService
     ) {
         this.applicationService = applicationService;
         this.notificationService = notificationService;
+        this.deliveryService = deliveryService;
     }
 
     @GetMapping("/citizen/applications")
@@ -29,6 +33,7 @@ public class ApplicationTrackingController {
         }
 
         model.addAttribute("applications", applicationService.getCitizenApplications(citizenId));
+        model.addAttribute("deliveryByApplicationId", deliveryService.getCitizenDeliveryMap(citizenId));
         model.addAttribute("unreadNotificationCount", notificationService.getUnreadCount(citizenId));
         return "citizen_frontends/application_tracking";
     }
