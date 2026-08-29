@@ -6,6 +6,8 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.PaymentSummary;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
@@ -34,6 +36,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final UserAccountRepository userRepository;
     private final NotificationService notificationService;
+    private final DocumentDeliveryService deliveryService;
 
     public PaymentService(
             CitizenApplicationRepository applicationRepository,
@@ -41,7 +44,8 @@ public class PaymentService {
             CentreRepository centreRepository,
             PaymentRepository paymentRepository,
             UserAccountRepository userRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            DocumentDeliveryService deliveryService
     ) {
         this.applicationRepository = applicationRepository;
         this.appointmentRepository = appointmentRepository;
@@ -49,6 +53,7 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.deliveryService = deliveryService;
     }
 
     @Transactional(readOnly = true)
@@ -60,11 +65,24 @@ public class PaymentService {
                         .findFirstByAppointmentIdAndPaymentStatusOrderByCreatedAtDesc(
                                 appointment.getAppointmentId(), "PAID"))
                 .orElse(null);
-        return new PaymentSummary(application, amountFor(application.getServiceType()), payment);
+        return new PaymentSummary(
+                application,
+                amountFor(application.getServiceType()),
+                deliveryService.homeDeliveryFee(application.getServiceType()),
+                payment,
+                deliveryService.findByApplicationId(applicationId).orElse(null),
+                deliveryService.getAvailableCentres(),
+                deliveryService.getHomeAddress(citizenId)
+        );
     }
 
     @Transactional
-    public Payment payForApplication(Integer citizenId, Integer applicationId) {
+    public Payment payForApplication(
+            Integer citizenId,
+            Integer applicationId,
+            String deliveryMethod,
+            Integer centreId
+    ) {
         CitizenApplication application = findApprovedApplication(citizenId, applicationId);
         Appointment appointment = appointmentRepository
                 .findByApplicationIdAndAppointmentType(applicationId, "BIOMETRIC")
@@ -74,25 +92,82 @@ public class PaymentService {
                 .findFirstByAppointmentIdAndPaymentStatusOrderByCreatedAtDesc(
                         appointment.getAppointmentId(), "PAID")
                 .orElse(null);
-        if (existingPayment != null) return existingPayment;
+        DocumentDelivery existingDelivery = deliveryService.findByApplicationId(applicationId).orElse(null);
+        if (existingPayment != null && existingDelivery != null) return existingPayment;
 
+        DocumentDelivery delivery = deliveryService.chooseDelivery(
+                citizenId,
+                applicationId,
+                deliveryMethod,
+                centreId
+        );
+
+        if (existingPayment != null) {
+            BigDecimal extraFee = deliveryService.deliveryFee(application.getServiceType(), deliveryMethod);
+            BigDecimal totalWithDelivery = amountFor(application.getServiceType()).add(extraFee);
+            if (extraFee.compareTo(BigDecimal.ZERO) > 0
+                    && existingPayment.getAmount().compareTo(totalWithDelivery) < 0) {
+                // Payment.appointment_id is unique in the existing database. For an older
+                // paid application, include the delivery fee in that payment instead of
+                // trying to insert a second payment row for the same appointment.
+                existingPayment.setAmount(totalWithDelivery);
+                existingPayment.setPaidAt(LocalDateTime.now());
+                existingPayment = paymentRepository.save(existingPayment);
+                sendDeliveryFeeNotification(citizenId, application, extraFee);
+            }
+            if ("ISSUED".equals(application.getCurrentStatus())) {
+                deliveryService.updateAfterPrinting(application, null);
+            }
+            return existingPayment;
+        }
+
+        BigDecimal total = amountFor(application.getServiceType())
+                .add(deliveryService.deliveryFee(application.getServiceType(), delivery.getDeliveryMethod()));
+        Payment payment = createPayment(appointment, total);
+        sendPaymentNotification(citizenId, application, payment, false);
+        return payment;
+    }
+
+    private Payment createPayment(Appointment appointment, BigDecimal amount) {
         Payment payment = new Payment();
         payment.setAppointmentId(appointment.getAppointmentId());
         payment.setTransactionReference(generateTransactionReference());
-        payment.setAmount(amountFor(application.getServiceType()));
+        payment.setAmount(amount);
         payment.setPaymentStatus("PAID");
         payment.setPaidAt(LocalDateTime.now());
-        payment = paymentRepository.save(payment);
+        return paymentRepository.save(payment);
+    }
 
+    private void sendDeliveryFeeNotification(
+            Integer citizenId,
+            CitizenApplication application,
+            BigDecimal deliveryFee
+    ) {
+        notificationService.sendToCitizen(
+                citizenId,
+                null,
+                "PAYMENT_CONFIRMED",
+                "Home-delivery payment of LKR " + deliveryFee.toPlainString()
+                        + " was received for " + application.getServiceType()
+                        + " application " + application.getApplicationNo() + "."
+        );
+    }
+
+    private void sendPaymentNotification(
+            Integer citizenId,
+            CitizenApplication application,
+            Payment payment,
+            boolean deliveryOnly
+    ) {
         notificationService.sendToCitizen(
                 citizenId,
                 null,
                 "PAYMENT_CONFIRMED",
                 "Payment of LKR " + payment.getAmount().toPlainString() + " was received for "
+                        + (deliveryOnly ? "home delivery of " : "")
                         + application.getServiceType() + " application " + application.getApplicationNo()
-                        + ". You can now select your biometric appointment."
+                        + (deliveryOnly ? "." : ". You can now select your biometric appointment.")
         );
-        return payment;
     }
 
     @Transactional(readOnly = true)
@@ -138,7 +213,7 @@ public class PaymentService {
                 .findByApplicationIdAndCitizenId(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
         List<String> allowedStatuses = List.of(
-                "APPROVED", "APPOINTMENT_BOOKED", "BIOMETRIC_COLLECTED", "PROCESSING"
+                "APPROVED", "APPOINTMENT_BOOKED", "BIOMETRIC_COLLECTED", "PROCESSING", "ISSUED"
         );
         if (!allowedStatuses.contains(application.getCurrentStatus())) {
             throw new IllegalArgumentException("Payment is available only after officer approval.");

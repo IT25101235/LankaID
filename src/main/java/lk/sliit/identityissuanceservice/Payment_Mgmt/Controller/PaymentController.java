@@ -2,6 +2,7 @@ package lk.sliit.identityissuanceservice.Payment_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,20 +45,37 @@ public class PaymentController {
     @PostMapping("/citizen/payment")
     public String completePayment(
             @RequestParam Integer applicationId,
+            @RequestParam String deliveryMethod,
+            @RequestParam(required = false) Integer centreId,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
         try {
-            paymentService.payForApplication(citizenId, applicationId);
+            paymentService.payForApplication(citizenId, applicationId, deliveryMethod, centreId);
+            String status = paymentService.getPaymentSummary(citizenId, applicationId)
+                    .application().getCurrentStatus();
+            if ("APPROVED".equals(status)) {
+                redirectAttributes.addFlashAttribute(
+                        "appointmentMessage",
+                        "Payment and delivery choice confirmed. Select a biometric appointment within the next 14 days."
+                );
+                return "redirect:/citizen/appointments/biometric?applicationId=" + applicationId;
+            }
             redirectAttributes.addFlashAttribute(
-                    "appointmentMessage",
-                    "Payment confirmed. Select a biometric appointment within the next 14 days."
+                    "applicationMessage",
+                    "Your document delivery choice was saved successfully."
             );
-            return "redirect:/citizen/appointments/biometric?applicationId=" + applicationId;
+            return "redirect:/citizen/applications";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("paymentError", exception.getMessage());
+            return "redirect:/citizen/payment?applicationId=" + applicationId;
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "paymentError",
+                    "The payment could not be saved. Please try again."
+            );
             return "redirect:/citizen/payment?applicationId=" + applicationId;
         }
     }
