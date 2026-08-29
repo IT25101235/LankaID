@@ -6,6 +6,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.Governmen
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.ApplicationDocumentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
@@ -24,7 +25,8 @@ import java.util.List;
 public class PrintingExportService {
 
     public static final String READY_FOR_PRINTING = "BIOMETRIC_COLLECTED";
-    public static final String PRINTED = "PRINTED";
+    // ISSUED is the existing database status used after the physical document is printed.
+    public static final String ISSUED = "ISSUED";
 
     private final CitizenApplicationRepository applicationRepository;
     private final CitizenAccountRepository citizenRepository;
@@ -32,6 +34,7 @@ public class PrintingExportService {
     private final GovernmentIdentityRecordRepository governmentRepository;
     private final ApplicationDocumentRepository documentRepository;
     private final NotificationService notificationService;
+    private final DocumentDeliveryService deliveryService;
 
     public PrintingExportService(
             CitizenApplicationRepository applicationRepository,
@@ -39,7 +42,8 @@ public class PrintingExportService {
             UserAccountRepository userRepository,
             GovernmentIdentityRecordRepository governmentRepository,
             ApplicationDocumentRepository documentRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            DocumentDeliveryService deliveryService
     ) {
         this.applicationRepository = applicationRepository;
         this.citizenRepository = citizenRepository;
@@ -47,6 +51,7 @@ public class PrintingExportService {
         this.governmentRepository = governmentRepository;
         this.documentRepository = documentRepository;
         this.notificationService = notificationService;
+        this.deliveryService = deliveryService;
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +66,7 @@ public class PrintingExportService {
     @Transactional(readOnly = true)
     public List<PrintingExportRow> getPrintedApplications() {
         return applicationRepository
-                .findAllByCurrentStatusOrderByUpdatedAtDesc(PRINTED)
+                .findAllByCurrentStatusOrderByUpdatedAtDesc(ISSUED)
                 .stream()
                 .map(this::buildRow)
                 .toList();
@@ -97,8 +102,9 @@ public class PrintingExportService {
             record.setIdentityStatus("ACTIVE");
             governmentRepository.save(record);
 
-            application.setCurrentStatus(PRINTED);
+            application.setCurrentStatus(ISSUED);
             applicationRepository.save(application);
+            deliveryService.updateAfterPrinting(application, directorId);
 
             notificationService.sendToCitizen(
                     application.getCitizenId(),

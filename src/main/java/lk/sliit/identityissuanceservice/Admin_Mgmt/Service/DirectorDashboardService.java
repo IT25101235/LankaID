@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class DirectorDashboardService {
 
     private static final Set<String> APPROVED_OR_LATER = Set.of(
-            "APPROVED", "APPOINTMENT_BOOKED", "BIOMETRIC_COLLECTED", "PRINTED", "ISSUED"
+            "APPROVED", "APPOINTMENT_BOOKED", "BIOMETRIC_COLLECTED", "ISSUED"
     );
     private static final Set<String> REVIEW_QUEUE = Set.of("SUBMITTED", "RESUBMITTED", "UNDER_REVIEW");
     private static final Set<String> BIOMETRIC_PIPELINE = Set.of("APPROVED", "APPOINTMENT_BOOKED");
@@ -64,7 +64,7 @@ public class DirectorDashboardService {
                 applications.size(),
                 countStatuses(applications, APPROVED_OR_LATER),
                 countStatus(applications, "BIOMETRIC_COLLECTED"),
-                countStatus(applications, "PRINTED"),
+                countStatus(applications, "ISSUED"),
                 countService(applications, "NIC"),
                 countService(applications, "PASSPORT"),
                 countStatuses(applications, REVIEW_QUEUE),

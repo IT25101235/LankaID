@@ -76,6 +76,11 @@ public class DirectorController {
             );
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("printingError", exception.getMessage());
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "printingError",
+                    "Printing could not be completed. No records were changed. Please check the citizen details and try again."
+            );
         }
         return "redirect:/officer/director/printing";
     }
