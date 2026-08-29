@@ -1,294 +1,78 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>File a Complaint | LankaID Identity Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
-input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(2,132,199,0.15); border-color: #0284C7 !important; }</style>
-<link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Citizen Support | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <style>body{font-family:'Public Sans',sans-serif}</style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a th:href="@{/citizen/support}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-      Dashboard
-    </a>
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-sm">verified_user</span>
-      </div>
-      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span></span>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+<header class="bg-white border-b">
+  <div class="max-w-4xl mx-auto min-h-16 px-4 py-3 flex items-center gap-3">
+    <a th:href="@{/citizen/support}" class="text-sm text-slate-600 flex items-center gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>My requests</a>
+    <div class="ml-auto flex gap-2">
+      <a th:href="@{/citizen/support/contact-us}" class="rounded-lg border px-3 py-2 text-xs font-bold"
+         th:classappend="${supportForm.requestType == 'CONTACT' ? ' border-sky-600 bg-sky-50 text-sky-700' : ' border-slate-300'}">Contact Us</a>
+      <a th:href="@{/citizen/support/complaint}" class="rounded-lg border px-3 py-2 text-xs font-bold"
+         th:classappend="${supportForm.requestType == 'COMPLAINT' ? ' border-orange-500 bg-orange-50 text-orange-700' : ' border-slate-300'}">Complaint</a>
     </div>
-    <div class="w-20"></div>
   </div>
 </header>
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-
-  <div class="mb-6">
-    <div class="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold mb-2">
-      <span class="material-symbols-outlined text-sm">feedback</span>
-      Complaints & Inquiries
-    </div>
-    <h1 class="text-2xl font-bold text-slate-900">File a Complaint or Inquiry</h1>
-    <p class="text-slate-500 text-sm mt-1">Our Citizen Service Representatives will respond within 2 business days.</p>
+<main class="max-w-4xl mx-auto p-4 sm:p-6">
+  <div class="mb-5">
+    <h1 class="text-2xl font-extrabold" th:text="${formTitle}">Contact Us</h1>
+    <p class="text-sm text-slate-500 mt-1" th:text="${formDescription}">Send a message to CSR.</p>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Complaint Form -->
-    <div class="lg:col-span-2">
-      <form id="complaintForm" onsubmit="submitComplaint(event)">
+  <form th:action="@{/citizen/support}" th:object="${supportForm}" method="post"
+        class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7">
+    <input type="hidden" th:field="*{requestType}"/>
 
-        <!-- Complaint Type -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-5">
-          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-            <span class="material-symbols-outlined text-orange-500">category</span>
-            <h2 class="font-semibold text-slate-800">Type of Complaint / Inquiry</h2>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label class="relative cursor-pointer">
-              <input type="radio" name="complaintType" value="delay" class="sr-only peer" checked/>
-              <div class="border-2 border-slate-200 peer-checked:border-orange-400 peer-checked:bg-orange-50 rounded-xl p-3 transition-all">
-                <span class="material-symbols-outlined text-orange-500 text-lg block mb-1">hourglass_empty</span>
-                <span class="text-sm font-semibold text-slate-800 block">Processing Delay</span>
-                <p class="text-xs text-slate-500">Application taking too long</p>
-              </div>
-            </label>
-            <label class="relative cursor-pointer">
-              <input type="radio" name="complaintType" value="rejection" class="sr-only peer"/>
-              <div class="border-2 border-slate-200 peer-checked:border-orange-400 peer-checked:bg-orange-50 rounded-xl p-3 transition-all">
-                <span class="material-symbols-outlined text-orange-500 text-lg block mb-1">cancel</span>
-                <span class="text-sm font-semibold text-slate-800 block">Rejection Dispute</span>
-                <p class="text-xs text-slate-500">Application wrongly rejected</p>
-              </div>
-            </label>
-            <label class="relative cursor-pointer">
-              <input type="radio" name="complaintType" value="officer" class="sr-only peer"/>
-              <div class="border-2 border-slate-200 peer-checked:border-orange-400 peer-checked:bg-orange-50 rounded-xl p-3 transition-all">
-                <span class="material-symbols-outlined text-orange-500 text-lg block mb-1">person_off</span>
-                <span class="text-sm font-semibold text-slate-800 block">Officer Misconduct</span>
-                <p class="text-xs text-slate-500">Unprofessional behaviour</p>
-              </div>
-            </label>
-            <label class="relative cursor-pointer">
-              <input type="radio" name="complaintType" value="technical" class="sr-only peer"/>
-              <div class="border-2 border-slate-200 peer-checked:border-orange-400 peer-checked:bg-orange-50 rounded-xl p-3 transition-all">
-                <span class="material-symbols-outlined text-orange-500 text-lg block mb-1">bug_report</span>
-                <span class="text-sm font-semibold text-slate-800 block">Technical Issue</span>
-                <p class="text-xs text-slate-500">System / portal problems</p>
-              </div>
-            </label>
-            <label class="relative cursor-pointer">
-              <input type="radio" name="complaintType" value="delivery" class="sr-only peer"/>
-              <div class="border-2 border-slate-200 peer-checked:border-orange-400 peer-checked:bg-orange-50 rounded-xl p-3 transition-all">
-                <span class="material-symbols-outlined text-orange-500 text-lg block mb-1">local_shipping</span>
-                <span class="text-sm font-semibold text-slate-800 block">Delivery Issue</span>
-                <p class="text-xs text-slate-500">Document not received</p>
-              </div>
-            </label>
-            <label class="relative cursor-pointer">
-              <input type="radio" name="complaintType" value="other" class="sr-only peer"/>
-              <div class="border-2 border-slate-200 peer-checked:border-orange-400 peer-checked:bg-orange-50 rounded-xl p-3 transition-all">
-                <span class="material-symbols-outlined text-orange-500 text-lg block mb-1">more_horiz</span>
-                <span class="text-sm font-semibold text-slate-800 block">Other / Inquiry</span>
-                <p class="text-xs text-slate-500">General questions</p>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- Complaint Details -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-5">
-          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-            <span class="material-symbols-outlined text-orange-500">description</span>
-            <h2 class="font-semibold text-slate-800">Complaint Details</h2>
-          </div>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Subject / Title <span class="text-red-500">*</span></label>
-              <input type="text" id="subject" placeholder="Brief summary of your complaint" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm"/>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Related Application Reference (if any)</label>
-              <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
-                <option value="">Not related to a specific application</option>
-                <option value="LK-NIC-2026-00183">LK-NIC-2026-00183 — NIC Application (Approved)</option>
-                <option value="LK-PASS-2026-00041">LK-PASS-2026-00041 — Passport Renewal (Under Review)</option>
-                <option value="LK-NIC-2026-00097">LK-NIC-2026-00097 — NIC Lost (Info Requested)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Describe your complaint in detail <span class="text-red-500">*</span></label>
-              <textarea id="description" rows="5" required placeholder="Please provide as much detail as possible — include dates, names, and specific issues you encountered..." class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
-              <p class="text-xs text-slate-400 mt-1 text-right"><span id="charCount">0</span>/500 characters</p>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Priority Level</label>
-              <div class="flex gap-3">
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="priority" value="low" class="text-orange-500"/>
-                  <span class="text-xs text-slate-600">Low</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="priority" value="medium" class="text-orange-500" checked/>
-                  <span class="text-xs text-slate-600">Medium</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="priority" value="high" class="text-orange-500"/>
-                  <span class="text-xs text-slate-600">High / Urgent</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Supporting Documents -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-5">
-          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-            <span class="material-symbols-outlined text-orange-500">attach_file</span>
-            <h2 class="font-semibold text-slate-800">Supporting Documents</h2>
-            <span class="text-xs text-slate-400 ml-auto">Optional</span>
-          </div>
-          <div class="border-2 border-dashed border-slate-300 hover:border-orange-400 rounded-xl p-8 text-center cursor-pointer transition-colors" onclick="document.getElementById('attachFile').click()">
-            <span class="material-symbols-outlined text-slate-400 text-3xl block mb-2">upload_file</span>
-            <p class="text-sm font-semibold text-slate-700">Drop files here or click to upload</p>
-            <p class="text-xs text-slate-500 mt-1">Screenshots, PDFs, images (Max 5MB each, up to 3 files)</p>
-            <input type="file" id="attachFile" class="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="showAttached(this)"/>
-          </div>
-          <div id="attachedFiles" class="mt-3 space-y-2"></div>
-        </div>
-
-        <!-- Contact Preference -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-5">
-          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-            <span class="material-symbols-outlined text-orange-500">contact_phone</span>
-            <h2 class="font-semibold text-slate-800">Preferred Response Method</h2>
-          </div>
-          <div class="flex flex-wrap gap-3">
-            <label class="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-orange-100 transition-colors">
-              <input type="checkbox" class="rounded text-orange-500" checked/>
-              <span class="material-symbols-outlined text-sm text-orange-600">email</span>
-              <span class="text-xs font-medium text-slate-700">Email</span>
-            </label>
-            <label class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-100 transition-colors">
-              <input type="checkbox" class="rounded"/>
-              <span class="material-symbols-outlined text-sm text-slate-600">sms</span>
-              <span class="text-xs font-medium text-slate-700">SMS</span>
-            </label>
-            <label class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-100 transition-colors">
-              <input type="checkbox" class="rounded"/>
-              <span class="material-symbols-outlined text-sm text-slate-600">call</span>
-              <span class="text-xs font-medium text-slate-700">Phone Call</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Submit -->
-        <div class="flex gap-3">
-          <a th:href="@{/citizen/support}" class="flex-1 border border-slate-300 text-slate-700 py-3 rounded-xl text-sm font-semibold text-center hover:bg-slate-50 transition-colors">
-            Cancel
-          </a>
-          <button type="submit" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md">
-            <span class="material-symbols-outlined text-lg">send</span>
-            Submit Complaint
-          </button>
-        </div>
-      </form>
+    <div th:if="${#fields.hasGlobalErrors()}" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to submit request.</p>
     </div>
 
-    <!-- Sidebar -->
-    <div class="space-y-4">
-      <!-- My Previous Complaints -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <span class="material-symbols-outlined text-orange-500 text-lg">history</span>
-          My Previous Complaints
-        </h3>
-        <div class="space-y-3">
-          <div class="border border-slate-100 rounded-lg p-3">
-            <div class="flex items-center justify-between mb-1">
-              <p class="text-xs font-semibold text-slate-800">Processing Delay</p>
-              <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Resolved</span>
-            </div>
-            <p class="text-xs text-slate-500">Ref: CMP-2026-0034 · Jul 10, 2026</p>
-          </div>
-          <div class="border border-slate-100 rounded-lg p-3">
-            <div class="flex items-center justify-between mb-1">
-              <p class="text-xs font-semibold text-slate-800">Technical Issue</p>
-              <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">In Progress</span>
-            </div>
-            <p class="text-xs text-slate-500">Ref: CMP-2026-0071 · Aug 2, 2026</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contact CSR -->
-      <div class="bg-slate-900 rounded-2xl p-5 text-white">
-        <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
-          <span class="material-symbols-outlined text-sky-400 text-lg">support_agent</span>
-          Talk to a Representative
-        </h3>
-        <p class="text-xs text-slate-400 mb-3">For urgent matters, call our helpline directly.</p>
-        <p class="text-sky-400 font-bold text-2xl">1919</p>
-        <p class="text-xs text-slate-400 mt-1">Mon – Fri, 8:00 AM – 5:00 PM</p>
-        <p class="text-xs text-slate-400">Saturday, 8:00 AM – 12:00 PM</p>
-      </div>
-
-      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-700">
-        <p class="font-semibold mb-1">Response Time</p>
-        <p>Standard complaints are responded to within <strong>2 business days</strong>. High priority complaints are escalated within <strong>24 hours</strong>.</p>
-      </div>
+    <div class="rounded-xl p-4 mb-5 flex gap-3"
+         th:classappend="${supportForm.requestType == 'COMPLAINT' ? ' bg-orange-50 border border-orange-200' : ' bg-sky-50 border border-sky-200'}">
+      <span class="material-symbols-outlined" th:text="${supportForm.requestType == 'COMPLAINT' ? 'report' : 'support_agent'}">support_agent</span>
+      <div><p class="font-bold text-sm" th:text="${supportForm.requestType == 'COMPLAINT' ? 'Complaint form' : 'Contact Us form'}">Form</p>
+        <p class="text-xs text-slate-600 mt-1">Your account details are added automatically from your login session.</p></div>
     </div>
-  </div>
-</div>
 
-<!-- Success Modal -->
-<div id="successModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-      <span class="material-symbols-outlined text-emerald-600 text-3xl">check_circle</span>
-    </div>
-    <h2 class="text-xl font-bold text-slate-900 mb-2">Complaint Submitted!</h2>
-    <p class="text-slate-500 text-sm mb-3">Your complaint has been received and assigned to a Citizen Service Representative.</p>
-    <div class="bg-slate-50 rounded-xl p-4 text-left text-xs text-slate-600 mb-5">
-      <div class="flex justify-between"><span class="text-slate-400">Reference No.</span><span class="font-bold text-sky-700">CMP-2026-0102</span></div>
-      <div class="flex justify-between mt-1"><span class="text-slate-400">Expected Response</span><span class="font-semibold">Within 2 business days</span></div>
-    </div>
-    <button onclick="window.location.href='/citizen/support'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
-      Back to Dashboard
-    </button>
-  </div>
-</div>
+    <label class="block text-sm font-bold text-slate-700">Subject
+      <input th:field="*{subject}" maxlength="200" required
+             class="mt-2 w-full rounded-xl border-slate-300 text-sm" placeholder="Briefly describe what you need help with"/>
+    </label>
+    <p th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="text-xs text-red-600 mt-1">Subject error</p>
 
+    <label class="block text-sm font-bold text-slate-700 mt-5">Message
+      <textarea id="supportMessage" th:field="*{message}" maxlength="2000" rows="8" required
+                class="mt-2 w-full rounded-xl border-slate-300 text-sm resize-y"
+                placeholder="Provide the information the CSR officer needs"></textarea>
+    </label>
+    <div class="flex justify-between mt-1 text-xs">
+      <p th:if="${#fields.hasErrors('message')}" th:errors="*{message}" class="text-red-600">Message error</p>
+      <p class="ml-auto text-slate-400"><span id="characterCount">0</span>/2000</p>
+    </div>
+
+    <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+      <a th:href="@{/citizen/support}" class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-bold text-center">Cancel</a>
+      <button class="rounded-xl px-6 py-3 text-sm font-bold text-white"
+              th:classappend="${supportForm.requestType == 'COMPLAINT' ? ' bg-orange-500 hover:bg-orange-600' : ' bg-sky-600 hover:bg-sky-700'}">
+        Submit to Citizen Service
+      </button>
+    </div>
+  </form>
+</main>
 <script>
-document.getElementById('description').addEventListener('input', function() {
-  document.getElementById('charCount').textContent = this.value.length;
-});
-
-function showAttached(input) {
-  const container = document.getElementById('attachedFiles');
-  container.innerHTML = '';
-  Array.from(input.files).forEach(file => {
-    container.innerHTML += `<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-      <span class="material-symbols-outlined text-sm text-slate-500">attach_file</span>
-      <span class="text-xs text-slate-700 flex-1">${file.name}</span>
-      <span class="text-xs text-slate-400">${(file.size/1024).toFixed(0)} KB</span>
-    </div>`;
-  });
-}
-
-function submitComplaint(e) {
-  e.preventDefault();
-  const m = document.getElementById('successModal');
-  m.classList.remove('hidden'); m.classList.add('flex');
-}
+const supportMessage = document.getElementById('supportMessage');
+const characterCount = document.getElementById('characterCount');
+function updateCount(){characterCount.textContent = supportMessage.value.length}
+supportMessage.addEventListener('input', updateCount); updateCount();
 </script>
 </body>
 </html>
