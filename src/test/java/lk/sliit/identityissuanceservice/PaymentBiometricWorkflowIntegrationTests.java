@@ -9,7 +9,12 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.BiometricCollectionRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.GovernmentIdentityRecord;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Repository.UserNotificationRepository;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
@@ -28,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
@@ -51,6 +57,8 @@ class PaymentBiometricWorkflowIntegrationTests {
     @Autowired UserAccountRepository userRepository;
     @Autowired CitizenAccountRepository citizenRepository;
     @Autowired CitizenApplicationRepository applicationRepository;
+    @Autowired GovernmentIdentityRecordRepository governmentRecordRepository;
+    @Autowired DocumentDeliveryRepository deliveryRepository;
     @Autowired StaffAccountRepository staffRepository;
     @Autowired AppointmentRepository appointmentRepository;
     @Autowired PaymentRepository paymentRepository;
@@ -66,11 +74,88 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(content().string(containsString("jsQR")));
 
         ensureServiceCentreExists();
-        completeWorkflow("NIC", "NIC_OFFICER", new BigDecimal("2000.0000"));
-        completeWorkflow("PASSPORT", "PASSPORT_OFFICER", new BigDecimal("10000.0000"));
+        completeWorkflow(
+                "NIC", "NIC_OFFICER", DocumentDeliveryService.HOME_DELIVERY,
+                new BigDecimal("2500.0000")
+        );
+        completeWorkflow(
+                "PASSPORT", "PASSPORT_OFFICER", DocumentDeliveryService.CENTRE_COLLECTION,
+                new BigDecimal("10000.0000")
+        );
     }
 
-    private void completeWorkflow(String serviceType, String officerRole, BigDecimal expectedAmount) throws Exception {
+    @Test
+    void alreadyPaidApplicationAddsHomeDeliveryWithoutCreatingSecondPayment() throws Exception {
+        ensureServiceCentreExists();
+        String unique = UUID.randomUUID().toString().substring(0, 8);
+        UserAccount user = createUser("legacy-payment-" + unique + "@example.com", "+94710000001");
+
+        CitizenAccount citizen = new CitizenAccount(user.getUserId());
+        citizen.setGivenName("Legacy");
+        citizen.setFamilyName("Citizen");
+        citizen.setPermanentHouseNo("10");
+        citizen.setPermanentStreet("Main Street");
+        citizen.setPermanentCity("Colombo");
+        citizen.setPermanentPostalCode("00100");
+        citizenRepository.saveAndFlush(citizen);
+
+        CitizenApplication application = new CitizenApplication();
+        application.setApplicationNo("LK-NIC-LEGACY-" + unique);
+        application.setCitizenId(user.getUserId());
+        application.setServiceType("NIC");
+        application.setApplicationKind("NEW");
+        application.setCurrentStatus("ISSUED");
+        application.setDeclarationAccepted("Y");
+        application = applicationRepository.saveAndFlush(application);
+
+        Appointment appointment = new Appointment();
+        appointment.setCitizenId(user.getUserId());
+        appointment.setApplicationId(application.getApplicationId());
+        appointment.setCentreId(centreRepository.findAllByOrderByCentreNameAsc().get(0).getCentreId());
+        appointment.setAppointmentType("BIOMETRIC");
+        appointment.setScheduledAt(LocalDateTime.now());
+        appointment.setAppointmentStatus("COMPLETED");
+        appointment.setReferenceNo("BIO-LEGACY-" + unique);
+        appointment.setQrCode(appointment.getReferenceNo());
+        appointment.setVisitorPhone(user.getPhone());
+        appointment = appointmentRepository.saveAndFlush(appointment);
+
+        Payment payment = new Payment();
+        payment.setAppointmentId(appointment.getAppointmentId());
+        payment.setTransactionReference("PAY-LEGACY-" + unique);
+        payment.setAmount(new BigDecimal("2000.00"));
+        payment.setPaymentStatus("PAID");
+        payment.setPaidAt(LocalDateTime.now().minusDays(1));
+        payment = paymentRepository.saveAndFlush(payment);
+        Integer appointmentId = appointment.getAppointmentId();
+
+        mockMvc.perform(post("/citizen/payment")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .param("deliveryMethod", DocumentDeliveryService.HOME_DELIVERY)
+                        .session(citizenSession(user)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/citizen/applications"));
+
+        Payment updatedPayment = paymentRepository.findById(payment.getPaymentId()).orElseThrow();
+        assertEquals(0, new BigDecimal("2500.00").compareTo(updatedPayment.getAmount()));
+        assertEquals(
+                1,
+                paymentRepository.findAll().stream()
+                        .filter(item -> appointmentId.equals(item.getAppointmentId()))
+                        .count()
+        );
+        DocumentDelivery delivery = deliveryRepository.findByApplicationId(application.getApplicationId())
+                .orElseThrow();
+        assertEquals(DocumentDeliveryService.HOME_DELIVERY, delivery.getDeliveryMethod());
+        assertEquals(DocumentDeliveryService.DISPATCHED, delivery.getDeliveryStatus());
+    }
+
+    private void completeWorkflow(
+            String serviceType,
+            String officerRole,
+            String deliveryMethod,
+            BigDecimal expectedAmount
+    ) throws Exception {
         String unique = UUID.randomUUID().toString().substring(0, 8);
         UserAccount citizenUser = createUser(
                 serviceType.toLowerCase() + "-bio-" + unique + "@example.com",
@@ -79,6 +164,12 @@ class PaymentBiometricWorkflowIntegrationTests {
         CitizenAccount citizen = new CitizenAccount(citizenUser.getUserId());
         citizen.setGivenName(serviceType + " Citizen");
         citizen.setFamilyName("Perera");
+        citizen.setGender("MALE");
+        citizen.setDateOfBirth(LocalDateTime.of(2000, 1, 15, 0, 0));
+        citizen.setPermanentHouseNo("25");
+        citizen.setPermanentStreet("Galle Road");
+        citizen.setPermanentCity("Colombo");
+        citizen.setPermanentPostalCode("00300");
         citizenRepository.saveAndFlush(citizen);
 
         CitizenApplication application = new CitizenApplication();
@@ -111,6 +202,9 @@ class PaymentBiometricWorkflowIntegrationTests {
 
         mockMvc.perform(post("/citizen/payment")
                         .param("applicationId", application.getApplicationId().toString())
+                        .param("deliveryMethod", deliveryMethod)
+                        .param("centreId", centreRepository.findAllByOrderByCentreNameAsc()
+                                .get(0).getCentreId().toString())
                         .session(citizenSession))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(
@@ -125,6 +219,10 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .orElseThrow();
         assertEquals(0, expectedAmount.compareTo(payment.getAmount()));
         assertEquals("PENDING_PAYMENT", appointment.getAppointmentStatus());
+        DocumentDelivery delivery = deliveryRepository.findByApplicationId(application.getApplicationId())
+                .orElseThrow();
+        assertEquals(deliveryMethod, delivery.getDeliveryMethod());
+        assertEquals("PREPARING", delivery.getDeliveryStatus());
 
         mockMvc.perform(get("/citizen/appointments/biometric")
                         .param("applicationId", application.getApplicationId().toString())
@@ -215,6 +313,58 @@ class PaymentBiometricWorkflowIntegrationTests {
         mockMvc.perform(get("/citizen/notifications").session(citizenSession))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("ready for printing")));
+
+        MockHttpSession directorSession = officerSession(officer, officerUser, "DIRECTOR");
+        mockMvc.perform(post("/officer/director/printing/process")
+                        .param("applicationIds", application.getApplicationId().toString())
+                        .session(directorSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/director/printing"));
+
+        assertEquals(
+                "ISSUED",
+                applicationRepository.findById(application.getApplicationId()).orElseThrow().getCurrentStatus()
+        );
+        CitizenAccount printedCitizen = citizenRepository.findById(citizenUser.getUserId()).orElseThrow();
+        GovernmentIdentityRecord identityRecord = governmentRecordRepository
+                .findById(printedCitizen.getGovernmentRecordId()).orElseThrow();
+        if ("NIC".equals(serviceType)) {
+            assertTrue(identityRecord.getNicNo().matches("2000\\d{8}"));
+        } else {
+            assertTrue(identityRecord.getPassportNo().matches("N\\d{7}"));
+        }
+
+        delivery = deliveryRepository.findByApplicationId(application.getApplicationId()).orElseThrow();
+        if (DocumentDeliveryService.HOME_DELIVERY.equals(deliveryMethod)) {
+            assertEquals("DISPATCHED", delivery.getDeliveryStatus());
+            mockMvc.perform(post("/citizen/deliveries/confirm")
+                            .param("applicationId", application.getApplicationId().toString())
+                            .session(citizenSession))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/citizen/applications"));
+            delivery = deliveryRepository.findByApplicationId(application.getApplicationId()).orElseThrow();
+            assertEquals("DELIVERED", delivery.getDeliveryStatus());
+            assertTrue(delivery.getCompletedAt() != null);
+        } else {
+            assertEquals("READY_FOR_COLLECTION", delivery.getDeliveryStatus());
+            MockHttpSession csrSession = officerSession(officer, officerUser, "CSR");
+            mockMvc.perform(get("/officer/csr/deliveries")
+                            .param("reference", delivery.getTrackingReference())
+                            .session(csrSession))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(delivery.getTrackingReference())))
+                    .andExpect(content().string(containsString("Confirm document handover")));
+
+            mockMvc.perform(post("/officer/csr/deliveries/handover")
+                            .param("reference", delivery.getTrackingReference())
+                            .session(csrSession))
+                    .andExpect(status().is3xxRedirection());
+            assertEquals(
+                    "COLLECTED",
+                    deliveryRepository.findByApplicationId(application.getApplicationId())
+                            .orElseThrow().getDeliveryStatus()
+            );
+        }
     }
 
     private UserAccount createUser(String email, String phone) {

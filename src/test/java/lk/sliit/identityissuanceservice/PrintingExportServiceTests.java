@@ -6,6 +6,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.Governmen
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.ApplicationDocumentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
+import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
@@ -39,6 +40,7 @@ class PrintingExportServiceTests {
     @Mock GovernmentIdentityRecordRepository governmentRepository;
     @Mock ApplicationDocumentRepository documentRepository;
     @Mock NotificationService notificationService;
+    @Mock DocumentDeliveryService deliveryService;
 
     private PrintingExportService printingService;
 
@@ -50,7 +52,8 @@ class PrintingExportServiceTests {
                 userRepository,
                 governmentRepository,
                 documentRepository,
-                notificationService
+                notificationService,
+                deliveryService
         );
         when(governmentRepository.save(any(GovernmentIdentityRecord.class))).thenAnswer(invocation -> {
             GovernmentIdentityRecord record = invocation.getArgument(0);
@@ -69,7 +72,7 @@ class PrintingExportServiceTests {
         assertNotNull(data.record.getNicNo());
         assertTrue(data.record.getNicNo().matches("2000\\d{8}"));
         assertEquals(12, data.record.getNicNo().length());
-        assertEquals("PRINTED", data.application.getCurrentStatus());
+        assertEquals("ISSUED", data.application.getCurrentStatus());
         assertEquals(91, data.citizen.getGovernmentRecordId());
         assertTrue(new String(csv, StandardCharsets.UTF_8).contains(data.record.getNicNo()));
         verify(notificationService).sendToCitizen(
@@ -87,7 +90,7 @@ class PrintingExportServiceTests {
 
         assertNotNull(data.record.getPassportNo());
         assertTrue(data.record.getPassportNo().matches("N\\d{7}"));
-        assertEquals("PRINTED", data.application.getCurrentStatus());
+        assertEquals("ISSUED", data.application.getCurrentStatus());
     }
 
     private TestData prepareApplication(String serviceType, int applicationId, String gender) {

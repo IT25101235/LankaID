@@ -9,6 +9,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.A
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BiometricService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller.CitizenSupportController;
+import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.CitizenSupportService;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.NicVerificationController;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Controller.PassportVerificationController;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Service.VerificationQueueService;
@@ -37,13 +38,14 @@ class SystemAdminOfficerAccessTests {
         BiometricService biometricService = mock(BiometricService.class);
         PrintingExportService printingExportService = mock(PrintingExportService.class);
         DirectorDashboardService directorDashboardService = mock(DirectorDashboardService.class);
+        CitizenSupportService citizenSupportService = mock(CitizenSupportService.class);
 
         mockMvc = standaloneSetup(
                 new NicVerificationController(verificationQueueService, verificationReviewService),
                 new PassportVerificationController(verificationQueueService, verificationReviewService),
                 new BiometricController(appointmentService, biometricService),
                 new AppointmentController(appointmentService, appointmentPassService),
-                new CitizenSupportController(),
+                new CitizenSupportController(citizenSupportService),
                 new DirectorController(printingExportService, directorDashboardService)
         ).build();
     }
