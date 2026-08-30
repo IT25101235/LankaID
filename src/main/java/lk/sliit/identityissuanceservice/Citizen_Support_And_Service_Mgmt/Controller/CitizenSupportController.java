@@ -6,7 +6,9 @@ import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.SupportRequestForm;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.SupportRequestView;
+import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.CitizenSupportService;
+import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +20,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+
 @Controller
 public class CitizenSupportController {
 
     private final CitizenSupportService supportService;
+    private final WalkInAppointmentService walkInService;
 
-    public CitizenSupportController(CitizenSupportService supportService) {
+    public CitizenSupportController(
+            CitizenSupportService supportService,
+            WalkInAppointmentService walkInService
+    ) {
         this.supportService = supportService;
+        this.walkInService = walkInService;
     }
 
     @GetMapping({
@@ -121,7 +133,24 @@ public class CitizenSupportController {
         model.addAttribute("openSupportCount", supportService.getOpenCount());
         model.addAttribute("respondedSupportCount", supportService.getRespondedCount());
         model.addAttribute("resolvedSupportCount", supportService.getResolvedCount());
+        model.addAttribute("averageResponseTime", supportService.getAverageResponseTimeLabel());
         model.addAttribute("recentSupportRequests", supportService.getRecentRequests());
+
+        LocalDate today = LocalDate.now();
+        List<WalkInAppointmentView> todayWalkIns = walkInService.getAppointmentsForDate(today);
+        model.addAttribute("todayWalkInCount", todayWalkIns.size());
+        model.addAttribute(
+                "todayCompletedWalkInCount",
+                todayWalkIns.stream()
+                        .filter(item -> "COMPLETED".equals(item.appointment().getAppointmentStatus()))
+                        .count()
+        );
+        model.addAttribute("todayWalkIns", todayWalkIns.stream().limit(5).toList());
+        model.addAttribute("hasMoreTodayWalkIns", todayWalkIns.size() > 5);
+        model.addAttribute(
+                "dashboardDate",
+                today.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", Locale.ENGLISH))
+        );
         addLoggedInOfficer(model, session);
         return "officers_frontends/csr_dashboard";
     }

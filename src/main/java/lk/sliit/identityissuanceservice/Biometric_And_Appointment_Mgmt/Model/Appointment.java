@@ -46,6 +46,12 @@ public class Appointment {
     @Column(name = "visitor_phone", length = 15)
     private String visitorPhone;
 
+    @Column(name = "visitor_name", length = 100)
+    private String visitorName;
+
+    @Column(name = "visitor_service", length = 50)
+    private String visitorService;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -75,6 +81,10 @@ public class Appointment {
     public void setQrCode(String qrCode) { this.qrCode = qrCode; }
     public String getVisitorPhone() { return visitorPhone; }
     public void setVisitorPhone(String visitorPhone) { this.visitorPhone = visitorPhone; }
+    public String getVisitorName() { return visitorName; }
+    public void setVisitorName(String visitorName) { this.visitorName = visitorName; }
+    public String getVisitorService() { return visitorService; }
+    public void setVisitorService(String visitorService) { this.visitorService = visitorService; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

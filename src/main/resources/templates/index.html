@@ -105,6 +105,10 @@
         <a href="#process" class="inline-flex items-center h-12 px-6 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm font-bold hover:border-cyan-400 hover:text-cyan-700 transition-colors">
           View the process
         </a>
+        <a th:href="@{/walk-in}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors">
+          <span class="material-symbols-outlined text-lg">calendar_month</span>
+          Book a walk-in
+        </a>
       </div>
     </div>
 
@@ -136,6 +140,14 @@
           </div>
           <span class="material-symbols-outlined text-slate-400">chevron_right</span>
         </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <p class="text-sm font-bold text-slate-900">Lost your walk-in QR pass?</p>
+        <p class="text-xs text-slate-500 mt-1">Enter the phone number used for booking.</p>
+        <form th:action="@{/walk-in/recover}" method="get" class="flex gap-2 mt-3">
+          <input name="phone" required pattern="\+?[0-9 -]{10,16}" inputmode="tel" class="min-w-0 flex-1 rounded-lg border-slate-300 text-sm" placeholder="0771234567"/>
+          <button class="rounded-lg bg-cyan-600 text-white px-4 text-xs font-bold">Find</button>
+        </form>
       </div>
     </aside>
   </div>

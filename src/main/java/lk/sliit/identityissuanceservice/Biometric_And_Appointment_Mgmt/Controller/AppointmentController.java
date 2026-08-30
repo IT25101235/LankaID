@@ -136,12 +136,6 @@ public class AppointmentController {
                 .body(passService.createDownloadablePass(details));
     }
 
-    @GetMapping("/citizen/appointments/walk-in")
-    public String bookWalkInAppointment(HttpSession session) {
-        if (loggedInCitizenId(session) == null) return "redirect:/login";
-        return "citizen_frontends/walkin_appointment_booking";
-    }
-
     @GetMapping("/officer/nic/appointments")
     public String nicAppointments(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
@@ -158,20 +152,6 @@ public class AppointmentController {
         addAppointmentPageData(model, "Passport", "/officer/passport/applications", "/officer/passport/biometrics");
         model.addAttribute("appointments", appointmentService.getOfficerQueue("PASSPORT"));
         return "officers_frontends/officer_appointments";
-    }
-
-    @GetMapping("/officer/csr/walk-ins")
-    public String manageWalkInAppointments(HttpSession session) {
-        if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
-        if (!canAccess(session, OfficerAccountService.CSR)) return "redirect:/login";
-        return "officers_frontends/walkin_management";
-    }
-
-    @GetMapping("/officer/csr/walk-ins/register")
-    public String registerUnscheduledWalkIn(HttpSession session) {
-        if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
-        if (!canAccess(session, OfficerAccountService.CSR)) return "redirect:/login";
-        return "officers_frontends/csr_walkin_booking";
     }
 
     private void addAppointmentPageData(Model model, String documentType, String queueRoute, String biometricRoute) {

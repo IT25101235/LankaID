@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.Duration;
 import java.time.Year;
 import java.util.List;
 import java.util.Set;
@@ -197,6 +198,22 @@ public class CitizenSupportService {
     @Transactional(readOnly = true)
     public long getResolvedCount() {
         return supportRepository.countByRequestStatus(RESOLVED);
+    }
+
+    @Transactional(readOnly = true)
+    public String getAverageResponseTimeLabel() {
+        List<SupportRequest> answeredRequests = supportRepository.findAllByRespondedAtIsNotNull();
+        if (answeredRequests.isEmpty()) return "N/A";
+
+        double averageHours = answeredRequests.stream()
+                .mapToLong(request -> Duration.between(
+                        request.getCreatedAt(),
+                        request.getRespondedAt()
+                ).toMinutes())
+                .average()
+                .orElse(0) / 60.0;
+        if (averageHours < 24) return String.format("%.1f h", averageHours);
+        return String.format("%.1f d", averageHours / 24.0);
     }
 
     @Transactional(readOnly = true)
