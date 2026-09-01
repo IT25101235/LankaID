@@ -14,13 +14,13 @@
     <div th:if="${correctionApplicationId != null}" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><p class="font-bold">Officer correction requested</p><p class="mt-1">Update the requested details, save the form, replace any requested documents, and resubmit the same application.</p></div>
     <div th:if="${#fields.hasAnyErrors()}" class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700"><p class="font-bold">Please correct the following:</p><ul class="list-disc ml-5 mt-1"><li th:each="error : ${#fields.allErrors()}" th:text="${error}">Invalid detail</li></ul></div>
 
-    <section th:if="${applicationKind != 'NEW'}" class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5"><h2 class="font-bold">Existing passport</h2><p class="font-mono text-indigo-700 mt-2" th:text="${existingDocumentNo}">N1234567</p><p class="text-xs text-slate-500 mt-1">Matched from the government identity record.</p></section>
+    <section th:if="${applicationKind != 'NEW'}" class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5"><h2 class="font-bold">Existing passport</h2><p class="font-mono text-indigo-700 mt-2" th:text="${existingDocumentNo}">N1234567</p><p class="text-xs text-slate-500 mt-1">Verified from the government identity record and cannot be changed.</p></section>
     <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <h2 class="font-bold">Passport service</h2><div class="grid sm:grid-cols-2 gap-4 mt-4"><div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4"><p class="text-xs text-slate-500">Service level</p><p class="font-bold mt-1">Normal Service</p></div><div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4"><p class="text-xs text-slate-500">Travel document</p><p class="font-bold mt-1">All Countries</p></div></div><input type="hidden" th:field="*{serviceLevel}"/><input type="hidden" th:field="*{travelDocumentType}"/>
     </section>
     <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <h2 class="font-bold">NIC proof</h2><p class="text-xs text-slate-500 mt-1">Enter the citizen's NIC. For a child without an NIC, enter a parent's NIC instead.</p>
-      <div class="grid sm:grid-cols-2 gap-4 mt-4"><label class="text-sm font-semibold">Citizen NIC number<input th:field="*{nicProofNo}" maxlength="12" class="mt-1 w-full rounded-lg border-slate-300"/></label><label class="text-sm font-semibold">Parent NIC number<input th:field="*{parentNicNo}" maxlength="12" class="mt-1 w-full rounded-lg border-slate-300"/></label></div>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4"><label class="text-sm font-semibold">Citizen NIC number<input th:field="*{nicProofNo}" th:readonly="${applicationKind != 'NEW' and !#strings.isEmpty(existingNicNo)}" th:attr="aria-readonly=${applicationKind != 'NEW' and !#strings.isEmpty(existingNicNo)}" maxlength="12" class="mt-1 w-full rounded-lg border-slate-300" th:classappend="${applicationKind != 'NEW' and !#strings.isEmpty(existingNicNo) ? ' bg-slate-100 text-slate-600 cursor-not-allowed' : ''}"/><span th:if="${applicationKind != 'NEW' and !#strings.isEmpty(existingNicNo)}" class="block text-xs font-normal text-slate-500 mt-1">Verified from your linked identity record.</span></label><label class="text-sm font-semibold">Parent NIC number<input th:field="*{parentNicNo}" maxlength="12" class="mt-1 w-full rounded-lg border-slate-300"/></label></div>
     </section>
 
     <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
@@ -64,4 +64,5 @@
   </form>
 </main>
 <script>function togglePostal(){document.getElementById('postalAddress').classList.toggle('hidden',document.getElementById('samePostal').checked)}function toggleDual(){document.getElementById('dualDetails').classList.toggle('hidden',!document.getElementById('dualCitizen').checked)}document.addEventListener('DOMContentLoaded',()=>{togglePostal();toggleDual()});</script>
+<script src="/js/portal-shell.js?v=20260901-5"></script>
 </body></html>

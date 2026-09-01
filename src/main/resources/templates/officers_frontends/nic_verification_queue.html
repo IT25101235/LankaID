@@ -105,7 +105,7 @@
     </style>
 <link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
 </head>
-<body class="bg-background text-on-background h-full flex officer-dashboard-shell">
+<body class="bg-background text-on-background h-full flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <!-- Officer Navigation -->
 <aside class="w-64 min-h-screen flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r officer-sidebar">
 <div class="p-5 border-b border-slate-800">
@@ -224,4 +224,5 @@ function filterQueue() {
   });
 }
 </script>
+<script src="/js/portal-shell.js"></script>
 </body></html>

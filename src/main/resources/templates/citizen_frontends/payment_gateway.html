@@ -104,8 +104,12 @@ function updateDeliveryChoice() {
   document.getElementById('homeAddress').classList.toggle('hidden', !home);
   const centre = document.getElementById('centreId');
   centre.required = !home;
-  document.getElementById('centreSelection').classList.toggle('ring-2', !home);
-  document.getElementById('centreSelection').classList.toggle('ring-sky-200', !home);
+  centre.disabled = home;
+  if (home) centre.value = '';
+  const centreSelection = document.getElementById('centreSelection');
+  centreSelection.classList.toggle('hidden', home);
+  centreSelection.classList.toggle('ring-2', !home);
+  centreSelection.classList.toggle('ring-sky-200', !home);
 
   const summary = document.getElementById('paymentSummaryBox');
   const base = Number(summary.dataset.base);
@@ -119,6 +123,13 @@ function updateDeliveryChoice() {
   document.getElementById('paymentButtonText').textContent = alreadyPaid && !home
     ? 'Confirm centre collection' : 'Confirm payment and delivery';
 }
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('input[name="deliveryMethod"]').forEach(function (radio) {
+    radio.addEventListener('change', updateDeliveryChoice);
+  });
+  if (document.querySelector('input[name="deliveryMethod"]:checked')) updateDeliveryChoice();
+});
 </script>
+<script src="/js/portal-shell.js?v=20260901-5"></script>
 </body>
 </html>

@@ -18,8 +18,8 @@
     <section th:if="${applicationKind != 'NEW'}" class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
       <h2 class="font-bold">Existing NIC</h2><p class="text-xs text-slate-500 mt-1">Matched from the government identity record.</p>
       <div class="grid sm:grid-cols-2 gap-4 mt-4">
-        <label class="text-sm font-semibold">Last NIC number<input th:field="*{lastNicNo}" required maxlength="12" class="mt-1 w-full rounded-lg border-slate-300 bg-white"/></label>
-        <label class="text-sm font-semibold">Last issued date<input type="date" th:field="*{lastIssuedDate}" class="mt-1 w-full rounded-lg border-slate-300 bg-white"/></label>
+        <label class="text-sm font-semibold">Last NIC number<input th:field="*{lastNicNo}" required readonly aria-readonly="true" maxlength="12" class="mt-1 w-full rounded-lg border-slate-300 bg-slate-100 text-slate-600 cursor-not-allowed"/><span class="block text-xs font-normal text-slate-500 mt-1">Verified from the government identity record and cannot be changed.</span></label>
+        <label class="text-sm font-semibold">Last issued date<input type="date" th:field="*{lastIssuedDate}" th:readonly="${applicationForm.lastIssuedDate != null}" th:attr="aria-readonly=${applicationForm.lastIssuedDate != null}" class="mt-1 w-full rounded-lg border-slate-300" th:classappend="${applicationForm.lastIssuedDate != null ? ' bg-slate-100 text-slate-600 cursor-not-allowed' : ' bg-white'}"/><span class="block text-xs font-normal text-slate-500 mt-1" th:text="${applicationForm.lastIssuedDate != null ? 'Previously recorded and cannot be changed.' : 'Enter this once because the legacy record has no issue date.'}">Issue-date guidance</span></label>
       </div>
     </section>
     <section th:if="${applicationKind == 'LOST'}" class="bg-red-50 border border-red-200 rounded-2xl p-5">
@@ -81,4 +81,5 @@
   </form>
 </main>
 <script>function togglePostal(){document.getElementById('postalAddress').classList.toggle('hidden',document.getElementById('samePostal').checked)}function toggleDual(){document.getElementById('dualDetails').classList.toggle('hidden',!document.getElementById('dualCitizen').checked)}document.addEventListener('DOMContentLoaded',()=>{togglePostal();toggleDual()});</script>
+<script src="/js/portal-shell.js?v=20260901-5"></script>
 </body></html>

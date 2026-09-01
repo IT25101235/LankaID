@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
   <style>body{font-family:'Public Sans',sans-serif}</style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body class="bg-slate-100 min-h-screen text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="${queueRoute}" class="text-sm text-slate-300 hover:text-white flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>Pending queue</a><div class="h-6 w-px bg-slate-700"></div><h1 class="font-bold"><span th:text="${documentType}">NIC</span> Processed Applications</h1><a th:href="${biometricRoute}" class="ml-auto rounded-lg bg-cyan-600 hover:bg-cyan-700 px-4 py-2 text-xs font-bold">Biometric collection</a></div></header>
 <main class="max-w-7xl mx-auto p-5 sm:p-6">
   <div class="flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-2xl font-bold">Review history</h2><p class="text-sm text-slate-500 mt-1">Applications already decided by this officer.</p></div><span class="text-xs bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full">Static demonstration data</span></div>
@@ -30,4 +30,5 @@
   </section>
 </main>
 <script>function filterRows(){const q=document.getElementById('search').value.toLowerCase(),d=document.getElementById('decision').value;document.querySelectorAll('#rows tr').forEach(r=>r.style.display=(r.textContent.toLowerCase().includes(q)&&(d==='all'||r.dataset.decision===d))?'':'none')}</script>
+<script src="/js/portal-shell.js"></script>
 </body></html>

@@ -58,25 +58,28 @@
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 
 <!-- Government header -->
-<header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+<header class="bg-[#0f2747] border-b border-[#1e3a5f] sticky top-0 z-50 text-white shadow-sm">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
     <a th:href="@{/}" class="flex items-center gap-3" aria-label="LankaID home">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center officer-brand-icon">
+      <div class="w-9 h-9 rounded-md bg-cyan-700 flex items-center justify-center">
         <span class="material-symbols-outlined text-white text-xl">account_balance</span>
       </div>
       <div>
-        <p class="font-extrabold text-base leading-none text-slate-900">Lanka<span class="text-cyan-600">ID</span></p>
-        <p class="text-[11px] text-slate-500 mt-1">Digital Government Services</p>
+        <p class="font-extrabold text-base leading-none text-white">Lanka<span class="text-cyan-300">ID</span></p>
+        <p class="text-[11px] text-slate-300 mt-1">Digital Government Services</p>
       </div>
     </a>
-    <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600" aria-label="Primary navigation">
-      <a class="text-cyan-700" href="#">Home</a>
-      <a class="hover:text-cyan-700 transition-colors" href="#services">Services</a>
-      <a class="hover:text-cyan-700 transition-colors" href="#process">How It Works</a>
-      <a class="hover:text-cyan-700 transition-colors" href="#support">Support</a>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-200" aria-label="Primary navigation">
+      <a class="text-cyan-300" href="#">Home</a>
+      <a class="hover:text-white transition-colors" href="#services">Services</a>
+      <a class="hover:text-white transition-colors" href="#process">How It Works</a>
+      <a class="hover:text-white transition-colors" href="#support">Support</a>
     </nav>
-    <a th:href="@{/login}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors">
+    <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
       Sign In
+    </a>
+    <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
+      Access Dashboard
     </a>
   </div>
 </header>
@@ -98,8 +101,12 @@
         Apply for identity documents, follow application progress, and access verified government services through one trusted LankaID account.
       </p>
       <div class="flex flex-wrap gap-3 mt-8">
-        <a th:href="@{/login}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+        <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
           Access LankaID
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+          Access Dashboard
           <span class="material-symbols-outlined text-lg">arrow_forward</span>
         </a>
         <a href="#process" class="inline-flex items-center h-12 px-6 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm font-bold hover:border-cyan-400 hover:text-cyan-700 transition-colors">

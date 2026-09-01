@@ -18,7 +18,7 @@
 </style>
 <link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 flex officer-dashboard-shell">
+<body class="min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 
 <!-- Sidebar -->
 <aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
@@ -379,5 +379,6 @@ function openComplaint(ref) {
   window.location.href = '/officer/csr/complaints/' + encodeURIComponent(ref);
 }
 </script>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>
