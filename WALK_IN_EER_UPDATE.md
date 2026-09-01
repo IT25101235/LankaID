@@ -79,4 +79,4 @@ The existing `Appointment`–`Centre` connection remains unchanged. `WalkInSlot`
 - `visitor_service` is limited to NIC and Passport; it is not another entity
 - No direct `Appointment`–`WalkInSlot` relationship in the current schema
 
-Run `WALK_IN_SCHEMA_UPDATE.sql` once in SSMS for every team member's database. The script is safe to rerun because it checks whether the columns and table already exist.
+For a new teammate database, run `DATABASE_SETUP.sql` in SSMS; it includes this walk-in schema and every other table used by the application. `WALK_IN_SCHEMA_UPDATE.sql` remains available only as the small incremental update for a database created before the walk-in workflow. Both scripts are safe to rerun.

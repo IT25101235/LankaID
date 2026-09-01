@@ -20,9 +20,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class UserController {
+
+    private static final DateTimeFormatter OFFICER_LOGIN_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
     private final UserAccountService userAccountService;
     private final AdminAccountService adminAccountService;
@@ -38,7 +43,10 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public String index() {
+    public String index(HttpSession session, Model model) {
+        String dashboardPath = landingDashboardPath(session);
+        model.addAttribute("landingSignedIn", dashboardPath != null);
+        model.addAttribute("landingDashboardPath", dashboardPath == null ? "" : dashboardPath);
         return "index";
     }
 
@@ -76,6 +84,7 @@ public class UserController {
         session.setAttribute("loggedInUserId", account.getUserId());
         session.setAttribute("loggedInUserEmail", account.getEmail());
         session.setAttribute("loggedInUserRole", "CITIZEN");
+        session.setAttribute("loggedInDashboardPath", "/citizen/dashboard");
 
         int sessionTimeout = loginRequest.isRememberMe()
                 ? 7 * 24 * 60 * 60
@@ -121,6 +130,12 @@ public class UserController {
             session.setAttribute("loggedInAdminId", admin.getUserId());
             session.setAttribute("loggedInAdminEmail", admin.getEmail());
             session.setAttribute("loggedInAdminRole", "SYSTEM_ADMIN");
+            session.setAttribute("loggedInOfficerEmail", admin.getEmail());
+            session.setAttribute("loggedInOfficerRole", "SYSTEM_ADMIN");
+            session.setAttribute("loggedInOfficerRoleLabel", "System Administrator");
+            session.setAttribute("loggedInOfficerEmployeeNo", "ADMIN");
+            session.setAttribute("loggedInOfficerLoginTime", currentOfficerLoginTime());
+            session.setAttribute("loggedInDashboardPath", "/officer/admin");
 
             int sessionTimeout = officerLoginRequest.isRememberMe()
                     ? 7 * 24 * 60 * 60
@@ -168,6 +183,8 @@ public class UserController {
         session.setAttribute("loggedInOfficerRole", officer.getRoleCode());
         session.setAttribute("loggedInOfficerRoleLabel", officer.getRoleLabel());
         session.setAttribute("loggedInOfficerEmployeeNo", officer.getEmployeeNo());
+        session.setAttribute("loggedInOfficerLoginTime", currentOfficerLoginTime());
+        session.setAttribute("loggedInDashboardPath", dashboardPath);
 
         int sessionTimeout = officerLoginRequest.isRememberMe()
                 ? 7 * 24 * 60 * 60
@@ -238,4 +255,32 @@ public class UserController {
         }
     }
 
+    private String currentOfficerLoginTime() {
+        return LocalDateTime.now().format(OFFICER_LOGIN_TIME_FORMAT);
+    }
+
+    private String landingDashboardPath(HttpSession session) {
+        if (session.getAttribute("loggedInUserId") != null) {
+            return "/citizen/dashboard";
+        }
+
+        Object savedDashboard = session.getAttribute("loggedInDashboardPath");
+        if (savedDashboard instanceof String path && !path.isBlank()) {
+            return path;
+        }
+        if (session.getAttribute("loggedInAdminId") != null) {
+            return "/officer/admin";
+        }
+
+        Object officerRole = session.getAttribute("loggedInOfficerRole");
+        if (officerRole == null) return null;
+        return switch (officerRole.toString()) {
+            case "SYSTEM_ADMIN" -> "/officer/admin";
+            case OfficerAccountService.DIRECTOR -> "/officer/director";
+            case OfficerAccountService.CSR -> "/officer/csr";
+            case OfficerAccountService.PASSPORT_OFFICER -> "/officer/passport/applications";
+            case OfficerAccountService.NIC_OFFICER -> "/officer/nic/applications";
+            default -> null;
+        };
+    }
 }

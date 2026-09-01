@@ -5,6 +5,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.UserController;
+import lk.sliit.identityissuanceservice.User_Mgmt.Controller.OfficerSessionIdentityAdvice;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -74,6 +77,7 @@ class UserControllerSessionTests {
         assertEquals(25, session.getAttribute("loggedInUserId"));
         assertEquals("citizen@example.com", session.getAttribute("loggedInUserEmail"));
         assertEquals("CITIZEN", session.getAttribute("loggedInUserRole"));
+        assertEquals("/citizen/dashboard", session.getAttribute("loggedInDashboardPath"));
         assertEquals(1800, session.getMaxInactiveInterval());
     }
 
@@ -100,6 +104,10 @@ class UserControllerSessionTests {
         assertEquals(50, session.getAttribute("loggedInAdminId"));
         assertEquals("admin@gov.lk", session.getAttribute("loggedInAdminEmail"));
         assertEquals("SYSTEM_ADMIN", session.getAttribute("loggedInAdminRole"));
+        assertEquals("admin@gov.lk", session.getAttribute("loggedInOfficerEmail"));
+        assertEquals("System Administrator", session.getAttribute("loggedInOfficerRoleLabel"));
+        assertNotNull(session.getAttribute("loggedInOfficerLoginTime"));
+        assertEquals("/officer/admin", session.getAttribute("loggedInDashboardPath"));
     }
 
     @Test
@@ -152,6 +160,8 @@ class UserControllerSessionTests {
         assertEquals("NIC Application Officer", session.getAttribute("loggedInOfficerRoleLabel"));
         assertEquals("EMP-NIC-001", session.getAttribute("loggedInOfficerEmployeeNo"));
         assertEquals("nic.officer@gov.lk", session.getAttribute("loggedInOfficerEmail"));
+        assertNotNull(session.getAttribute("loggedInOfficerLoginTime"));
+        assertEquals("/officer/nic/applications", session.getAttribute("loggedInDashboardPath"));
     }
 
     @Test
@@ -190,5 +200,44 @@ class UserControllerSessionTests {
         assertEquals("Director", session.getAttribute("loggedInOfficerRoleLabel"));
         assertEquals("EMP-DIR-001", session.getAttribute("loggedInOfficerEmployeeNo"));
         assertEquals("director@gov.lk", session.getAttribute("loggedInOfficerEmail"));
+        assertNotNull(session.getAttribute("loggedInOfficerLoginTime"));
+        assertEquals("/officer/csr", session.getAttribute("loggedInDashboardPath"));
+    }
+
+    @Test
+    void landingPageShowsTheSavedDashboardForAnAuthenticatedSession() throws Exception {
+        MockHttpSession citizenSession = new MockHttpSession();
+        citizenSession.setAttribute("loggedInUserId", 25);
+
+        mockMvc.perform(get("/").session(citizenSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attribute("landingSignedIn", true))
+                .andExpect(model().attribute("landingDashboardPath", "/citizen/dashboard"));
+
+        MockHttpSession directorSession = new MockHttpSession();
+        directorSession.setAttribute("loggedInOfficerId", 71);
+        directorSession.setAttribute("loggedInOfficerRole", OfficerAccountService.DIRECTOR);
+        directorSession.setAttribute("loggedInDashboardPath", "/officer/passport/applications");
+
+        mockMvc.perform(get("/").session(directorSession))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("landingSignedIn", true))
+                .andExpect(model().attribute("landingDashboardPath", "/officer/passport/applications"));
+    }
+
+    @Test
+    void officerIdentityAdviceExposesTheSharedSidebarDetails() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInOfficerEmail", "director@gov.lk");
+        session.setAttribute("loggedInOfficerRoleLabel", "Director");
+        session.setAttribute("loggedInOfficerLoginTime", "01 Sep 2026, 10:15");
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        new OfficerSessionIdentityAdvice().exposeOfficerIdentity(session, model);
+
+        assertEquals("director@gov.lk", model.get("loggedInOfficerEmail"));
+        assertEquals("Director", model.get("loggedInOfficerRoleLabel"));
+        assertEquals("01 Sep 2026, 10:15", model.get("loggedInOfficerLoginTime"));
     }
 }

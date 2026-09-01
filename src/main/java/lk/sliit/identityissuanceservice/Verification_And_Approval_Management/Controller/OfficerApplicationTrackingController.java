@@ -42,6 +42,7 @@ public class OfficerApplicationTrackingController {
         model.addAttribute("hasNext", trackingPage.hasNext());
         model.addAttribute("search", search == null ? "" : search);
         model.addAttribute("scopeLabel", scopeLabel(role));
+        model.addAttribute("loggedInOfficerRole", role);
         model.addAttribute("backRoute", backRoute(role));
         model.addAttribute("loggedInOfficerRoleLabel", session.getAttribute("loggedInOfficerRoleLabel"));
         model.addAttribute("loggedInOfficerEmployeeNo", session.getAttribute("loggedInOfficerEmployeeNo"));
