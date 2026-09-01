@@ -256,6 +256,7 @@ public class DocumentRenewalReplacementController {
                 "existingDocumentNo",
                 "NIC".equals(service) ? eligibility.getNicNumber() : eligibility.getPassportNumber()
         );
+        model.addAttribute("existingNicNo", eligibility.getNicNumber());
     }
 
     private void addDocumentData(

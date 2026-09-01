@@ -2,6 +2,10 @@
 
 This guide turns the current LankaID Identity Issuance Service into a formal Enhanced Entity Relationship (EER) design and a practical SQL database plan. It follows the notation and mapping methods taught in IT2140 Lectures 04-06 and targets every Part B category in the assignment marking scheme.
 
+> **Runnable application database:** the implemented Spring Boot application uses Microsoft SQL Server and validates the 19-table schema mapped by its JPA entities. Run [`DATABASE_SETUP.sql`](DATABASE_SETUP.sql) in SQL Server Management Studio for a clean or existing teammate database. The later MySQL-style relational blueprint describes the broader proposed EER and is not the executable application schema.
+
+> **Implementation status:** see [`PROJECT_STATUS_AND_REMAINING_WORK.md`](PROJECT_STATUS_AND_REMAINING_WORK.md) for the evidence-based completion estimate and remaining delivery workflow.
+
 > Important: the assignment still requires two separate PDF submissions: a 2-3 page requirement specification and the EER diagram. This README is a design guide, not either final PDF.
 
 ## 1. What the database must support

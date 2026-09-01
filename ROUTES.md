@@ -2,6 +2,8 @@
 
 The project uses Spring MVC controllers, `HttpSession`, services and Spring Data JPA repositories. Citizen application pages read and save data through the existing SQL Server schema.
 
+Run `DATABASE_SETUP.sql` in SQL Server Management Studio before starting the application on a new machine. The shared `portal-shell.js` and `portal-shell.css` give officers a responsive side navigation and give citizens and public walk-in users a simpler responsive top navigation.
+
 ## How a route works
 
 ```java
@@ -65,6 +67,7 @@ The dashboard has no demo-state parameter. It matches the logged-in citizen's em
 | `/officer/passport/appointments` | Passport biometric schedule |
 | `/officer/nic/biometrics` | NIC QR/manual check-in and biometric collection |
 | `/officer/passport/biometrics` | Passport QR/manual check-in and biometric collection |
+| `/officer/application-tracking` | Role-scoped application tracking for officers/directors |
 
 `{reference}` is a path variable. For example, `/officer/nic/applications/LK-NIC-2026-00183` passes `LK-NIC-2026-00183` to the review page.
 
@@ -76,6 +79,7 @@ The dashboard has no demo-state parameter. It matches the logged-in citizen's em
 | `/officer/csr/complaints/{reference}` | Complaint conversation and reply |
 | `/officer/csr/walk-ins` | Accept, reschedule and check in physical visits |
 | `/officer/csr/walk-ins/register` | Register an unscheduled visitor |
+| `/officer/csr/deliveries` | Complete centre document handover |
 | `/officer/director` | Statistics dashboard |
 | `/officer/director/printing` | Select records and prepare a printing export |
 | `/officer/admin` | Officer credential management |
