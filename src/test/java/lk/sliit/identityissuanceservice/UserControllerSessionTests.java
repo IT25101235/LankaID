@@ -6,7 +6,10 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.UserController;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.OfficerSessionIdentityAdvice;
+import lk.sliit.identityissuanceservice.User_Mgmt.Dto.EmailVerificationChallenge;
+import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
+import lk.sliit.identityissuanceservice.User_Mgmt.Service.EmailVerificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +20,12 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,6 +42,9 @@ class UserControllerSessionTests {
     private UserAccountService userAccountService;
 
     @Mock
+    private EmailVerificationService emailVerificationService;
+
+    @Mock
     private AdminAccountService adminAccountService;
 
     @Mock
@@ -48,6 +56,7 @@ class UserControllerSessionTests {
     void setUp() {
         mockMvc = standaloneSetup(new UserController(
                 userAccountService,
+                emailVerificationService,
                 adminAccountService,
                 officerAccountService
         )).build();
@@ -224,6 +233,45 @@ class UserControllerSessionTests {
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("landingSignedIn", true))
                 .andExpect(model().attribute("landingDashboardPath", "/officer/passport/applications"));
+    }
+
+    @Test
+    void registrationRequiresEmailCodeBeforeCreatingAccount() throws Exception {
+        PreparedCitizenRegistration registration = new PreparedCitizenRegistration(
+                "citizen@example.com",
+                "+94771234567",
+                "bcrypt-hash"
+        );
+        EmailVerificationChallenge challenge = new EmailVerificationChallenge(
+                "code-hash",
+                Instant.now().plusSeconds(600),
+                Instant.now().plusSeconds(60)
+        );
+        when(userAccountService.prepareCitizenRegistration(
+                "citizen@example.com",
+                "0771234567",
+                "password123"
+        )).thenReturn(registration);
+        when(emailVerificationService.sendVerificationCode("citizen@example.com"))
+                .thenReturn(challenge);
+
+        MockHttpSession session = (MockHttpSession) mockMvc.perform(post("/register")
+                        .param("email", "citizen@example.com")
+                        .param("phone", "0771234567")
+                        .param("password", "password123")
+                        .param("confirmPassword", "password123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/register/verify"))
+                .andReturn().getRequest().getSession(false);
+
+        when(emailVerificationService.isValid(challenge, "123456")).thenReturn(true);
+        mockMvc.perform(post("/register/verify")
+                        .session(session)
+                        .param("code", "123456"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        verify(userAccountService).registerVerifiedCitizen(registration);
     }
 
     @Test

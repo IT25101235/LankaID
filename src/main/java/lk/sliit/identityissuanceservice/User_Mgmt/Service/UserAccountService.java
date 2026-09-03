@@ -1,5 +1,6 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Service;
 
+import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -27,20 +28,43 @@ public class UserAccountService {
 
     @Transactional
     public UserAccount registerCitizen(String email, String phone, String password) {
+        PreparedCitizenRegistration registration = prepareCitizenRegistration(email, phone, password);
+        return saveCitizen(registration, true);
+    }
+
+    public PreparedCitizenRegistration prepareCitizenRegistration(String email, String phone, String password) {
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
         String normalizedPhone = normalizePhone(phone);
 
+        assertRegistrationAvailable(normalizedEmail, normalizedPhone);
+        return new PreparedCitizenRegistration(
+                normalizedEmail,
+                normalizedPhone,
+                passwordEncoder.encode(password)
+        );
+    }
+
+    @Transactional
+    public UserAccount registerVerifiedCitizen(PreparedCitizenRegistration registration) {
+        assertRegistrationAvailable(registration.email(), registration.phone());
+        return saveCitizen(registration, true);
+    }
+
+    private void assertRegistrationAvailable(String normalizedEmail, String normalizedPhone) {
         if (userAccountRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new IllegalArgumentException("An account already uses this email address.");
         }
         if (userAccountRepository.existsByPhone(normalizedPhone)) {
             throw new IllegalArgumentException("An account already uses this phone number.");
         }
+    }
 
+    private UserAccount saveCitizen(PreparedCitizenRegistration registration, boolean emailVerified) {
         UserAccount account = new UserAccount();
-        account.setEmail(normalizedEmail);
-        account.setPhone(normalizedPhone);
-        account.setPasswordHash(passwordEncoder.encode(password));
+        account.setEmail(registration.email());
+        account.setPhone(registration.phone());
+        account.setPasswordHash(registration.passwordHash());
+        account.setEmailVerified(emailVerified ? "Y" : "N");
 
         UserAccount savedAccount = userAccountRepository.save(account);
         citizenAccountRepository.save(new CitizenAccount(savedAccount.getUserId()));
@@ -51,7 +75,7 @@ public class UserAccountService {
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
 
         return userAccountRepository
-                .findByEmailIgnoreCaseAndAccountStatus(normalizedEmail, "ACTIVE")
+                .findByEmailIgnoreCaseAndAccountStatusAndEmailVerified(normalizedEmail, "ACTIVE", "Y")
                 .filter(account -> citizenAccountRepository.existsById(account.getUserId()))
                 .filter(account -> passwordEncoder.matches(password, account.getPasswordHash()));
     }

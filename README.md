@@ -6,6 +6,21 @@ This guide turns the current LankaID Identity Issuance Service into a formal Enh
 
 > **Implementation status:** see [`PROJECT_STATUS_AND_REMAINING_WORK.md`](PROJECT_STATUS_AND_REMAINING_WORK.md) for the evidence-based completion estimate and remaining delivery workflow.
 
+## Registration email verification setup
+
+Citizen registration sends a six-digit code through Gmail SMTP and creates the account only after the code is verified. Do not place the Gmail password or App Password in this repository.
+
+1. Enable 2-Step Verification on the Google account used to send LankaID mail.
+2. Open <https://myaccount.google.com/apppasswords>, create an App Password named `LankaID`, and copy the generated 16-character value. A normal Gmail password will not work here.
+3. Before starting the application in PowerShell, set the credentials for that terminal session:
+
+```powershell
+$env:LANKAID_MAIL_USERNAME="your-sender@gmail.com"
+$env:LANKAID_MAIL_APP_PASSWORD="the-16-character-app-password"
+```
+
+Optionally set `LANKAID_MAIL_FROM` to the sender address when it differs from the login username. Configure the same environment variables in the IDE run configuration when launching from IntelliJ IDEA or Eclipse. The code expires after 10 minutes, allows five attempts, and has a 60-second resend cooldown.
+
 > Important: the assignment still requires two separate PDF submissions: a 2-3 page requirement specification and the EER diagram. This README is a design guide, not either final PDF.
 
 ## 1. What the database must support
