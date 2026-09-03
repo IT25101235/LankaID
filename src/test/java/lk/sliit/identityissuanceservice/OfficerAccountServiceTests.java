@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -78,6 +80,26 @@ class OfficerAccountServiceTests {
         assertEquals(80, staffCaptor.getValue().getUserId());
         assertEquals("EMP-NIC-004", staffCaptor.getValue().getEmployeeNo());
         assertEquals(OfficerAccountService.NIC_OFFICER, staffCaptor.getValue().getStaffRole());
+    }
+
+    @Test
+    void createOfficerRejectsEmailAlreadyUsedByCitizenAccount() {
+        OfficerRegistrationDto request = new OfficerRegistrationDto();
+        request.setEmail("Citizen@Example.com");
+        request.setPhone("+94771234567");
+        request.setRole("nic-officer");
+        request.setPassword("password123");
+        when(userAccountRepository.existsByEmailIgnoreCase("citizen@example.com"))
+                .thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> officerAccountService.createOfficer(request)
+        );
+
+        assertEquals("That email address is already registered.", exception.getMessage());
+        verify(userAccountRepository, never()).save(any(UserAccount.class));
+        verify(staffAccountRepository, never()).save(any(StaffAccount.class));
     }
 
     @Test
