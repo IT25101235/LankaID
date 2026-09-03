@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -102,6 +103,29 @@ class CitizenApplicationControllerTests {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/citizen/dashboard"))
                 .andExpect(flash().attribute("applicationError", "You already have this identity document."));
+    }
+
+    @Test
+    void citizenCanDeleteDraftFromDashboard() throws Exception {
+        CitizenApplication draft = new CitizenApplication();
+        draft.setApplicationId(42);
+        draft.setApplicationNo("LK-NIC-2026-000042");
+        when(applicationService.deleteDraftApplication(25, 42)).thenReturn(draft);
+
+        mockMvc.perform(post("/citizen/applications/42/delete").session(citizenSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/citizen/dashboard"))
+                .andExpect(flash().attribute(
+                        "applicationMessage",
+                        "Draft LK-NIC-2026-000042 was deleted. You can start a new application when needed."
+                ));
+    }
+
+    @Test
+    void deleteDraftEndpointRequiresCitizenSession() throws Exception {
+        mockMvc.perform(post("/citizen/applications/42/delete"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     private MockHttpSession citizenSession() {

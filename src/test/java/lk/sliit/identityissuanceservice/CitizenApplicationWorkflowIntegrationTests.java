@@ -27,6 +27,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -200,6 +201,35 @@ class CitizenApplicationWorkflowIntegrationTests {
         assertEquals("PASSPORT", application.getServiceType());
         assertEquals("NEW", application.getApplicationKind());
         assertTrue(passportRepository.existsById(application.getApplicationId()));
+    }
+
+    @Test
+    void unsubmittedDraftCanBeDeletedAndCitizenCanStartAgain() throws Exception {
+        UserAccount user = createCitizen(false);
+        MockHttpSession session = citizenSession(user);
+        mockMvc.perform(validProfile(post("/citizen/applications/nic/new").session(session)))
+                .andExpect(status().is3xxRedirection());
+
+        CitizenApplication draft = applicationRepository
+                .findAllByCitizenIdOrderByCreatedAtDesc(user.getUserId()).get(0);
+        assertTrue(nicRepository.existsById(draft.getApplicationId()));
+
+        mockMvc.perform(post("/citizen/applications/{applicationId}/delete", draft.getApplicationId())
+                        .session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/citizen/dashboard"))
+                .andExpect(flash().attribute(
+                        "applicationMessage",
+                        "Draft " + draft.getApplicationNo()
+                                + " was deleted. You can start a new application when needed."
+                ));
+
+        assertFalse(applicationRepository.existsById(draft.getApplicationId()));
+        assertFalse(nicRepository.existsById(draft.getApplicationId()));
+        mockMvc.perform(get("/citizen/dashboard").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("New NIC")))
+                .andExpect(content().string(containsString("No applications yet")));
     }
 
     @Test

@@ -292,6 +292,27 @@ public class CitizenApplicationController {
         }
     }
 
+    @PostMapping("/citizen/applications/{applicationId}/delete")
+    public String deleteDraftApplication(
+            @PathVariable Integer applicationId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+
+        try {
+            CitizenApplication deleted = applicationService.deleteDraftApplication(citizenId, applicationId);
+            redirectAttributes.addFlashAttribute(
+                    "applicationMessage",
+                    "Draft " + deleted.getApplicationNo() + " was deleted. You can start a new application when needed."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
+        }
+        return "redirect:/citizen/dashboard";
+    }
+
     private void addNewFormData(Model model, String service) {
         model.addAttribute("formKind", "new");
         model.addAttribute("applicationKind", "NEW");

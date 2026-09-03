@@ -42,7 +42,7 @@
       <a th:href="@{/citizen/support}" class="text-slate-600 hover:text-sky-600">Support</a>
     </nav>
     <form th:action="@{/logout}" method="post">
-      <button type="submit" class="rounded-lg border px-3 py-2 text-xs font-semibold hover:bg-red-50 hover:text-red-700">Sign out</button>
+      <button type="submit" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:border-red-300 hover:bg-red-100">Sign out</button>
     </form>
   </div>
 </header>
@@ -113,6 +113,9 @@
           <div class="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
             <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Next action</span>
             <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
+            <form th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:action="@{/citizen/applications/{applicationId}/delete(applicationId=${citizenApplication.applicationId})}" method="post" onsubmit="return confirm('Delete this unsubmitted draft? This cannot be undone.')">
+              <button type="submit" class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-bold text-red-700 hover:bg-red-100">Delete draft</button>
+            </form>
             <a th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" th:href="@{/citizen/{workflow}/{service}/correction(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-amber-700">Correct form</a>
             <a th:if="${citizenApplication.currentStatus == 'APPROVED'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-emerald-700">Pay &amp; book biometrics</a>
             <a th:if="${citizenApplication.currentStatus == 'APPOINTMENT_BOOKED'}" th:href="@{/citizen/appointments/biometric(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">View QR pass</a>

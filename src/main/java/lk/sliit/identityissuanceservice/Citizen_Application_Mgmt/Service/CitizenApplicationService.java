@@ -281,8 +281,32 @@ public class CitizenApplicationService {
 
     @Transactional(readOnly = true)
     public List<ApplicationDocument> getNewDocuments(Integer citizenId, Integer applicationId) {
-        getNewApplication(citizenId, applicationId);
+        CitizenApplication application = getNewApplication(citizenId, applicationId);
+        requireEditable(application);
         return documentRepository.findAllByApplicationIdOrderByUploadedAtAsc(applicationId);
+    }
+
+    @Transactional
+    public CitizenApplication deleteDraftApplication(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = findOwnedApplication(citizenId, applicationId);
+        if (!"DRAFT".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException(
+                    "Only an unsubmitted draft application can be deleted."
+            );
+        }
+
+        List<ApplicationDocument> documents = documentRepository
+                .findAllByApplicationIdOrderByUploadedAtAsc(applicationId);
+        documentRepository.deleteAll(documents);
+
+        if (NIC.equals(application.getServiceType())) {
+            nicRepository.deleteById(applicationId);
+        } else if (PASSPORT.equals(application.getServiceType())) {
+            passportRepository.deleteById(applicationId);
+        }
+        applicationRepository.delete(application);
+        deleteDraftFiles(application, documents);
+        return application;
     }
 
     @Transactional
@@ -391,6 +415,41 @@ public class CitizenApplicationService {
         document.setVerifiedByStaffId(null);
         document.setVerifiedAt(null);
         documentRepository.save(document);
+    }
+
+    private void requireEditable(CitizenApplication application) {
+        if (!"DRAFT".equals(application.getCurrentStatus())
+                && !"CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException(
+                    "This application is locked after submission. It can only be edited when an officer requests a correction."
+            );
+        }
+    }
+
+    private void deleteDraftFiles(
+            CitizenApplication application,
+            List<ApplicationDocument> documents
+    ) {
+        for (ApplicationDocument document : documents) {
+            Path file = uploadRoot.resolve(document.getFilePath()).normalize();
+            if (file.startsWith(uploadRoot)) {
+                try {
+                    Files.deleteIfExists(file);
+                } catch (IOException ignored) {
+                    // The database draft is deleted even if an orphaned upload cannot be removed.
+                }
+            }
+        }
+
+        Path applicationFolder = uploadRoot.resolve("application-documents")
+                .resolve(application.getApplicationNo()).normalize();
+        if (applicationFolder.startsWith(uploadRoot)) {
+            try {
+                Files.deleteIfExists(applicationFolder);
+            } catch (IOException ignored) {
+                // A non-empty or locked folder can be cleaned up later without restoring the draft.
+            }
+        }
     }
 
     private void submitWhenDocumentsComplete(

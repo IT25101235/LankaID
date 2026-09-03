@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -157,6 +158,54 @@ class CitizenApplicationServiceTests {
         );
         assertTrue(exception.getMessage().contains("BIRTH_CERTIFICATE"));
         assertTrue("DRAFT".equals(application.getCurrentStatus()));
+    }
+
+    @Test
+    void citizenCanDeleteAnUnsubmittedDraft() {
+        CitizenApplication application = application();
+        when(applicationRepository.findByApplicationIdAndCitizenId(101, 25))
+                .thenReturn(Optional.of(application));
+        when(documentRepository.findAllByApplicationIdOrderByUploadedAtAsc(101))
+                .thenReturn(List.of());
+
+        CitizenApplication deleted = service.deleteDraftApplication(25, 101);
+
+        assertTrue(deleted == application);
+        verify(documentRepository).deleteAll(List.of());
+        verify(nicRepository).deleteById(101);
+        verify(passportRepository, never()).deleteById(101);
+        verify(applicationRepository).delete(application);
+    }
+
+    @Test
+    void citizenCannotDeleteAnApplicationAfterSubmission() {
+        CitizenApplication application = application();
+        application.setCurrentStatus("SUBMITTED");
+        when(applicationRepository.findByApplicationIdAndCitizenId(101, 25))
+                .thenReturn(Optional.of(application));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.deleteDraftApplication(25, 101)
+        );
+
+        assertTrue(exception.getMessage().contains("unsubmitted draft"));
+        verify(applicationRepository, never()).delete(application);
+    }
+
+    @Test
+    void submittedApplicationDocumentFormCannotBeOpened() {
+        CitizenApplication application = application();
+        application.setCurrentStatus("SUBMITTED");
+        when(applicationRepository.findByApplicationIdAndCitizenId(101, 25))
+                .thenReturn(Optional.of(application));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.getNewDocuments(25, 101)
+        );
+
+        assertTrue(exception.getMessage().contains("locked after submission"));
     }
 
     private void stubAccountAndIdentity(
