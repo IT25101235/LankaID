@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Secure Sign In | LankaID</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "secondary": "#006398",
+                        "on-tertiary-container": "#818486",
+                        "primary-fixed": "#dae2fd",
+                        "primary": "#000000",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline-variant": "#c6c6cd",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-secondary-fixed-variant": "#004b73",
+                        "tertiary": "#000000",
+                        "secondary-fixed-dim": "#93ccff",
+                        "on-primary-container": "#7c839b",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#e0e3e5",
+                        "on-background": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "surface-tint": "#565e74",
+                        "on-secondary-fixed": "#001d31",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary-container": "#191c1e",
+                        "inverse-on-surface": "#eaf1ff",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#cce5ff",
+                        "on-secondary-container": "#00476e",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "secondary-container": "#5bb8fe",
+                        "outline": "#76777d",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#131b2e",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface-variant": "#45464d",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "max-width-content": "1200px",
+                        "container-padding-desktop": "2.5rem",
+                        "section-margin": "4rem",
+                        "base": "8px",
+                        "container-padding-mobile": "1rem",
+                        "stack-gap": "1.5rem"
+                    },
+                    "fontFamily": {
+                        "sans": ["Public Sans", "sans-serif"],
+                        "label-sm": ["Public Sans", "sans-serif"],
+                        "headline-lg": ["Public Sans", "sans-serif"],
+                        "display-lg": ["Public Sans", "sans-serif"],
+                        "body-lg": ["Public Sans", "sans-serif"],
+                        "body-md": ["Public Sans", "sans-serif"],
+                        "headline-md": ["Public Sans", "sans-serif"],
+                        "headline-lg-mobile": ["Public Sans", "sans-serif"],
+                        "caption": ["Public Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .auth-tab { transition: color 160ms ease, border-color 160ms ease; }
+        .auth-field { transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease; }
+        .auth-field:hover { background-color: #ffffff; }
+    </style>
+<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+</head>
+<body class="m-0 min-h-screen bg-white font-sans text-slate-900 antialiased">
+<!-- Full-page authentication workspace -->
+<main class="min-h-screen grid lg:grid-cols-[0.72fr_1.28fr]">
+  <aside class="hidden lg:flex bg-slate-900 text-white px-12 xl:px-16 py-12 flex-col">
+    <a th:href="@{/}" class="flex items-center gap-3 w-fit" aria-label="LankaID home">
+      <div class="w-11 h-11 rounded-md bg-cyan-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-2xl">account_balance</span>
+      </div>
+      <div>
+        <p class="font-extrabold text-xl leading-none text-white">Lanka<span class="text-cyan-400">ID</span></p>
+        <p class="text-xs text-slate-400 mt-1">Digital Government Services</p>
+      </div>
+    </a>
+    <div class="my-auto max-w-md">
+      <p class="text-xs font-bold uppercase tracking-[0.12em] text-cyan-300 mb-5">Government of Sri Lanka</p>
+      <h1 class="text-3xl xl:text-4xl font-bold tracking-tight leading-tight">Identity services portal</h1>
+      <p class="text-base text-slate-300 leading-relaxed mt-5">Access National Identity Card and passport services through the official LankaID system.</p>
+    </div>
+    <div class="pt-6 border-t border-slate-700 text-xs text-slate-400 leading-relaxed">
+      <p>Official Government of Sri Lanka service</p>
+      <p class="mt-1">Public assistance: 1919</p>
+    </div>
+  </aside>
+
+  <section class="bg-white min-w-0 overflow-y-auto flex flex-col">
+    <div class="flex-1 flex items-center py-8 sm:py-10">
+      <div class="w-full max-w-[520px] mx-auto px-5 sm:px-8">
+        <a th:href="@{/}" class="lg:hidden flex items-center gap-3 w-fit mb-10" aria-label="LankaID home">
+          <div class="w-10 h-10 rounded-md bg-cyan-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-xl">account_balance</span>
+          </div>
+          <div>
+            <p class="font-extrabold text-lg leading-none text-slate-900">Lanka<span class="text-cyan-600">ID</span></p>
+            <p class="text-[11px] text-slate-500 mt-1">Digital Government Services</p>
+          </div>
+        </a>
+        <div class="mb-6">
+          <p class="text-xs font-bold uppercase tracking-wider text-cyan-700 mb-2">Secure account access</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Sign in to LankaID</h2>
+          <p class="text-sm text-slate-500 mt-2">Choose your account type and enter your credentials.</p>
+        </div>
+
+        <!-- Access tabs -->
+        <div class="flex border-b border-slate-200" id="loginTabs" role="tablist" aria-label="Account access type">
+          <button id="tab-citizen" class="auth-tab flex-1 h-11 border-b-2 border-cyan-700 text-sm text-cyan-800 font-bold" onclick="switchTab('citizen')" role="tab" aria-controls="form-citizen">
+            Citizen
+          </button>
+          <button id="tab-officer" class="auth-tab flex-1 h-11 border-b-2 border-transparent text-sm text-slate-500 font-semibold hover:text-slate-800" onclick="switchTab('officer')" role="tab" aria-controls="form-officer">
+            Officer
+          </button>
+          <button id="tab-register" class="auth-tab flex-1 h-11 border-b-2 border-transparent text-sm text-slate-500 font-semibold hover:text-slate-800" onclick="switchTab('register')" role="tab" aria-controls="form-register">
+            Register
+          </button>
+        </div>
+<!-- CITIZEN LOGIN Form -->
+<section id="form-citizen" class="py-6 bg-transparent" role="tabpanel">
+<div th:if="${successMessage}" class="mb-4 border-l-4 border-green-600 bg-green-50 px-4 py-3 text-sm text-green-800">
+  <span th:text="${successMessage}"></span>
+</div>
+
+<form th:action="@{/login}" th:object="${loginRequest}" method="post" novalidate onsubmit="return validateCitizenLoginForm(event)">
+  <div class="flex flex-col gap-stack-gap">
+    <div th:if="${#fields.hasGlobalErrors()}" class="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+      <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Invalid email or password.</p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface" for="citizenEmail">Citizen Email</label>
+      <div>
+        <input id="citizenEmail"
+               th:field="*{email}"
+               th:errorclass="border-red-500"
+               class="auth-field w-full h-12 px-3 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none font-body-md text-body-md placeholder:text-slate-400"
+               placeholder="name@example.com"
+               type="email"
+               required />
+      </div>
+      <p id="citizenEmailError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface" for="password">Password</label>
+      <div class="relative">
+        <input id="password"
+               th:field="*{password}"
+               th:errorclass="border-red-500"
+               class="auth-field w-full h-12 pl-3 pr-10 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none font-body-md text-body-md placeholder:text-slate-400"
+               placeholder="••••••••"
+               type="password"
+               required />
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-700 transition-colors" type="button" onclick="togglePassword('password', this)" aria-label="Show password"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
+      </div>
+      <p id="passwordError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input th:field="*{rememberMe}" class="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-600" type="checkbox"/>
+        <span class="font-body-md text-body-md text-on-surface-variant text-[14px]">Remember Me</span>
+      </label>
+      <a class="font-label-sm text-label-sm text-cyan-700 hover:underline" href="#">Forgot Password?</a>
+    </div>
+
+    <button type="submit" class="w-full h-12 bg-cyan-700 text-white rounded-md font-label-sm text-label-sm font-bold tracking-wide hover:bg-cyan-800 transition-colors">
+      Sign In
+    </button>
+
+    <p class="text-center text-sm text-on-surface-variant">Don't have an account? <button type="button" onclick="switchTab('register')" class="text-cyan-700 font-semibold hover:underline">Register here</button></p>
+  </div>
+</form>
+</section>
+
+<!-- OFFICER PORTAL Form -->
+<section id="form-officer" class="py-6 bg-transparent hidden" role="tabpanel">
+<div class="border-l-4 border-cyan-700 bg-slate-50 px-4 py-3 mb-4 text-xs text-slate-700 font-medium">
+  Restricted to authorized government officers.
+</div>
+<div th:if="${officerSuccessMessage}" class="mb-4 border-l-4 border-green-600 bg-green-50 px-4 py-3 text-sm text-green-800">
+  <span th:text="${officerSuccessMessage}"></span>
+</div>
+<form th:action="@{/login/officer}" th:object="${officerLoginRequest}" method="post" novalidate onsubmit="return validateOfficerLoginForm(event)">
+  <div class="flex flex-col gap-4">
+    <div th:if="${#fields.hasGlobalErrors()}" class="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+      <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Invalid administrator credentials.</p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface" for="officerRole">Your Role</label>
+      <select id="officerRole" th:field="*{role}" th:errorclass="border-red-500" class="auth-field w-full h-12 px-3 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none text-sm font-medium">
+        <option value="">Select your role...</option>
+        <option value="nic-officer">NIC Application Officer</option>
+        <option value="passport-officer">Passport Application Officer</option>
+        <option value="csr">Citizen Service Representative</option>
+        <option value="director">Identity Service Director</option>
+        <option value="admin">System Administrator</option>
+      </select>
+      <p id="officerRoleError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('role') ? #fields.errors('role')[0] : ''}"></p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface" for="officerEmail">Staff Email</label>
+      <div>
+        <input id="officerEmail" th:field="*{email}" th:errorclass="border-red-500" class="auth-field w-full h-12 px-3 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none text-sm placeholder:text-slate-400" placeholder="name@lankaid.gov.lk" type="email" required />
+      </div>
+      <p id="officerEmailError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('email') ? #fields.errors('email')[0] : ''}"></p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-label-sm text-label-sm text-on-surface" for="officerPassword">Password</label>
+      <div class="relative">
+        <input id="officerPassword" th:field="*{password}" th:errorclass="border-red-500" class="auth-field w-full h-12 pl-3 pr-10 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none text-sm placeholder:text-slate-400" placeholder="••••••••" type="password" required />
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-700 transition-colors" type="button" onclick="togglePassword('officerPassword', this)" aria-label="Show password"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
+      </div>
+      <p id="officerPasswordError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('password') ? #fields.errors('password')[0] : ''}"></p>
+    </div>
+    <div class="flex items-center justify-between">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input th:field="*{rememberMe}" class="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-600" type="checkbox"/>
+        <span class="font-body-md text-body-md text-on-surface-variant text-[14px]">Remember Me</span>
+      </label>
+    </div>
+    <button type="submit" class="w-full h-12 bg-cyan-700 text-white rounded-md font-label-sm text-label-sm font-bold tracking-wide hover:bg-cyan-800 transition-colors">
+      Access Officer Portal
+    </button>
+  </div>
+</form>
+</section>
+
+<!-- REGISTER Form -->
+<section id="form-register" class="py-8 bg-transparent hidden" role="tabpanel">
+<p class="text-sm text-on-surface-variant mb-4">Create a citizen account to apply for identity services online.</p>
+<div class="border border-slate-300 rounded-md p-6">
+  <p class="text-sm font-semibold text-on-surface mb-1">Citizen account registration</p>
+  <p class="text-sm text-on-surface-variant mb-5">You only need an email address, mobile number and password to create the account.</p>
+  <a th:href="@{/register}" class="inline-flex items-center justify-center bg-cyan-700 text-white px-5 h-11 rounded-md font-semibold text-sm hover:bg-cyan-800 transition-colors">
+    Continue to Registration
+  </a>
+</div>
+<p class="text-center text-sm text-on-surface-variant mt-4">Already have an account? <button type="button" onclick="switchTab('citizen')" class="text-cyan-700 font-semibold hover:underline">Sign In</button></p>
+</section>
+
+</div>
+</div>
+<div class="px-5 sm:px-8 py-4 border-t border-slate-200 text-center text-xs text-slate-500">
+This is an official Government of Sri Lanka system. Use is subject to LankaID privacy and security policies.
+</div>
+</section>
+</main>
+<script th:inline="javascript">
+function switchTab(tab) {
+  ['citizen','officer','register'].forEach(t => {
+    document.getElementById('form-' + t).classList.add('hidden');
+    const btn = document.getElementById('tab-' + t);
+    if (btn) {
+      btn.classList.remove('border-cyan-700','text-cyan-800','font-bold');
+      btn.classList.add('border-transparent','text-slate-500','font-semibold');
+      btn.setAttribute('aria-selected', 'false');
+    }
+  });
+  document.getElementById('form-' + tab).classList.remove('hidden');
+  const btn = document.getElementById('tab-' + tab);
+  if (btn) {
+    btn.classList.remove('border-transparent','text-slate-500','font-semibold');
+    btn.classList.add('border-cyan-700','text-cyan-800','font-bold');
+    btn.setAttribute('aria-selected', 'true');
+  }
+}
+
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const reveal = input.type === 'password';
+  input.type = reveal ? 'text' : 'password';
+  const icon = button.querySelector('.material-symbols-outlined');
+  if (icon) icon.textContent = reveal ? 'visibility' : 'visibility_off';
+  button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+}
+
+function validateCitizenLoginForm(event) {
+  const form = event.target;
+  const email = form.querySelector('#citizenEmail');
+  const password = form.querySelector('#password');
+  const emailError = document.getElementById('citizenEmailError');
+  const passwordError = document.getElementById('passwordError');
+
+  if (emailError) emailError.textContent = '';
+  if (passwordError) passwordError.textContent = '';
+  if (email) email.classList.remove('border-red-500');
+  if (password) password.classList.remove('border-red-500');
+
+  const emailValue = email ? email.value.trim() : '';
+  const passwordValue = password ? password.value.trim() : '';
+
+  if (!emailValue) {
+    if (emailError) emailError.textContent = 'Citizen email is required.';
+    if (email) email.classList.add('border-red-500');
+    email?.focus();
+    return false;
+  }
+
+  const validEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(emailValue);
+  if (!validEmail) {
+    if (emailError) emailError.textContent = 'Enter a valid email address.';
+    if (email) email.classList.add('border-red-500');
+    email?.focus();
+    return false;
+  }
+
+  if (!passwordValue) {
+    if (passwordError) passwordError.textContent = 'Password is required.';
+    if (password) password.classList.add('border-red-500');
+    password?.focus();
+    return false;
+  }
+
+  return true;
+}
+
+function validateOfficerLoginForm(event) {
+  const form = event.target;
+  const role = form.querySelector('[name="role"]');
+  const email = form.querySelector('[name="email"]');
+  const password = form.querySelector('[name="password"]');
+  const roleError = document.getElementById('officerRoleError');
+  const emailError = document.getElementById('officerEmailError');
+  const passwordError = document.getElementById('officerPasswordError');
+
+  if (roleError) roleError.textContent = '';
+  if (emailError) emailError.textContent = '';
+  if (passwordError) passwordError.textContent = '';
+  if (role) role.classList.remove('border-red-500');
+  if (email) email.classList.remove('border-red-500');
+  if (password) password.classList.remove('border-red-500');
+
+  const roleValue = role ? role.value.trim() : '';
+  const emailValue = email ? email.value.trim() : '';
+  const passwordValue = password ? password.value.trim() : '';
+
+  if (!roleValue) {
+    if (roleError) roleError.textContent = 'Please select your role.';
+    if (role) role.classList.add('border-red-500');
+    role?.focus();
+    return false;
+  }
+
+  if (!emailValue) {
+    if (emailError) emailError.textContent = 'Staff email is required.';
+    if (email) email.classList.add('border-red-500');
+    email?.focus();
+    return false;
+  }
+
+  const validOfficerEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+  if (!validOfficerEmail) {
+    if (emailError) emailError.textContent = 'Enter a valid email address.';
+    if (email) email.classList.add('border-red-500');
+    email?.focus();
+    return false;
+  }
+
+  if (!passwordValue) {
+    if (passwordError) passwordError.textContent = 'Password is required.';
+    if (password) password.classList.add('border-red-500');
+    password?.focus();
+    return false;
+  }
+
+  if (passwordValue.length < 8) {
+    if (passwordError) passwordError.textContent = 'Password must be at least 8 characters.';
+    if (password) password.classList.add('border-red-500');
+    password?.focus();
+    return false;
+  }
+
+  return true;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const activeTab = /*[[${activeTab}]]*/ 'citizen';
+  switchTab(activeTab || 'citizen');
+});
+</script>
+</body></html>

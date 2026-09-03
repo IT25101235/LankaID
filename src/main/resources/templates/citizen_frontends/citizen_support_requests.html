@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Support Requests | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <style>body{font-family:'Public Sans',sans-serif}</style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+<main class="max-w-6xl mx-auto p-4 sm:p-6">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold">Contact and complaints</h1>
+      <p class="text-sm text-slate-500 mt-1">Ask a question, report a problem, and review responses from Citizen Service Representatives.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a th:href="@{/citizen/support/contact-us}" class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl px-4 py-2.5 text-sm font-bold"><span class="material-symbols-outlined text-lg">mail</span>Contact Us</a>
+      <a th:href="@{/citizen/support/complaint}" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-4 py-2.5 text-sm font-bold"><span class="material-symbols-outlined text-lg">report_problem</span>Make a Complaint</a>
+    </div>
+  </div>
+
+  <div class="grid sm:grid-cols-3 gap-3 mt-5">
+    <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Waiting for CSR</p><p class="text-2xl font-bold mt-1" th:text="${openCount}">0</p></div>
+    <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Responded</p><p class="text-2xl font-bold text-sky-700 mt-1" th:text="${respondedCount}">0</p></div>
+    <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Resolved</p><p class="text-2xl font-bold text-emerald-700 mt-1" th:text="${resolvedCount}">0</p></div>
+  </div>
+
+  <div class="mt-5 text-sm text-slate-500"><b class="text-slate-800" th:text="${totalRequests}">0</b> total request(s) · 15 loaded per page</div>
+
+  <div th:if="${#lists.isEmpty(supportRequests)}" class="mt-4 bg-white border border-dashed rounded-2xl p-10 text-center">
+    <span class="material-symbols-outlined text-5xl text-slate-300">support_agent</span>
+    <p class="font-bold mt-2">No support requests yet</p>
+    <p class="text-sm text-slate-500 mt-1">Use Contact Us for a question or Complaint to report a problem.</p>
+  </div>
+
+  <section th:unless="${#lists.isEmpty(supportRequests)}" class="mt-4 bg-white border rounded-2xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto"><table class="w-full min-w-[850px] text-sm">
+      <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Reference</th><th class="p-4 text-left">Type</th><th class="p-4 text-left">Subject</th><th class="p-4 text-left">Status</th><th class="p-4 text-left">Submitted</th><th class="p-4"></th></tr></thead>
+      <tbody class="divide-y">
+      <tr th:each="item : ${supportRequests}" class="hover:bg-slate-50">
+        <td class="p-4 font-mono text-xs font-bold text-sky-700" th:text="${item.reference}">SUP</td>
+        <td class="p-4"><span class="rounded-full px-2.5 py-1 text-xs font-bold"
+             th:classappend="${item.request.requestType == 'COMPLAINT' ? ' bg-orange-100 text-orange-700' : ' bg-sky-100 text-sky-700'}"
+             th:text="${item.request.requestType == 'COMPLAINT' ? 'Complaint' : 'Contact Us'}">Type</span></td>
+        <td class="p-4"><p class="font-semibold" th:text="${item.request.subject}">Subject</p><p class="text-xs text-slate-500 mt-1 line-clamp-1" th:text="${item.request.message}">Message</p></td>
+        <td class="p-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold" th:text="${item.request.requestStatus == 'IN_PROGRESS' ? 'Responded' : #strings.capitalize(#strings.toLowerCase(item.request.requestStatus))}">Open</span></td>
+        <td class="p-4 text-xs text-slate-500 whitespace-nowrap" th:text="${item.request.createdAt == null ? '-' : #temporals.format(item.request.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+        <td class="p-4 text-right"><a th:href="@{/citizen/support/{reference}(reference=${item.reference})}" class="rounded-lg bg-slate-900 text-white px-3 py-2 text-xs font-bold">View response</a></td>
+      </tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <nav th:if="${totalPages > 1}" class="mt-5 flex items-center justify-between">
+    <a th:if="${hasPrevious}" th:href="@{/citizen/support(page=${currentPage - 1})}" class="rounded-xl border bg-white px-4 py-2.5 text-sm font-bold">Previous 15</a><span th:unless="${hasPrevious}"></span>
+    <span class="text-sm text-slate-500" th:text="${'Page ' + (currentPage + 1) + ' of ' + totalPages}">Page</span>
+    <a th:if="${hasNext}" th:href="@{/citizen/support(page=${currentPage + 1})}" class="rounded-xl bg-sky-600 text-white px-4 py-2.5 text-sm font-bold">Load next 15</a><span th:unless="${hasNext}"></span>
+  </nav>
+</main>
+<script src="/js/portal-shell.js?v=20260901-5"></script>
+</body>
+</html>

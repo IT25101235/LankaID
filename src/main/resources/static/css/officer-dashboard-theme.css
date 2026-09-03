@@ -1,0 +1,307 @@
+:root {
+  --officer-bg: #f1f5f9;
+  --officer-surface: #ffffff;
+  --officer-surface-muted: #f8fafc;
+  --officer-border: #e2e8f0;
+  --officer-sidebar: #0f172a;
+  --officer-sidebar-border: #1e293b;
+  --officer-accent: #0891b2;
+  --officer-accent-dark: #0e7490;
+  --officer-accent-soft: #cffafe;
+  --officer-text: #0f172a;
+  --officer-text-muted: #64748b;
+}
+
+body.officer-dashboard-shell {
+  min-height: 100vh;
+  background: var(--officer-bg) !important;
+  color: var(--officer-text);
+  font-family: "Public Sans", sans-serif;
+}
+
+.officer-sidebar {
+  background: var(--officer-sidebar) !important;
+  border-color: var(--officer-sidebar-border) !important;
+  color: #e2e8f0;
+}
+
+.officer-brand-icon {
+  background: linear-gradient(135deg, #06b6d4, #14b8a6) !important;
+  box-shadow: 0 8px 20px rgba(8, 145, 178, 0.22);
+}
+
+.officer-accent-text {
+  color: #22d3ee !important;
+}
+
+.officer-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #94a3b8 !important;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.officer-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #e2e8f0 !important;
+  transform: translateX(2px);
+}
+
+.officer-nav-link.active {
+  background: rgba(34, 211, 238, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+.officer-nav-link .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.officer-topbar {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: var(--officer-border) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.officer-panel {
+  background: var(--officer-surface) !important;
+  border: 1px solid var(--officer-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.officer-panel.interactive:hover {
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.officer-subpanel {
+  background: var(--officer-surface-muted) !important;
+  border: 1px solid var(--officer-border) !important;
+  border-radius: 12px;
+}
+
+.officer-primary-button {
+  background: var(--officer-accent) !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+  transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.officer-primary-button:hover {
+  background: var(--officer-accent-dark) !important;
+  box-shadow: 0 8px 18px rgba(8, 145, 178, 0.2);
+  transform: translateY(-1px);
+}
+
+.officer-table-row {
+  transition: background-color 150ms ease;
+}
+
+.officer-table-row:hover {
+  background: #f8fafc !important;
+}
+
+/* Normalize the semantic utility tokens used by the older generated pages. */
+.officer-dashboard-shell .bg-background { background-color: var(--officer-bg) !important; }
+.officer-dashboard-shell .bg-surface { background-color: #f8fafc !important; }
+.officer-dashboard-shell .bg-surface-container-lowest { background-color: #ffffff !important; }
+.officer-dashboard-shell .bg-surface-container-low { background-color: #f8fafc !important; }
+.officer-dashboard-shell .bg-surface-container { background-color: #f1f5f9 !important; }
+.officer-dashboard-shell .bg-surface-container-high,
+.officer-dashboard-shell .bg-surface-container-highest,
+.officer-dashboard-shell .bg-surface-variant { background-color: #e2e8f0 !important; }
+.officer-dashboard-shell .bg-secondary { background-color: var(--officer-accent) !important; }
+.officer-dashboard-shell .bg-secondary-container { background-color: var(--officer-accent-soft) !important; }
+.officer-dashboard-shell .text-on-background,
+.officer-dashboard-shell .text-on-surface { color: var(--officer-text) !important; }
+.officer-dashboard-shell .text-on-surface-variant { color: var(--officer-text-muted) !important; }
+.officer-dashboard-shell .text-secondary { color: var(--officer-accent) !important; }
+.officer-dashboard-shell .text-on-secondary-container { color: #155e75 !important; }
+.officer-dashboard-shell .border-outline-variant { border-color: var(--officer-border) !important; }
+.officer-dashboard-shell .border-secondary { border-color: var(--officer-accent) !important; }
+.officer-dashboard-shell main section.bg-surface-container-lowest {
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.officer-sidebar .text-on-surface { color: #f8fafc !important; }
+.officer-sidebar .text-on-surface-variant,
+.officer-sidebar .text-outline-variant { color: #94a3b8 !important; }
+.officer-sidebar .border-outline-variant { border-color: var(--officer-sidebar-border) !important; }
+.officer-sidebar a:hover { background: rgba(255, 255, 255, 0.08) !important; color: #e2e8f0 !important; }
+.officer-sidebar a.bg-secondary-container {
+  background: rgba(34, 211, 238, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+.metric-card {
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.metric-card:hover {
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+/* The director dashboard previously used a full dark theme. These scoped
+   mappings retain its semantic status colors while moving content to the
+   shared light officer workspace. */
+.director-main {
+  background: var(--officer-bg);
+  color: #334155;
+}
+
+.director-main .text-white { color: var(--officer-text) !important; }
+.director-main .text-slate-300 { color: #475569 !important; }
+.director-main .text-slate-400 { color: var(--officer-text-muted) !important; }
+.director-main .text-slate-500 { color: #64748b !important; }
+.director-main .border-slate-800 { border-color: var(--officer-border) !important; }
+.director-main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: var(--officer-border) !important; }
+.director-main .bg-slate-700 { background: #e2e8f0 !important; }
+.director-main .bg-slate-800\/50 { background: #f8fafc !important; border: 1px solid var(--officer-border); }
+.director-main .text-purple-400 { color: var(--officer-accent) !important; }
+.director-main .text-emerald-400 { color: #047857 !important; }
+.director-main .text-amber-400 { color: #b45309 !important; }
+.director-main .text-red-400 { color: #dc2626 !important; }
+.director-main .bg-emerald-900\/30 { background: #d1fae5 !important; }
+.director-main .bg-red-900\/30 { background: #fee2e2 !important; }
+
+/* System administration uses the same light workspace and cyan accent as the
+   Citizen Service Representative portal. The selectors below translate the
+   older dark utility classes without changing their status semantics. */
+.admin-dashboard-main {
+  background: var(--officer-bg);
+  color: #334155;
+}
+
+.admin-dashboard-main .card,
+.admin-light-page .bg-slate-900 {
+  background: var(--officer-surface) !important;
+  border-color: var(--officer-border) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.admin-dashboard-main .text-white,
+.admin-light-page .text-slate-100 { color: var(--officer-text) !important; }
+.admin-dashboard-main .text-slate-200,
+.admin-dashboard-main .text-slate-300 { color: #475569 !important; }
+.admin-dashboard-main .text-slate-400,
+.admin-light-page .text-slate-400 { color: var(--officer-text-muted) !important; }
+.admin-dashboard-main .border-slate-800,
+.admin-dashboard-main .border-slate-700,
+.admin-light-page .border-slate-800,
+.admin-light-page .border-slate-700 { border-color: var(--officer-border) !important; }
+.admin-dashboard-main .divide-slate-800 > :not([hidden]) ~ :not([hidden]),
+.admin-light-page .divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: var(--officer-border) !important; }
+.admin-dashboard-main .bg-slate-800,
+.admin-dashboard-main .bg-slate-800\/50,
+.admin-dashboard-main .bg-slate-700,
+.admin-light-page .bg-slate-950 { background: var(--officer-surface-muted) !important; }
+.admin-dashboard-main table {
+  background: #ffffff;
+  color: #334155;
+}
+.admin-dashboard-main table thead { background: #f8fafc; }
+.admin-dashboard-main table th {
+  color: #64748b !important;
+  border-color: var(--officer-border) !important;
+}
+.admin-dashboard-main table td { border-color: #f1f5f9 !important; }
+.admin-dashboard-main .hover\:bg-slate-800\/50:hover,
+.admin-dashboard-main tbody tr:hover { background: #f8fafc !important; }
+.admin-dashboard-main .hover\:bg-slate-600:hover { background: #cbd5e1 !important; }
+.admin-dashboard-main .hover\:bg-amber-900\/50:hover { background: #fef3c7 !important; }
+.admin-dashboard-main .hover\:bg-red-900\/50:hover { background: #fee2e2 !important; }
+
+/* Convert the dark status chips and avatar tiles to light semantic colors. */
+.admin-dashboard-main .bg-sky-900\/50 { background: #e0f2fe !important; }
+.admin-dashboard-main .text-sky-400 { color: #0369a1 !important; }
+.admin-dashboard-main .border-sky-800 { border-color: #bae6fd !important; }
+.admin-dashboard-main .bg-emerald-900\/50 { background: #d1fae5 !important; }
+.admin-dashboard-main .text-emerald-400 { color: #047857 !important; }
+.admin-dashboard-main .border-emerald-800 { border-color: #a7f3d0 !important; }
+.admin-dashboard-main .bg-indigo-900\/50 { background: #e0e7ff !important; }
+.admin-dashboard-main .text-indigo-400 { color: #4338ca !important; }
+.admin-dashboard-main .border-indigo-800 { border-color: #c7d2fe !important; }
+.admin-dashboard-main .bg-cyan-900\/50 { background: #cffafe !important; }
+.admin-dashboard-main .text-cyan-400 { color: #0e7490 !important; }
+.admin-dashboard-main .border-cyan-800 { border-color: #a5f3fc !important; }
+.admin-dashboard-main .bg-purple-900\/50 { background: #f3e8ff !important; }
+.admin-dashboard-main .text-purple-400 { color: #7e22ce !important; }
+.admin-dashboard-main .border-purple-800 { border-color: #e9d5ff !important; }
+.admin-dashboard-main .bg-red-900\/50 { background: #fee2e2 !important; }
+.admin-dashboard-main .text-red-400,
+.admin-dashboard-main .hover\:text-red-400:hover { color: #dc2626 !important; }
+.admin-dashboard-main .hover\:text-amber-400:hover { color: #b45309 !important; }
+
+/* White is correct on solid action colors, but ordinary white text from the
+   former dark theme is translated to slate by the rules above. */
+.admin-dashboard-main .bg-cyan-600.text-white,
+.admin-dashboard-main .bg-emerald-600.text-white,
+.admin-dashboard-main .bg-red-500.text-white,
+.admin-dashboard-main .bg-red-600.text-white,
+.admin-light-modal .bg-cyan-600.text-white,
+.admin-light-modal .bg-red-600.text-white { color: #ffffff !important; }
+.admin-dashboard-main input,
+.admin-dashboard-main select,
+.admin-light-page input,
+.admin-light-page select,
+.admin-light-page textarea {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: var(--officer-text) !important;
+}
+.admin-dashboard-main input::placeholder,
+.admin-light-page input::placeholder,
+.admin-light-page textarea::placeholder { color: #94a3b8 !important; }
+.admin-dashboard-main tbody tr:hover,
+.admin-light-page tbody tr:hover { background: #f8fafc !important; }
+.admin-light-page { background: var(--officer-bg) !important; color: var(--officer-text) !important; }
+.admin-light-page > header { background: rgba(255, 255, 255, 0.96) !important; border-color: var(--officer-border) !important; }
+.admin-light-page thead { background: #f8fafc !important; }
+.admin-light-page .text-emerald-400 { color: #047857 !important; }
+.admin-light-page .text-amber-400 { color: #b45309 !important; }
+.admin-light-page .bg-emerald-400\/10 { background: #d1fae5 !important; }
+.admin-light-page .bg-amber-400\/10 { background: #fef3c7 !important; }
+.admin-light-page .bg-red-600 { background: var(--officer-accent) !important; }
+.admin-light-page .hover\:bg-red-700:hover { background: var(--officer-accent-dark) !important; }
+.admin-light-page .border-red-500 { border-color: var(--officer-accent) !important; }
+.admin-light-page .text-red-500,
+.admin-light-page .text-red-300 { color: var(--officer-accent) !important; }
+.admin-light-page .bg-red-500\/10 { background: var(--officer-accent-soft) !important; }
+.admin-light-page button.bg-red-600 { color: #ffffff !important; }
+.admin-light-page table {
+  background: #ffffff;
+  color: #334155;
+}
+.admin-light-page table th { color: #64748b !important; }
+.admin-light-page table td { border-color: #f1f5f9 !important; }
+.admin-light-modal > div {
+  background: var(--officer-surface) !important;
+  border-color: var(--officer-border) !important;
+  color: var(--officer-text);
+}
+.admin-light-modal .text-white { color: var(--officer-text) !important; }
+.admin-light-modal .text-slate-400 { color: var(--officer-text-muted) !important; }
+.admin-light-modal .border-slate-700 { border-color: #cbd5e1 !important; }
+.admin-light-modal .bg-slate-800 {
+  background: #ffffff !important;
+  color: var(--officer-text) !important;
+}
+.admin-light-modal .bg-red-600 { background: var(--officer-accent) !important; }
+.admin-light-modal .hover\:bg-red-700:hover { background: var(--officer-accent-dark) !important; }
+.admin-light-modal .text-red-400 { color: var(--officer-accent) !important; }
+
+@media (max-width: 767px) {
+  .officer-panel {
+    border-radius: 12px !important;
+  }
+}

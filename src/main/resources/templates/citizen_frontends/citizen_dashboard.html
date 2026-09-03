@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Citizen Dashboard | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
+    .application-progress { position: relative; }
+    .application-progress-line { position: absolute; left: 8%; right: 8%; top: 15px; height: 4px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .application-progress-line::after { content: ''; display: block; height: 100%; width: var(--progress, 0%); border-radius: inherit; background: linear-gradient(90deg,#0ea5e9,#6366f1,#10b981); transition: width 1s ease; }
+    .progress-step { position: relative; z-index: 1; text-align: center; color: #94a3b8; min-width: 58px; }
+    .progress-dot { width: 32px; height: 32px; margin: auto; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: white; border: 3px solid #cbd5e1; font-size: 15px; font-weight: 800; transition: all .5s ease; }
+    .progress-step.complete { color: #047857; }
+    .progress-step.complete .progress-dot { color: white; background: #10b981; border-color: #10b981; }
+    .progress-step.current { color: #0369a1; font-weight: 700; }
+    .progress-step.current .progress-dot { color: white; background: #0ea5e9; border-color: #bae6fd; box-shadow: 0 0 0 5px rgba(14,165,233,.15); animation: progressPulse 1.8s infinite; }
+    .application-progress.correction .progress-step.current { color: #b45309; }
+    .application-progress.correction .progress-step.current .progress-dot { background: #f59e0b; border-color: #fde68a; box-shadow: 0 0 0 5px rgba(245,158,11,.15); }
+    .application-progress.rejected .progress-step.current { color: #b91c1c; }
+    .application-progress.rejected .progress-step.current .progress-dot { background: #ef4444; border-color: #fecaca; box-shadow: 0 0 0 5px rgba(239,68,68,.15); animation: none; }
+    .application-accordion > summary::-webkit-details-marker { display: none; }
+    .application-accordion > summary { list-style: none; }
+    @keyframes progressPulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 9px rgba(14,165,233,.06); } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center material-symbols-outlined">verified_user</span>
+      <span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span>
+    </a>
+    <nav class="hidden md:flex gap-6 text-sm font-semibold">
+      <a th:href="@{/citizen/dashboard}" class="text-sky-600">Home</a>
+      <a th:href="@{/citizen/applications}" class="text-slate-600 hover:text-sky-600">My Applications</a>
+      <a th:href="@{/citizen/notifications}" class="text-slate-600 hover:text-sky-600 flex items-center gap-1">Notifications<span th:if="${unreadNotificationCount > 0}" class="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center" th:text="${unreadNotificationCount}">1</span></a>
+      <a th:href="@{/citizen/support}" class="text-slate-600 hover:text-sky-600">Support</a>
+    </nav>
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="rounded-lg border px-3 py-2 text-xs font-semibold hover:bg-red-50 hover:text-red-700">Sign out</button>
+    </form>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-7 w-full flex-1">
+  <div th:if="${applicationMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${applicationMessage}"></div>
+  <div th:if="${applicationError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${applicationError}"></div>
+  <div th:if="${identityConflict}" class="mb-5 rounded-xl border border-red-300 bg-red-50 p-4">
+    <p class="font-bold text-red-800">Identity details need to be checked</p>
+    <p class="text-sm text-red-700 mt-1">Your registered email and phone number match different government records. New applications are blocked until Citizen Support verifies the account.</p>
+  </div>
+
+  <section class="mb-7">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900">Welcome back</h1>
+        <p class="text-sm text-slate-500 mt-1">Signed in as <span class="font-semibold" th:text="${loggedInUserEmail}">citizen@example.com</span></p>
+      </div>
+      <div th:unless="${identityConflict}" class="flex flex-wrap gap-2">
+        <a th:if="${!hasNic and !hasActiveNicApplication}" th:href="@{/citizen/applications/nic/new}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">New NIC</a>
+        <a th:if="${hasNic and !hasActiveNicApplication}" th:href="@{/citizen/applications/nic/renewal}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold">Renew NIC</a>
+        <a th:if="${hasNic and !hasActiveNicApplication}" th:href="@{/citizen/applications/nic/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost NIC</a>
+        <a th:if="${!hasPassport and !hasActivePassportApplication}" th:href="@{/citizen/applications/passport/new}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">New Passport</a>
+        <a th:if="${hasPassport and !hasActivePassportApplication}" th:href="@{/citizen/applications/passport/renewal}" class="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 px-4 py-2.5 rounded-xl text-sm font-bold">Renew Passport</a>
+        <a th:if="${hasPassport and !hasActivePassportApplication}" th:href="@{/citizen/applications/passport/replacement}" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-4 py-2.5 rounded-xl text-sm font-bold">Lost Passport</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid sm:grid-cols-2 gap-4 mb-7">
+    <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex gap-4">
+      <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined">badge</span>
+      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">NIC record</p><p th:if="${hasNic}" class="font-bold mt-1" th:text="${nicNumber}">200012345678</p><p th:unless="${hasNic}" class="text-sm text-slate-500 mt-1">No existing NIC found</p></div>
+    </article>
+    <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex gap-4">
+      <span class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center material-symbols-outlined">flight_takeoff</span>
+      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Passport record</p><p th:if="${hasPassport}" class="font-bold mt-1" th:text="${passportNumber}">N1234567</p><p th:unless="${hasPassport}" class="text-sm text-slate-500 mt-1">No existing passport found</p></div>
+    </article>
+  </section>
+
+  <section>
+    <div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold text-slate-900">My Applications</h2><a th:href="@{/citizen/applications}" class="text-sm font-semibold text-sky-700">View all</a></div>
+    <div th:if="${#lists.isEmpty(applications)}" class="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+      <span class="material-symbols-outlined text-4xl text-slate-300">assignment_add</span><p class="font-bold mt-2">No applications yet</p><p class="text-sm text-slate-500 mt-1">Use one of the application buttons above to begin.</p>
+    </div>
+    <div th:unless="${#lists.isEmpty(applications)}" class="space-y-3">
+      <details th:each="citizenApplication : ${applications}" th:with="deliveryInfo=${deliveryByApplicationId.get(citizenApplication.applicationId)}" class="application-accordion group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <summary class="cursor-pointer px-4 sm:px-5 py-4 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500">
+          <span class="flex items-center gap-3 sm:gap-4">
+            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-sky-700 flex-shrink-0 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
+            <span class="min-w-0 flex-1">
+              <span class="block font-bold" th:text="${citizenApplication.serviceType + ' ' + #strings.toLowerCase(citizenApplication.applicationKind)}">NIC new</span>
+              <span class="block text-xs text-slate-500 font-mono mt-1 truncate" th:text="${citizenApplication.applicationNo}">Reference</span>
+              <span class="block text-xs text-slate-400 mt-1" th:text="${'Created ' + #temporals.format(citizenApplication.createdAt, 'dd MMM yyyy, HH:mm')}">Created</span>
+            </span>
+            <span class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <span class="text-[11px] sm:text-xs rounded-full px-2.5 sm:px-3 py-1 font-bold"
+                    th:classappend="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED' ? ' bg-amber-100 text-amber-800' : (citizenApplication.currentStatus == 'REJECTED' ? ' bg-red-100 text-red-700' : ((citizenApplication.currentStatus == 'ISSUED' or citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED') ? ' bg-emerald-100 text-emerald-700' : ' bg-sky-100 text-sky-700'))}"
+                    th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
+              <span class="hidden sm:inline text-xs font-semibold text-slate-500 group-open:hidden">View progress</span>
+              <span class="hidden sm:group-open:inline text-xs font-semibold text-sky-700">Hide details</span>
+              <span class="material-symbols-outlined text-slate-400 transition-transform duration-200 group-open:rotate-180">expand_more</span>
+            </span>
+          </span>
+        </summary>
+
+        <div class="border-t border-slate-100 px-4 sm:px-5 py-5">
+          <div class="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
+            <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Next action</span>
+            <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
+            <a th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" th:href="@{/citizen/{workflow}/{service}/correction(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-amber-700">Correct form</a>
+            <a th:if="${citizenApplication.currentStatus == 'APPROVED'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-emerald-700">Pay &amp; book biometrics</a>
+            <a th:if="${citizenApplication.currentStatus == 'APPOINTMENT_BOOKED'}" th:href="@{/citizen/appointments/biometric(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">View QR pass</a>
+            <span th:if="${citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED'}" class="text-sm font-bold text-purple-700">Ready for printing</span>
+            <a th:if="${deliveryInfo == null and (citizenApplication.currentStatus == 'APPOINTMENT_BOOKED' or citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED' or citizenApplication.currentStatus == 'ISSUED')}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-orange-700">Choose delivery</a>
+            <span th:if="${citizenApplication.currentStatus == 'ISSUED' and deliveryInfo == null}" class="text-sm font-bold text-emerald-700">Document printed</span>
+            <form th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' and deliveryInfo.delivery.deliveryStatus == 'DISPATCHED'}" th:action="@{/citizen/deliveries/confirm}" method="post" onsubmit="return confirm('Confirm that you have received your document?')">
+              <input type="hidden" name="applicationId" th:value="${citizenApplication.applicationId}"/>
+              <button type="submit" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold">Confirm delivery received</button>
+            </form>
+            <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'READY_FOR_COLLECTION'}" class="text-sm font-bold text-emerald-700">Ready for collection</span>
+            <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'COLLECTED'}" class="text-sm font-bold text-emerald-700">Document handed over</span>
+            <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'DELIVERED'}" class="text-sm font-bold text-emerald-700">Delivered</span>
+          </div>
+        <div class="application-progress mt-6 overflow-x-auto pb-1" th:attr="data-status=${citizenApplication.currentStatus},data-delivery-status=${deliveryInfo == null ? '' : deliveryInfo.delivery.deliveryStatus}">
+          <div class="application-progress-line"></div>
+          <div class="grid grid-cols-7 min-w-[650px]">
+            <div class="progress-step"><span class="progress-dot">1</span><span class="block text-[10px] mt-2">Application</span></div>
+            <div class="progress-step"><span class="progress-dot">2</span><span class="block text-[10px] mt-2">Verification</span></div>
+            <div class="progress-step"><span class="progress-dot">3</span><span class="block text-[10px] mt-2">Approved</span></div>
+            <div class="progress-step"><span class="progress-dot">4</span><span class="block text-[10px] mt-2">Appointment</span></div>
+            <div class="progress-step"><span class="progress-dot">5</span><span class="block text-[10px] mt-2">Biometrics</span></div>
+            <div class="progress-step"><span class="progress-dot">6</span><span class="block text-[10px] mt-2">Printed</span></div>
+            <div class="progress-step"><span class="progress-dot">7</span><span class="block text-[10px] mt-2">Delivery</span></div>
+          </div>
+        </div>
+        <div th:if="${deliveryInfo != null}" class="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-900">
+          <div class="flex flex-wrap justify-between gap-2"><span class="font-bold" th:text="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' ? 'Home delivery' : 'Service-centre collection'}">Method</span><span class="font-mono font-bold" th:text="${deliveryInfo.delivery.trackingReference}">DEL-REF</span></div>
+          <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY'}" th:text="${deliveryInfo.delivery.deliveryAddress}">Address</p>
+          <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'CENTRE_COLLECTION'}" th:text="${deliveryInfo.centreName + ' — ' + deliveryInfo.centreAddress}">Centre</p>
+          <p class="mt-2 font-semibold" th:text="${'Status: ' + #strings.replace(deliveryInfo.delivery.deliveryStatus, '_', ' ')}">Status</p>
+        </div>
+        </div>
+      </details>
+    </div>
+  </section>
+</main>
+<script>
+const progressByStatus = {DRAFT:0,SUBMITTED:1,RESUBMITTED:1,UNDER_REVIEW:1,CORRECTION_REQUIRED:1,REJECTED:1,APPROVED:2,APPOINTMENT_BOOKED:3,BIOMETRIC_COLLECTED:4,ISSUED:5};
+document.querySelectorAll('.application-progress').forEach(path => {
+  const status = path.dataset.status;
+  const deliveryStatus = path.dataset.deliveryStatus;
+  const deliveryComplete = deliveryStatus === 'COLLECTED' || deliveryStatus === 'DELIVERED';
+  let current = progressByStatus[status] ?? 0;
+  if (status === 'ISSUED' && deliveryStatus && deliveryStatus !== 'PREPARING') current = 6;
+  const steps = path.querySelectorAll('.progress-step');
+  steps.forEach((step, index) => {
+    if (index < current || deliveryComplete) step.classList.add('complete');
+    if (index === current && !deliveryComplete) step.classList.add('current');
+  });
+  if (status === 'CORRECTION_REQUIRED') path.classList.add('correction');
+  if (status === 'REJECTED') path.classList.add('rejected');
+  setTimeout(() => path.style.setProperty('--progress', deliveryComplete ? '100%' : (current * 100 / (steps.length - 1)) + '%'), 120);
+});
+</script>
+<script src="/js/portal-shell.js?v=20260901-5"></script>
+</body>
+</html>

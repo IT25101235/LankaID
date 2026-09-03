@@ -21,7 +21,7 @@
 <body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <aside class="w-64 min-h-screen bg-slate-950 fixed inset-y-0 left-0 z-30 border-r border-slate-800 flex flex-col">
   <div class="p-5 border-b border-slate-800 flex items-center gap-3">
-    <img src="/government_logo.png" alt="" aria-hidden="true" class="government-brand-logo"/>
+    <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center material-symbols-outlined">analytics</span>
     <div><p class="font-extrabold">Lanka<span class="text-cyan-400">ID</span></p><p class="text-xs text-slate-400">Director Portal</p></div>
   </div>
   <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -124,6 +124,6 @@ function showSection(section) {
   document.getElementById('pageTitle').textContent = titles[section];
 }
 </script>
-<script src="/js/portal-shell.js?v=20260903-6"></script>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>

@@ -129,6 +129,6 @@ function openDocument(url,title){document.getElementById('documentTitle').textCo
 function closeDocument(){const modal=document.getElementById('documentModal');modal.classList.add('hidden');modal.classList.remove('flex');document.getElementById('documentFrame').src=''}
 function confirmCorrection(form){if(!form.querySelector('input[type=checkbox]:checked')){alert('Select the form or at least one document.');return false}return confirm('Send this correction request to the citizen?')}
 </script>
-<script src="/js/portal-shell.js?v=20260903-6"></script>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>

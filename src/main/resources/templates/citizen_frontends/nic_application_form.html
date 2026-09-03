@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${pageTitle} + ' | LankaID'">NIC Application | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="/css/citizen-theme.css" rel="stylesheet"/>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+<header class="bg-white border-b"><div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between"><a th:href="@{/citizen/dashboard}" class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></a><span class="text-sm font-semibold text-slate-500">NIC Application</span></div></header>
+<main class="max-w-5xl mx-auto px-4 py-7">
+  <div class="mb-6"><a th:href="@{/citizen/dashboard}" class="text-sm text-sky-700 font-semibold">← Back to dashboard</a><h1 class="text-2xl font-bold mt-3" th:text="${pageTitle}">New NIC Application</h1><p class="text-sm text-slate-500 mt-1">Only details represented in the current database schema are collected here.</p></div>
+  <form th:action="@{/citizen/applications/nic/{kind}(kind=${formKind})}" th:object="${applicationForm}" method="post" class="space-y-5">
+    <input th:if="${correctionApplicationId != null}" type="hidden" name="applicationId" th:value="${correctionApplicationId}"/>
+    <div th:if="${correctionApplicationId != null}" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"><p class="font-bold">Officer correction requested</p><p class="mt-1">Update the requested details, save the form, replace any requested documents, and resubmit the same application.</p></div>
+    <div th:if="${#fields.hasAnyErrors()}" class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700"><p class="font-bold">Please correct the following:</p><ul class="list-disc ml-5 mt-1"><li th:each="error : ${#fields.allErrors()}" th:text="${error}">Invalid detail</li></ul></div>
+
+    <section th:if="${applicationKind != 'NEW'}" class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+      <h2 class="font-bold">Existing NIC</h2><p class="text-xs text-slate-500 mt-1">Matched from the government identity record.</p>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm font-semibold">Last NIC number<input th:field="*{lastNicNo}" required readonly aria-readonly="true" maxlength="12" class="mt-1 w-full rounded-lg border-slate-300 bg-slate-100 text-slate-600 cursor-not-allowed"/><span class="block text-xs font-normal text-slate-500 mt-1">Verified from the government identity record and cannot be changed.</span></label>
+        <label class="text-sm font-semibold">Last issued date<input type="date" th:field="*{lastIssuedDate}" th:readonly="${applicationForm.lastIssuedDate != null}" th:attr="aria-readonly=${applicationForm.lastIssuedDate != null}" class="mt-1 w-full rounded-lg border-slate-300" th:classappend="${applicationForm.lastIssuedDate != null ? ' bg-slate-100 text-slate-600 cursor-not-allowed' : ' bg-white'}"/><span class="block text-xs font-normal text-slate-500 mt-1" th:text="${applicationForm.lastIssuedDate != null ? 'Previously recorded and cannot be changed.' : 'Enter this once because the legacy record has no issue date.'}">Issue-date guidance</span></label>
+      </div>
+    </section>
+    <section th:if="${applicationKind == 'LOST'}" class="bg-red-50 border border-red-200 rounded-2xl p-5">
+      <h2 class="font-bold text-red-800">Police report details</h2>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm font-semibold">Police station<input th:field="*{policeStation}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300 bg-white"/></label>
+        <label class="text-sm font-semibold">Police report date<input type="date" th:field="*{policeReportDate}" required class="mt-1 w-full rounded-lg border-slate-300 bg-white"/></label>
+      </div><p class="text-xs text-red-700 mt-3">The police report PDF is uploaded in the next step.</p>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <h2 class="font-bold">Name and personal details</h2>
+      <div class="grid sm:grid-cols-3 gap-4 mt-4">
+        <label class="text-sm font-semibold">Family name<input th:field="*{familyName}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Given name<input th:field="*{givenName}" required maxlength="150" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Surname<input th:field="*{surname}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Gender<select th:field="*{gender}" required class="mt-1 w-full rounded-lg border-slate-300 bg-white"><option value="">Select</option><option value="MALE">Male</option><option value="FEMALE">Female</option></select></label>
+        <label class="text-sm font-semibold">Civil status<select th:field="*{civilStatus}" required class="mt-1 w-full rounded-lg border-slate-300 bg-white"><option value="">Select</option><option value="SINGLE">Single</option><option value="MARRIED">Married</option><option value="WIDOWED">Widowed</option><option value="DIVORCED">Divorced</option></select></label>
+        <label class="text-sm font-semibold">Occupation<input th:field="*{occupation}" maxlength="150" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+      </div>
+    </section>
+    <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <h2 class="font-bold">Birth details</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <label class="text-sm font-semibold">Date of birth<input type="date" th:field="*{dateOfBirth}" required class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Birth certificate number<input th:field="*{birthCertificateNo}" required maxlength="50" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Birth place<input th:field="*{birthPlace}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Division<input th:field="*{birthDivision}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">District<input th:field="*{birthDistrict}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Country of birth<input th:field="*{countryOfBirth}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Birth city<input th:field="*{birthCity}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+      </div>
+    </section>
+    <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <h2 class="font-bold">Residence details</h2>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm font-semibold">House name or number<input th:field="*{permanentHouseNo}" required maxlength="50" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Street / lane / place<input th:field="*{permanentStreet}" required maxlength="150" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">City<input th:field="*{permanentCity}" required maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Postal code<input th:field="*{permanentPostalCode}" required maxlength="10" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+      </div>
+      <label class="flex items-center gap-2 mt-4 text-sm font-semibold"><input id="samePostal" type="checkbox" th:field="*{postalSameAsPermanent}" onchange="togglePostal()" class="rounded text-sky-600"/>Postal address is the same</label>
+      <div id="postalAddress" class="grid sm:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm font-semibold">Postal house number<input th:field="*{postalHouseNo}" maxlength="50" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Postal street<input th:field="*{postalStreet}" maxlength="150" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Postal city<input th:field="*{postalCity}" maxlength="100" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Postal code<input th:field="*{postalPostalCode}" maxlength="10" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+      </div>
+    </section>
+    <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+      <label class="flex items-center gap-2 text-sm font-semibold"><input id="dualCitizen" type="checkbox" th:field="*{dualCitizen}" onchange="toggleDual()" class="rounded text-sky-600"/>I am a dual citizen</label>
+      <div id="dualDetails" class="grid sm:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm font-semibold">Citizenship certificate number<input th:field="*{citizenshipCertificateNo}" maxlength="50" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+        <label class="text-sm font-semibold">Certificate issued date<input type="date" th:field="*{citizenshipIssuedDate}" class="mt-1 w-full rounded-lg border-slate-300"/></label>
+      </div>
+    </section>
+    <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"><label class="flex gap-3 text-sm"><input type="checkbox" th:field="*{declarationAccepted}" required class="mt-1 rounded text-sky-600"/><span>I declare that the information supplied in this application is true and correct.</span></label></section>
+    <div class="flex justify-between gap-3"><a th:href="@{/citizen/dashboard}" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold">Cancel</a><button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-bold" th:text="${correctionApplicationId == null ? 'Save and upload documents' : 'Save corrections and continue'}">Save and upload documents</button></div>
+  </form>
+</main>
+<script>function togglePostal(){document.getElementById('postalAddress').classList.toggle('hidden',document.getElementById('samePostal').checked)}function toggleDual(){document.getElementById('dualDetails').classList.toggle('hidden',!document.getElementById('dualCitizen').checked)}document.addEventListener('DOMContentLoaded',()=>{togglePostal();toggleDual()});</script>
+<script src="/js/portal-shell.js?v=20260901-5"></script>
+</body></html>

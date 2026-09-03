@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LankaID | National Identity Services</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Public Sans', 'sans-serif'] }
+      }
+    }
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Public Sans', sans-serif; }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .icon-fill { font-variation-settings: 'FILL' 1; }
+  .service-card {
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .service-card:hover {
+    border-color: #a5f3fc;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+  .reveal-step {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-ready .reveal-step {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 520ms ease, transform 520ms ease;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal-ready .reveal-step.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal-step {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
+<script>document.documentElement.classList.add('reveal-ready');</script>
+<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+
+<!-- Government header -->
+<header class="bg-[#0f2747] border-b border-[#1e3a5f] sticky top-0 z-50 text-white shadow-sm">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
+    <a th:href="@{/}" class="flex items-center gap-3" aria-label="LankaID home">
+      <div class="w-9 h-9 rounded-md bg-cyan-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-xl">account_balance</span>
+      </div>
+      <div>
+        <p class="font-extrabold text-base leading-none text-white">Lanka<span class="text-cyan-300">ID</span></p>
+        <p class="text-[11px] text-slate-300 mt-1">Digital Government Services</p>
+      </div>
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-200" aria-label="Primary navigation">
+      <a class="text-cyan-300" href="#">Home</a>
+      <a class="hover:text-white transition-colors" href="#services">Services</a>
+      <a class="hover:text-white transition-colors" href="#process">How It Works</a>
+      <a class="hover:text-white transition-colors" href="#support">Support</a>
+    </nav>
+    <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
+      Sign In
+    </a>
+    <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
+      Access Dashboard
+    </a>
+  </div>
+</header>
+
+<main class="flex-grow">
+
+<!-- Hero -->
+<section class="bg-slate-100 border-b border-slate-200">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-16 lg:py-20 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 text-xs font-semibold text-cyan-800 bg-cyan-50 border border-cyan-200 rounded-full px-3 py-1.5 mb-6">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        Official Government Identity Portal
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 max-w-3xl leading-[1.12]">
+        Secure access to Sri Lanka’s identity services.
+      </h1>
+      <p class="text-lg text-slate-600 leading-relaxed mt-6 max-w-2xl">
+        Apply for identity documents, follow application progress, and access verified government services through one trusted LankaID account.
+      </p>
+      <div class="flex flex-wrap gap-3 mt-8">
+        <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+          Access LankaID
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+          Access Dashboard
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a href="#process" class="inline-flex items-center h-12 px-6 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm font-bold hover:border-cyan-400 hover:text-cyan-700 transition-colors">
+          View the process
+        </a>
+        <a th:href="@{/walk-in}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors">
+          <span class="material-symbols-outlined text-lg">calendar_month</span>
+          Book a walk-in
+        </a>
+      </div>
+    </div>
+
+    <aside class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" aria-label="Portal status">
+      <div class="pb-4 border-b border-slate-100">
+        <div>
+          <p class="text-sm font-bold text-slate-900">Identity services</p>
+          <p class="text-xs text-slate-500 mt-1">Available through LankaID</p>
+        </div>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <div class="py-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
+            <span class="material-symbols-outlined">id_card</span>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-bold text-slate-900">National Identity Card</p>
+            <p class="text-xs text-slate-500 mt-1">Applications, renewals and replacements</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+        </div>
+        <div class="py-4 flex items-center gap-4">
+          <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
+            <span class="material-symbols-outlined">flight_takeoff</span>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-bold text-slate-900">Passport Services</p>
+            <p class="text-xs text-slate-500 mt-1">Applications, renewals and replacements</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <p class="text-sm font-bold text-slate-900">Lost your walk-in QR pass?</p>
+        <p class="text-xs text-slate-500 mt-1">Enter the phone number used for booking.</p>
+        <form th:action="@{/walk-in/recover}" method="get" class="flex gap-2 mt-3">
+          <input name="phone" required pattern="\+?[0-9 -]{10,16}" inputmode="tel" class="min-w-0 flex-1 rounded-lg border-slate-300 text-sm" placeholder="0771234567"/>
+          <button class="rounded-lg bg-cyan-600 text-white px-4 text-xs font-bold">Find</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- Essential services -->
+<section id="services" class="bg-white py-16 lg:py-20">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">Essential services</p>
+      <h2 class="text-3xl font-bold text-slate-900 mt-2">Identity documents for citizens</h2>
+      <p class="text-base text-slate-600 mt-3">Clear guidance for the documents citizens use most frequently.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <article class="service-card bg-white border border-slate-200 rounded-2xl p-7">
+        <div class="flex items-center gap-4 mb-5">
+          <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">id_card</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">National Identity Card</h3>
+            <p class="text-sm text-slate-500 mt-1">Proof of identity and citizenship</p>
+          </div>
+        </div>
+        <p class="text-sm leading-relaxed text-slate-600 mb-6">Apply for a first NIC, renew an existing card, or request a secure replacement for a lost or damaged document.</p>
+        <ul class="space-y-3 text-sm text-slate-700">
+          <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>New applications from age 16</li>
+          <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Renewals and information updates</li>
+          <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Lost or damaged card replacement</li>
+        </ul>
+      </article>
+
+      <article class="service-card bg-white border border-slate-200 rounded-2xl p-7">
+        <div class="flex items-center gap-4 mb-5">
+          <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">flight_takeoff</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Passport Services</h3>
+            <p class="text-sm text-slate-500 mt-1">Secure international travel documents</p>
+          </div>
+        </div>
+        <p class="text-sm leading-relaxed text-slate-600 mb-6">Submit a first passport application, renew an expiring document, or replace a passport that is missing or damaged.</p>
+        <ul class="space-y-3 text-sm text-slate-700">
+          <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>First-time passport applications</li>
+          <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Passport validity renewals</li>
+          <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Lost or damaged passport replacement</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="process" class="bg-slate-100 border-y border-slate-200 py-16 lg:py-20">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">How it works</p>
+      <h2 class="text-3xl font-bold text-slate-900 mt-2">A clear four-step process</h2>
+      <p class="text-base text-slate-600 mt-3">Complete the online steps before attending any required in-person verification.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 0ms">
+        <div class="w-10 h-10 rounded-xl bg-cyan-600 text-white font-bold flex items-center justify-center mb-5">1</div>
+        <h3 class="text-base font-bold text-slate-900">Apply Online</h3>
+        <p class="text-sm leading-relaxed text-slate-600 mt-2">Complete the relevant form and submit the required supporting documents.</p>
+      </article>
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 90ms">
+        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">2</div>
+        <h3 class="text-base font-bold text-slate-900">Book Appointment</h3>
+        <p class="text-sm leading-relaxed text-slate-600 mt-2">Choose an available time at the most convenient service centre.</p>
+      </article>
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 180ms">
+        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">3</div>
+        <h3 class="text-base font-bold text-slate-900">Verify Identity</h3>
+        <p class="text-sm leading-relaxed text-slate-600 mt-2">Attend the centre for document checks and biometric capture where required.</p>
+      </article>
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 270ms">
+        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">4</div>
+        <h3 class="text-base font-bold text-slate-900">Receive Document</h3>
+        <p class="text-sm leading-relaxed text-slate-600 mt-2">Track the final status and receive the completed identity document securely.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Simplified footer -->
+<footer id="support" class="bg-slate-900 text-slate-300 border-t border-slate-800">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
+    <div class="grid md:grid-cols-[1.2fr_0.8fr] gap-10 pb-9 border-b border-slate-800">
+      <div class="max-w-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center officer-brand-icon">
+            <span class="material-symbols-outlined text-white">account_balance</span>
+          </div>
+          <div>
+            <p class="font-extrabold text-lg text-white leading-none">Lanka<span class="officer-accent-text">ID</span></p>
+            <p class="text-xs text-slate-400 mt-1">National Identity Portal</p>
+          </div>
+        </div>
+        <p class="text-sm text-slate-400 leading-relaxed mt-5">The official digital identity and citizen verification service of Sri Lanka.</p>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-bold text-white">Support and assistance</h2>
+        <div class="grid sm:grid-cols-2 gap-4 mt-5 text-sm">
+          <div class="flex gap-3">
+            <span class="material-symbols-outlined text-cyan-400">call</span>
+            <div><p class="font-semibold text-slate-200">National Helpline</p><p class="text-slate-400 mt-1">1919</p></div>
+          </div>
+          <div class="flex gap-3">
+            <span class="material-symbols-outlined text-cyan-400">mail</span>
+            <div><p class="font-semibold text-slate-200">Email Support</p><p class="text-slate-400 mt-1">support@lankaid.gov.lk</p></div>
+          </div>
+          <div class="sm:col-span-2 flex gap-3">
+            <span class="material-symbols-outlined text-cyan-400">location_on</span>
+            <div><p class="font-semibold text-slate-200">Department Headquarters</p><p class="text-slate-400 mt-1">Department for Registration of Persons, Battaramulla, Sri Lanka</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <p>© 2026 Democratic Socialist Republic of Sri Lanka. LankaID National Portal.</p>
+      <div class="flex items-center gap-5">
+        <a class="hover:text-slate-300 transition-colors" href="#">Privacy</a>
+        <a class="hover:text-slate-300 transition-colors" href="#">Accessibility</a>
+        <a class="hover:text-slate-300 transition-colors" href="#">Security</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const revealSteps = document.querySelectorAll('.reveal-step');
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+    revealSteps.forEach(step => revealObserver.observe(step));
+  } else {
+    revealSteps.forEach(step => step.classList.add('is-visible'));
+  }
+</script>
+</body></html>

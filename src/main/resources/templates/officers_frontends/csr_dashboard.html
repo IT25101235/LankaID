@@ -24,7 +24,9 @@
 <aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
   <div class="p-5 border-b border-slate-800">
     <div class="flex items-center gap-3">
-      <img src="/government_logo.png" alt="" aria-hidden="true" class="government-brand-logo"/>
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md officer-brand-icon">
+        <span class="material-symbols-outlined text-white text-lg">support_agent</span>
+      </div>
       <div>
         <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p>
         <p class="text-xs text-slate-400 mt-0.5">CSR Portal</p>
@@ -377,6 +379,6 @@ function openComplaint(ref) {
   window.location.href = '/officer/csr/complaints/' + encodeURIComponent(ref);
 }
 </script>
-<script src="/js/portal-shell.js?v=20260903-6"></script>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>
