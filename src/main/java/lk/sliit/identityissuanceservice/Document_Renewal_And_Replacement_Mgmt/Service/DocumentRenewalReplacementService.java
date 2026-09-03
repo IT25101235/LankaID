@@ -276,7 +276,13 @@ public class DocumentRenewalReplacementService {
 
     @Transactional(readOnly = true)
     public List<ApplicationDocument> getDocuments(Integer citizenId, Integer applicationId) {
-        getRequest(citizenId, applicationId);
+        CitizenApplication application = getRequest(citizenId, applicationId);
+        if (!"DRAFT".equals(application.getCurrentStatus())
+                && !"CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException(
+                    "This application is locked after submission. It can only be edited when an officer requests a correction."
+            );
+        }
         return documentRepository.findAllByApplicationIdOrderByUploadedAtAsc(applicationId);
     }
 
