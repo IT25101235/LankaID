@@ -87,26 +87,59 @@ public class CitizenApplicationController {
             BindingResult bindingResult,
             @RequestParam(required = false) Integer applicationId,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
+
+        CitizenApplication editingApplication = null;
+        if (applicationId != null) {
+            try {
+                editingApplication = applicationService.getEditableNewApplication(citizenId, applicationId);
+                checkService(editingApplication, "nic");
+            } catch (IllegalArgumentException exception) {
+                redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
+                return "redirect:/citizen/dashboard";
+            }
+        }
         if (bindingResult.hasErrors()) {
             addNewFormData(model, "NIC");
-            addCorrectionFormData(model, applicationId);
+            addEditFormData(model, editingApplication);
             return "citizen_frontends/nic_application_form";
         }
 
         try {
             CitizenApplication application = applicationId == null
                     ? applicationService.createNewNicApplication(citizenId, form)
-                    : applicationService.updateNewNicCorrection(citizenId, applicationId, form);
+                    : applicationService.updateNewNicApplication(citizenId, applicationId, form);
             return "redirect:/citizen/applications/nic/documents?applicationId="
                     + application.getApplicationId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
             addNewFormData(model, "NIC");
-            addCorrectionFormData(model, applicationId);
+            addEditFormData(model, editingApplication);
             return "citizen_frontends/nic_application_form";
+        }
+    }
+
+    @GetMapping("/citizen/applications/nic/edit")
+    public String editNewNicDraft(
+            @RequestParam Integer applicationId,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+
+        try {
+            model.addAttribute("applicationForm", applicationService.prepareNewNicDraftEdit(citizenId, applicationId));
+            addNewFormData(model, "NIC");
+            addDraftEditFormData(model, applicationId);
+            return "citizen_frontends/nic_application_form";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
+            return "redirect:/citizen/dashboard";
         }
     }
 
@@ -155,26 +188,62 @@ public class CitizenApplicationController {
             BindingResult bindingResult,
             @RequestParam(required = false) Integer applicationId,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
+
+        CitizenApplication editingApplication = null;
+        if (applicationId != null) {
+            try {
+                editingApplication = applicationService.getEditableNewApplication(citizenId, applicationId);
+                checkService(editingApplication, "passport");
+            } catch (IllegalArgumentException exception) {
+                redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
+                return "redirect:/citizen/dashboard";
+            }
+        }
         if (bindingResult.hasErrors()) {
             addNewFormData(model, "Passport");
-            addCorrectionFormData(model, applicationId);
+            addEditFormData(model, editingApplication);
             return "citizen_frontends/passport_application_form";
         }
 
         try {
             CitizenApplication application = applicationId == null
                     ? applicationService.createNewPassportApplication(citizenId, form)
-                    : applicationService.updateNewPassportCorrection(citizenId, applicationId, form);
+                    : applicationService.updateNewPassportApplication(citizenId, applicationId, form);
             return "redirect:/citizen/applications/passport/documents?applicationId="
                     + application.getApplicationId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
             addNewFormData(model, "Passport");
-            addCorrectionFormData(model, applicationId);
+            addEditFormData(model, editingApplication);
             return "citizen_frontends/passport_application_form";
+        }
+    }
+
+    @GetMapping("/citizen/applications/passport/edit")
+    public String editNewPassportDraft(
+            @RequestParam Integer applicationId,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+
+        try {
+            model.addAttribute(
+                    "applicationForm",
+                    applicationService.prepareNewPassportDraftEdit(citizenId, applicationId)
+            );
+            addNewFormData(model, "Passport");
+            addDraftEditFormData(model, applicationId);
+            return "citizen_frontends/passport_application_form";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
+            return "redirect:/citizen/dashboard";
         }
     }
 
@@ -344,6 +413,20 @@ public class CitizenApplicationController {
         if (applicationId != null) {
             model.addAttribute("correctionApplicationId", applicationId);
             model.addAttribute("pageTitle", "Correct Application Details");
+        }
+    }
+
+    private void addDraftEditFormData(Model model, Integer applicationId) {
+        model.addAttribute("draftEditApplicationId", applicationId);
+        model.addAttribute("pageTitle", "Edit Saved Draft");
+    }
+
+    private void addEditFormData(Model model, CitizenApplication application) {
+        if (application == null) return;
+        if ("CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            addCorrectionFormData(model, application.getApplicationId());
+        } else {
+            addDraftEditFormData(model, application.getApplicationId());
         }
     }
 

@@ -144,10 +144,40 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    public NewNicApplicationForm prepareNewNicDraftEdit(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getEditableNewApplication(citizenId, applicationId);
+        if (!NIC.equals(application.getServiceType()) || !"DRAFT".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("Only an unsubmitted new NIC draft can be edited here.");
+        }
+
+        NewNicApplicationForm form = new NewNicApplicationForm();
+        CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
+        return form;
+    }
+
+    @Transactional(readOnly = true)
     public NewPassportApplicationForm prepareNewPassportCorrection(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getCorrectionApplication(citizenId, applicationId, PASSPORT);
         if (!NEW.equals(application.getApplicationKind())) {
             throw new IllegalArgumentException("This correction is not a new passport application.");
+        }
+
+        NewPassportApplicationForm form = new NewPassportApplicationForm();
+        CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
+        PassportApplication passport = passportRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
+        form.setServiceLevel(passport.getServiceLevel());
+        form.setTravelDocumentType(passport.getTravelDocumentType());
+        form.setNicProofNo(passport.getNicProofNo());
+        form.setParentNicNo(passport.getParentNicNo());
+        return form;
+    }
+
+    @Transactional(readOnly = true)
+    public NewPassportApplicationForm prepareNewPassportDraftEdit(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getEditableNewApplication(citizenId, applicationId);
+        if (!PASSPORT.equals(application.getServiceType()) || !"DRAFT".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("Only an unsubmitted new passport draft can be edited here.");
         }
 
         NewPassportApplicationForm form = new NewPassportApplicationForm();
@@ -203,14 +233,14 @@ public class CitizenApplicationService {
     }
 
     @Transactional
-    public CitizenApplication updateNewNicCorrection(
+    public CitizenApplication updateNewNicApplication(
             Integer citizenId,
             Integer applicationId,
             NewNicApplicationForm form
     ) {
-        CitizenApplication application = getCorrectionApplication(citizenId, applicationId, NIC);
-        if (!NEW.equals(application.getApplicationKind())) {
-            throw new IllegalArgumentException("This correction is not a new NIC application.");
+        CitizenApplication application = getEditableNewApplication(citizenId, applicationId);
+        if (!NIC.equals(application.getServiceType())) {
+            throw new IllegalArgumentException("This is not a new NIC application.");
         }
         CitizenProfileMapper.validateConditionalFields(form);
         CitizenAccount citizen = findCitizen(citizenId);
@@ -220,14 +250,14 @@ public class CitizenApplicationService {
     }
 
     @Transactional
-    public CitizenApplication updateNewPassportCorrection(
+    public CitizenApplication updateNewPassportApplication(
             Integer citizenId,
             Integer applicationId,
             NewPassportApplicationForm form
     ) {
-        CitizenApplication application = getCorrectionApplication(citizenId, applicationId, PASSPORT);
-        if (!NEW.equals(application.getApplicationKind())) {
-            throw new IllegalArgumentException("This correction is not a new passport application.");
+        CitizenApplication application = getEditableNewApplication(citizenId, applicationId);
+        if (!PASSPORT.equals(application.getServiceType())) {
+            throw new IllegalArgumentException("This is not a new passport application.");
         }
         CitizenProfileMapper.validateConditionalFields(form);
         validatePassportProof(form.getNicProofNo(), form.getParentNicNo());
@@ -266,6 +296,13 @@ public class CitizenApplicationService {
         if (!NEW.equals(application.getApplicationKind())) {
             throw new IllegalArgumentException("This page only handles new applications.");
         }
+        return application;
+    }
+
+    @Transactional(readOnly = true)
+    public CitizenApplication getEditableNewApplication(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getNewApplication(citizenId, applicationId);
+        requireEditable(application);
         return application;
     }
 

@@ -201,6 +201,13 @@ class CitizenApplicationWorkflowIntegrationTests {
         assertEquals("PASSPORT", application.getServiceType());
         assertEquals("NEW", application.getApplicationKind());
         assertTrue(passportRepository.existsById(application.getApplicationId()));
+
+        mockMvc.perform(get("/citizen/applications/passport/edit")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Editing saved draft")))
+                .andExpect(content().string(containsString("Save changes and continue")));
     }
 
     @Test
@@ -230,6 +237,52 @@ class CitizenApplicationWorkflowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("New NIC")))
                 .andExpect(content().string(containsString("No applications yet")));
+    }
+
+    @Test
+    void newNicDraftBioDataCanBeEditedBeforeSubmissionOnly() throws Exception {
+        UserAccount user = createCitizen(false);
+        MockHttpSession session = citizenSession(user);
+        mockMvc.perform(validProfile(post("/citizen/applications/nic/new").session(session)))
+                .andExpect(status().is3xxRedirection());
+
+        CitizenApplication draft = applicationRepository
+                .findAllByCitizenIdOrderByCreatedAtDesc(user.getUserId()).get(0);
+        String applicationId = draft.getApplicationId().toString();
+
+        mockMvc.perform(get("/citizen/applications/nic/documents")
+                        .param("applicationId", applicationId)
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Edit bio data")))
+                .andExpect(content().string(containsString(
+                        "/citizen/applications/nic/edit?applicationId=" + applicationId
+                )));
+
+        mockMvc.perform(get("/citizen/applications/nic/edit")
+                        .param("applicationId", applicationId)
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Editing saved draft")))
+                .andExpect(content().string(containsString("Save changes and continue")));
+
+        mockMvc.perform(validProfile(post("/citizen/applications/nic/new")
+                        .param("applicationId", applicationId)
+                        .param("occupation", "Teacher")
+                        .session(session)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/citizen/applications/nic/documents?applicationId=" + applicationId
+                ));
+        assertEquals("Teacher", citizenRepository.findById(user.getUserId()).orElseThrow().getOccupation());
+
+        draft.setCurrentStatus("SUBMITTED");
+        applicationRepository.saveAndFlush(draft);
+        mockMvc.perform(get("/citizen/applications/nic/edit")
+                        .param("applicationId", applicationId)
+                        .session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/citizen/dashboard"));
     }
 
     @Test
