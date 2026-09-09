@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public interface WalkInAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
+    // Include the old local format so existing bookings can still be recovered.
+    List<Appointment> findAllByVisitorPhoneInAndAppointmentTypeOrderByScheduledAtDesc(
+            Collection<String> visitorPhones, String appointmentType);
+
     Optional<Appointment> findByReferenceNoIgnoreCaseAndAppointmentType(
             String referenceNo,
             String appointmentType

@@ -1,6 +1,8 @@
 package lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service;
 
 import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Shared.Otp.SmsOtpService;
+import lk.sliit.identityissuanceservice.Shared.Otp.SriLankanMobileNumber;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.AppointmentCheckIn;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
@@ -26,15 +28,12 @@ import java.util.UUID;
 @Service
 public class WalkInAppointmentService {
 
-    public static final String DEFAULT_OTP = "111111";
     public static final int PAGE_SIZE = 15;
     public static final String WALK_IN = "WALK_IN";
 
     private static final String SESSION_NAME = "walkInVisitorName";
     private static final String SESSION_PHONE = "walkInVisitorPhone";
-    private static final String SESSION_VERIFIED = "walkInPhoneVerified";
-    private static final String SESSION_EXPIRES = "walkInOtpExpiresAt";
-    private static final String SESSION_ATTEMPTS = "walkInOtpAttempts";
+    private static final String OTP_PURPOSE = "WALK_IN_BOOKING";
     private static final List<String> OCCUPIED_STATUSES = List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
     private static final Set<String> SERVICES = Set.of(
             "NIC_APPLICATION_HELP",
@@ -45,17 +44,20 @@ public class WalkInAppointmentService {
     private final WalkInSlotRepository slotRepository;
     private final CentreRepository centreRepository;
     private final AppointmentCheckInRepository checkInRepository;
+    private final SmsOtpService otpService;
 
     public WalkInAppointmentService(
             WalkInAppointmentRepository appointmentRepository,
             WalkInSlotRepository slotRepository,
             CentreRepository centreRepository,
-            AppointmentCheckInRepository checkInRepository
+            AppointmentCheckInRepository checkInRepository,
+            SmsOtpService otpService
     ) {
         this.appointmentRepository = appointmentRepository;
         this.slotRepository = slotRepository;
         this.centreRepository = centreRepository;
         this.checkInRepository = checkInRepository;
+        this.otpService = otpService;
     }
 
     public void startPhoneVerification(String visitorName, String visitorPhone, HttpSession session) {
@@ -64,37 +66,27 @@ public class WalkInAppointmentService {
         if (name.length() < 2 || name.length() > 100) {
             throw new IllegalArgumentException("Enter the visitor's full name.");
         }
-        if (!phone.matches("\\+?[0-9]{10,14}")) {
-            throw new IllegalArgumentException("Enter a valid phone number with 10 to 14 digits.");
+        synchronized (session) {
+            otpService.send(phone, OTP_PURPOSE, session);
+            session.setAttribute(SESSION_NAME, name);
+            session.setAttribute(SESSION_PHONE, phone);
         }
-        session.setAttribute(SESSION_NAME, name);
-        session.setAttribute(SESSION_PHONE, phone);
-        session.setAttribute(SESSION_VERIFIED, false);
-        session.setAttribute(SESSION_EXPIRES, LocalDateTime.now().plusMinutes(5));
-        session.setAttribute(SESSION_ATTEMPTS, 0);
+    }
+
+    public void resendPhoneVerification(HttpSession session) {
+        startPhoneVerification(sessionName(session), sessionPhone(session), session);
+    }
+
+    public long otpRetryAfterSeconds(String phone, HttpSession session) {
+        return otpService.retryAfterSeconds(phone, OTP_PURPOSE, session);
     }
 
     public void verifyPhone(String otp, HttpSession session) {
-        if (session.getAttribute(SESSION_PHONE) == null) {
-            throw new IllegalArgumentException("Enter your name and phone number first.");
-        }
-        Object expiresValue = session.getAttribute(SESSION_EXPIRES);
-        if (!(expiresValue instanceof LocalDateTime expiresAt) || LocalDateTime.now().isAfter(expiresAt)) {
-            throw new IllegalArgumentException("The OTP expired. Request a new OTP.");
-        }
-        int attempts = session.getAttribute(SESSION_ATTEMPTS) instanceof Integer value ? value : 0;
-        if (attempts >= 3) {
-            throw new IllegalArgumentException("Too many incorrect attempts. Request a new OTP.");
-        }
-        if (!DEFAULT_OTP.equals(clean(otp))) {
-            session.setAttribute(SESSION_ATTEMPTS, attempts + 1);
-            throw new IllegalArgumentException("Incorrect OTP. Please try again.");
-        }
-        session.setAttribute(SESSION_VERIFIED, true);
+        otpService.verify(clean(otp), OTP_PURPOSE, session);
     }
 
     public boolean isPhoneVerified(HttpSession session) {
-        return Boolean.TRUE.equals(session.getAttribute(SESSION_VERIFIED));
+        return otpService.isVerified(sessionPhone(session), OTP_PURPOSE, session);
     }
 
     public String sessionName(HttpSession session) {
@@ -120,6 +112,13 @@ public class WalkInAppointmentService {
 
     @Transactional
     public WalkInAppointmentView book(String visitorService, Integer slotId, HttpSession session) {
+        // Keep the verified number unchanged while this session creates its booking.
+        synchronized (session) {
+            return bookVerifiedVisitor(visitorService, slotId, session);
+        }
+    }
+
+    private WalkInAppointmentView bookVerifiedVisitor(String visitorService, Integer slotId, HttpSession session) {
         if (!isPhoneVerified(session)) {
             throw new IllegalArgumentException("Verify your phone number before booking.");
         }
@@ -161,11 +160,9 @@ public class WalkInAppointmentService {
     @Transactional(readOnly = true)
     public List<WalkInAppointmentView> recoverByPhone(String visitorPhone) {
         String phone = normalizePhone(visitorPhone);
-        if (!phone.matches("\\+?[0-9]{10,14}")) {
-            throw new IllegalArgumentException("Enter the phone number used for booking.");
-        }
         return appointmentRepository
-                .findAllByVisitorPhoneAndAppointmentTypeOrderByScheduledAtDesc(phone, WALK_IN)
+                .findAllByVisitorPhoneInAndAppointmentTypeOrderByScheduledAtDesc(
+                        List.of(phone, "0" + phone.substring(3)), WALK_IN)
                 .stream()
                 .map(this::buildAppointmentView)
                 .toList();
@@ -500,13 +497,11 @@ public class WalkInAppointmentService {
     private void clearVerification(HttpSession session) {
         session.removeAttribute(SESSION_NAME);
         session.removeAttribute(SESSION_PHONE);
-        session.removeAttribute(SESSION_VERIFIED);
-        session.removeAttribute(SESSION_EXPIRES);
-        session.removeAttribute(SESSION_ATTEMPTS);
+        otpService.clear(OTP_PURPOSE, session);
     }
 
     private String normalizePhone(String value) {
-        return clean(value).replace(" ", "").replace("-", "");
+        return SriLankanMobileNumber.normalize(value);
     }
 
     private String clean(String value) {

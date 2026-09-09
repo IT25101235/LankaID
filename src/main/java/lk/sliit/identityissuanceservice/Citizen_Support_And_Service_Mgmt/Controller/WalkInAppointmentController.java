@@ -53,11 +53,14 @@ public class WalkInAppointmentController {
             walkInService.startPhoneVerification(visitorName, visitorPhone, session);
             redirectAttributes.addFlashAttribute(
                     "walkInMessage",
-                    "A six-digit verification code has been sent to the entered phone number."
+                    "Your SMS verification code was requested. Enter it when it arrives."
             );
             return "redirect:/walk-in/verify";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+            redirectAttributes.addFlashAttribute("retryAfterSeconds", walkInService.otpRetryAfterSeconds(visitorPhone, session));
+            redirectAttributes.addFlashAttribute("visitorName", visitorName);
+            redirectAttributes.addFlashAttribute("visitorPhone", visitorPhone);
             return "redirect:/walk-in";
         }
     }
@@ -67,7 +70,19 @@ public class WalkInAppointmentController {
         if (walkInService.sessionPhone(session).isBlank()) return "redirect:/walk-in";
         model.addAttribute("step", "OTP");
         model.addAttribute("visitorPhone", walkInService.sessionPhone(session));
+        model.addAttribute("retryAfterSeconds", walkInService.otpRetryAfterSeconds(walkInService.sessionPhone(session), session));
         return "citizen_frontends/walkin_appointment_booking";
+    }
+
+    @PostMapping("/walk-in/otp/resend")
+    public String resendOtp(HttpSession session, RedirectAttributes redirectAttributes) {
+        try {
+            walkInService.resendPhoneVerification(session);
+            redirectAttributes.addFlashAttribute("walkInMessage", "A new SMS code was requested. Use the latest code.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+        }
+        return "redirect:/walk-in/verify";
     }
 
     @PostMapping("/walk-in/otp/verify")
