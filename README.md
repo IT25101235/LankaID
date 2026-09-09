@@ -8,6 +8,8 @@ This guide turns the current LankaID Identity Issuance Service into a formal Enh
 
 ## Registration email verification setup
 
+For walk-in mobile verification, see [SMS OTP setup and lecturer guide](SMS_OTP_GUIDE.md).
+
 Citizen registration sends a six-digit code through Gmail SMTP and creates the account only after the code is verified. Do not place the Gmail password or App Password in this repository.
 
 1. Enable 2-Step Verification on the Google account used to send LankaID mail.

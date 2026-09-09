@@ -13,6 +13,10 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
+import lk.sliit.identityissuanceservice.Shared.Sms.SmsSender;
+import lk.sliit.identityissuanceservice.Shared.Otp.SriLankanMobileNumber;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -54,6 +62,7 @@ class WalkInAppointmentWorkflowIntegrationTests {
     @Autowired CentreRepository centreRepository;
     @Autowired UserAccountRepository userRepository;
     @Autowired StaffAccountRepository staffRepository;
+    @MockitoBean SmsSender smsSender;
 
     @Test
     void anonymousVisitorVerifiesBooksRecoversAndCsrChecksIn() throws Exception {
@@ -83,7 +92,7 @@ class WalkInAppointmentWorkflowIntegrationTests {
 
         mockMvc.perform(post("/walk-in/otp/verify")
                         .session(visitorSession)
-                        .param("otp", "111111"))
+                        .param("otp", lastSentCode()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/walk-in/book"));
 
@@ -94,7 +103,8 @@ class WalkInAppointmentWorkflowIntegrationTests {
                 .andExpect(status().is3xxRedirection());
 
         Appointment appointment = appointmentRepository
-                .findAllByVisitorPhoneAndAppointmentTypeOrderByScheduledAtDesc(phone, "WALK_IN")
+                .findAllByVisitorPhoneAndAppointmentTypeOrderByScheduledAtDesc(
+                        SriLankanMobileNumber.normalize(phone), "WALK_IN")
                 .get(0);
         assertNull(appointment.getCitizenId());
         assertNull(appointment.getApplicationId());
@@ -252,8 +262,14 @@ class WalkInAppointmentWorkflowIntegrationTests {
     private MockHttpSession verifiedSession(String name, String phone) {
         MockHttpSession session = new MockHttpSession();
         walkInService.startPhoneVerification(name, phone, session);
-        walkInService.verifyPhone("111111", session);
+        walkInService.verifyPhone(lastSentCode(), session);
         return session;
+    }
+
+    private String lastSentCode() {
+        ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
+        verify(smsSender, atLeastOnce()).send(anyString(), message.capture(), anyInt());
+        return message.getValue().substring("LankaID (OTP) - ".length());
     }
 
     private Centre createCentre(String unique) {
