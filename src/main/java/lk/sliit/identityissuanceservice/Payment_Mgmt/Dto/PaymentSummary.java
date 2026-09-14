@@ -2,7 +2,7 @@ package lk.sliit.identityissuanceservice.Payment_Mgmt.Dto;
 
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 
 import java.math.BigDecimal;
