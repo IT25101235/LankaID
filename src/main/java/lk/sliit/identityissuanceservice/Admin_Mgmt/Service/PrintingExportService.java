@@ -97,8 +97,6 @@ public class PrintingExportService {
             GovernmentIdentityRecord record = findOrCreateGovernmentRecord(citizen, user);
             String documentNumber = issueDocumentNumber(application, citizen, record);
 
-            record.setRegisteredEmail(user.getEmail());
-            record.setRegisteredPhone(user.getPhone());
             record.setIdentityStatus("ACTIVE");
             governmentRepository.save(record);
 
@@ -124,25 +122,23 @@ public class PrintingExportService {
     }
 
     private GovernmentIdentityRecord findOrCreateGovernmentRecord(CitizenAccount citizen, UserAccount user) {
-        GovernmentIdentityRecord record = null;
+        // Existing documents must have been linked through verification, never just by matching contacts.
         if (citizen.getGovernmentRecordId() != null) {
-            record = governmentRepository.findById(citizen.getGovernmentRecordId()).orElse(null);
+            return governmentRepository.findById(citizen.getGovernmentRecordId())
+                    .orElseThrow(() -> new IllegalArgumentException("The linked government record is missing. Contact support."));
         }
-        if (record == null) {
-            record = governmentRepository
-                    .findByRegisteredEmailIgnoreCaseAndRegisteredPhone(user.getEmail(), user.getPhone())
-                    .orElseGet(GovernmentIdentityRecord::new);
+        if (citizenRepository.countIdentityRequests(citizen.getUserId()) > 0
+                || governmentRepository.findByRegisteredEmailIgnoreCase(user.getEmail()).isPresent()
+                || governmentRepository.findByRegisteredPhone(user.getPhone()).isPresent()) {
+            throw new IllegalArgumentException("Verify the citizen's existing government record before printing.");
         }
-        if (record.getGovernmentRecordId() == null) {
-            record.setRegisteredEmail(user.getEmail());
-            record.setRegisteredPhone(user.getPhone());
-            record.setIdentityStatus("ACTIVE");
-            record = governmentRepository.save(record);
-        }
-        if (!record.getGovernmentRecordId().equals(citizen.getGovernmentRecordId())) {
-            citizen.setGovernmentRecordId(record.getGovernmentRecordId());
-            citizenRepository.save(citizen);
-        }
+        GovernmentIdentityRecord record = new GovernmentIdentityRecord();
+        record.setRegisteredEmail(user.getEmail());
+        record.setRegisteredPhone(user.getPhone());
+        record.setIdentityStatus("ACTIVE");
+        record = governmentRepository.save(record);
+        citizen.setGovernmentRecordId(record.getGovernmentRecordId());
+        citizenRepository.save(citizen);
         return record;
     }
 

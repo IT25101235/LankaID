@@ -332,6 +332,10 @@ class CitizenApplicationWorkflowIntegrationTests {
             record.setRegisteredPhone(user.getPhone());
             record.setIdentityStatus("ACTIVE");
             governmentRepository.saveAndFlush(record);
+            // This fixture represents an account whose existing identity has already been verified.
+            CitizenAccount linkedCitizen = citizenRepository.findById(user.getUserId()).orElseThrow();
+            linkedCitizen.setGovernmentRecordId(record.getGovernmentRecordId());
+            citizenRepository.saveAndFlush(linkedCitizen);
         }
         return user;
     }

@@ -11,6 +11,8 @@ import java.util.List;
 
 @Repository
 public interface SupportRequestRepository extends JpaRepository<SupportRequest, Integer> {
+    Optional<SupportRequest> findFirstByCitizenIdAndRequestTypeAndSubjectOrderByRequestIdDesc(
+            Integer citizenId, String requestType, String subject);
 
     Optional<SupportRequest> findByRequestIdAndCitizenId(Integer requestId, Integer citizenId);
 

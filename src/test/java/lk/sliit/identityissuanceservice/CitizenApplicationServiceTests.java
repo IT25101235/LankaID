@@ -66,14 +66,15 @@ class CitizenApplicationServiceTests {
         user = new UserAccount();
         user.setUserId(25);
         user.setEmail("citizen@example.com");
+        user.setEmailVerified("Y");
         user.setPhone("+94771234567");
         citizen = new CitizenAccount(25);
     }
 
     @Test
-    void exactEmailAndPhoneMatchFindsExistingDocuments() {
+    void matchingUniqueContactsLinkExistingDocumentsAfterEmailVerification() {
         GovernmentIdentityRecord record = governmentRecord();
-        stubAccountAndIdentity(Optional.of(record), Optional.of(record), Optional.of(record));
+        stubAccountAndIdentity(Optional.of(record), Optional.of(record));
 
         CitizenEligibilityDto result = service.getEligibility(25);
 
@@ -86,7 +87,8 @@ class CitizenApplicationServiceTests {
     @Test
     void partialMatchIsBlockedAsIdentityConflict() {
         GovernmentIdentityRecord record = governmentRecord();
-        stubAccountAndIdentity(Optional.empty(), Optional.of(record), Optional.empty());
+        record.setRegisteredPhone("+94770000000");
+        stubAccountAndIdentity(Optional.of(record), Optional.empty());
 
         CitizenEligibilityDto result = service.getEligibility(25);
 
@@ -97,7 +99,10 @@ class CitizenApplicationServiceTests {
     @Test
     void newNicIsRejectedForExistingNicHolder() {
         GovernmentIdentityRecord record = governmentRecord();
-        stubAccountAndIdentity(Optional.of(record), Optional.of(record), Optional.of(record));
+        citizen.setGovernmentRecordId(record.getGovernmentRecordId());
+        when(userRepository.findById(25)).thenReturn(Optional.of(user));
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+        when(governmentRepository.findById(10)).thenReturn(Optional.of(record));
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -108,7 +113,7 @@ class CitizenApplicationServiceTests {
 
     @Test
     void newNicFormIsRejectedWhenADraftAlreadyExists() {
-        stubAccountAndIdentity(Optional.empty(), Optional.empty(), Optional.empty());
+        stubAccountAndIdentity(Optional.empty(), Optional.empty());
         when(applicationRepository.existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
                 eq(25),
                 eq("NIC"),
@@ -144,6 +149,7 @@ class CitizenApplicationServiceTests {
 
     @Test
     void submissionCannotContinueWhenRequiredDocumentIsMissing() {
+        stubAccountAndIdentity(Optional.empty(), Optional.empty());
         CitizenApplication application = application();
         when(applicationRepository.findByApplicationIdAndCitizenId(101, 25))
                 .thenReturn(Optional.of(application));
@@ -209,15 +215,18 @@ class CitizenApplicationServiceTests {
     }
 
     private void stubAccountAndIdentity(
-            Optional<GovernmentIdentityRecord> exact,
             Optional<GovernmentIdentityRecord> email,
             Optional<GovernmentIdentityRecord> phone) {
         when(userRepository.findById(25)).thenReturn(Optional.of(user));
         when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
-        when(governmentRepository.findByRegisteredEmailIgnoreCaseAndRegisteredPhone(
-                user.getEmail(), user.getPhone())).thenReturn(exact);
-        when(governmentRepository.findByRegisteredEmailIgnoreCase(user.getEmail())).thenReturn(email);
-        when(governmentRepository.findByRegisteredPhone(user.getPhone())).thenReturn(phone);
+        List<GovernmentIdentityRecord> matches = java.util.stream.Stream.concat(email.stream(), phone.stream()).distinct().toList();
+        when(governmentRepository.findAllByRegisteredEmailIgnoreCaseOrRegisteredPhone(user.getEmail(), user.getPhone()))
+                .thenReturn(matches);
+        if (matches.size() == 1) {
+            when(citizenRepository.findByIdForIdentityLink(25)).thenReturn(Optional.of(citizen));
+            when(governmentRepository.findByIdForIdentityLink(matches.get(0).getGovernmentRecordId()))
+                    .thenReturn(Optional.of(matches.get(0)));
+        }
     }
 
     private GovernmentIdentityRecord governmentRecord() {

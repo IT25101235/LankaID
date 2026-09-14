@@ -167,6 +167,9 @@ public class CitizenSupportService {
     @Transactional
     public SupportRequestView resolve(String reference, Integer staffId) {
         SupportRequest request = findRequest(reference);
+        if ("Existing document verification".equals(request.getSubject())) {
+            throw new IllegalArgumentException("Use the identity verification decision form to close this request.");
+        }
         if (request.getResponse() == null || request.getResponse().isBlank()) {
             throw new IllegalArgumentException("Send a response before resolving this request.");
         }

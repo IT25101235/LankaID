@@ -49,8 +49,9 @@
 
       <section class="bg-white border rounded-2xl shadow-sm p-5">
         <h2 class="font-bold">Actions</h2>
+        <a th:if="${supportRequest.request.subject == 'Existing document verification' and supportRequest.request.requestStatus != 'RESOLVED'}" th:href="@{/officer/csr/identity/{id}(id=${supportRequest.request.requestId})}" class="block mt-4 rounded-xl bg-cyan-700 text-white p-3 text-sm font-bold">Review identity and record decision</a>
         <p class="text-xs text-slate-500 mt-2">A response must be sent before the request can be resolved.</p>
-        <form th:if="${supportRequest.request.requestStatus == 'IN_PROGRESS'}" th:action="@{/officer/csr/support/{reference}/resolve(reference=${supportRequest.reference})}" method="post"><button class="w-full mt-4 rounded-xl bg-emerald-600 text-white py-3 text-sm font-bold" onclick="return confirm('Mark this request as resolved?')">Mark as resolved</button></form>
+        <form th:if="${supportRequest.request.requestStatus == 'IN_PROGRESS' and supportRequest.request.subject != 'Existing document verification'}" th:action="@{/officer/csr/support/{reference}/resolve(reference=${supportRequest.reference})}" method="post"><button class="w-full mt-4 rounded-xl bg-emerald-600 text-white py-3 text-sm font-bold" onclick="return confirm('Mark this request as resolved?')">Mark as resolved</button></form>
         <div th:if="${supportRequest.request.requestStatus == 'RESOLVED'}" class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700">This request is resolved.</div>
       </section>
     </aside>
