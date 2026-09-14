@@ -18,12 +18,38 @@
 </header>
 <main class="max-w-4xl mx-auto p-4 sm:p-8">
   <h1 class="text-3xl font-extrabold">Recover walk-in booking</h1>
-  <p class="text-sm text-slate-500 mt-2">Enter the verified phone number used during booking.</p>
-  <form th:action="@{/walk-in/recover}" method="get" class="mt-5 bg-white border rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
-    <input name="phone" th:value="${phone}" required pattern="\+?[0-9 -]{10,16}" class="flex-1 rounded-xl border-slate-300" placeholder="0771234567"/>
-    <button class="rounded-xl bg-cyan-600 text-white px-5 py-3 font-bold">Find bookings</button>
+  <p class="text-sm text-slate-500 mt-2">Verify the mobile number used during booking to access your QR pass.</p>
+  <div th:if="${walkInMessage}" class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700" th:text="${walkInMessage}"></div>
+  <div id="otp-feedback" th:if="${walkInError}" class="mt-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700" th:text="${walkInError}"></div>
+  <form th:if="${step == 'PHONE'}" th:action="@{/walk-in/recover/otp/send}" method="post" class="mt-5 bg-white border rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
+    <div class="min-w-0 flex-1">
+      <label for="visitorPhone" class="block text-sm font-bold">Mobile number</label>
+      <div class="mt-2 flex">
+        <span class="inline-flex items-center rounded-l-xl border border-r-0 border-slate-300 bg-slate-100 px-4 font-bold">+94</span>
+        <input id="visitorPhone" name="phone" th:value="${phone}" required pattern="7[0-9]{8}" minlength="9" maxlength="9" inputmode="numeric" autocomplete="tel-national" aria-describedby="phoneHelp" title="Enter nine digits starting with 7, without the leading zero." class="w-full min-w-0 rounded-r-xl border-slate-300" placeholder="771234567"/>
+      </div>
+      <p id="phoneHelp" class="mt-2 text-xs text-slate-500">Enter the remaining 9 digits, starting with 7. Leave out the first 0: 0771234567 becomes +94 771234567.</p>
+    </div>
+    <button data-otp-retry data-ready-label="Send OTP" th:attr="data-retry-seconds=${retryAfterSeconds ?: 0}" class="self-start sm:self-center rounded-xl bg-cyan-600 text-white px-5 py-3 font-bold disabled:opacity-50 disabled:cursor-not-allowed">Send OTP</button>
   </form>
-  <div th:if="${walkInError}" class="mt-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700" th:text="${walkInError}"></div>
+  <section th:if="${step == 'OTP'}" class="mt-5 bg-white border rounded-2xl p-5 sm:p-7">
+    <h2 class="text-lg font-bold">Verify your mobile number</h2>
+    <p class="text-sm text-slate-500 mt-2">Enter the six-digit code sent to <b th:text="${phone}">your phone</b>.</p>
+    <form th:action="@{/walk-in/recover/otp/verify}" method="post" class="mt-5">
+      <label for="recoveryOtp" class="block text-sm font-bold">Six-digit OTP</label>
+      <input id="recoveryOtp" name="otp" required inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" class="w-full mt-2 rounded-xl border-slate-300 text-center font-mono text-xl tracking-[0.4em]" placeholder="6-digit code"/>
+      <button class="w-full mt-5 rounded-xl bg-cyan-600 text-white py-3 font-bold">Verify and find bookings</button>
+    </form>
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <form th:action="@{/walk-in/recover/otp/resend}" method="post"><button data-otp-retry data-ready-label="Resend code" th:attr="data-retry-seconds=${retryAfterSeconds ?: 0}" class="font-bold text-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed">Resend code</button></form>
+      <form th:action="@{/walk-in/recover/reset}" method="post"><button class="font-bold text-slate-600">Change phone number</button></form>
+    </div>
+    <p class="mt-3 text-xs text-slate-500">Use the latest code. If it expires, request another when the countdown ends.</p>
+  </section>
+  <div th:if="${step == 'RESULTS'}" class="mt-5 flex flex-wrap items-center justify-between gap-3">
+    <p class="text-sm font-bold text-emerald-700">Verified: <span th:text="${phone}">phone</span></p>
+    <form th:action="@{/walk-in/recover/reset}" method="post"><button class="text-sm font-bold text-cyan-700">Use another number</button></form>
+  </div>
   <div th:if="${walkIns != null and #lists.isEmpty(walkIns)}" class="mt-4 bg-white border border-dashed rounded-2xl p-8 text-center">No walk-in bookings were found for that phone number.</div>
   <div th:if="${walkIns != null and !#lists.isEmpty(walkIns)}" class="mt-4 space-y-3">
     <article th:each="item : ${walkIns}" class="bg-white border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -37,6 +63,8 @@
     </article>
   </div>
 </main>
+<script src="/js/walkin-phone.js"></script>
+<script src="/js/walkin-otp.js"></script>
 <script src="/js/portal-shell.js?v=20260901-5"></script>
 </body>
 </html>

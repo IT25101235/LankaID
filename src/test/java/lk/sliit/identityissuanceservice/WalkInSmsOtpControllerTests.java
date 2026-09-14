@@ -7,8 +7,8 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Reposit
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInSlotRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
-import lk.sliit.identityissuanceservice.Shared.Otp.SmsOtpService;
-import lk.sliit.identityissuanceservice.Shared.Sms.SmsSender;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SmsOtpService;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.SmsSender;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.mock.web.MockHttpSession;
@@ -27,7 +27,8 @@ class WalkInSmsOtpControllerTests {
     private final WalkInSlotRepository slots = mock(WalkInSlotRepository.class);
     private final WalkInAppointmentService service = new WalkInAppointmentService(appointments, slots,
             mock(CentreRepository.class), mock(AppointmentCheckInRepository.class),
-            new SmsOtpService(sender, 180, 5, 60, 900));
+            new SmsOtpService(sender, 180, 5, 60, 900),
+            mock(lk.sliit.identityissuanceservice.Payment_Mgmt.Service.WalkInPaymentService.class));
     private final MockMvc mvc = MockMvcBuilders.standaloneSetup(new WalkInAppointmentController(
             service, mock(WalkInPassService.class))).build();
     private final MockHttpSession session = new MockHttpSession();

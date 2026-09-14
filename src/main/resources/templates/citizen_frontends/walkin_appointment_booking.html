@@ -11,10 +11,15 @@
 <body class="min-h-screen bg-slate-100 text-slate-800">
 <header class="bg-white border-b"><div class="max-w-4xl mx-auto h-16 px-4 flex items-center"><a th:href="@{/}" class="font-extrabold text-lg">Lanka<span class="text-cyan-600">ID</span></a><a th:href="@{/walk-in/recover}" class="ml-auto text-sm font-bold text-cyan-700">Recover my booking</a></div></header>
 <main class="max-w-4xl mx-auto px-4 py-8">
-  <div class="mb-6"><p class="text-xs font-bold uppercase tracking-wider text-cyan-700">No account required</p><h1 class="text-3xl font-extrabold mt-2">Book a walk-in appointment</h1><p class="text-sm text-slate-500 mt-2">Verify your phone, select a published half-hour slot, and download the QR appointment pass.</p></div>
+  <div class="mb-6"><p class="text-xs font-bold uppercase tracking-wider text-cyan-700">No account required</p><h1 class="text-3xl font-extrabold mt-2">Book a walk-in appointment</h1><p class="text-sm text-slate-500 mt-2">Verify your phone, select a slot, and pay before downloading your QR appointment pass.</p><p class="text-sm font-bold text-cyan-700 mt-2" th:text="${'Standard walk-in fee: LKR ' + #numbers.formatDecimal(walkInFee, 1, 'COMMA', 2, 'POINT')}">Standard walk-in fee: LKR 1,500.00</p></div>
   <div th:if="${walkInMessage}" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${walkInMessage}"></div>
   <div id="otp-feedback" role="alert" th:if="${walkInError}" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${walkInError}"></div>
-  <div class="grid grid-cols-3 gap-2 mb-5 text-xs font-bold"><div class="rounded-xl p-3 text-center" th:classappend="${step == 'PHONE' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">1. Phone</div><div class="rounded-xl p-3 text-center" th:classappend="${step == 'OTP' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">2. OTP</div><div class="rounded-xl p-3 text-center" th:classappend="${step == 'BOOK' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">3. Book</div></div>
+  <div class="grid grid-cols-4 gap-2 mb-5 text-xs font-bold">
+    <div class="rounded-xl p-3 text-center" th:classappend="${step == 'PHONE' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">1. Phone</div>
+    <div class="rounded-xl p-3 text-center" th:classappend="${step == 'OTP' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">2. OTP</div>
+    <div class="rounded-xl p-3 text-center" th:classappend="${step == 'BOOK' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">3. Slot</div>
+    <div class="rounded-xl p-3 text-center" th:classappend="${step == 'PAYMENT' ? ' bg-cyan-600 text-white' : ' bg-white border text-slate-500'}">4. Payment</div>
+  </div>
 
   <section th:if="${step == 'PHONE'}" class="bg-white border rounded-2xl shadow-sm p-5 sm:p-7">
     <h2 class="text-lg font-bold">Visitor details</h2><p class="text-sm text-slate-500 mt-1">The phone number will be saved with the appointment.</p>
@@ -45,7 +50,23 @@
   <section th:if="${step == 'BOOK'}" class="bg-white border rounded-2xl shadow-sm p-5 sm:p-7">
     <div class="flex flex-wrap justify-between gap-3"><div><h2 class="text-lg font-bold">Choose service and slot</h2><p class="text-sm text-slate-500 mt-1"><span th:text="${visitorName}">Visitor</span> · <span th:text="${visitorPhone}">Phone</span></p></div><span class="h-fit rounded-full bg-emerald-100 text-emerald-700 px-3 py-1 text-xs font-bold">Phone verified</span></div>
     <div th:if="${#lists.isEmpty(slots)}" class="mt-6 rounded-xl border border-dashed p-8 text-center"><span class="material-symbols-outlined text-4xl text-slate-300">event_busy</span><p class="font-bold mt-2">No walk-in slots are available</p><p class="text-sm text-slate-500 mt-1">A CSR officer must publish appointment days first.</p></div>
-    <form th:unless="${#lists.isEmpty(slots)}" th:action="@{/walk-in/book}" method="post" class="mt-6 space-y-5"><label class="block text-sm font-bold">Required service<select name="visitorService" required class="w-full mt-2 rounded-xl border-slate-300"><option value="">Select service</option><option value="NIC_APPLICATION_HELP">NIC walk-in service</option><option value="PASSPORT_APPLICATION_HELP">Passport walk-in service</option></select></label><label class="block text-sm font-bold">Centre, date and half-hour time slot<select name="slotId" required class="w-full mt-2 rounded-xl border-slate-300"><option value="">Select an available slot</option><option th:each="slot : ${slots}" th:value="${slot.slotId}" th:text="${slot.centreName + ' — ' + #temporals.format(slot.slotDate, 'dd MMM yyyy') + ' at ' + #temporals.format(slot.slotTime, 'hh:mm a') + ' — ' + slot.remainingPlaces + ' place(s) left'}">Centre — date — time</option></select></label><button class="w-full rounded-xl bg-cyan-600 text-white py-3 font-bold">Confirm walk-in appointment</button></form>
+    <form th:unless="${#lists.isEmpty(slots)}" th:action="@{/walk-in/book}" method="post" class="mt-6 space-y-5"><label class="block text-sm font-bold">Required service<select name="visitorService" required class="w-full mt-2 rounded-xl border-slate-300"><option value="">Select service</option><option value="NIC_APPLICATION_HELP">NIC walk-in service</option><option value="PASSPORT_APPLICATION_HELP">Passport walk-in service</option></select></label><label class="block text-sm font-bold">Centre, date and half-hour time slot<select name="slotId" required class="w-full mt-2 rounded-xl border-slate-300"><option value="">Select an available slot</option><option th:each="slot : ${slots}" th:value="${slot.slotId}" th:text="${slot.centreName + ' — ' + #temporals.format(slot.slotDate, 'dd MMM yyyy') + ' at ' + #temporals.format(slot.slotTime, 'hh:mm a') + ' — ' + slot.remainingPlaces + ' place(s) left'}">Centre — date — time</option></select></label><button class="w-full rounded-xl bg-cyan-600 text-white py-3 font-bold">Continue to payment</button></form>
+  </section>
+  <section th:if="${step == 'PAYMENT'}" class="bg-white border rounded-2xl shadow-sm p-5 sm:p-7">
+    <h2 class="text-lg font-bold">Review and pay</h2>
+    <dl class="mt-5 space-y-4 text-sm">
+      <div><dt class="text-slate-500">Service</dt><dd class="font-bold" th:text="${paymentDetails.serviceLabel}">Walk-in service</dd></div>
+      <div><dt class="text-slate-500">Centre</dt><dd class="font-bold" th:text="${paymentDetails.slot.centreName}">Centre</dd></div>
+      <div><dt class="text-slate-500">Date and time</dt><dd class="font-bold" th:text="${#temporals.format(paymentDetails.slot.slotDate, 'dd MMM yyyy') + ' at ' + #temporals.format(paymentDetails.slot.slotTime, 'hh:mm a')}">Appointment time</dd></div>
+      <div class="border-t pt-4 flex justify-between items-center"><dt class="font-bold">Total</dt><dd class="text-2xl font-extrabold text-cyan-700" th:text="${'LKR ' + #numbers.formatDecimal(paymentDetails.amount, 1, 'COMMA', 2, 'POINT')}">LKR 1,500.00</dd></div>
+    </dl>
+    <p class="mt-5 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">Demo payment: no real money is charged. A payment receipt is saved when you confirm.</p>
+    <p class="mt-3 text-xs text-slate-500">Your slot is confirmed after payment. Availability is checked again when you pay.</p>
+    <form th:action="@{/walk-in/payment}" method="post" class="mt-5">
+      <input type="hidden" name="token" th:value="${paymentDetails.token}"/>
+      <button class="w-full rounded-xl bg-cyan-600 text-white py-3 font-bold">Simulate payment and confirm booking</button>
+    </form>
+    <a th:href="@{/walk-in/book}" class="inline-block mt-4 text-sm font-bold text-slate-600">Change service or slot</a>
   </section>
 </main>
 <script src="/js/portal-shell.js?v=20260901-5"></script>

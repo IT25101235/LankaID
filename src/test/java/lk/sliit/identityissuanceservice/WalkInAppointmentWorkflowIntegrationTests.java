@@ -8,13 +8,15 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Cen
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInSlotView;
+import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInPaymentDetails;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInAppointmentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
-import lk.sliit.identityissuanceservice.Shared.Sms.SmsSender;
-import lk.sliit.identityissuanceservice.Shared.Otp.SriLankanMobileNumber;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.SmsSender;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.junit.jupiter.api.Test;
@@ -62,6 +64,7 @@ class WalkInAppointmentWorkflowIntegrationTests {
     @Autowired CentreRepository centreRepository;
     @Autowired UserAccountRepository userRepository;
     @Autowired StaffAccountRepository staffRepository;
+    @Autowired PaymentRepository paymentRepository;
     @MockitoBean SmsSender smsSender;
 
     @Test
@@ -100,6 +103,18 @@ class WalkInAppointmentWorkflowIntegrationTests {
                         .session(visitorSession)
                         .param("visitorService", "NIC_APPLICATION_HELP")
                         .param("slotId", slot.slotId().toString()))
+                .andExpect(redirectedUrl("/walk-in/payment"));
+
+        assertTrue(appointmentRepository.findAllByVisitorPhoneAndAppointmentTypeOrderByScheduledAtDesc(
+                SriLankanMobileNumber.normalize(phone), "WALK_IN").isEmpty());
+        MvcResult paymentPage = mockMvc.perform(get("/walk-in/payment").session(visitorSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("LKR 1,500.00")))
+                .andReturn();
+        WalkInPaymentDetails paymentDetails = (WalkInPaymentDetails) paymentPage.getModelAndView()
+                .getModel().get("paymentDetails");
+        mockMvc.perform(post("/walk-in/payment").session(visitorSession)
+                        .param("token", paymentDetails.token()).param("amount", "1"))
                 .andExpect(status().is3xxRedirection());
 
         Appointment appointment = appointmentRepository
@@ -111,19 +126,27 @@ class WalkInAppointmentWorkflowIntegrationTests {
         assertEquals("Anonymous Visitor", appointment.getVisitorName());
         assertEquals("NIC_APPLICATION_HELP", appointment.getVisitorService());
         assertTrue(appointment.getReferenceNo().startsWith("WALK-"));
+        var payment = paymentRepository.findFirstByAppointmentIdAndPaymentStatusOrderByCreatedAtDesc(
+                appointment.getAppointmentId(), "PAID").orElseThrow();
+        assertEquals(0, new java.math.BigDecimal("1500.00").compareTo(payment.getAmount()));
+        assertTrue(payment.getTransactionReference().startsWith("WALKPAY-"));
         assertTrue(passService.createQrCode(appointment.getReferenceNo(), 200).length > 100);
         assertTrue(passService.createPass(walkInService.findByReference(appointment.getReferenceNo())).length > 100);
 
-        mockMvc.perform(get("/walk-in/pass/{reference}", appointment.getReferenceNo()))
+        mockMvc.perform(get("/walk-in/pass/{reference}", appointment.getReferenceNo()).session(visitorSession))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(appointment.getReferenceNo())));
-        mockMvc.perform(get("/walk-in/pass/{reference}/qr", appointment.getReferenceNo()))
+        mockMvc.perform(get("/walk-in/pass/{reference}/qr", appointment.getReferenceNo()).session(visitorSession))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_PNG));
 
         mockMvc.perform(get("/walk-in/recover").param("phone", phone))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString(appointment.getReferenceNo())));
+                .andExpect(content().string(not(containsString(appointment.getReferenceNo()))));
+        mockMvc.perform(get("/walk-in/pass/{reference}", appointment.getReferenceNo()))
+                .andExpect(redirectedUrl("/walk-in/recover"));
+        mockMvc.perform(get("/walk-in/pass/{reference}/qr", appointment.getReferenceNo()))
+                .andExpect(status().isForbidden());
 
         Integer csrId = createCsr(unique);
         MockHttpSession csrSession = csrSession(csrId);
@@ -158,17 +181,17 @@ class WalkInAppointmentWorkflowIntegrationTests {
                 .findFirst().orElseThrow();
 
         MockHttpSession first = verifiedSession("First Visitor", "0771111111");
-        WalkInAppointmentView booked = walkInService.book("NIC_APPLICATION_HELP", slot.slotId(), first);
+        WalkInAppointmentView booked = payAndBook("NIC_APPLICATION_HELP", slot.slotId(), first);
 
         MockHttpSession second = verifiedSession("Second Visitor", "0772222222");
         assertThrows(
                 IllegalArgumentException.class,
-                () -> walkInService.book("PASSPORT_APPLICATION_HELP", slot.slotId(), second)
+                () -> payAndBook("PASSPORT_APPLICATION_HELP", slot.slotId(), second)
         );
         MockHttpSession invalidService = verifiedSession("Third Visitor", "0773333333");
         assertThrows(
                 IllegalArgumentException.class,
-                () -> walkInService.book("GENERAL_INQUIRY", slot.slotId(), invalidService)
+                () -> payAndBook("GENERAL_INQUIRY", slot.slotId(), invalidService)
         );
 
         walkInService.closeDay(centre.getCentreId(), date);
@@ -292,6 +315,11 @@ class WalkInAppointmentWorkflowIntegrationTests {
         staff.setStaffRole(OfficerAccountService.CSR);
         staffRepository.saveAndFlush(staff);
         return user.getUserId();
+    }
+
+    private WalkInAppointmentView payAndBook(String service, Integer slotId, MockHttpSession session) {
+        walkInService.preparePayment(service, slotId, session);
+        return walkInService.payAndBook(walkInService.getPaymentDetails(session).token(), session);
     }
 
     private MockHttpSession csrSession(Integer csrId) {

@@ -150,10 +150,13 @@
       </div>
       <div class="mt-4 pt-4 border-t border-slate-100">
         <p class="text-sm font-bold text-slate-900">Lost your walk-in QR pass?</p>
-        <p class="text-xs text-slate-500 mt-1">Enter the phone number used for booking.</p>
-        <form th:action="@{/walk-in/recover}" method="get" class="flex gap-2 mt-3">
-          <input name="phone" required pattern="\+?[0-9 -]{10,16}" inputmode="tel" class="min-w-0 flex-1 rounded-lg border-slate-300 text-sm" placeholder="0771234567"/>
-          <button class="rounded-lg bg-cyan-600 text-white px-4 text-xs font-bold">Find</button>
+        <form th:action="@{/walk-in/recover/otp/send}" method="post" class="flex gap-2 mt-3">
+          <label for="visitorPhone" class="sr-only">Mobile number used for booking, country code +94</label>
+          <div class="flex min-w-0 flex-1">
+            <span class="inline-flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-100 px-3 text-sm font-bold">+94</span>
+            <input id="visitorPhone" name="phone" required pattern="7[0-9]{8}" minlength="9" maxlength="9" inputmode="numeric" autocomplete="tel-national" title="Enter nine digits starting with 7, without the leading zero." class="w-full min-w-0 rounded-r-lg border-slate-300 text-sm" placeholder="771234567"/>
+          </div>
+          <button class="rounded-lg bg-cyan-600 text-white px-4 text-xs font-bold">Send OTP</button>
         </form>
       </div>
     </aside>
@@ -308,4 +311,5 @@
     revealSteps.forEach(step => step.classList.add('is-visible'));
   }
 </script>
+<script src="/js/walkin-phone.js"></script>
 </body></html>

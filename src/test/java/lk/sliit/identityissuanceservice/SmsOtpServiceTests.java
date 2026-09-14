@@ -1,9 +1,9 @@
 package lk.sliit.identityissuanceservice;
 
-import lk.sliit.identityissuanceservice.Shared.Otp.OtpChallenge;
-import lk.sliit.identityissuanceservice.Shared.Otp.SmsOtpService;
-import lk.sliit.identityissuanceservice.Shared.Otp.SriLankanMobileNumber;
-import lk.sliit.identityissuanceservice.Shared.Sms.SmsSender;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.OtpChallenge;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SmsOtpService;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.SmsSender;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
 

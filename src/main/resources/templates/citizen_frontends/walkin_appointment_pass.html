@@ -36,6 +36,11 @@
         <div><p class="text-xs text-slate-400">Centre</p><p class="font-bold" th:text="${walkIn.centreName}">Centre</p><p class="text-xs text-slate-500" th:text="${walkIn.centreAddress}">Address</p></div>
         <div><p class="text-xs text-slate-400">Date and time</p><p class="font-bold" th:text="${#temporals.format(walkIn.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Date</p></div>
         <div><p class="text-xs text-slate-400">Status</p><p class="font-bold" th:text="${walkIn.appointment.appointmentStatus}">CONFIRMED</p></div>
+        <div th:if="${walkInPayment != null}">
+          <p class="text-xs text-slate-400">Payment received</p>
+          <p class="font-bold text-emerald-700" th:text="${'LKR ' + #numbers.formatDecimal(walkInPayment.amount, 1, 'COMMA', 2, 'POINT')}">LKR 1,500.00</p>
+          <p class="text-xs text-slate-500 break-all" th:text="${walkInPayment.transactionReference}">Payment reference</p>
+        </div>
         <a th:href="@{/walk-in/pass/{reference}/download(reference=${walkIn.appointment.referenceNo})}" class="inline-flex items-center gap-2 rounded-xl bg-cyan-600 text-white px-5 py-3 font-bold"><span class="material-symbols-outlined">download</span>Download pass</a>
       </div>
     </div>
