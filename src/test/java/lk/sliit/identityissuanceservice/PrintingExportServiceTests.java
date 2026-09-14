@@ -43,6 +43,7 @@ class PrintingExportServiceTests {
     @Mock DocumentDeliveryService deliveryService;
 
     private PrintingExportService printingService;
+    private GovernmentIdentityRecord savedRecord;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +59,7 @@ class PrintingExportServiceTests {
         when(governmentRepository.save(any(GovernmentIdentityRecord.class))).thenAnswer(invocation -> {
             GovernmentIdentityRecord record = invocation.getArgument(0);
             if (record.getGovernmentRecordId() == null) record.setGovernmentRecordId(91);
+            savedRecord = record;
             return record;
         });
     }
@@ -69,15 +71,15 @@ class PrintingExportServiceTests {
 
         byte[] csv = printingService.printAndCreateCsv(List.of(123), 70);
 
-        assertNotNull(data.record.getNicNo());
-        assertTrue(data.record.getNicNo().matches("2000\\d{8}"));
-        assertEquals(12, data.record.getNicNo().length());
+        assertNotNull(savedRecord.getNicNo());
+        assertTrue(savedRecord.getNicNo().matches("2000\\d{8}"));
+        assertEquals(12, savedRecord.getNicNo().length());
         assertEquals("ISSUED", data.application.getCurrentStatus());
         assertEquals(91, data.citizen.getGovernmentRecordId());
-        assertTrue(new String(csv, StandardCharsets.UTF_8).contains(data.record.getNicNo()));
+        assertTrue(new String(csv, StandardCharsets.UTF_8).contains(savedRecord.getNicNo()));
         verify(notificationService).sendToCitizen(
                 data.application.getCitizenId(), 70, "DOCUMENT_PRINTED",
-                "NIC application APP-123 has been printed. Document number: " + data.record.getNicNo() + "."
+                "NIC application APP-123 has been printed. Document number: " + savedRecord.getNicNo() + "."
         );
     }
 
@@ -88,8 +90,8 @@ class PrintingExportServiceTests {
 
         printingService.printAndCreateCsv(List.of(456), 70);
 
-        assertNotNull(data.record.getPassportNo());
-        assertTrue(data.record.getPassportNo().matches("N\\d{7}"));
+        assertNotNull(savedRecord.getPassportNo());
+        assertTrue(savedRecord.getPassportNo().matches("N\\d{7}"));
         assertEquals("ISSUED", data.application.getCurrentStatus());
     }
 
@@ -113,22 +115,18 @@ class PrintingExportServiceTests {
         user.setEmail("citizen@example.com");
         user.setPhone("+94771234567");
 
-        GovernmentIdentityRecord record = new GovernmentIdentityRecord();
         when(applicationRepository.findAllById(List.of(applicationId))).thenReturn(List.of(application));
         when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
         when(userRepository.findById(25)).thenReturn(Optional.of(user));
-        when(governmentRepository.findByRegisteredEmailIgnoreCaseAndRegisteredPhone(
-                user.getEmail(), user.getPhone())).thenReturn(Optional.of(record));
-        when(governmentRepository.findById(91)).thenReturn(Optional.of(record));
+        when(governmentRepository.findById(91)).thenAnswer(invocation -> Optional.of(savedRecord));
         when(documentRepository.findByApplicationIdAndDocumentType(applicationId, "PHOTOGRAPH"))
                 .thenReturn(Optional.empty());
-        return new TestData(application, citizen, record);
+        return new TestData(application, citizen);
     }
 
     private record TestData(
             CitizenApplication application,
-            CitizenAccount citizen,
-            GovernmentIdentityRecord record
+            CitizenAccount citizen
     ) {
     }
 }
