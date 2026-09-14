@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service;
 
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
@@ -6,10 +6,10 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.GovernmentIdentityRecord;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Dto.CitizenDeliveryDetails;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Dto.CsrCollectionDetails;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.CitizenDeliveryDetails;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.CsrCollectionDetails;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;

@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Service;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenProfileForm;
@@ -12,8 +12,8 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Citi
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Dto.NicRenewalReplacementForm;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Dto.PassportRenewalReplacementForm;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.PassportRenewalReplacementForm;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;

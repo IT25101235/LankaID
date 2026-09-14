@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

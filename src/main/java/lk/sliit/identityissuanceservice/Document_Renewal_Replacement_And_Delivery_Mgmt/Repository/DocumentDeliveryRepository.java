@@ -1,6 +1,6 @@
-package lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Repository;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Repository;
 
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

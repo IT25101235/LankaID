@@ -1,9 +1,9 @@
-package lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Controller;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Dto.CsrCollectionDetails;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Service.DocumentDeliveryService;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.CsrCollectionDetails;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

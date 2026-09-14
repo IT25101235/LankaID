@@ -1,12 +1,12 @@
-package lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Controller;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Dto.NicRenewalReplacementForm;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Dto.PassportRenewalReplacementForm;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Service.DocumentRenewalReplacementService;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.PassportRenewalReplacementForm;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentRenewalReplacementService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;

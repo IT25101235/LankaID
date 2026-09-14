@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Dto;
+package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto;
 
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;

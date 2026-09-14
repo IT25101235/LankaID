@@ -1,9 +1,9 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Controller.DocumentRenewalReplacementController;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Dto.NicRenewalReplacementForm;
-import lk.sliit.identityissuanceservice.Document_Renewal_And_Replacement_Mgmt.Service.DocumentRenewalReplacementService;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Controller.DocumentRenewalReplacementController;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentRenewalReplacementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
