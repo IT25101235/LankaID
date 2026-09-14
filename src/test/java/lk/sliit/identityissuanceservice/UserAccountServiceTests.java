@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -31,6 +32,8 @@ class UserAccountServiceTests {
     @Mock
     private CitizenAccountRepository citizenAccountRepository;
 
+    @Mock private CitizenApplicationService applicationService;
+
     @Test
     void registrationHashesPasswordAndCreatesCitizenAccount() {
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> {
@@ -41,7 +44,8 @@ class UserAccountServiceTests {
 
         UserAccountService service = new UserAccountService(
                 userAccountRepository,
-                citizenAccountRepository
+                citizenAccountRepository,
+                applicationService
         );
 
         service.registerCitizen(" Citizen@Example.com ", "0771234567", "password123");
@@ -58,6 +62,7 @@ class UserAccountServiceTests {
         ArgumentCaptor<CitizenAccount> citizenCaptor = ArgumentCaptor.forClass(CitizenAccount.class);
         verify(citizenAccountRepository).save(citizenCaptor.capture());
         assertEquals(25, citizenCaptor.getValue().getUserId());
+        verify(applicationService).getEligibility(25);
     }
 
     @Test
@@ -76,7 +81,8 @@ class UserAccountServiceTests {
 
         UserAccountService service = new UserAccountService(
                 userAccountRepository,
-                citizenAccountRepository
+                citizenAccountRepository,
+                applicationService
         );
 
         assertTrue(service.authenticateCitizen(
@@ -99,7 +105,8 @@ class UserAccountServiceTests {
 
         UserAccountService service = new UserAccountService(
                 userAccountRepository,
-                citizenAccountRepository
+                citizenAccountRepository,
+                applicationService
         );
         PreparedCitizenRegistration prepared = service.prepareCitizenRegistration(
                 "verified@example.com",

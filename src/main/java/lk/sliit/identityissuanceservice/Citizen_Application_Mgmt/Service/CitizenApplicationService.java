@@ -359,6 +359,7 @@ public class CitizenApplicationService {
     @Transactional
     public CitizenApplication submitNewApplication(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getNewApplication(citizenId, applicationId);
+        checkNewEligibility(getEligibility(citizenId), application.getServiceType());
         submitWhenDocumentsComplete(application, requiredNewDocumentTypes(application));
         application = applicationRepository.save(application);
         sendSubmissionNotification(application);
@@ -385,7 +386,7 @@ public class CitizenApplicationService {
     private void checkNewEligibility(CitizenEligibilityDto eligibility, String serviceType) {
         if (eligibility.isIdentityConflict()) {
             throw new IllegalArgumentException(
-                    "Your email and phone do not match one government record. Please contact support."
+                    "Verify your existing documents through Link existing NIC or passport, or request officer verification."
             );
         }
         boolean hasDocument = NIC.equals(serviceType) ? eligibility.isHasNic() : eligibility.isHasPassport();
@@ -577,33 +578,37 @@ public class CitizenApplicationService {
     }
 
     private IdentityMatch findGovernmentIdentity(UserAccount user, CitizenAccount citizen) {
-        Optional<GovernmentIdentityRecord> exactMatch = governmentRepository
-                .findByRegisteredEmailIgnoreCaseAndRegisteredPhone(user.getEmail(), user.getPhone());
-        Optional<GovernmentIdentityRecord> emailMatch = governmentRepository
-                .findByRegisteredEmailIgnoreCase(user.getEmail());
-        Optional<GovernmentIdentityRecord> phoneMatch = governmentRepository
-                .findByRegisteredPhone(user.getPhone());
-
-        if (exactMatch.isEmpty() && (emailMatch.isPresent() || phoneMatch.isPresent())) {
+        // Keep the established link when a citizen later changes their contact details.
+        if (citizen.getGovernmentRecordId() != null) {
+            GovernmentIdentityRecord record = governmentRepository.findById(citizen.getGovernmentRecordId()).orElse(null);
+            boolean conflict = record == null || "CANCELLED".equalsIgnoreCase(record.getIdentityStatus())
+                    || citizenRepository.existsByGovernmentRecordIdAndUserIdNot(
+                    citizen.getGovernmentRecordId(), citizen.getUserId());
+            return new IdentityMatch(conflict ? null : record, conflict);
+        }
+        // Project assumption: existing holders register with the unique email and phone in the registry.
+        List<GovernmentIdentityRecord> matches = governmentRepository
+                .findAllByRegisteredEmailIgnoreCaseOrRegisteredPhone(user.getEmail(), user.getPhone());
+        if (matches.isEmpty()) {
+            return new IdentityMatch(null, citizenRepository.countIdentityRequests(citizen.getUserId()) > 0);
+        }
+        if (matches.size() != 1 || !"Y".equals(user.getEmailVerified())) {
             return new IdentityMatch(null, true);
         }
-
-        GovernmentIdentityRecord matchedRecord = exactMatch.orElse(null);
-        if (citizen.getGovernmentRecordId() != null) {
-            GovernmentIdentityRecord linkedRecord = governmentRepository
-                    .findById(citizen.getGovernmentRecordId()).orElse(null);
-            if (linkedRecord == null || matchedRecord == null
-                    || !matchedRecord.getGovernmentRecordId().equals(linkedRecord.getGovernmentRecordId())) {
-                return new IdentityMatch(null, true);
-            }
-            return new IdentityMatch(linkedRecord, false);
+        CitizenAccount lockedCitizen = citizenRepository.findByIdForIdentityLink(citizen.getUserId()).orElseThrow();
+        GovernmentIdentityRecord record = governmentRepository
+                .findByIdForIdentityLink(matches.get(0).getGovernmentRecordId()).orElse(null);
+        if (record == null || !user.getEmail().equalsIgnoreCase(record.getRegisteredEmail())
+                || !user.getPhone().equals(record.getRegisteredPhone())
+                || "CANCELLED".equalsIgnoreCase(record.getIdentityStatus())
+                || citizenRepository.existsByGovernmentRecordIdAndUserIdNot(record.getGovernmentRecordId(), citizen.getUserId())
+                || (lockedCitizen.getGovernmentRecordId() != null
+                    && !lockedCitizen.getGovernmentRecordId().equals(record.getGovernmentRecordId()))) {
+            return new IdentityMatch(null, true);
         }
-
-        if (matchedRecord != null) {
-            citizen.setGovernmentRecordId(matchedRecord.getGovernmentRecordId());
-            citizenRepository.save(citizen);
-        }
-        return new IdentityMatch(matchedRecord, false);
+        lockedCitizen.setGovernmentRecordId(record.getGovernmentRecordId());
+        citizenRepository.save(lockedCitizen);
+        return new IdentityMatch(record, false);
     }
 
     private CitizenApplication findOwnedApplication(Integer citizenId, Integer applicationId) {

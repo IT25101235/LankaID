@@ -52,8 +52,14 @@
   <div th:if="${applicationError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${applicationError}"></div>
   <div th:if="${identityConflict}" class="mb-5 rounded-xl border border-red-300 bg-red-50 p-4">
     <p class="font-bold text-red-800">Identity details need to be checked</p>
-    <p class="text-sm text-red-700 mt-1">Your registered email and phone number match different government records. New applications are blocked until Citizen Support verifies the account.</p>
+    <p class="text-sm text-red-700 mt-1">Your contact details do not uniquely match one usable government record, or an identity request needs review. New applications are blocked until this is resolved.</p>
   </div>
+
+  <section th:if="${identityConflict}" class="mb-5 rounded-xl border border-sky-200 bg-sky-50 p-4">
+    <h2 class="font-bold">Resolve your government record match</h2>
+    <p class="text-sm mt-1">Use document verification or contact an officer if your government-registered contact details have changed.</p>
+    <a th:href="@{/citizen/identity}" class="inline-block mt-3 rounded-lg bg-sky-700 px-4 py-2 text-sm font-bold text-white">Verify record or request support</a>
+  </section>
 
   <section class="mb-7">
     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
@@ -75,11 +81,11 @@
   <section class="grid sm:grid-cols-2 gap-4 mb-7">
     <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex gap-4">
       <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined">badge</span>
-      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">NIC record</p><p th:if="${hasNic}" class="font-bold mt-1" th:text="${nicNumber}">200012345678</p><p th:unless="${hasNic}" class="text-sm text-slate-500 mt-1">No existing NIC found</p></div>
+      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">NIC record</p><p th:if="${hasNic}" class="font-bold mt-1" th:text="${nicNumber}">200012345678</p><p th:unless="${hasNic}" class="text-sm text-slate-500 mt-1">No verified NIC linked</p></div>
     </article>
     <article class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex gap-4">
       <span class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center material-symbols-outlined">flight_takeoff</span>
-      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Passport record</p><p th:if="${hasPassport}" class="font-bold mt-1" th:text="${passportNumber}">N1234567</p><p th:unless="${hasPassport}" class="text-sm text-slate-500 mt-1">No existing passport found</p></div>
+      <div><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Passport record</p><p th:if="${hasPassport}" class="font-bold mt-1" th:text="${passportNumber}">N1234567</p><p th:unless="${hasPassport}" class="text-sm text-slate-500 mt-1">No verified passport linked</p></div>
     </article>
   </section>
 
