@@ -410,13 +410,13 @@ public class DocumentRenewalReplacementService {
     private void checkExistingDocument(CitizenEligibilityDto eligibility, String serviceType) {
         if (eligibility.isIdentityConflict()) {
             throw new IllegalArgumentException(
-                    "Your email and phone do not match one government record. Please contact support."
+                    "Verify your existing documents through Link existing NIC or passport, or request officer verification."
             );
         }
         boolean hasDocument = NIC.equals(serviceType) ? eligibility.isHasNic() : eligibility.isHasPassport();
         if (!hasDocument) {
             throw new IllegalArgumentException(
-                    "No existing identity document was found. Please use the new application option."
+                    "No verified document is linked. If you already own this document, link it or request officer verification."
             );
         }
     }

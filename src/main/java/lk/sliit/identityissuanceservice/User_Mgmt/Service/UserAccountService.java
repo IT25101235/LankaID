@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Service;
 
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -17,13 +18,16 @@ public class UserAccountService {
 
     private final UserAccountRepository userAccountRepository;
     private final CitizenAccountRepository citizenAccountRepository;
+    private final CitizenApplicationService applicationService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserAccountService(
             UserAccountRepository userAccountRepository,
-            CitizenAccountRepository citizenAccountRepository) {
+            CitizenAccountRepository citizenAccountRepository,
+            CitizenApplicationService applicationService) {
         this.userAccountRepository = userAccountRepository;
         this.citizenAccountRepository = citizenAccountRepository;
+        this.applicationService = applicationService;
     }
 
     @Transactional
@@ -68,6 +72,8 @@ public class UserAccountService {
 
         UserAccount savedAccount = userAccountRepository.save(account);
         citizenAccountRepository.save(new CitizenAccount(savedAccount.getUserId()));
+        // Link matching government documents as part of verified registration.
+        if (emailVerified) applicationService.getEligibility(savedAccount.getUserId());
         return savedAccount;
     }
 
