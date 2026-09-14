@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Shared.Sms;
+package lk.sliit.identityissuanceservice.OTP_Mgmt.Sms;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;

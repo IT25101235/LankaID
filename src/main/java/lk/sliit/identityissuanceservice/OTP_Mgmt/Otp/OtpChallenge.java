@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Shared.Otp;
+package lk.sliit.identityissuanceservice.OTP_Mgmt.Otp;
 
 import java.io.Serializable;
 import java.time.Instant;

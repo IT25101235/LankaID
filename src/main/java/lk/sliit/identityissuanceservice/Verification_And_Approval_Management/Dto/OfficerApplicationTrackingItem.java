@@ -3,7 +3,7 @@ package lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Dt
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.BiometricCollection;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Model.ApplicationReview;
 

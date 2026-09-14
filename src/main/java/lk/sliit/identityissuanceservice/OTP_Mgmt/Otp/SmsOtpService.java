@@ -1,7 +1,7 @@
-package lk.sliit.identityissuanceservice.Shared.Otp;
+package lk.sliit.identityissuanceservice.OTP_Mgmt.Otp;
 
 import jakarta.servlet.http.HttpSession;
-import lk.sliit.identityissuanceservice.Shared.Sms.SmsSender;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.SmsSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

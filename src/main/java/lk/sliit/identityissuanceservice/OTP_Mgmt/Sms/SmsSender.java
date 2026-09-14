@@ -1,4 +1,4 @@
-package lk.sliit.identityissuanceservice.Shared.Sms;
+package lk.sliit.identityissuanceservice.OTP_Mgmt.Sms;
 
 /** Implement this interface to use a different SMS provider. */
 public interface SmsSender {

@@ -7,8 +7,8 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.BiometricCollectionRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Model.DocumentDelivery;
-import lk.sliit.identityissuanceservice.Document_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;

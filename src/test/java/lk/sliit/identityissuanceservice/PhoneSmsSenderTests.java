@@ -1,7 +1,7 @@
 package lk.sliit.identityissuanceservice;
 
 import com.sun.net.httpserver.HttpServer;
-import lk.sliit.identityissuanceservice.Shared.Sms.PhoneSmsSender;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.PhoneSmsSender;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
