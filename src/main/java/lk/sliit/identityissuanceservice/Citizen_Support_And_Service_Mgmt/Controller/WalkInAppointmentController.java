@@ -1,10 +1,13 @@
 package lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletResponse;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.WalkInPaymentService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
@@ -14,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -34,6 +38,11 @@ public class WalkInAppointmentController {
     ) {
         this.walkInService = walkInService;
         this.passService = passService;
+    }
+
+    @ModelAttribute("walkInFee")
+    public java.math.BigDecimal walkInFee() {
+        return WalkInPaymentService.WALK_IN_FEE;
     }
 
     @GetMapping({"/walk-in", "/citizen/appointments/walk-in"})
@@ -119,48 +128,96 @@ public class WalkInAppointmentController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            WalkInAppointmentView created = walkInService.book(visitorService, slotId, session);
-            redirectAttributes.addFlashAttribute("walkInMessage", "Walk-in appointment confirmed.");
-            return "redirect:/walk-in/pass/" + created.appointment().getReferenceNo();
+            walkInService.preparePayment(visitorService, slotId, session);
+            return "redirect:/walk-in/payment";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
             return "redirect:/walk-in/book";
         }
     }
 
+    @GetMapping("/walk-in/payment")
+    public String walkInPaymentPage(HttpSession session, Model model,
+                                    HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+        try {
+            model.addAttribute("paymentDetails", walkInService.getPaymentDetails(session));
+            model.addAttribute("step", "PAYMENT");
+            return "citizen_frontends/walkin_appointment_booking";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+            return "redirect:/walk-in/book";
+        }
+    }
+
+    @PostMapping("/walk-in/payment")
+    public String payForWalkIn(@RequestParam String token, HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            WalkInAppointmentView created = walkInService.payAndBook(token, session);
+            redirectAttributes.addFlashAttribute("walkInMessage", "Payment recorded. Your walk-in appointment is confirmed.");
+            return "redirect:/walk-in/pass/" + created.appointment().getReferenceNo();
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", "Payment could not be saved. Please try again.");
+        }
+        return "redirect:/walk-in/payment";
+    }
+
     @GetMapping("/walk-in/pass/{reference}")
     public String pass(
             @org.springframework.web.bind.annotation.PathVariable String reference,
-            Model model
+            Model model,
+            HttpSession session,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes
     ) {
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
         try {
-            WalkInAppointmentView details = walkInService.findByReference(reference);
+            WalkInAppointmentView details = walkInService.getVisitorPass(reference, session);
             model.addAttribute("walkIn", details);
+            model.addAttribute("walkInPayment", walkInService.getPaidPayment(details.appointment().getAppointmentId()));
             model.addAttribute("serviceLabel", walkInService.serviceLabel(
                     details.appointment().getVisitorService()
             ));
         } catch (IllegalArgumentException exception) {
-            model.addAttribute("walkInError", exception.getMessage());
+            redirectAttributes.addFlashAttribute("walkInError", "Verify your mobile number to access this pass.");
+            return "redirect:/walk-in/recover";
         }
         return "citizen_frontends/walkin_appointment_pass";
     }
 
     @GetMapping("/walk-in/pass/{reference}/qr")
     public ResponseEntity<byte[]> qr(
-            @org.springframework.web.bind.annotation.PathVariable String reference
+            @org.springframework.web.bind.annotation.PathVariable String reference,
+            HttpSession session
     ) {
-        WalkInAppointmentView details = walkInService.findByReference(reference);
+        WalkInAppointmentView details;
+        try {
+            details = walkInService.getVisitorPass(reference, session);
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.status(403).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
+        }
         return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .contentType(MediaType.IMAGE_PNG)
                 .body(passService.createQrCode(details.appointment().getReferenceNo(), 420));
     }
 
     @GetMapping("/walk-in/pass/{reference}/download")
     public ResponseEntity<byte[]> download(
-            @org.springframework.web.bind.annotation.PathVariable String reference
+            @org.springframework.web.bind.annotation.PathVariable String reference,
+            HttpSession session
     ) {
-        WalkInAppointmentView details = walkInService.findByReference(reference);
+        WalkInAppointmentView details;
+        try {
+            details = walkInService.getVisitorPass(reference, session);
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.status(403).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
+        }
         return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .contentType(MediaType.IMAGE_PNG)
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
@@ -174,17 +231,82 @@ public class WalkInAppointmentController {
     @GetMapping("/walk-in/recover")
     public String recover(
             @RequestParam(required = false) String phone,
-            Model model
+            Model model,
+            HttpSession session,
+            HttpServletResponse response
     ) {
-        model.addAttribute("phone", phone == null ? "" : phone);
-        if (phone != null && !phone.isBlank()) {
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+        model.addAttribute("step", "PHONE");
+        if (phone != null) model.addAttribute("phone", phone);
+        // A URL phone parameter can only prefill the form, never select whose data is read.
+        if (phone == null && !model.containsAttribute("phone") && walkInService.isRecoveryVerified(session)) {
             try {
-                model.addAttribute("walkIns", walkInService.recoverByPhone(phone));
+                model.addAttribute("walkIns", walkInService.recoverVerifiedBookings(session));
+                model.addAttribute("step", "RESULTS");
+                model.addAttribute("phone", walkInService.recoveryPhone(session));
             } catch (IllegalArgumentException exception) {
                 model.addAttribute("walkInError", exception.getMessage());
             }
         }
+        if (!model.containsAttribute("phone")) model.addAttribute("phone", "");
+        model.addAttribute("retryAfterSeconds", walkInService.recoveryRetryAfterSeconds(
+                String.valueOf(model.getAttribute("phone")), session));
         return "citizen_frontends/walkin_appointment_recovery";
+    }
+
+    @PostMapping("/walk-in/recover/otp/send")
+    public String sendRecoveryOtp(@RequestParam String phone, HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            walkInService.startRecoveryVerification(phone, session);
+            redirectAttributes.addFlashAttribute("walkInMessage", "Enter the SMS code to retrieve your bookings.");
+            return "redirect:/walk-in/recover/verify";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("phone", phone);
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+            return "redirect:/walk-in/recover";
+        }
+    }
+
+    @GetMapping("/walk-in/recover/verify")
+    public String recoveryVerifyPage(HttpSession session, Model model, HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+        if (walkInService.recoveryPhone(session).isBlank()) return "redirect:/walk-in/recover";
+        if (walkInService.isRecoveryVerified(session)) return "redirect:/walk-in/recover";
+        model.addAttribute("step", "OTP");
+        model.addAttribute("phone", walkInService.recoveryPhone(session));
+        model.addAttribute("retryAfterSeconds", walkInService.recoveryRetryAfterSeconds(
+                walkInService.recoveryPhone(session), session));
+        return "citizen_frontends/walkin_appointment_recovery";
+    }
+
+    @PostMapping("/walk-in/recover/otp/verify")
+    public String verifyRecoveryOtp(@RequestParam String otp, HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            walkInService.verifyRecovery(otp, session);
+            return "redirect:/walk-in/recover";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+            return "redirect:/walk-in/recover/verify";
+        }
+    }
+
+    @PostMapping("/walk-in/recover/otp/resend")
+    public String resendRecoveryOtp(HttpSession session, RedirectAttributes redirectAttributes) {
+        try {
+            walkInService.startRecoveryVerification(walkInService.recoveryPhone(session), session);
+            redirectAttributes.addFlashAttribute("walkInMessage", "A new SMS code was requested. Use the latest code.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+        }
+        return "redirect:/walk-in/recover/verify";
+    }
+
+    @PostMapping("/walk-in/recover/reset")
+    public String resetRecovery(HttpSession session) {
+        walkInService.clearRecovery(session);
+        return "redirect:/walk-in/recover";
     }
 
     @GetMapping("/officer/csr/walk-ins")

@@ -1,8 +1,8 @@
 package lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service;
 
 import jakarta.servlet.http.HttpSession;
-import lk.sliit.identityissuanceservice.Shared.Otp.SmsOtpService;
-import lk.sliit.identityissuanceservice.Shared.Otp.SriLankanMobileNumber;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SmsOtpService;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.AppointmentCheckIn;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
@@ -10,6 +10,9 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInSlotView;
+import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInPaymentDetails;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.WalkInPaymentService;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Model.WalkInSlot;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInAppointmentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInSlotRepository;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -34,6 +38,10 @@ public class WalkInAppointmentService {
     private static final String SESSION_NAME = "walkInVisitorName";
     private static final String SESSION_PHONE = "walkInVisitorPhone";
     private static final String OTP_PURPOSE = "WALK_IN_BOOKING";
+    private static final String RECOVERY_PURPOSE = "WALK_IN_RECOVERY";
+    private static final String RECOVERY_PHONE = "walkInRecoveryPhone";
+    private static final String CREATED_PASS = "walkInCreatedPass";
+    private static final String PENDING_BOOKING = "walkInPendingBooking";
     private static final List<String> OCCUPIED_STATUSES = List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
     private static final Set<String> SERVICES = Set.of(
             "NIC_APPLICATION_HELP",
@@ -45,19 +53,22 @@ public class WalkInAppointmentService {
     private final CentreRepository centreRepository;
     private final AppointmentCheckInRepository checkInRepository;
     private final SmsOtpService otpService;
+    private final WalkInPaymentService paymentService;
 
     public WalkInAppointmentService(
             WalkInAppointmentRepository appointmentRepository,
             WalkInSlotRepository slotRepository,
             CentreRepository centreRepository,
             AppointmentCheckInRepository checkInRepository,
-            SmsOtpService otpService
+            SmsOtpService otpService,
+            WalkInPaymentService paymentService
     ) {
         this.appointmentRepository = appointmentRepository;
         this.slotRepository = slotRepository;
         this.centreRepository = centreRepository;
         this.checkInRepository = checkInRepository;
         this.otpService = otpService;
+        this.paymentService = paymentService;
     }
 
     public void startPhoneVerification(String visitorName, String visitorPhone, HttpSession session) {
@@ -70,6 +81,7 @@ public class WalkInAppointmentService {
             otpService.send(phone, OTP_PURPOSE, session);
             session.setAttribute(SESSION_NAME, name);
             session.setAttribute(SESSION_PHONE, phone);
+            session.removeAttribute(PENDING_BOOKING);
         }
     }
 
@@ -110,30 +122,63 @@ public class WalkInAppointmentService {
                 .toList();
     }
 
-    @Transactional
-    public WalkInAppointmentView book(String visitorService, Integer slotId, HttpSession session) {
-        // Keep the verified number unchanged while this session creates its booking.
+    @Transactional(readOnly = true)
+    public void preparePayment(String visitorService, Integer slotId, HttpSession session) {
         synchronized (session) {
-            return bookVerifiedVisitor(visitorService, slotId, session);
+            if (!isPhoneVerified(session)) {
+                throw new IllegalArgumentException("Verify your phone number before booking.");
+            }
+            String service = clean(visitorService).toUpperCase();
+            if (!SERVICES.contains(service)) {
+                throw new IllegalArgumentException("Select a valid walk-in service.");
+            }
+            WalkInSlot slot = slotRepository.findById(slotId)
+                    .orElseThrow(() -> new IllegalArgumentException("Select an available appointment slot."));
+            requireAvailableSlot(slot);
+            session.setAttribute(PENDING_BOOKING,
+                    new PendingBooking(service, slotId, sessionPhone(session), UUID.randomUUID().toString()));
         }
     }
 
-    private WalkInAppointmentView bookVerifiedVisitor(String visitorService, Integer slotId, HttpSession session) {
+    @Transactional(readOnly = true)
+    public WalkInPaymentDetails getPaymentDetails(HttpSession session) {
+        synchronized (session) {
+            PendingBooking pending = requirePendingBooking(session);
+            WalkInSlot slot = slotRepository.findById(pending.slotId())
+                    .orElseThrow(() -> new IllegalArgumentException("Select an available appointment slot."));
+            requireAvailableSlot(slot);
+            return new WalkInPaymentDetails(pending.token(), serviceLabel(pending.service()),
+                    buildSlotView(slot), WalkInPaymentService.WALK_IN_FEE);
+        }
+    }
+
+    @Transactional
+    public WalkInAppointmentView payAndBook(String token, HttpSession session) {
+        synchronized (session) {
+            PendingBooking pending = requirePendingBooking(session);
+            if (!pending.token().equals(token)) {
+                throw new IllegalArgumentException("The selection changed. Review the appointment before paying.");
+            }
+            return bookPaidVisitor(pending, session);
+        }
+    }
+
+    private PendingBooking requirePendingBooking(HttpSession session) {
         if (!isPhoneVerified(session)) {
             throw new IllegalArgumentException("Verify your phone number before booking.");
         }
-        String service = clean(visitorService).toUpperCase();
-        if (!SERVICES.contains(service)) {
-            throw new IllegalArgumentException("Select a valid walk-in service.");
+        Object value = session.getAttribute(PENDING_BOOKING);
+        if (!(value instanceof PendingBooking pending) || !pending.phone().equals(sessionPhone(session))) {
+            throw new IllegalArgumentException("Select a service and slot before paying.");
         }
-        // Lock this one slot until the booking is saved so simultaneous visitors cannot exceed its capacity.
-        WalkInSlot slot = slotRepository.findByIdForBooking(slotId)
+        return pending;
+    }
+
+    private WalkInAppointmentView bookPaidVisitor(PendingBooking pending, HttpSession session) {
+        // Recheck and lock the slot: viewing the payment page does not reserve it.
+        WalkInSlot slot = slotRepository.findByIdForBooking(pending.slotId())
                 .orElseThrow(() -> new IllegalArgumentException("Select an available appointment slot."));
-        WalkInSlotView slotView = buildSlotView(slot);
-        if (!slotView.available() || slotView.remainingPlaces() < 1
-                || !slot.getSlotDate().atTime(slot.getSlotTime()).isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("That appointment slot is no longer available.");
-        }
+        requireAvailableSlot(slot);
 
         Appointment appointment = new Appointment();
         appointment.setCitizenId(null);
@@ -141,16 +186,37 @@ public class WalkInAppointmentService {
         appointment.setCentreId(slot.getCentreId());
         appointment.setAppointmentType(WALK_IN);
         appointment.setScheduledAt(slot.getSlotDate().atTime(slot.getSlotTime()));
-        appointment.setAppointmentStatus("CONFIRMED");
+        appointment.setAppointmentStatus("PENDING_PAYMENT");
         appointment.setReferenceNo(createReference());
         appointment.setQrCode(appointment.getReferenceNo());
         appointment.setVisitorName(sessionName(session));
         appointment.setVisitorPhone(sessionPhone(session));
-        appointment.setVisitorService(service);
+        appointment.setVisitorService(pending.service());
         appointment = appointmentRepository.save(appointment);
+        paymentService.pay(appointment);
+        appointment.setAppointmentStatus("CONFIRMED");
+        appointment = appointmentRepository.save(appointment);
+        // The booking OTP authorizes only this newly created pass after it is consumed.
+        session.setAttribute(CREATED_PASS,
+                new CreatedPass(appointment.getReferenceNo(), Instant.now().plusSeconds(900)));
         clearVerification(session);
         return buildAppointmentView(appointment);
     }
+
+    private void requireAvailableSlot(WalkInSlot slot) {
+        WalkInSlotView view = buildSlotView(slot);
+        if (!view.available() || view.remainingPlaces() < 1
+                || !slot.getSlotDate().atTime(slot.getSlotTime()).isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("That appointment slot is no longer available.");
+        }
+    }
+
+    public Payment getPaidPayment(Integer appointmentId) {
+        return paymentService.findPaidPayment(appointmentId).orElse(null);
+    }
+
+    private record PendingBooking(String service, Integer slotId, String phone, String token)
+            implements java.io.Serializable { }
 
     @Transactional(readOnly = true)
     public WalkInAppointmentView findByReference(String reference) {
@@ -158,15 +224,74 @@ public class WalkInAppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<WalkInAppointmentView> recoverByPhone(String visitorPhone) {
-        String phone = normalizePhone(visitorPhone);
-        return appointmentRepository
+    public List<WalkInAppointmentView> recoverVerifiedBookings(HttpSession session) {
+        synchronized (session) {
+            if (!isRecoveryVerified(session)) {
+                throw new IllegalArgumentException("Verify your mobile number to retrieve bookings.");
+            }
+            String phone = recoveryPhone(session);
+            return appointmentRepository
                 .findAllByVisitorPhoneInAndAppointmentTypeOrderByScheduledAtDesc(
                         List.of(phone, "0" + phone.substring(3)), WALK_IN)
                 .stream()
                 .map(this::buildAppointmentView)
                 .toList();
+        }
     }
+
+    public void startRecoveryVerification(String phone, HttpSession session) {
+        String normalized = normalizePhone(phone);
+        synchronized (session) {
+            // Send regardless of whether bookings exist; do not reveal number registration.
+            otpService.send(normalized, RECOVERY_PURPOSE, session);
+            session.setAttribute(RECOVERY_PHONE, normalized);
+        }
+    }
+
+    public void verifyRecovery(String code, HttpSession session) {
+        otpService.verify(clean(code), RECOVERY_PURPOSE, session);
+    }
+
+    public String recoveryPhone(HttpSession session) {
+        return clean((String) session.getAttribute(RECOVERY_PHONE));
+    }
+
+    public boolean isRecoveryVerified(HttpSession session) {
+        synchronized (session) {
+            return otpService.isVerified(recoveryPhone(session), RECOVERY_PURPOSE, session);
+        }
+    }
+
+    public long recoveryRetryAfterSeconds(String phone, HttpSession session) {
+        return otpService.retryAfterSeconds(phone, RECOVERY_PURPOSE, session);
+    }
+
+    public void clearRecovery(HttpSession session) {
+        synchronized (session) {
+            otpService.clear(RECOVERY_PURPOSE, session);
+            session.removeAttribute(RECOVERY_PHONE);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public WalkInAppointmentView getVisitorPass(String reference, HttpSession session) {
+        synchronized (session) {
+            Object value = session.getAttribute(CREATED_PASS);
+            boolean justBooked = value instanceof CreatedPass pass
+                    && pass.reference().equalsIgnoreCase(clean(reference))
+                    && Instant.now().isBefore(pass.expiresAt());
+            if (!justBooked && !isRecoveryVerified(session)) {
+                throw new IllegalArgumentException("Verify your mobile number to access this pass.");
+            }
+            Appointment appointment = findAppointment(reference);
+            if (!justBooked && !normalizePhone(appointment.getVisitorPhone()).equals(recoveryPhone(session))) {
+                throw new IllegalArgumentException("Verify your mobile number to access this pass.");
+            }
+            return buildAppointmentView(appointment);
+        }
+    }
+
+    private record CreatedPass(String reference, Instant expiresAt) implements java.io.Serializable { }
 
     @Transactional(readOnly = true)
     public Page<WalkInAppointmentView> getCsrQueue(int page) {
@@ -495,6 +620,7 @@ public class WalkInAppointmentService {
     }
 
     private void clearVerification(HttpSession session) {
+        session.removeAttribute(PENDING_BOOKING);
         session.removeAttribute(SESSION_NAME);
         session.removeAttribute(SESSION_PHONE);
         otpService.clear(OTP_PURPOSE, session);
