@@ -412,7 +412,7 @@
 
 <!-- Add User Modal -->
 <div id="addUserModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal" th:attr="data-open=${openOfficerModal}">
-  <form th:action="@{/officer/admin/officers}" th:object="${officerRegistration}" method="post" class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+  <form th:action="@{/officer/admin/officers}" th:object="${officerRegistration}" method="post" data-validate data-officer-form class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
     <div class="flex items-center justify-between mb-5">
       <h2 class="font-bold text-white text-base flex items-center gap-2">
         <span class="material-symbols-outlined text-red-400">person_add</span>
@@ -435,7 +435,7 @@
       </div>
       <div>
         <label class="block text-xs text-slate-400 mb-1.5">Phone Number <span class="text-red-400">*</span></label>
-        <input type="tel" th:field="*{phone}" required maxlength="15" pattern="\+?[0-9]{10,14}" placeholder="+94771234567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <input type="tel" th:field="*{phone}" required maxlength="15" pattern="(?:\+94|0)?7[0-9]{8}" title="Enter 0771234567 or +94771234567" placeholder="+94771234567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
         <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
       </div>
       <div>
@@ -451,7 +451,7 @@
       </div>
       <div class="sm:col-span-2">
         <label class="block text-xs text-slate-400 mb-1.5">Temporary Password <span class="text-red-400">*</span></label>
-        <input type="password" th:field="*{password}" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimum 8 characters" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <input type="password" th:field="*{password}" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s])\S{8,72}" title="Use 8-72 characters: uppercase, lowercase, number and symbol; no spaces" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Uppercase, lowercase, number and symbol" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
         <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
       </div>
     </div>
@@ -463,8 +463,8 @@
 </div>
 
 <!-- Edit Officer Modal -->
-<div id="editOfficerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
-  <form id="editOfficerForm" method="post" class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+<div id="editOfficerModal" th:attr="data-open=${editOfficerId != null}" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
+  <form id="editOfficerForm" th:action="${editOfficerId != null ? '/officer/admin/officers/' + editOfficerId + '/edit' : '/officer/admin'}" method="post" data-validate data-officer-form class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
     <div class="flex items-center justify-between mb-5">
       <h2 class="font-bold text-white text-base flex items-center gap-2">
         <span class="material-symbols-outlined text-cyan-400">edit</span>
@@ -473,20 +473,21 @@
       <button type="button" onclick="closeEditOfficer()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
     </div>
 
+    <p th:if="${officerEditError}" th:text="${officerEditError}" role="alert" class="mb-4 text-sm text-red-400"></p>
     <p class="mb-4 text-xs text-slate-400">Leave the new password empty to keep the current password.</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <label for="editOfficerEmail" class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label>
-        <input id="editOfficerEmail" name="email" type="email" required maxlength="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
+        <input id="editOfficerEmail" th:value="${officerUpdate != null ? officerUpdate.email : ''}" name="email" type="email" required maxlength="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
       </div>
       <div>
         <label for="editOfficerPhone" class="block text-xs text-slate-400 mb-1.5">Phone Number <span class="text-red-400">*</span></label>
-        <input id="editOfficerPhone" name="phone" type="tel" required maxlength="15" pattern="\+?[0-9]{10,14}" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
+        <input id="editOfficerPhone" th:value="${officerUpdate != null ? officerUpdate.phone : ''}" name="phone" type="tel" required maxlength="15" pattern="(?:\+94|0)?7[0-9]{8}" title="Enter 0771234567 or +94771234567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
       </div>
       <div>
         <label for="editOfficerRole" class="block text-xs text-slate-400 mb-1.5">Role <span class="text-red-400">*</span></label>
-        <select id="editOfficerRole" name="role" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white">
+        <select id="editOfficerRole" th:attr="data-selected=${officerUpdate != null ? officerUpdate.role : ''}" name="role" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white">
           <option value="director">Director</option>
           <option value="csr">Citizen Service Representative</option>
           <option value="nic-officer">NIC Application Officer</option>
@@ -495,7 +496,7 @@
       </div>
       <div>
         <label for="editOfficerPassword" class="block text-xs text-slate-400 mb-1.5">New Password</label>
-        <input id="editOfficerPassword" name="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Optional" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <input id="editOfficerPassword" name="newPassword" type="password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s])\S{8,72}" title="Use 8-72 characters: uppercase, lowercase, number and symbol; no spaces" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Optional" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
       </div>
     </div>
 
@@ -554,6 +555,8 @@ function openEditOfficer(button) {
   document.getElementById('editOfficerPhone').value = button.dataset.phone;
   document.getElementById('editOfficerRole').value = button.dataset.role;
   document.getElementById('editOfficerPassword').value = '';
+  form.querySelectorAll('input').forEach(input => { input.setCustomValidity(''); input.removeAttribute('aria-invalid'); });
+  form.querySelectorAll('.client-field-error').forEach(error => error.remove());
 
   const modal = document.getElementById('editOfficerModal');
   modal.classList.remove('hidden');
@@ -635,8 +638,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (requestedSection) showSection(requestedSection);
   const officerModal = document.getElementById('addUserModal');
   if (officerModal && officerModal.dataset.open === 'true') openAddUser();
+  const editModal = document.getElementById('editOfficerModal');
+  if (editModal.dataset.open === 'true') {
+    const role = document.getElementById('editOfficerRole');
+    role.value = role.dataset.selected;
+    editModal.classList.remove('hidden');
+    editModal.classList.add('flex');
+  }
 });
 </script>
 <script src="/js/portal-shell.js"></script>
+<script src="/User_Mgmt/password-rules.js"></script>
+<script src="/Admin_Mgmt/officer-form.js"></script>
+<script src="/js/form-errors.js"></script>
 </body>
 </html>

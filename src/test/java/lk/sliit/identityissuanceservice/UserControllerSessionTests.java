@@ -70,12 +70,12 @@ class UserControllerSessionTests {
 
         when(userAccountService.authenticateCitizen(
                 "citizen@example.com",
-                "password123"
+                "Password123!"
         )).thenReturn(Optional.of(account));
 
         HttpSession session = mockMvc.perform(post("/login")
                         .param("email", "citizen@example.com")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/citizen/dashboard"))
                 .andReturn()
@@ -149,14 +149,14 @@ class UserControllerSessionTests {
                 .thenReturn("/officer/nic/applications");
         when(officerAccountService.authenticateOfficer(
                 "nic.officer@gov.lk",
-                "password123",
+                "Password123!",
                 "nic-officer"
         )).thenReturn(Optional.of(officer));
 
         HttpSession session = mockMvc.perform(post("/login/officer")
                         .param("role", "nic-officer")
                         .param("email", "nic.officer@gov.lk")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/nic/applications"))
                 .andReturn()
@@ -190,14 +190,14 @@ class UserControllerSessionTests {
                 .thenReturn("/officer/csr");
         when(officerAccountService.authenticateOfficer(
                 "director@gov.lk",
-                "password123",
+                "Password123!",
                 "csr"
         )).thenReturn(Optional.of(director));
 
         HttpSession session = mockMvc.perform(post("/login/officer")
                         .param("role", "csr")
                         .param("email", "director@gov.lk")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/csr"))
                 .andReturn()
@@ -250,7 +250,7 @@ class UserControllerSessionTests {
         when(userAccountService.prepareCitizenRegistration(
                 "citizen@example.com",
                 "0771234567",
-                "password123"
+                "Password123!"
         )).thenReturn(registration);
         when(emailVerificationService.sendVerificationCode("citizen@example.com"))
                 .thenReturn(challenge);
@@ -258,8 +258,8 @@ class UserControllerSessionTests {
         MockHttpSession session = (MockHttpSession) mockMvc.perform(post("/register")
                         .param("email", "citizen@example.com")
                         .param("phone", "0771234567")
-                        .param("password", "password123")
-                        .param("confirmPassword", "password123"))
+                        .param("password", "Password123!")
+                        .param("confirmPassword", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register/verify"))
                 .andReturn().getRequest().getSession(false);
@@ -287,5 +287,21 @@ class UserControllerSessionTests {
         assertEquals("director@gov.lk", model.get("loggedInOfficerEmail"));
         assertEquals("Director", model.get("loggedInOfficerRoleLabel"));
         assertEquals("01 Sep 2026, 10:15", model.get("loggedInOfficerLoginTime"));
+    }
+
+    @Test
+    void invalidRegistrationKeepsEmailAndReportsPhoneAndPasswordErrors() throws Exception {
+        mockMvc.perform(post("/register")
+                        .param("email", "citizen@example.com")
+                        .param("phone", "77123")
+                        .param("password", "weak").param("confirmPassword", "weak"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("citizen_frontends/citizen_register"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.model()
+                        .attributeHasFieldErrors("registrationRequest", "phone", "password"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.model()
+                        .attribute("registrationRequest", org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("citizen@example.com"))));
+        org.mockito.Mockito.verify(userAccountService, org.mockito.Mockito.never())
+                .prepareCitizenRegistration(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
     }
 }

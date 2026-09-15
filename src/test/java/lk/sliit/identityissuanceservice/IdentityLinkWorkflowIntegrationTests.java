@@ -59,7 +59,7 @@ class IdentityLinkWorkflowIntegrationTests {
             if ("PASSPORT".equals(documents)) record.setNicNo(null);
             records.saveAndFlush(record);
             var prepared = registration.prepareCitizenRegistration(
-                    record.getRegisteredEmail().toUpperCase(), "0" + record.getRegisteredPhone().substring(3), "demo-password");
+                    record.getRegisteredEmail().toUpperCase(), "0" + record.getRegisteredPhone().substring(3), "Demo-password1");
             UserAccount user = registration.registerVerifiedCitizen(prepared);
             assertEquals(record.getGovernmentRecordId(), citizens.findById(user.getUserId()).orElseThrow().getGovernmentRecordId());
             String html = mvc.perform(get("/citizen/dashboard").session(session(user)))
@@ -82,7 +82,7 @@ class IdentityLinkWorkflowIntegrationTests {
     @Test
     void registrationWithNoRegistryMatchStillOffersNewApplications() throws Exception {
         String email = "new-" + UUID.randomUUID() + "@example.com";
-        UserAccount user = registration.registerVerifiedCitizen(registration.prepareCitizenRegistration(email, phone(), "demo-password"));
+        UserAccount user = registration.registerVerifiedCitizen(registration.prepareCitizenRegistration(email, phone(), "Demo-password1"));
         assertNull(citizens.findById(user.getUserId()).orElseThrow().getGovernmentRecordId());
         mvc.perform(get("/citizen/dashboard").session(session(user))).andExpect(status().isOk())
                 .andExpect(content().string(containsString(">New NIC<")))

@@ -97,7 +97,7 @@ class AdminOfficerWorkflowIntegrationTests {
                         .param("email", email)
                         .param("phone", phone)
                         .param("role", "nic-officer")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/admin"));
 
@@ -109,7 +109,7 @@ class AdminOfficerWorkflowIntegrationTests {
         HttpSession officerSession = mockMvc.perform(post("/login/officer")
                         .param("role", "nic-officer")
                         .param("email", email)
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/nic/applications"))
                 .andReturn()
@@ -145,7 +145,7 @@ class AdminOfficerWorkflowIntegrationTests {
                             .param("email", emailPrefixes[index] + suffix + "@gov.lk")
                             .param("phone", "+947" + suffix + index)
                             .param("role", roles[index])
-                            .param("password", "password123"))
+                            .param("password", "Password123!"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/officer/admin"));
         }
@@ -160,7 +160,7 @@ class AdminOfficerWorkflowIntegrationTests {
         HttpSession directorSession = mockMvc.perform(post("/login/officer")
                         .param("role", "csr")
                         .param("email", "director." + suffix + "@gov.lk")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/csr"))
                 .andReturn()
@@ -188,7 +188,7 @@ class AdminOfficerWorkflowIntegrationTests {
         String originalEmail = "actions." + suffix + "@gov.lk";
         String updatedEmail = "edited." + suffix + "@gov.lk";
         String phone = "+947" + suffix;
-        String updatedPhone = "+948" + suffix;
+        String updatedPhone = "+947" + new StringBuilder(suffix).reverse();
 
         MockHttpSession adminSession = new MockHttpSession();
         adminSession.setAttribute("loggedInAdminId", 1);
@@ -199,7 +199,7 @@ class AdminOfficerWorkflowIntegrationTests {
                         .param("email", originalEmail)
                         .param("phone", phone)
                         .param("role", "nic-officer")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection());
 
         UserAccount user = userAccountRepository.findByEmailIgnoreCase(originalEmail).orElseThrow();
@@ -209,7 +209,7 @@ class AdminOfficerWorkflowIntegrationTests {
                         .param("email", updatedEmail)
                         .param("phone", updatedPhone)
                         .param("role", "passport-officer")
-                        .param("newPassword", "changed123"))
+                        .param("newPassword", "Changed123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/admin"));
 
@@ -230,7 +230,7 @@ class AdminOfficerWorkflowIntegrationTests {
         mockMvc.perform(post("/login/officer")
                         .param("role", "passport-officer")
                         .param("email", updatedEmail)
-                        .param("password", "changed123"))
+                        .param("password", "Changed123!"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Invalid officer email, password or selected role.")));
 
@@ -241,7 +241,7 @@ class AdminOfficerWorkflowIntegrationTests {
         HttpSession officerSession = mockMvc.perform(post("/login/officer")
                         .param("role", "passport-officer")
                         .param("email", updatedEmail)
-                        .param("password", "changed123"))
+                        .param("password", "Changed123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/passport/applications"))
                 .andReturn()

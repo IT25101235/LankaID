@@ -52,7 +52,7 @@ class OfficerAccountServiceTests {
         request.setEmail("NIC.Officer@GOV.LK");
         request.setPhone("+94771234567");
         request.setRole("nic-officer");
-        request.setPassword("password123");
+        request.setPassword("Password123!");
 
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> {
             UserAccount user = invocation.getArgument(0);
@@ -74,7 +74,7 @@ class OfficerAccountServiceTests {
 
         assertEquals("nic.officer@gov.lk", userCaptor.getValue().getEmail());
         assertTrue(new BCryptPasswordEncoder().matches(
-                "password123",
+                "Password123!",
                 userCaptor.getValue().getPasswordHash()
         ));
         assertEquals(80, staffCaptor.getValue().getUserId());
@@ -88,7 +88,7 @@ class OfficerAccountServiceTests {
         request.setEmail("Citizen@Example.com");
         request.setPhone("+94771234567");
         request.setRole("nic-officer");
-        request.setPassword("password123");
+        request.setPassword("Password123!");
         when(userAccountRepository.existsByEmailIgnoreCase("citizen@example.com"))
                 .thenReturn(true);
 
@@ -104,7 +104,7 @@ class OfficerAccountServiceTests {
 
     @Test
     void directorCredentialsCanAuthenticateForCsrDashboard() {
-        UserAccount user = activeUser(81, "director@gov.lk", "password123");
+        UserAccount user = activeUser(81, "director@gov.lk", "Password123!");
         StaffAccount director = staffAccount(81, "EMP-DIR-001", OfficerAccountService.DIRECTOR);
 
         when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatus("director@gov.lk", "ACTIVE"))
@@ -114,7 +114,7 @@ class OfficerAccountServiceTests {
 
         Optional<OfficerDetailsDto> result = officerAccountService.authenticateOfficer(
                 "director@gov.lk",
-                "password123",
+                "Password123!",
                 "csr"
         );
 
@@ -124,7 +124,7 @@ class OfficerAccountServiceTests {
 
     @Test
     void nicOfficerCannotAuthenticateForPassportDashboard() {
-        UserAccount user = activeUser(82, "nic@gov.lk", "password123");
+        UserAccount user = activeUser(82, "nic@gov.lk", "Password123!");
         StaffAccount nicOfficer = staffAccount(82, "EMP-NIC-002", OfficerAccountService.NIC_OFFICER);
 
         when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatus("nic@gov.lk", "ACTIVE"))
@@ -133,7 +133,7 @@ class OfficerAccountServiceTests {
 
         Optional<OfficerDetailsDto> result = officerAccountService.authenticateOfficer(
                 "nic@gov.lk",
-                "password123",
+                "Password123!",
                 "passport-officer"
         );
 
@@ -149,7 +149,7 @@ class OfficerAccountServiceTests {
         request.setEmail("NEW.Officer@GOV.LK");
         request.setPhone("+94771112233");
         request.setRole("csr");
-        request.setNewPassword("newpassword123");
+        request.setNewPassword("NewPassword123!");
 
         when(staffAccountRepository.findById(83)).thenReturn(Optional.of(staff));
         when(userAccountRepository.findById(83)).thenReturn(Optional.of(user));
@@ -164,7 +164,7 @@ class OfficerAccountServiceTests {
 
         assertEquals("new.officer@gov.lk", user.getEmail());
         assertEquals("+94771112233", user.getPhone());
-        assertTrue(new BCryptPasswordEncoder().matches("newpassword123", user.getPasswordHash()));
+        assertTrue(new BCryptPasswordEncoder().matches("NewPassword123!", user.getPasswordHash()));
         assertEquals(OfficerAccountService.CSR, staff.getStaffRole());
         assertEquals("EMP-CSR-003", staff.getEmployeeNo());
         verify(userAccountRepository).save(user);
@@ -173,7 +173,7 @@ class OfficerAccountServiceTests {
 
     @Test
     void toggleOfficerStatusDisablesAndReactivatesBothAccounts() {
-        UserAccount user = activeUser(84, "csr@gov.lk", "password123");
+        UserAccount user = activeUser(84, "csr@gov.lk", "Password123!");
         StaffAccount staff = staffAccount(84, "EMP-CSR-004", OfficerAccountService.CSR);
 
         when(staffAccountRepository.findById(84)).thenReturn(Optional.of(staff));
@@ -192,7 +192,7 @@ class OfficerAccountServiceTests {
 
     @Test
     void removeOfficerMarksBothAccountsAsRemoved() {
-        UserAccount user = activeUser(85, "passport@gov.lk", "password123");
+        UserAccount user = activeUser(85, "passport@gov.lk", "Password123!");
         StaffAccount staff = staffAccount(85, "EMP-PASS-003", OfficerAccountService.PASSPORT_OFFICER);
 
         when(staffAccountRepository.findById(85)).thenReturn(Optional.of(staff));

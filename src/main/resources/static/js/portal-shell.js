@@ -6,10 +6,12 @@
   const isCitizen = path.startsWith('/citizen/') || path === '/walk-in' || path.startsWith('/walk-in/');
   if (!isOfficer && !isCitizen) return;
 
-  const stylesheet = document.createElement('link');
-  stylesheet.rel = 'stylesheet';
-  stylesheet.href = '/css/portal-shell.css?v=20260901-5';
-  document.head.appendChild(stylesheet);
+  if (!document.querySelector('link[href^="/css/portal-shell.css"]')) {
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/css/portal-shell.css?v=20260915-signout';
+    document.head.appendChild(stylesheet);
+  }
 
   if (!document.querySelector('link[href*="Material+Symbols"]')) {
     const icons = document.createElement('link');

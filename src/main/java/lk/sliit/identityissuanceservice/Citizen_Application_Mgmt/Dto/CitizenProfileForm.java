@@ -14,15 +14,18 @@ import java.time.LocalDate;
 public class CitizenProfileForm {
 
     @NotBlank(message = "Family name is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Family name cannot exceed 100 characters.")
+    @Pattern(regexp = "[\\p{L}][\\p{L}\\p{M} ]*", message = "Family name must contain only letters and spaces.")
     private String familyName;
 
     @NotBlank(message = "Given name is required.")
-    @Size(max = 150)
+    @Size(max = 150, message = "Given name cannot exceed 150 characters.")
+    @Pattern(regexp = "[\\p{L}][\\p{L}\\p{M} ]*", message = "Given name must contain only letters and spaces.")
     private String givenName;
 
     @NotBlank(message = "Surname is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Surname cannot exceed 100 characters.")
+    @Pattern(regexp = "[\\p{L}][\\p{L}\\p{M} ]*", message = "Surname must contain only letters and spaces.")
     private String surname;
 
     @NotBlank(message = "Gender is required.")
@@ -33,7 +36,7 @@ public class CitizenProfileForm {
     @Pattern(regexp = "SINGLE|MARRIED|WIDOWED|DIVORCED", message = "Select a valid civil status.")
     private String civilStatus;
 
-    @Size(max = 150)
+    @Size(max = 150, message = "Occupation cannot exceed 150 characters.")
     private String occupation;
 
     @NotNull(message = "Date of birth is required.")
@@ -42,62 +45,62 @@ public class CitizenProfileForm {
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "Birth certificate number is required.")
-    @Size(max = 50)
+    @Size(max = 50, message = "Birth certificate no cannot exceed 50 characters.")
     private String birthCertificateNo;
 
     @NotBlank(message = "Birth place is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Birth place cannot exceed 100 characters.")
     private String birthPlace;
 
     @NotBlank(message = "Birth division is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Birth division cannot exceed 100 characters.")
     private String birthDivision;
 
     @NotBlank(message = "Birth district is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Birth district cannot exceed 100 characters.")
     private String birthDistrict;
 
     @NotBlank(message = "Country of birth is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Country of birth cannot exceed 100 characters.")
     private String countryOfBirth;
 
     @NotBlank(message = "Birth city is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Birth city cannot exceed 100 characters.")
     private String birthCity;
 
     @NotBlank(message = "Permanent house number is required.")
-    @Size(max = 50)
+    @Size(max = 50, message = "Permanent house no cannot exceed 50 characters.")
     private String permanentHouseNo;
 
     @NotBlank(message = "Permanent street is required.")
-    @Size(max = 150)
+    @Size(max = 150, message = "Permanent street cannot exceed 150 characters.")
     private String permanentStreet;
 
     @NotBlank(message = "Permanent city is required.")
-    @Size(max = 100)
+    @Size(max = 100, message = "Permanent city cannot exceed 100 characters.")
     private String permanentCity;
 
     @NotBlank(message = "Permanent postal code is required.")
-    @Size(max = 10)
+    @Pattern(regexp = "[0-9]{5}", message = "Permanent postal code must contain exactly 5 digits.")
     private String permanentPostalCode;
 
     private boolean postalSameAsPermanent = true;
 
-    @Size(max = 50)
+    @Size(max = 50, message = "Postal house no cannot exceed 50 characters.")
     private String postalHouseNo;
 
-    @Size(max = 150)
+    @Size(max = 150, message = "Postal street cannot exceed 150 characters.")
     private String postalStreet;
 
-    @Size(max = 100)
+    @Size(max = 100, message = "Postal city cannot exceed 100 characters.")
     private String postalCity;
 
-    @Size(max = 10)
+    @Size(max = 10, message = "Postal postal code cannot exceed 10 characters.")
     private String postalPostalCode;
 
     private boolean dualCitizen;
 
-    @Size(max = 50)
+    @Size(max = 50, message = "Citizenship certificate no cannot exceed 50 characters.")
     private String citizenshipCertificateNo;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")

@@ -25,6 +25,7 @@
     .application-progress.rejected .progress-step.current .progress-dot { background: #ef4444; border-color: #fecaca; animation: none; }
     @keyframes progressPulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 9px rgba(14,165,233,.06); } }
   </style>
+  <link href="/css/portal-shell.css?v=20260915-signout" rel="stylesheet"/>
 </head>
 <body class="min-h-screen text-slate-800">
 <header class="bg-white border-b shadow-sm">
@@ -115,6 +116,6 @@ document.querySelectorAll('.application-progress').forEach(path => {
   setTimeout(() => path.style.setProperty('--progress', deliveryComplete ? '100%' : (current * 100 / (steps.length - 1)) + '%'), 120);
 });
 </script>
-<script src="/js/portal-shell.js?v=20260901-5"></script>
+<script src="/js/portal-shell.js?v=20260915-signout"></script>
 </body>
 </html>

@@ -76,7 +76,7 @@ class AdminControllerSessionTests {
                         .param("email", "nic.officer@gov.lk")
                         .param("phone", "+94771234567")
                         .param("role", "nic-officer")
-                        .param("password", "password123"))
+                        .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/officer/admin"))
                 .andExpect(flash().attribute("officerCreatedMessage", "Officer account created successfully."));
@@ -156,5 +156,35 @@ class AdminControllerSessionTests {
 
         verify(serviceCentreService).addCentre(
                 "Kandy Service Centre", "Peradeniya Road", "Kandy", "Kandy", 120);
+    }
+
+    @Test
+    void invalidOfficerDetailsKeepModalOpenAndPreserveEmail() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+        mockMvc.perform(post("/officer/admin/officers").session(session)
+                        .param("email", "officer@gov.lk").param("phone", "123")
+                        .param("role", "csr").param("password", "weak"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("openOfficerModal", true))
+                .andExpect(model().attributeHasFieldErrors("officerRegistration", "phone", "password"))
+                .andExpect(model().attribute("officerRegistration",
+                        org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("officer@gov.lk"))));
+        org.mockito.Mockito.verify(officerAccountService, org.mockito.Mockito.never()).createOfficer(any());
+    }
+
+    @Test
+    void invalidOfficerEditKeepsSubmittedDetailsInTheModal() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+        mockMvc.perform(post("/officer/admin/officers/12/edit").session(session)
+                        .param("email", "officer@gov.lk").param("phone", "123")
+                        .param("role", "csr").param("newPassword", "weak"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("officers_frontends/admin_dashboard"))
+                .andExpect(model().attribute("editOfficerId", 12))
+                .andExpect(model().attributeHasFieldErrors("officerUpdate", "phone", "newPassword"))
+                .andExpect(model().attribute("officerUpdate",
+                        org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("officer@gov.lk"))));
     }
 }

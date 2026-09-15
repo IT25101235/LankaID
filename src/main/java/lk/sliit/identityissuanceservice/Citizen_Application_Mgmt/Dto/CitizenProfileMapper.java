@@ -91,6 +91,10 @@ public final class CitizenProfileMapper {
                     "Complete the postal address or select same as permanent address."
             );
         }
+        if (!form.isPostalSameAsPermanent()
+                && !form.getPostalPostalCode().matches("[0-9]{5}")) {
+            throw new IllegalArgumentException("Postal address postal code must contain exactly 5 digits.");
+        }
         if (form.isDualCitizen()
                 && (blankToNull(form.getCitizenshipCertificateNo()) == null
                 || form.getCitizenshipIssuedDate() == null)) {

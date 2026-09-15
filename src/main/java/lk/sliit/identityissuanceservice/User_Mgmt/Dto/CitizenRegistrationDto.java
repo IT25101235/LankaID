@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Dto;
 
 import jakarta.validation.constraints.Email;
+import lk.sliit.identityissuanceservice.User_Mgmt.Service.PasswordRules;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -13,14 +14,12 @@ public class CitizenRegistrationDto {
     private String email;
 
     @NotBlank(message = "Phone number is required.")
-    @Pattern(
-            regexp = "^(?:\\+94|0)7\\d{8}$",
-            message = "Use a Sri Lankan mobile number such as 0771234567 or +94771234567."
-    )
+    @Pattern(regexp = "^(?:\\+94|0)?7[0-9]{8}$", message = "Enter nine mobile digits starting with 7 after +94 (for example, 771234567).")
     private String phone;
 
     @NotBlank(message = "Password is required.")
     @Size(min = 8, max = 72, message = "Password must contain 8 to 72 characters.")
+    @Pattern(regexp = PasswordRules.PATTERN, message = PasswordRules.MESSAGE)
     private String password;
 
     @NotBlank(message = "Please repeat your password.")

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
 import java.util.Optional;
 
 @Service
@@ -37,8 +38,9 @@ public class UserAccountService {
     }
 
     public PreparedCitizenRegistration prepareCitizenRegistration(String email, String phone, String password) {
+        PasswordRules.validate(password);
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
-        String normalizedPhone = normalizePhone(phone);
+        String normalizedPhone = SriLankanMobileNumber.normalize(phone);
 
         assertRegistrationAvailable(normalizedEmail, normalizedPhone);
         return new PreparedCitizenRegistration(
@@ -86,11 +88,4 @@ public class UserAccountService {
                 .filter(account -> passwordEncoder.matches(password, account.getPasswordHash()));
     }
 
-    private String normalizePhone(String phone) {
-        String value = phone.trim();
-        if (value.startsWith("0")) {
-            return "+94" + value.substring(1);
-        }
-        return value;
-    }
 }

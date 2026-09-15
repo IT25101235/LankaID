@@ -1,6 +1,11 @@
 package lk.sliit.identityissuanceservice.Payment_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.PaymentSummary;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.CardPaymentValidation;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import java.util.Map;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
@@ -18,6 +23,9 @@ public class PaymentController {
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
+
+    @ModelAttribute("cardForm")
+    public CardPaymentForm cardForm() { return new CardPaymentForm(); }
 
     @GetMapping("/citizen/payment")
     public String paymentPage(
@@ -47,12 +55,28 @@ public class PaymentController {
             @RequestParam Integer applicationId,
             @RequestParam String deliveryMethod,
             @RequestParam(required = false) Integer centreId,
+            @ModelAttribute("cardForm") CardPaymentForm cardForm,
+            Model model,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
+        model.addAttribute("selectedDeliveryMethod", deliveryMethod);
+        model.addAttribute("selectedCentreId", centreId);
         try {
+            PaymentSummary summary = paymentService.getPaymentSummary(citizenId, applicationId);
+            model.addAttribute("paymentSummary", summary);
+            boolean cardNeeded = !summary.deliverySelected()
+                    && (!summary.paid() || "HOME_DELIVERY".equals(deliveryMethod));
+            if (cardNeeded) {
+                Map<String, String> errors = CardPaymentValidation.errors(cardForm);
+                if (!errors.isEmpty()) {
+                    model.addAttribute("cardErrors", errors);
+                    model.addAttribute("paymentError", "Please correct the card details below.");
+                    return "citizen_frontends/payment_gateway";
+                }
+            }
             paymentService.payForApplication(citizenId, applicationId, deliveryMethod, centreId);
             String status = paymentService.getPaymentSummary(citizenId, applicationId)
                     .application().getCurrentStatus();
@@ -69,13 +93,18 @@ public class PaymentController {
             );
             return "redirect:/citizen/applications";
         } catch (IllegalArgumentException exception) {
-            redirectAttributes.addFlashAttribute("paymentError", exception.getMessage());
-            return "redirect:/citizen/payment?applicationId=" + applicationId;
+            if (model.containsAttribute("paymentSummary")) {
+                model.addAttribute("paymentError", exception.getMessage());
+                return "citizen_frontends/payment_gateway";
+            }
+            redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
+            return "redirect:/citizen/applications";
         } catch (DataAccessException exception) {
-            redirectAttributes.addFlashAttribute(
-                    "paymentError",
-                    "The payment could not be saved. Please try again."
-            );
+            if (model.containsAttribute("paymentSummary")) {
+                model.addAttribute("paymentError", "The payment could not be saved. Please try again.");
+                return "citizen_frontends/payment_gateway";
+            }
+            redirectAttributes.addFlashAttribute("paymentError", "The payment could not be loaded. Please try again.");
             return "redirect:/citizen/payment?applicationId=" + applicationId;
         }
     }

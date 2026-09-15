@@ -135,4 +135,18 @@ class CitizenApplicationControllerTests {
         session.setAttribute("loggedInUserRole", "CITIZEN");
         return session;
     }
+
+    @Test
+    void invalidApplicationReturnsFieldErrorsAndKeepsValidNames() throws Exception {
+        mockMvc.perform(post("/citizen/applications/nic/new").session(citizenSession())
+                        .param("familyName", "Perera").param("givenName", "Kamal123")
+                        .param("surname", "Perera").param("permanentPostalCode", "12AB"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("citizen_frontends/nic_application_form"))
+                .andExpect(model().attributeHasFieldErrors("applicationForm", "givenName", "permanentPostalCode"))
+                .andExpect(model().attribute("applicationForm",
+                        org.hamcrest.Matchers.hasProperty("familyName", org.hamcrest.Matchers.is("Perera"))));
+        org.mockito.Mockito.verify(applicationService, org.mockito.Mockito.never())
+                .createNewNicApplication(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
 }

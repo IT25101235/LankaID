@@ -11,20 +11,21 @@
   <style>
     body { font-family: 'Public Sans', sans-serif; }
     input:focus { outline: none; box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.16); }
+    body > header.registration-header { background: #0f2747 !important; border-color: #1e3a5f !important; }
   </style>
   <link href="/css/citizen-theme.css" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900">
 
-<header class="border-b border-slate-200 bg-white">
+<header class="registration-header border-b text-white">
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
     <a th:href="@{/}" class="flex items-center gap-2.5">
       <span class="flex h-9 w-9 items-center justify-center rounded-md bg-cyan-700 text-white">
         <span class="material-symbols-outlined">account_balance</span>
       </span>
-      <span><span class="block text-xl leading-none font-extrabold">Lanka<span class="text-cyan-600">ID</span></span><span class="block text-[11px] text-slate-500 mt-1">Digital Government Services</span></span>
+      <span><span class="block text-xl leading-none font-extrabold">Lanka<span class="text-cyan-600">ID</span></span><span class="block text-[11px] text-slate-300 mt-1">Digital Government Services</span></span>
     </a>
-    <a th:href="@{/login}" class="text-sm font-semibold text-cyan-800 hover:underline">Sign in</a>
+    <a th:href="@{/login}" class="text-sm font-semibold text-cyan-300 hover:underline">Sign in</a>
   </div>
 </header>
 
@@ -64,12 +65,14 @@
 
       <div>
         <label for="phone" class="mb-1.5 block text-sm font-semibold text-slate-700">Mobile number</label>
-        <input id="phone" type="tel" th:field="*{phone}" required maxlength="12" autocomplete="tel" aria-describedby="phoneHelp phoneClientError"
-               pattern="(?:\+94|0)7[0-9]{8}" placeholder="0771234567"
-               title="Enter 0771234567 or +94771234567"
+        <div class="flex items-center gap-2"><span class="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm font-semibold">+94</span>
+        <input id="phone" type="tel" th:field="*{phone}" required maxlength="9" inputmode="numeric" autocomplete="tel-national" aria-describedby="phoneHelp phoneClientError"
+               pattern="7[0-9]{8}" placeholder="771234567"
+               title="Enter 9 digits starting with 7, without the leading zero"
                th:classappend="${#fields.hasErrors('phone')} ? 'border-red-500' : 'border-slate-300'"
                class="w-full rounded-lg border px-3 py-2.5 text-sm transition focus:border-cyan-700"/>
-        <p id="phoneHelp" class="mt-1 text-xs text-slate-500">Format: 0771234567 or +94771234567</p>
+        </div>
+        <p id="phoneHelp" class="mt-1 text-xs text-slate-500">Enter 9 digits starting with 7, without the leading zero.</p>
         <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="mt-1 text-xs text-red-600">Phone error</p>
         <p id="phoneClientError" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
       </div>
@@ -85,7 +88,7 @@
             <span class="material-symbols-outlined text-xl">visibility</span>
           </button>
         </div>
-        <p id="passwordHelp" class="mt-1 text-xs text-slate-500">Use 8 to 72 characters.</p>
+        <p id="passwordHelp" class="mt-1 text-xs text-slate-500">Use 8-72 characters with uppercase, lowercase, a number and a symbol. No spaces.</p>
         <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="mt-1 text-xs text-red-600">Password error</p>
         <p id="passwordClientError" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
       </div>
@@ -115,89 +118,8 @@
   </section>
 </main>
 
-<script>
-  const registrationForm = document.getElementById('registrationForm');
-  const email = document.getElementById('email');
-  const phone = document.getElementById('phone');
-  const password = document.getElementById('password');
-  const confirmation = document.getElementById('confirmPassword');
+<script src="/User_Mgmt/password-rules.js"></script>
+<script src="/User_Mgmt/registration.js"></script>
 
-  function showClientError(input, errorId, message) {
-    const error = document.getElementById(errorId);
-    error.textContent = message;
-    error.classList.toggle('hidden', !message);
-    input.classList.toggle('border-red-500', Boolean(message));
-    input.setAttribute('aria-invalid', message ? 'true' : 'false');
-    return !message;
-  }
-
-  function validateEmail() {
-    const value = email.value.trim();
-    let message = '';
-    if (!value) message = 'Email address is required.';
-    else if (value.length > 100) message = 'Email cannot exceed 100 characters.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) message = 'Enter a valid email address, such as name@example.com.';
-    return showClientError(email, 'emailClientError', message);
-  }
-
-  function validatePhone() {
-    const value = phone.value.trim();
-    let message = '';
-    if (!value) message = 'Mobile number is required.';
-    else if (!/^(?:\+94|0)7\d{8}$/.test(value)) message = 'Enter 0771234567 or +94771234567.';
-    return showClientError(phone, 'phoneClientError', message);
-  }
-
-  function validatePassword() {
-    let message = '';
-    if (!password.value) message = 'Password is required.';
-    else if (password.value.length < 8) message = 'Password must contain at least 8 characters.';
-    else if (password.value.length > 72) message = 'Password cannot exceed 72 characters.';
-    return showClientError(password, 'passwordClientError', message);
-  }
-
-  function validateConfirmation() {
-    let message = '';
-    if (!confirmation.value) message = 'Please repeat your password.';
-    else if (confirmation.value !== password.value) message = 'Passwords do not match.';
-    return showClientError(confirmation, 'confirmationClientError', message);
-  }
-
-  const fields = [
-    [email, validateEmail],
-    [phone, validatePhone],
-    [password, validatePassword],
-    [confirmation, validateConfirmation]
-  ];
-
-  fields.forEach(([input, validate]) => {
-    input.addEventListener('blur', () => {
-      input.dataset.touched = 'true';
-      validate();
-    });
-    input.addEventListener('input', () => {
-      if (input.dataset.touched) validate();
-      if (input === password && confirmation.dataset.touched) validateConfirmation();
-    });
-  });
-
-  registrationForm.addEventListener('submit', event => {
-    fields.forEach(([input]) => { input.dataset.touched = 'true'; });
-    const valid = [validateEmail(), validatePhone(), validatePassword(), validateConfirmation()].every(Boolean);
-    if (!valid) {
-      event.preventDefault();
-      registrationForm.querySelector('[aria-invalid="true"]')?.focus();
-    }
-  });
-
-  document.querySelectorAll('[data-toggle-password]').forEach(button => {
-    button.addEventListener('click', () => {
-      const input = document.getElementById(button.dataset.togglePassword);
-      const showing = input.type === 'text';
-      input.type = showing ? 'password' : 'text';
-      button.querySelector('span').textContent = showing ? 'visibility' : 'visibility_off';
-    });
-  });
-</script>
 </body>
 </html>

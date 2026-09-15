@@ -48,7 +48,7 @@ class UserAccountServiceTests {
                 applicationService
         );
 
-        service.registerCitizen(" Citizen@Example.com ", "0771234567", "password123");
+        service.registerCitizen(" Citizen@Example.com ", "0771234567", "Password123!");
 
         ArgumentCaptor<UserAccount> userCaptor = ArgumentCaptor.forClass(UserAccount.class);
         verify(userAccountRepository).save(userCaptor.capture());
@@ -56,8 +56,8 @@ class UserAccountServiceTests {
 
         assertEquals("citizen@example.com", savedUser.getEmail());
         assertEquals("+94771234567", savedUser.getPhone());
-        assertNotEquals("password123", savedUser.getPasswordHash());
-        assertTrue(new BCryptPasswordEncoder().matches("password123", savedUser.getPasswordHash()));
+        assertNotEquals("Password123!", savedUser.getPasswordHash());
+        assertTrue(new BCryptPasswordEncoder().matches("Password123!", savedUser.getPasswordHash()));
 
         ArgumentCaptor<CitizenAccount> citizenCaptor = ArgumentCaptor.forClass(CitizenAccount.class);
         verify(citizenAccountRepository).save(citizenCaptor.capture());
@@ -70,7 +70,7 @@ class UserAccountServiceTests {
         UserAccount account = new UserAccount();
         account.setUserId(25);
         account.setEmail("citizen@example.com");
-        account.setPasswordHash(new BCryptPasswordEncoder().encode("password123"));
+        account.setPasswordHash(new BCryptPasswordEncoder().encode("Password123!"));
 
         when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatusAndEmailVerified(
                 "citizen@example.com",
@@ -87,7 +87,7 @@ class UserAccountServiceTests {
 
         assertTrue(service.authenticateCitizen(
                 "Citizen@Example.com",
-                "password123"
+                "Password123!"
         ).isPresent());
         assertTrue(service.authenticateCitizen(
                 "citizen@example.com",
@@ -111,7 +111,7 @@ class UserAccountServiceTests {
         PreparedCitizenRegistration prepared = service.prepareCitizenRegistration(
                 "verified@example.com",
                 "0771234568",
-                "password123"
+                "Password123!"
         );
 
         service.registerVerifiedCitizen(prepared);
