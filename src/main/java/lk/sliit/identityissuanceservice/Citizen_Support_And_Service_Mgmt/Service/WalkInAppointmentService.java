@@ -203,7 +203,7 @@ public class WalkInAppointmentService {
         return buildAppointmentView(appointment);
     }
 
-    private void requireAvailableSlot(WalkInSlot slot) {
+    void requireAvailableSlot(WalkInSlot slot) {
         WalkInSlotView view = buildSlotView(slot);
         if (!view.available() || view.remainingPlaces() < 1
                 || !slot.getSlotDate().atTime(slot.getSlotTime()).isAfter(LocalDateTime.now())) {
@@ -488,7 +488,8 @@ public class WalkInAppointmentService {
     @Transactional
     public WalkInAppointmentView checkIn(String reference, Integer staffId, String method) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
-        Appointment appointment = findAppointment(reference);
+        Appointment appointment = appointmentRepository.findForChange(clean(reference))
+                .orElseThrow(() -> new IllegalArgumentException("Walk-in appointment was not found."));
         if ("CANCELLED".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("This walk-in appointment was cancelled.");
         }

@@ -26,6 +26,9 @@ import java.util.List;
 @Service
 public class AppointmentService {
 
+    @org.springframework.beans.factory.annotation.Value("${app.biometric.slot-capacity:1}")
+    private int slotCapacity = 1;
+
     private static final List<String> OFFICER_QUEUE_STATUSES =
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
 
@@ -95,18 +98,16 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository
                 .findByApplicationIdAndAppointmentType(applicationId, "BIOMETRIC")
                 .orElseThrow(() -> new IllegalArgumentException("Appointment record was not found."));
-        Centre centre = centreRepository.findById(centreId)
+        Centre centre = centreRepository.findByIdForBooking(centreId)
                 .orElseThrow(() -> new IllegalArgumentException("Select a valid service centre."));
+        appointment = appointmentRepository.findByIdForChange(appointment.getAppointmentId()).orElseThrow();
+        if (!"PENDING_PAYMENT".equals(appointment.getAppointmentStatus())
+                || !"APPROVED".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("Use Manage booking to reschedule or pay the LKR 300 rebooking fee.");
+        }
 
         LocalDateTime scheduledAt = date.atTime(time);
-        if (date.isBefore(LocalDate.now().plusDays(1))) {
-            throw new IllegalArgumentException("Appointments can be booked from tomorrow onwards.");
-        }
-        if (date.isAfter(LocalDate.now().plusDays(14))) {
-            throw new IllegalArgumentException("The appointment must be within the next 14 days.");
-        }
-        validateWorkingTime(time);
-        validateCentreCapacity(centre, date);
+        validateSelection(centre, date, time, appointment.getAppointmentId());
 
         appointment.setCentreId(centreId);
         appointment.setScheduledAt(scheduledAt);
@@ -143,7 +144,7 @@ public class AppointmentService {
         Appointment appointment = getCitizenAppointment(citizenId, reference);
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
-        if ("PENDING_PAYMENT".equals(appointment.getAppointmentStatus())) {
+        if (!OFFICER_QUEUE_STATUSES.contains(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Confirm an appointment before opening its pass.");
         }
         return buildOfficerDetails(appointment, application.getServiceType(), true);
@@ -189,7 +190,10 @@ public class AppointmentService {
     ) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
-        Appointment appointment = details.appointment();
+        Appointment appointment = appointmentRepository.findByIdForChange(details.appointment().getAppointmentId()).orElseThrow();
+        if (!List.of("CONFIRMED", "CHECKED_IN").contains(appointment.getAppointmentStatus())) {
+            throw new IllegalArgumentException("Only a confirmed appointment can be checked in.");
+        }
         if ("COMPLETED".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Biometrics have already been completed.");
         }
@@ -221,7 +225,7 @@ public class AppointmentService {
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElse(null);
         if (application == null || !serviceType.equals(application.getServiceType())) return null;
-        if (rejectPendingPayment && "PENDING_PAYMENT".equals(appointment.getAppointmentStatus())) {
+        if (rejectPendingPayment && !OFFICER_QUEUE_STATUSES.contains(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("This appointment has not been paid and confirmed.");
         }
         CitizenAccount citizen = citizenRepository.findById(application.getCitizenId())
@@ -248,22 +252,37 @@ public class AppointmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
     }
 
+    public void validateSelection(Centre centre, LocalDate date, LocalTime time, Integer excludedId) {
+        if (date == null || date.isBefore(LocalDate.now().plusDays(1)) || date.isAfter(LocalDate.now().plusDays(14))) {
+            throw new IllegalArgumentException("Choose a date from tomorrow through the next 14 days.");
+        }
+        if (time == null) throw new IllegalArgumentException("Choose an appointment time.");
+        validateWorkingTime(time);
+        if (remainingCapacity(centre, date, excludedId) < 1) {
+            throw new IllegalArgumentException("That centre is fully booked for the selected date. Choose another date or centre.");
+        }
+        if (remainingSlotCapacity(centre, date.atTime(time), excludedId) < 1) {
+            throw new IllegalArgumentException("That time slot is fully booked. Choose another time; your current booking has not changed.");
+        }
+    }
+
     private void validateWorkingTime(LocalTime time) {
         if (time.isBefore(LocalTime.of(9, 0)) || time.isAfter(LocalTime.of(16, 0))
+                || time.getHour() == 12 || time.getSecond() != 0 || time.getNano() != 0
                 || (time.getMinute() != 0 && time.getMinute() != 30)) {
             throw new IllegalArgumentException("Choose a 30-minute slot between 9:00 AM and 4:00 PM.");
         }
     }
 
-    private void validateCentreCapacity(Centre centre, LocalDate date) {
-        long bookings = appointmentRepository.countByCentreIdAndScheduledAtBetweenAndAppointmentStatusIn(
-                centre.getCentreId(),
-                date.atStartOfDay(),
-                date.plusDays(1).atStartOfDay(),
-                List.of("CONFIRMED", "CHECKED_IN", "COMPLETED")
-        );
-        if (bookings >= centre.getDailyCapacity()) {
-            throw new IllegalArgumentException("That centre is fully booked for the selected date.");
-        }
+    public int remainingCapacity(Centre centre, LocalDate date, Integer excludedId) {
+        long bookings = appointmentRepository.countBiometricBookings(centre.getCentreId(),
+                date.atStartOfDay(), date.plusDays(1).atStartOfDay(), excludedId == null ? -1 : excludedId);
+        return Math.max(0, centre.getDailyCapacity() - (int) bookings);
+    }
+
+    public int remainingSlotCapacity(Centre centre, LocalDateTime time, Integer excludedId) {
+        long booked = appointmentRepository.countBiometricSlotBookings(centre.getCentreId(), time,
+                excludedId == null ? -1 : excludedId);
+        return Math.max(0, slotCapacity - (int) booked);
     }
 }

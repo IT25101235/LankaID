@@ -242,9 +242,16 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(content().string(containsString(LocalDate.now().plusDays(14).toString())));
 
         LocalDate appointmentDate = LocalDate.now().plusDays(1);
+        // Each workflow gets its own centre so it does not compete for the same half-hour slot.
+        Centre biometricCentre = new Centre();
+        biometricCentre.setCentreName("Biometric workflow " + unique);
+        biometricCentre.setCity("Colombo");
+        biometricCentre.setDistrict("Colombo");
+        biometricCentre.setDailyCapacity(100);
+        centreRepository.saveAndFlush(biometricCentre);
         mockMvc.perform(post("/citizen/appointments/biometric")
                         .param("applicationId", application.getApplicationId().toString())
-                        .param("centreId", appointment.getCentreId().toString())
+                        .param("centreId", biometricCentre.getCentreId().toString())
                         .param("appointmentDate", appointmentDate.toString())
                         .param("appointmentTime", "10:00")
                         .session(citizenSession))

@@ -176,6 +176,10 @@ public class WalkInAppointmentController {
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
         try {
             WalkInAppointmentView details = walkInService.getVisitorPass(reference, session);
+            if ("CANCELLED".equals(details.appointment().getAppointmentStatus())) {
+                redirectAttributes.addFlashAttribute("walkInError", "This booking is cancelled. Its old QR pass is no longer valid.");
+                return "redirect:/walk-in/recover";
+            }
             model.addAttribute("walkIn", details);
             model.addAttribute("walkInPayment", walkInService.getPaidPayment(details.appointment().getAppointmentId()));
             model.addAttribute("serviceLabel", walkInService.serviceLabel(
@@ -199,6 +203,9 @@ public class WalkInAppointmentController {
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.status(403).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
         }
+        if ("CANCELLED".equals(details.appointment().getAppointmentStatus())) {
+            return ResponseEntity.status(410).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .contentType(MediaType.IMAGE_PNG)
@@ -215,6 +222,9 @@ public class WalkInAppointmentController {
             details = walkInService.getVisitorPass(reference, session);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.status(403).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
+        }
+        if ("CANCELLED".equals(details.appointment().getAppointmentStatus())) {
+            return ResponseEntity.status(410).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
         }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")

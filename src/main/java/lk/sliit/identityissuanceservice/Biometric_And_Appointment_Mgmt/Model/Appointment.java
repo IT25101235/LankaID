@@ -14,6 +14,13 @@ import java.time.LocalDateTime;
 @Table(name = "Appointment", schema = "dbo")
 public class Appointment {
 
+    // Reject a stale write if another request changed this booking while the form was open.
+    @jakarta.persistence.Version
+    @Column(name = "booking_version", nullable = false)
+    private Long bookingVersion;
+
+    public Long getBookingVersion() { return bookingVersion; }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")

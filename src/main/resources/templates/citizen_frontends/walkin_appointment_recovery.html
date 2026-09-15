@@ -18,8 +18,8 @@
   </div>
 </header>
 <main class="max-w-4xl mx-auto p-4 sm:p-8">
-  <h1 class="text-3xl font-extrabold">Recover walk-in booking</h1>
-  <p class="text-sm text-slate-500 mt-2">Verify the mobile number used during booking to access your QR pass.</p>
+  <h1 class="text-3xl font-extrabold">Manage walk-in bookings</h1>
+  <p class="text-sm text-slate-500 mt-2">Verify the mobile number used during booking to view, cancel or reschedule your bookings. Rescheduling costs LKR 300.</p>
   <div th:if="${walkInMessage}" class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700" th:text="${walkInMessage}"></div>
   <div id="otp-feedback" th:if="${walkInError}" class="mt-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700" th:text="${walkInError}"></div>
   <form th:if="${step == 'PHONE'}" th:action="@{/walk-in/recover/otp/send}" method="post" class="mt-5 bg-white border rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
@@ -60,7 +60,8 @@
         <p class="text-sm text-slate-500 mt-2" th:text="${item.centreName + ' · ' + #temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Appointment</p>
       </div>
       <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold" th:text="${item.appointment.appointmentStatus}">Status</span>
-      <a th:href="@{/walk-in/pass/{reference}(reference=${item.appointment.referenceNo})}" class="rounded-xl bg-cyan-600 text-white px-4 py-2.5 text-sm text-center font-bold">Open QR pass</a>
+      <a th:if="${item.appointment.appointmentStatus != 'CANCELLED'}" th:href="@{/walk-in/pass/{reference}(reference=${item.appointment.referenceNo})}" class="rounded-xl bg-cyan-600 text-white px-4 py-2.5 text-sm text-center font-bold">Open QR pass</a>
+      <a th:href="@{/walk-in/bookings/{reference}/manage(reference=${item.appointment.referenceNo})}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-center font-bold">Manage booking</a>
     </article>
   </div>
 </main>

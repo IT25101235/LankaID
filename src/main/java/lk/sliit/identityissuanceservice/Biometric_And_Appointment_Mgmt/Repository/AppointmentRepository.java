@@ -12,6 +12,26 @@ import java.util.Optional;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select a from Appointment a where a.appointmentId = :id")
+    Optional<Appointment> findByIdForChange(@org.springframework.data.repository.query.Param("id") Integer id);
+
+    @org.springframework.data.jpa.repository.Query("""
+            select count(a) from Appointment a where a.appointmentType = 'BIOMETRIC'
+            and a.centreId = :centreId and a.scheduledAt >= :start and a.scheduledAt < :end
+            and a.appointmentStatus in ('CONFIRMED', 'CHECKED_IN', 'COMPLETED')
+            and a.appointmentId <> :excludedId
+            """)
+    long countBiometricBookings(Integer centreId, LocalDateTime start, LocalDateTime end, Integer excludedId);
+
+    @org.springframework.data.jpa.repository.Query("""
+            select count(a) from Appointment a where a.appointmentType = 'BIOMETRIC'
+            and a.centreId = :centreId and a.scheduledAt = :time
+            and a.appointmentStatus in ('CONFIRMED', 'CHECKED_IN', 'COMPLETED')
+            and a.appointmentId <> :excludedId
+            """)
+    long countBiometricSlotBookings(Integer centreId, LocalDateTime time, Integer excludedId);
+
     Optional<Appointment> findByApplicationIdAndAppointmentType(Integer applicationId, String appointmentType);
 
     Optional<Appointment> findByReferenceNoIgnoreCase(String referenceNo);

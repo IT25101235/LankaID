@@ -28,6 +28,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final AppointmentPassService passService;
 
+
     public AppointmentController(AppointmentService appointmentService, AppointmentPassService passService) {
         this.appointmentService = appointmentService;
         this.passService = passService;
@@ -89,6 +90,31 @@ public class AppointmentController {
             redirectAttributes.addFlashAttribute("appointmentError", exception.getMessage());
             if (selectedApplicationId == null) return "redirect:/citizen/applications";
             return "redirect:/citizen/appointments/biometric?applicationId=" + selectedApplicationId;
+        }
+    }
+
+    @GetMapping("/citizen/appointments/biometric/availability")
+    public ResponseEntity<?> availability(@RequestParam Integer applicationId, @RequestParam Integer centreId,
+            @RequestParam String date, HttpSession session) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return ResponseEntity.status(401).build();
+        try {
+            var details = appointmentService.getBookingDetails(citizenId, applicationId);
+            LocalDate selectedDate = readDate(date);
+            if (selectedDate.isBefore(details.earliestDate()) || selectedDate.isAfter(details.latestDate())) {
+                throw new IllegalArgumentException("Choose a date within the booking window.");
+            }
+            var centre = details.centres().stream().filter(c -> centreId.equals(c.getCentreId())).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Select a valid centre."));
+            int remaining = appointmentService.remainingCapacity(centre, selectedDate, details.appointment().getAppointmentId());
+            var times = remaining == 0 ? java.util.List.<String>of() : java.util.List.of(
+                    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00")
+                    .stream().filter(time -> appointmentService.remainingSlotCapacity(centre,
+                            selectedDate.atTime(LocalTime.parse(time)), details.appointment().getAppointmentId()) > 0).toList();
+            return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .body(java.util.Map.of("remaining", remaining, "times", times));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", exception.getMessage()));
         }
     }
 

@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public interface WalkInAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select a from Appointment a where a.referenceNo = :reference and a.appointmentType = 'WALK_IN'")
+    Optional<Appointment> findForChange(@org.springframework.data.repository.query.Param("reference") String reference);
+
     // Include the old local format so existing bookings can still be recovered.
     List<Appointment> findAllByVisitorPhoneInAndAppointmentTypeOrderByScheduledAtDesc(
             Collection<String> visitorPhones, String appointmentType);
