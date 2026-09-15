@@ -130,6 +130,10 @@ class PaymentBiometricWorkflowIntegrationTests {
         Integer appointmentId = appointment.getAppointmentId();
 
         mockMvc.perform(post("/citizen/payment")
+                        .param("cardholderName", "Test Citizen")
+                        .param("cardNumber", "4111 1111 1111 1111")
+                        .param("expiry", java.time.YearMonth.now().plusYears(1).format(java.time.format.DateTimeFormatter.ofPattern("MM/yy")))
+                        .param("cvv", "123")
                         .param("applicationId", application.getApplicationId().toString())
                         .param("deliveryMethod", DocumentDeliveryService.HOME_DELIVERY)
                         .session(citizenSession(user)))
@@ -201,6 +205,10 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(content().string(containsString("LKR")));
 
         mockMvc.perform(post("/citizen/payment")
+                        .param("cardholderName", "Test Citizen")
+                        .param("cardNumber", "4111 1111 1111 1111")
+                        .param("expiry", java.time.YearMonth.now().plusYears(1).format(java.time.format.DateTimeFormatter.ofPattern("MM/yy")))
+                        .param("cvv", "123")
                         .param("applicationId", application.getApplicationId().toString())
                         .param("deliveryMethod", deliveryMethod)
                         .param("centreId", centreRepository.findAllByOrderByCentreNameAsc()
