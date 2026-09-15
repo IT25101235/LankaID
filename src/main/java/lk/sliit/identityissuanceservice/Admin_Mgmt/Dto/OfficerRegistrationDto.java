@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice.Admin_Mgmt.Dto;
 
 import jakarta.validation.constraints.Email;
+import lk.sliit.identityissuanceservice.User_Mgmt.Service.PasswordRules;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -13,7 +14,7 @@ public class OfficerRegistrationDto {
     private String email;
 
     @NotBlank(message = "Phone number is required.")
-    @Pattern(regexp = "^\\+?[0-9]{10,14}$", message = "Enter a valid phone number using digits only.")
+    @Pattern(regexp = "^(?:\\+94|0)?7[0-9]{8}$", message = "Enter nine mobile digits starting with 7 after +94 (for example, 771234567).")
     private String phone;
 
     @NotBlank(message = "Please select an officer role.")
@@ -21,6 +22,7 @@ public class OfficerRegistrationDto {
 
     @NotBlank(message = "Temporary password is required.")
     @Size(min = 8, max = 72, message = "Password must contain 8 to 72 characters.")
+    @Pattern(regexp = PasswordRules.PATTERN, message = PasswordRules.MESSAGE)
     private String password;
 
     public String getEmail() {
