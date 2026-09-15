@@ -326,11 +326,12 @@ body.portal-shell.portal-officer > main {
 .citizen-session-link {
   margin-left: 0.35rem;
   padding-inline: 1rem;
-  background: #ffffff;
-  color: var(--portal-secondary);
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  color: #ffffff !important;
 }
 
-.citizen-session-link:hover { background: #ecfeff; }
+.citizen-session-link:hover { background: #b91c1c; border-color: #b91c1c; }
 .citizen-signout-form { margin: 0; }
 
 .citizen-menu-button {

@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import lk.sliit.identityissuanceservice.User_Mgmt.Service.PasswordRules;
+import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -40,8 +42,9 @@ public class OfficerAccountService {
 
     @Transactional
     public void createOfficer(OfficerRegistrationDto request) {
+        PasswordRules.validate(request.getPassword());
         String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
-        String phone = request.getPhone().trim();
+        String phone = SriLankanMobileNumber.normalize(request.getPhone());
         String roleCode = roleCodeFromForm(request.getRole());
 
         if (roleCode == null) {
@@ -88,7 +91,7 @@ public class OfficerAccountService {
         UserAccount userAccount = findUser(userId);
 
         String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
-        String phone = request.getPhone().trim();
+        String phone = SriLankanMobileNumber.normalize(request.getPhone());
         String roleCode = roleCodeFromForm(request.getRole());
 
         if (roleCode == null) {
@@ -109,6 +112,7 @@ public class OfficerAccountService {
         userAccount.setPhone(phone);
 
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            PasswordRules.validate(request.getNewPassword());
             userAccount.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         }
 
