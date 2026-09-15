@@ -6,6 +6,7 @@
   <title>Link existing documents | LankaID</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <link href="/css/portal-shell.css?v=20260915-signout" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
 <main class="max-w-2xl mx-auto px-4 py-8">
@@ -60,6 +61,6 @@
     <a th:href="@{/citizen/support/{id}(id=${identityRequest.requestId})}" class="inline-block mt-3 text-sky-700 font-semibold">View request and officer response</a>
   </section>
 </main>
-<script src="/js/portal-shell.js"></script>
+<script src="/js/portal-shell.js?v=20260915-signout"></script>
 </body>
 </html>

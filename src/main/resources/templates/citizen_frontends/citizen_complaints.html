@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
   <link href="/css/citizen-theme.css" rel="stylesheet"/>
   <style>body{font-family:'Public Sans',sans-serif}</style>
+  <link href="/css/portal-shell.css?v=20260915-signout" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800">
 <header class="bg-white border-b">
@@ -74,6 +75,6 @@ const characterCount = document.getElementById('characterCount');
 function updateCount(){characterCount.textContent = supportMessage.value.length}
 supportMessage.addEventListener('input', updateCount); updateCount();
 </script>
-<script src="/js/portal-shell.js?v=20260901-5"></script>
+<script src="/js/portal-shell.js?v=20260915-signout"></script>
 </body>
 </html>

@@ -402,6 +402,7 @@ public class WalkInAppointmentController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
         }
+        redirectAttributes.addAttribute("scheduleOpen", true);
         addScheduleFilters(redirectAttributes, centreId, startDate);
         return "redirect:/officer/csr/walk-ins";
     }
@@ -425,6 +426,7 @@ public class WalkInAppointmentController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
         }
+        redirectAttributes.addAttribute("scheduleOpen", true);
         addScheduleFilters(redirectAttributes, centreId, startDate);
         return "redirect:/officer/csr/walk-ins";
     }
@@ -450,6 +452,7 @@ public class WalkInAppointmentController {
         if (scheduleCentreId != null) {
             redirectAttributes.addAttribute("scheduleCentreId", scheduleCentreId);
         }
+        redirectAttributes.addAttribute("scheduleOpen", true);
         redirectAttributes.addAttribute("scheduleMonth", parseScheduleMonth(scheduleMonth).toString());
         return "redirect:/officer/csr/walk-ins";
     }
