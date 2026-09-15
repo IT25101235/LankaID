@@ -82,8 +82,9 @@ public class AdminController {
     @PostMapping("/officer/admin/officers/{userId}/edit")
     public String updateOfficer(
             @PathVariable Integer userId,
-            @Valid @ModelAttribute OfficerUpdateDto officerUpdate,
+            @Valid @ModelAttribute("officerUpdate") OfficerUpdateDto officerUpdate,
             BindingResult bindingResult,
+            Model model,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         if (session.getAttribute("loggedInAdminId") == null) {
@@ -91,17 +92,23 @@ public class AdminController {
         }
 
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("officerActionError", firstValidationError(bindingResult));
-            return "redirect:/officer/admin";
+            return officerEditError(userId, bindingResult, session, model);
         }
 
         try {
             officerAccountService.updateOfficer(userId, officerUpdate);
             redirectAttributes.addFlashAttribute("officerActionMessage", "Officer account updated successfully.");
         } catch (IllegalArgumentException exception) {
-            redirectAttributes.addFlashAttribute("officerActionError", exception.getMessage());
+            bindingResult.reject("officer.update.failed", exception.getMessage());
+            return officerEditError(userId, bindingResult, session, model);
         }
         return "redirect:/officer/admin";
+    }
+
+    private String officerEditError(Integer userId, BindingResult errors, HttpSession session, Model model) {
+        model.addAttribute("editOfficerId", userId);
+        model.addAttribute("officerEditError", firstValidationError(errors));
+        return officerManagement(session, model);
     }
 
     @PostMapping("/officer/admin/officers/{userId}/status")
