@@ -44,42 +44,36 @@ class BookingChangeWorkflowIntegrationTests {
     @Autowired CitizenAccountRepository citizens;
     @Autowired PaymentRepository payments;
     @Autowired AppointmentChangePaymentRepository changePayments;
-    @Autowired AppointmentService bookingService;
-    @Autowired BiometricBookingChangeService biometricChanges;
     @Autowired WalkInAppointmentService walkIns;
     @Autowired WalkInBookingChangeService walkInChanges;
     @Autowired WalkInSlotRepository slots;
+    @Autowired BiometricAppointmentSlotRepository biometricSlots;
+    @Autowired BiometricScheduleService biometricSchedules;
     @MockitoBean SmsSender sms;
 
-    @Test void biometricCancellationReleasesCapacityAndRequiresPaidRebooking() throws Exception {
+    @Test void biometricCancellationReleasesSlotAndRebooksWithoutAnotherPayment() throws Exception {
         Appointment appointment = biometric();
         var session = citizenSession(appointment);
         var date = appointment.getScheduledAt().toLocalDate();
         var centre = centres.findById(appointment.getCentreId()).orElseThrow();
-        assertEquals(0, bookingService.remainingCapacity(centre, date, null));
+        assertEquals(1, biometricSchedules.bookedCount(appointment.getBiometricSlotId(), null));
         String token = open(appointment, session);
         mvc.perform(post(bioUrl(appointment) + "/cancel").session(session).param("token", token))
                 .andExpect(status().is3xxRedirection());
         assertEquals("CANCELLED", appointment.getAppointmentStatus());
         assertEquals("APPROVED", applications.findById(appointment.getApplicationId()).orElseThrow().getCurrentStatus());
-        assertEquals(1, bookingService.remainingCapacity(centre, date, null));
+        assertEquals(0, biometricSchedules.bookedCount(appointment.getBiometricSlotId(), null));
         assertEquals(0, changePayments.countByAppointmentId(appointment.getAppointmentId()));
         assertTrue(payments.findFirstByAppointmentIdAndPaymentStatusOrderByCreatedAtDesc(appointment.getAppointmentId(), "PAID").isPresent());
 
-        mvc.perform(post("/citizen/appointments/biometric").session(session)
-                        .param("applicationId", appointment.getApplicationId().toString()).param("centreId", centre.getCentreId().toString())
-                        .param("appointmentDate", date.toString()).param("appointmentTime", "10:00"))
-                .andExpect(flash().attribute("appointmentError", containsString("LKR 300")));
-        assertEquals("CANCELLED", appointment.getAppointmentStatus());
+        var newSlot = biometricSlot(centre, date, LocalTime.of(10, 0));
         token = open(appointment, session);
-        mvc.perform(card(post(bioUrl(appointment) + "/pay").session(session).param("token", token)
-                .param("centreId", centre.getCentreId().toString()).param("appointmentDate", date.toString()).param("appointmentTime", "10:00")))
+        mvc.perform(post(bioUrl(appointment) + "/change").session(session).param("token", token)
+                .param("slotId", newSlot.getSlotId().toString()))
                 .andExpect(redirectedUrl("/citizen/appointments/" + appointment.getReferenceNo() + "/pass"));
         assertEquals("CONFIRMED", appointment.getAppointmentStatus());
-        assertEquals(0, bookingService.remainingCapacity(centre, date, null));
-        assertEquals(1, changePayments.countByAppointmentId(appointment.getAppointmentId()));
-        assertEquals(0, new BigDecimal("300").compareTo(changePayments.findAll().stream()
-                .filter(p -> p.getAppointmentId().equals(appointment.getAppointmentId())).findFirst().orElseThrow().getAmount()));
+        assertEquals(1, biometricSchedules.bookedCount(newSlot.getSlotId(), null));
+        assertEquals(0, changePayments.countByAppointmentId(appointment.getAppointmentId()));
     }
 
     @Test void biometricRescheduleMovesCapacityAndDuplicatePostDoesNotChargeTwice() throws Exception {
@@ -87,29 +81,27 @@ class BookingChangeWorkflowIntegrationTests {
         var session = citizenSession(appointment);
         var oldDate = appointment.getScheduledAt().toLocalDate();
         var newDate = oldDate.plusDays(1);
+        Integer oldSlotId = appointment.getBiometricSlotId();
+        var destination = biometricSlot(centres.findById(appointment.getCentreId()).orElseThrow(),
+                newDate, LocalTime.of(10, 0));
         String token = open(appointment, session);
         for (int i = 0; i < 2; i++) {
-            mvc.perform(card(post(bioUrl(appointment) + "/pay").session(session).param("token", token)
-                    .param("centreId", appointment.getCentreId().toString()).param("appointmentDate", newDate.toString()).param("appointmentTime", "10:00")))
+            mvc.perform(post(bioUrl(appointment) + "/change").session(session).param("token", token)
+                    .param("slotId", destination.getSlotId().toString()))
                     .andExpect(i == 0 ? status().is3xxRedirection() : status().isOk());
         }
-        var centre = centres.findById(appointment.getCentreId()).orElseThrow();
-        assertEquals(1, bookingService.remainingCapacity(centre, oldDate, null));
-        assertEquals(0, bookingService.remainingCapacity(centre, newDate, null));
-        assertEquals(1, changePayments.countByAppointmentId(appointment.getAppointmentId()));
+        assertEquals(0, biometricSchedules.bookedCount(oldSlotId, null));
+        assertEquals(1, biometricSchedules.bookedCount(destination.getSlotId(), null));
+        assertEquals(0, changePayments.countByAppointmentId(appointment.getAppointmentId()));
     }
 
-    @Test void biometricInvalidCardPreservesSelectionAndDoesNotChangeBooking() throws Exception {
+    @Test void biometricMissingSlotPreservesBooking() throws Exception {
         Appointment appointment = biometric();
         var session = citizenSession(appointment);
         var original = appointment.getScheduledAt();
         String token = open(appointment, session);
-        mvc.perform(post(bioUrl(appointment) + "/pay").session(session).param("token", token)
-                .param("centreId", appointment.getCentreId().toString()).param("appointmentDate", original.plusDays(1).toLocalDate().toString())
-                .param("appointmentTime", "10:00").param("cardholderName", "Example Citizen").param("cardNumber", "123"))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Enter exactly 16")))
-                .andExpect(content().string(containsString("Example Citizen")))
-                .andExpect(content().string(containsString(original.plusDays(1).toLocalDate().toString())));
+        mvc.perform(post(bioUrl(appointment) + "/change").session(session).param("token", token))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Select an available appointment slot")));
         assertEquals(original, appointment.getScheduledAt());
         assertEquals(0, changePayments.countByAppointmentId(appointment.getAppointmentId()));
     }
@@ -135,10 +127,9 @@ class BookingChangeWorkflowIntegrationTests {
         var session = citizenSession(appointment);
         String token = open(appointment, session);
         var original = appointment.getScheduledAt();
-        mvc.perform(card(post(bioUrl(appointment) + "/pay").session(session).param("token", token)
-                .param("centreId", occupied.getCentreId().toString()).param("appointmentDate", occupied.getScheduledAt().toLocalDate().toString())
-                .param("appointmentTime", "10:00")))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("fully booked")));
+        mvc.perform(post(bioUrl(appointment) + "/change").session(session).param("token", token)
+                .param("slotId", occupied.getBiometricSlotId().toString()))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("no longer available")));
         assertEquals(original, appointment.getScheduledAt());
         assertEquals(0, changePayments.countByAppointmentId(appointment.getAppointmentId()));
     }
@@ -191,29 +182,30 @@ class BookingChangeWorkflowIntegrationTests {
         var centre = centres.findById(appointment.getCentreId()).orElseThrow();
         centre.setDailyCapacity(10); centres.saveAndFlush(centre);
         Appointment other = biometric();
+        var occupiedSlot = biometricSlot(centre, appointment.getScheduledAt().toLocalDate(), LocalTime.of(11, 0));
         other.setCentreId(centre.getCentreId());
         other.setScheduledAt(appointment.getScheduledAt().withHour(11));
+        other.setBiometricSlotId(occupiedSlot.getSlotId());
         appointments.saveAndFlush(other);
         var oldTime = appointment.getScheduledAt();
         var session = citizenSession(appointment);
         String token = open(appointment, session);
-        mvc.perform(card(post(bioUrl(appointment) + "/pay").session(session).param("token", token)
-                .param("centreId", centre.getCentreId().toString()).param("appointmentDate", oldTime.toLocalDate().toString())
-                .param("appointmentTime", "11:00")))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("time slot is fully booked")));
+        mvc.perform(post(bioUrl(appointment) + "/change").session(session).param("token", token)
+                .param("slotId", occupiedSlot.getSlotId().toString()))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("no longer available")));
         assertEquals(oldTime, appointment.getScheduledAt());
         assertEquals(0, changePayments.countByAppointmentId(appointment.getAppointmentId()));
         token = open(appointment, session);
-        mvc.perform(card(post(bioUrl(appointment) + "/pay").session(session).param("token", token)
-                .param("centreId", centre.getCentreId().toString()).param("appointmentDate", oldTime.toLocalDate().toString())
-                .param("appointmentTime", "10:00"))).andExpect(status().is3xxRedirection());
-        assertEquals(1, bookingService.remainingSlotCapacity(centre, oldTime, null));
-        assertEquals(0, bookingService.remainingSlotCapacity(centre, oldTime.withHour(10), null));
+        var tenOClock = biometricSlot(centre, oldTime.toLocalDate(), LocalTime.of(10, 0));
+        mvc.perform(post(bioUrl(appointment) + "/change").session(session).param("token", token)
+                .param("slotId", tenOClock.getSlotId().toString())).andExpect(status().is3xxRedirection());
+        assertEquals(0, biometricSchedules.bookedCount(biometricSlot(centre, oldTime.toLocalDate(), LocalTime.of(9, 0)).getSlotId(), null));
+        assertEquals(1, biometricSchedules.bookedCount(tenOClock.getSlotId(), null));
         mvc.perform(get("/citizen/appointments/biometric/availability").session(citizenSession(other))
                 .param("applicationId", other.getApplicationId().toString()).param("centreId", centre.getCentreId().toString())
-                .param("date", oldTime.toLocalDate().toString()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.times", org.hamcrest.Matchers.hasItem("09:00")))
-                .andExpect(jsonPath("$.times", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem("10:00"))));
+                .param("startDate", oldTime.toLocalDate().toString()).param("endDate", oldTime.toLocalDate().toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.dates[0].slots[*].time", org.hamcrest.Matchers.hasItem("09:00")))
+                .andExpect(jsonPath("$.dates[0].slots[*].time", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem("10:00"))));
     }
 
     @Test void walkInFullDestinationDoesNotChargeOrReleaseOldSlot() throws Exception {
@@ -261,7 +253,12 @@ class BookingChangeWorkflowIntegrationTests {
         app.setDeclarationAccepted("Y"); applications.saveAndFlush(app);
         Appointment appointment = baseAppointment("BIOMETRIC", centre());
         appointment.setCitizenId(user.getUserId()); appointment.setApplicationId(app.getApplicationId());
-        appointments.saveAndFlush(appointment); pay(appointment);
+        appointments.saveAndFlush(appointment);
+        var slot = biometricSlot(centres.findById(appointment.getCentreId()).orElseThrow(),
+                appointment.getScheduledAt().toLocalDate(), appointment.getScheduledAt().toLocalTime());
+        appointment.setBiometricSlotId(slot.getSlotId());
+        appointments.saveAndFlush(appointment);
+        pay(appointment);
         return appointment;
     }
 
@@ -291,6 +288,15 @@ class BookingChangeWorkflowIntegrationTests {
         Payment payment = new Payment(); payment.setAppointmentId(appointment.getAppointmentId());
         payment.setTransactionReference("TEST-" + UUID.randomUUID()); payment.setPaymentStatus("PAID");
         payment.setAmount(new BigDecimal("2000")); payment.setPaidAt(LocalDateTime.now()); payments.saveAndFlush(payment);
+    }
+    private BiometricAppointmentSlot biometricSlot(Centre centre, LocalDate date, LocalTime time) {
+        if (biometricSlots.findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
+                centre.getCentreId(), "NIC", date, time).isEmpty()) {
+            biometricSchedules.publishDateRange("NIC", centre.getCentreId(), date, date,
+                    LocalTime.of(9, 0), LocalTime.of(16, 30), 1, 1);
+        }
+        return biometricSlots.findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
+                centre.getCentreId(), "NIC", date, time).orElseThrow();
     }
     private MockHttpSession citizenSession(Appointment appointment) {
         var session = new MockHttpSession(); session.setAttribute("loggedInUserId", appointment.getCitizenId());

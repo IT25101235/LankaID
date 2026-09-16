@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Biometric Schedule | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <style>
+    body{font-family:'Public Sans',sans-serif}.calendar-day{min-height:92px}.calendar-day:disabled{cursor:default}
+    .calendar-day.selected{outline:3px solid #0891b2;outline-offset:-3px}.calendar-day.empty{background:#f8fafc}
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<header class="bg-slate-950 text-white"><div class="max-w-[1500px] mx-auto min-h-16 px-4 sm:px-6 py-3 flex items-center gap-4"><a th:href="@{/officer/{service}/appointments(service=${servicePath})}" class="text-sm text-slate-300">← Appointments</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold" th:text="|${serviceType} biometric schedule|">Biometric schedule</p><p class="text-xs text-cyan-400">Publish dates and control appointment capacity</p></div></div></header>
+
+<main class="max-w-[1500px] mx-auto p-4 sm:p-6">
+  <div th:if="${scheduleMessage}" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800" th:text="${scheduleMessage}"></div>
+  <div th:if="${scheduleError}" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800" th:text="${scheduleError}"></div>
+
+  <nav class="mb-5 grid max-w-xl grid-cols-2 rounded-2xl border bg-white p-1.5 shadow-sm" aria-label="Appointment sections">
+    <a th:href="@{/officer/{service}/appointments(service=${servicePath})}" class="rounded-xl px-4 py-3 text-center text-sm font-bold text-slate-600 hover:bg-cyan-50 hover:text-cyan-700"><span class="material-symbols-outlined mr-1 align-middle text-lg">history</span>Appointment History</a>
+    <a th:href="@{/officer/{service}/appointments/schedule(service=${servicePath})}" aria-current="page" class="rounded-xl bg-slate-900 px-4 py-3 text-center text-sm font-bold text-white"><span class="material-symbols-outlined mr-1 align-middle text-lg">calendar_month</span>Schedule Settings</a>
+  </nav>
+
+  <section class="grid xl:grid-cols-2 gap-5">
+    <form th:action="@{/officer/{service}/appointments/schedule/publish(service=${servicePath})}" method="post" class="rounded-2xl border bg-white p-5 shadow-sm">
+      <h1 class="font-extrabold text-lg">Publish appointment dates</h1>
+      <p class="mt-1 text-xs text-slate-500" th:text="|These slots are only for ${serviceType} applications.|">Service-specific schedule</p>
+      <div class="mt-4 grid sm:grid-cols-2 gap-3">
+        <label class="sm:col-span-2 text-xs font-bold">Service centre<select required name="centreId" class="mt-1 block w-full rounded-xl border-slate-300"><option th:each="centre : ${centres}" th:value="${centre.centreId}" th:selected="${centre.centreId == selectedCentreId}" th:text="${centre.centreName + ' — ' + centre.city}"></option></select></label>
+        <label class="text-xs font-bold">Start date<input required type="date" name="startDate" th:min="${minimumDate}" th:value="${minimumDate}" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+        <label class="text-xs font-bold">End date<input required type="date" name="endDate" th:min="${minimumDate}" th:value="${minimumDate}" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+        <label class="text-xs font-bold">Opening time<input required type="time" step="1800" name="openingTime" value="09:00" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+        <label class="text-xs font-bold">Closing time<input required type="time" step="1800" name="closingTime" value="16:30" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+        <label class="sm:col-span-2 text-xs font-bold">Capacity per half-hour slot<input required type="number" min="1" max="100" name="capacity" value="1" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+      </div>
+      <button class="mt-4 rounded-xl bg-cyan-600 px-5 py-3 text-sm font-bold text-white">Publish half-hour slots</button>
+    </form>
+
+    <form th:action="@{/officer/{service}/appointments/schedule/close(service=${servicePath})}" method="post" class="rounded-2xl border border-red-200 bg-white p-5 shadow-sm" onsubmit="return confirm('Close this date range? Confirmed appointments in it will be cancelled and citizens will be notified.')">
+      <h2 class="font-extrabold text-lg text-red-700">Close appointment dates</h2>
+      <p class="mt-1 text-xs text-slate-500">Closing keeps the history, releases bookings, and allows affected citizens to rebook free.</p>
+      <div class="mt-4 grid sm:grid-cols-2 gap-3">
+        <label class="sm:col-span-2 text-xs font-bold">Service centre<select required name="centreId" class="mt-1 block w-full rounded-xl border-slate-300"><option th:each="centre : ${centres}" th:value="${centre.centreId}" th:selected="${centre.centreId == selectedCentreId}" th:text="${centre.centreName + ' — ' + centre.city}"></option></select></label>
+        <label class="text-xs font-bold">Start date<input required type="date" name="startDate" th:min="${minimumDate}" th:value="${minimumDate}" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+        <label class="text-xs font-bold">End date<input required type="date" name="endDate" th:min="${minimumDate}" th:value="${minimumDate}" class="mt-1 block w-full rounded-xl border-slate-300"/></label>
+      </div>
+      <button class="mt-4 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white">Close published dates</button>
+    </form>
+  </section>
+
+  <section class="mt-5 rounded-2xl border bg-white p-5 shadow-sm">
+    <form method="get" th:action="@{/officer/{service}/appointments/schedule(service=${servicePath})}" class="flex flex-wrap items-end gap-3 border-b pb-5">
+      <label class="min-w-64 flex-1 text-xs font-bold">Centre<select required name="centreId" class="mt-1 block w-full rounded-xl border-slate-300"><option th:each="centre : ${centres}" th:value="${centre.centreId}" th:selected="${centre.centreId == selectedCentreId}" th:text="${centre.centreName + ' — ' + centre.city}"></option></select></label>
+      <label class="text-xs font-bold">Calendar month<input required type="month" name="month" th:value="${selectedMonth}" class="mt-1 block rounded-xl border-slate-300"/></label>
+      <button class="rounded-xl bg-slate-800 px-5 py-2.5 text-sm font-bold text-white">View schedule</button>
+    </form>
+
+    <div class="mt-5 grid lg:grid-cols-[minmax(0,1fr)_430px] gap-5">
+      <div>
+        <div class="grid grid-cols-7 text-center text-[11px] font-bold uppercase text-slate-400"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div id="officerCalendar" class="mt-2 grid grid-cols-7 overflow-hidden rounded-xl border"></div>
+        <div id="scheduleData" class="hidden">
+          <span th:each="slot : ${schedule}" class="schedule-data" th:attr="data-date=${slot.slotDate},data-open=${slot.available},data-booked=${slot.bookedCount},data-capacity=${slot.capacity}"></span>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="font-bold">Selected date</h2>
+        <p id="selectedDateLabel" class="mt-1 text-sm text-slate-500">Select a date on the calendar.</p>
+        <p id="noScheduleSlots" class="mt-4 rounded-xl border border-dashed p-5 text-center text-sm text-slate-500">Select a date to manage its slots.</p>
+        <div class="mt-4 space-y-3">
+          <article th:each="slot : ${schedule}" class="slot-card hidden rounded-xl border p-4" th:attr="data-date=${slot.slotDate}">
+            <div class="flex items-start justify-between gap-3"><div><p class="font-extrabold" th:text="${#temporals.format(slot.slotTime, 'hh:mm a')}">09:00 AM</p><p class="mt-1 text-xs text-slate-500" th:text="|${slot.bookedCount} booked · ${slot.remainingPlaces} remaining|">Capacity</p></div><span class="rounded-full px-2.5 py-1 text-[11px] font-bold" th:classappend="${slot.available ? ' bg-emerald-100 text-emerald-700' : ' bg-red-100 text-red-700'}" th:text="${slot.available ? 'OPEN' : 'CLOSED'}">OPEN</span></div>
+            <form th:action="@{/officer/{service}/appointments/schedule/slot(service=${servicePath})}" method="post" class="mt-3 flex flex-wrap items-end gap-2">
+              <input type="hidden" name="slotId" th:value="${slot.slotId}"/><input type="hidden" name="centreId" th:value="${selectedCentreId}"/><input type="hidden" name="month" th:value="${selectedMonth}"/>
+              <label class="text-xs font-bold">Capacity<input type="number" name="capacity" min="1" max="100" th:value="${slot.capacity}" class="mt-1 block w-24 rounded-lg border-slate-300 text-sm"/></label>
+              <label class="mb-2 flex items-center gap-2 text-xs font-bold"><input type="checkbox" name="available" value="true" th:checked="${slot.available}" class="rounded"/>Open</label>
+              <button class="ml-auto rounded-lg bg-cyan-600 px-3 py-2 text-xs font-bold text-white">Save slot</button>
+            </form>
+            <form th:if="${slot.bookedCount == 0}" th:action="@{/officer/{service}/appointments/schedule/slot/{id}/delete(service=${servicePath},id=${slot.slotId})}" method="post" class="mt-2" onsubmit="return confirm('Delete this unused slot permanently?')">
+              <input type="hidden" name="deleteToken" th:value="${deleteToken}"/><input type="hidden" name="centreId" th:value="${selectedCentreId}"/><input type="hidden" name="month" th:value="${selectedMonth}"/>
+              <button class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700">Delete unused slot</button>
+            </form>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script th:inline="javascript">
+(() => {
+  const month = /*[[${selectedMonth}]]*/ '2026-01';
+  const calendar = document.getElementById('officerCalendar');
+  const [year, monthNumber] = month.split('-').map(Number);
+  const first = new Date(year, monthNumber - 1, 1), lastDay = new Date(year, monthNumber, 0).getDate();
+  const grouped = new Map();
+  document.querySelectorAll('.schedule-data').forEach(item => {
+    const value = grouped.get(item.dataset.date) || {slots: 0, open: 0, booked: 0, capacity: 0};
+    value.slots++; if (item.dataset.open === 'true') value.open++;
+    value.booked += Number(item.dataset.booked); value.capacity += Number(item.dataset.capacity);
+    grouped.set(item.dataset.date, value);
+  });
+  for (let i = 0; i < first.getDay(); i++) { const blank=document.createElement('div'); blank.className='calendar-day empty border-b border-r'; calendar.append(blank); }
+  for (let day = 1; day <= lastDay; day++) {
+    const date = `${year}-${String(monthNumber).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const data = grouped.get(date); const button=document.createElement('button'); button.type='button';
+    button.className='calendar-day border-b border-r p-2 text-left hover:bg-cyan-50'; button.dataset.date=date;
+    const state=!data?'UNPUBLISHED':data.open===data.slots?'OPEN':data.open===0?'CLOSED':'MIXED';
+    const color=state==='OPEN'?'text-emerald-700':state==='CLOSED'?'text-red-700':state==='MIXED'?'text-amber-700':'text-slate-400';
+    button.innerHTML=`<b class="text-sm">${day}</b><span class="mt-2 block text-[10px] font-bold ${color}">${state}</span><small class="block text-[10px] text-slate-500">${data ? data.booked+'/'+data.capacity+' booked' : 'No slots'}</small>`;
+    button.addEventListener('click',()=>selectDate(date,button)); calendar.append(button);
+  }
+  function selectDate(date, button) {
+    document.querySelectorAll('.calendar-day.selected').forEach(item=>item.classList.remove('selected')); button.classList.add('selected');
+    document.getElementById('selectedDateLabel').textContent=new Date(date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    let visible=0; document.querySelectorAll('.slot-card').forEach(card=>{const show=card.dataset.date===date; card.classList.toggle('hidden',!show); if(show)visible++;});
+    const empty=document.getElementById('noScheduleSlots'); empty.classList.toggle('hidden',visible>0); empty.textContent=visible?'':'No slots were published for this date.';
+  }
+})();
+</script>
+<script src="/js/portal-shell.js?v=20260915-signout"></script>
+</body>
+</html>

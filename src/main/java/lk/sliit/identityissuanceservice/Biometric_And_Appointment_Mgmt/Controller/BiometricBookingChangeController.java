@@ -4,8 +4,6 @@ import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BookingChangeRequest;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BookingSelectionForm;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.*;
-import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
-import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.CardPaymentValidation;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +20,6 @@ public class BiometricBookingChangeController {
         this.changes = changes;
     }
 
-    @ModelAttribute("cardForm") public CardPaymentForm cardForm() { return new CardPaymentForm(); }
     @ModelAttribute public void noCache(jakarta.servlet.http.HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-store");
     }
@@ -40,7 +37,7 @@ public class BiometricBookingChangeController {
             model.addAttribute("biometric", true);
             model.addAttribute("rebooking", rebooking);
             model.addAttribute("canChange", BookingChangePolicy.canChange(appointment));
-            model.addAttribute("canPay", rebooking || BookingChangePolicy.canChange(appointment));
+            model.addAttribute("canBook", rebooking || BookingChangePolicy.canChange(appointment));
             model.addAttribute("centres", details.centres());
             model.addAttribute("earliestDate", details.earliestDate());
             model.addAttribute("latestDate", details.latestDate());
@@ -63,7 +60,7 @@ public class BiometricBookingChangeController {
             requireReference(reference, request, session);
             changes.cancel(citizenId(session), request);
             BookingChangeRequest.clear(session);
-            redirect.addFlashAttribute("changeMessage", "Booking cancelled. Your place is released. Pay LKR 300 to book again and continue your application.");
+            redirect.addFlashAttribute("changeMessage", "Booking cancelled. Your place is released. Choose another published slot without paying again to continue your application.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("changeError", exception.getMessage());
         } catch (DataAccessException exception) {
@@ -72,23 +69,17 @@ public class BiometricBookingChangeController {
         return "redirect:/citizen/appointments/" + reference + "/manage";
     }
 
-    @PostMapping("/citizen/appointments/{reference}/manage/pay")
-    public String pay(@PathVariable String reference, @RequestParam(required = false) String token,
+    @PostMapping({"/citizen/appointments/{reference}/manage/change", "/citizen/appointments/{reference}/manage/pay"})
+    public String change(@PathVariable String reference, @RequestParam(required = false) String token,
                       @ModelAttribute("selection") BookingSelectionForm selection,
-                      @ModelAttribute("cardForm") CardPaymentForm card, HttpSession session,
-                      Model model, RedirectAttributes redirect) {
+                      HttpSession session, Model model, RedirectAttributes redirect) {
         if (citizenId(session) == null) return "redirect:/login";
         try {
             var request = BookingChangeRequest.require(token, session);
             requireReference(reference, request, session);
-            var errors = CardPaymentValidation.errors(card);
-            if (!errors.isEmpty()) {
-                model.addAttribute("cardErrors", errors);
-                throw new IllegalArgumentException("Correct the highlighted card details. Your booking has not changed.");
-            }
-            changes.payAndChange(citizenId(session), request, selection.readCentre(), selection.readDate(), selection.readTime());
+            changes.changeBooking(citizenId(session), request, selection.readSlot());
             BookingChangeRequest.clear(session);
-            redirect.addFlashAttribute("appointmentMessage", "LKR 300 payment recorded. Your new booking is confirmed; use this updated pass.");
+            redirect.addFlashAttribute("appointmentMessage", "Your new booking is confirmed. No additional payment was required.");
             return "redirect:/citizen/appointments/" + reference + "/pass";
         } catch (IllegalArgumentException exception) {
             model.addAttribute("changeError", exception.getMessage());

@@ -5,13 +5,14 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Controller.Citi
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller.CitizenSupportController;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller.WalkInAppointmentController;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Controller.DocumentRenewalReplacementController;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Controller.BiometricScheduleController;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import java.util.UUID;
 
 /** Require deletion forms to come from the same browser session that displayed them. */
 @ControllerAdvice(assignableTypes = {CitizenApplicationController.class, DocumentRenewalReplacementController.class,
-        CitizenSupportController.class, WalkInAppointmentController.class})
+        CitizenSupportController.class, WalkInAppointmentController.class, BiometricScheduleController.class})
 public class DeletionFormToken {
     private static final String KEY = "deletionFormToken";
 

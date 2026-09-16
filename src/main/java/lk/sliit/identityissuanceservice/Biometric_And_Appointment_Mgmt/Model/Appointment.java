@@ -35,6 +35,9 @@ public class Appointment {
     @Column(name = "centre_id", nullable = false)
     private Integer centreId;
 
+    @Column(name = "biometric_slot_id")
+    private Integer biometricSlotId;
+
     @Column(name = "appointment_type", nullable = false, length = 20)
     private String appointmentType;
 
@@ -76,6 +79,8 @@ public class Appointment {
     public void setApplicationId(Integer applicationId) { this.applicationId = applicationId; }
     public Integer getCentreId() { return centreId; }
     public void setCentreId(Integer centreId) { this.centreId = centreId; }
+    public Integer getBiometricSlotId() { return biometricSlotId; }
+    public void setBiometricSlotId(Integer biometricSlotId) { this.biometricSlotId = biometricSlotId; }
     public String getAppointmentType() { return appointmentType; }
     public void setAppointmentType(String appointmentType) { this.appointmentType = appointmentType; }
     public LocalDateTime getScheduledAt() { return scheduledAt; }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.LinkedHashMap;
 
 @Controller
 public class AppointmentController {
@@ -67,9 +67,7 @@ public class AppointmentController {
     @PostMapping("/citizen/appointments/biometric")
     public String confirmBiometricAppointment(
             @RequestParam(required = false) String applicationId,
-            @RequestParam(required = false) String centreId,
-            @RequestParam(required = false) String appointmentDate,
-            @RequestParam(required = false) String appointmentTime,
+            @RequestParam(required = false) String slotId,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -79,11 +77,9 @@ public class AppointmentController {
         Integer selectedApplicationId = null;
         try {
             selectedApplicationId = readInteger(applicationId, "Application details are missing. Please try again.");
-            Integer selectedCentreId = readInteger(centreId, "Select a service centre.");
-            LocalDate selectedDate = readDate(appointmentDate);
-            LocalTime selectedTime = readTime(appointmentTime);
+            Integer selectedSlotId = readInteger(slotId, "Select an available appointment time.");
             Appointment appointment = appointmentService.bookAppointment(
-                    citizenId, selectedApplicationId, selectedCentreId, selectedDate, selectedTime);
+                    citizenId, selectedApplicationId, selectedSlotId);
             redirectAttributes.addFlashAttribute("appointmentMessage", "Appointment confirmed successfully.");
             return "redirect:/citizen/appointments/" + appointment.getReferenceNo() + "/pass";
         } catch (IllegalArgumentException exception) {
@@ -94,25 +90,44 @@ public class AppointmentController {
     }
 
     @GetMapping("/citizen/appointments/biometric/availability")
-    public ResponseEntity<?> availability(@RequestParam Integer applicationId, @RequestParam Integer centreId,
-            @RequestParam String date, HttpSession session) {
+    public ResponseEntity<?> availability(
+            @RequestParam Integer applicationId,
+            @RequestParam Integer centreId,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            HttpSession session
+    ) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return ResponseEntity.status(401).build();
         try {
             var details = appointmentService.getBookingDetails(citizenId, applicationId);
-            LocalDate selectedDate = readDate(date);
-            if (selectedDate.isBefore(details.earliestDate()) || selectedDate.isAfter(details.latestDate())) {
-                throw new IllegalArgumentException("Choose a date within the booking window.");
-            }
-            var centre = details.centres().stream().filter(c -> centreId.equals(c.getCentreId())).findFirst()
+            LocalDate from = readDate(startDate);
+            LocalDate to = readDate(endDate);
+            details.centres().stream().filter(c -> centreId.equals(c.getCentreId())).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Select a valid centre."));
-            int remaining = appointmentService.remainingCapacity(centre, selectedDate, details.appointment().getAppointmentId());
-            var times = remaining == 0 ? java.util.List.<String>of() : java.util.List.of(
-                    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00")
-                    .stream().filter(time -> appointmentService.remainingSlotCapacity(centre,
-                            selectedDate.atTime(LocalTime.parse(time)), details.appointment().getAppointmentId()) > 0).toList();
+            if (from.isBefore(details.earliestDate()) || to.isAfter(details.latestDate()) || to.isBefore(from)) {
+                throw new IllegalArgumentException("Choose a valid calendar range within the booking window.");
+            }
+            var schedule = appointmentService.getAvailableSchedule(
+                    details.application().getServiceType(), centreId, from, to);
+            var grouped = new LinkedHashMap<LocalDate, java.util.List<java.util.Map<String, Object>>>();
+            for (var slot : schedule) {
+                if (!slot.available() || slot.remainingPlaces() < 1) continue;
+                grouped.computeIfAbsent(slot.slotDate(), ignored -> new java.util.ArrayList<>()).add(
+                        java.util.Map.of(
+                                "slotId", slot.slotId(),
+                                "time", slot.slotTime().toString(),
+                                "remaining", slot.remainingPlaces()
+                        ));
+            }
+            var dates = grouped.entrySet().stream().map(entry -> java.util.Map.of(
+                    "date", entry.getKey().toString(),
+                    "remaining", entry.getValue().stream()
+                            .mapToInt(slot -> (Integer) slot.get("remaining")).sum(),
+                    "slots", entry.getValue()
+            )).toList();
             return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
-                    .body(java.util.Map.of("remaining", remaining, "times", times));
+                    .body(java.util.Map.of("dates", dates));
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", exception.getMessage()));
         }
@@ -184,6 +199,9 @@ public class AppointmentController {
         model.addAttribute("documentType", documentType);
         model.addAttribute("queueRoute", queueRoute);
         model.addAttribute("biometricRoute", biometricRoute);
+        String servicePath = documentType.toLowerCase();
+        model.addAttribute("historyRoute", "/officer/" + servicePath + "/appointments");
+        model.addAttribute("scheduleRoute", "/officer/" + servicePath + "/appointments/schedule");
     }
 
     private boolean canAccess(HttpSession session, String requiredRole) {
@@ -219,14 +237,4 @@ public class AppointmentController {
         }
     }
 
-    private LocalTime readTime(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Select an appointment time.");
-        }
-        try {
-            return LocalTime.parse(value);
-        } catch (java.time.format.DateTimeParseException exception) {
-            throw new IllegalArgumentException("Select a valid appointment time.");
-        }
-    }
 }

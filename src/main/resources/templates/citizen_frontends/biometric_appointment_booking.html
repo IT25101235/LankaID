@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
   <link href="/css/citizen-theme.css" rel="stylesheet"/>
-  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}</style>
+  <style>body{font-family:'Public Sans',sans-serif;background:#f1f5f9}.appointment-day{min-height:72px}.appointment-day.selected{outline:3px solid #0284c7;outline-offset:-3px}.appointment-day:disabled{cursor:not-allowed}</style>
   <link href="/css/portal-shell.css?v=20260915-signout" rel="stylesheet"/>
 </head>
 <body class="min-h-screen text-slate-800">
@@ -20,12 +20,12 @@
     <div th:if="${appointmentMessage}" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-semibold text-emerald-700" th:text="${appointmentMessage}"></div>
     <div th:if="${appointmentError}" class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-semibold text-red-700" th:text="${appointmentError}"></div>
 
-    <div class="mb-5"><p class="text-xs font-bold text-sky-700 uppercase tracking-wide">Step 2 of 2</p><h1 class="text-2xl font-extrabold mt-1">Biometric collection appointment</h1><p class="text-sm text-slate-500 mt-1">Choose a date and time within the next 14 days.</p></div>
+    <div class="mb-5"><p class="text-xs font-bold text-sky-700 uppercase tracking-wide">Step 2 of 2</p><h1 class="text-2xl font-extrabold mt-1">Biometric collection appointment</h1><p class="text-sm text-slate-500 mt-1">Choose a date published by your document officer, then select an available time.</p></div>
 
     <div th:if="${appointment.appointmentStatus != 'PENDING_PAYMENT' and appointment.appointmentStatus != 'CANCELLED'}" class="bg-white border rounded-2xl p-7 text-center"><span class="material-symbols-outlined text-5xl text-emerald-600">event_available</span><h2 class="font-bold text-xl mt-2">Your appointment is confirmed</h2><p class="font-mono text-sky-700 font-bold mt-2" th:text="${appointment.referenceNo}">BIO-REF</p><a th:href="@{/citizen/appointments/{reference}/pass(reference=${appointment.referenceNo})}" class="inline-flex mt-5 bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Open QR appointment pass</a></div>
 
     <section th:if="${appointment.appointmentStatus != 'PENDING_PAYMENT'}" class="mt-4 bg-white border rounded-2xl p-5">
-      <p th:if="${appointment.appointmentStatus == 'CANCELLED'}" class="text-sm mb-3">Your booking is cancelled. Book again and pay LKR 300 to continue your application.</p>
+      <p th:if="${appointment.appointmentStatus == 'CANCELLED'}" class="text-sm mb-3">Your booking is cancelled. Choose another published slot to continue; your original payment is retained.</p>
       <a th:href="@{/citizen/appointments/{reference}/manage(reference=${appointment.referenceNo})}" class="inline-block rounded-xl bg-slate-800 text-white px-5 py-3 text-sm font-bold">Manage booking / rebook</a>
     </section>
 
@@ -33,19 +33,20 @@
       <input type="hidden" name="applicationId" th:value="${citizenApplication.applicationId}"/>
       <section class="bg-white border rounded-2xl shadow-sm p-5 sm:p-6">
         <div class="rounded-xl bg-sky-50 border border-sky-200 p-4"><p class="font-bold text-sky-900" th:text="|${citizenApplication.serviceType} application ${citizenApplication.applicationNo}|">Application</p><p class="text-xs text-sky-700 mt-1">Payment confirmed. The reference and QR pass are issued when this appointment is confirmed.</p></div>
-        <div class="grid sm:grid-cols-2 gap-4 mt-5" data-biometric-selection th:attr="data-application-id=${citizenApplication.applicationId}">
+        <div class="mt-5" data-biometric-selection th:attr="data-application-id=${citizenApplication.applicationId},data-earliest-date=${earliestDate},data-latest-date=${latestDate}">
           <label class="sm:col-span-2 text-sm font-semibold">Service centre
             <select required name="centreId" class="w-full mt-1.5 rounded-xl border-slate-300">
               <option value="">Select a centre</option>
               <option th:each="centre : ${centres}" th:value="${centre.centreId}" th:text="${centre.centreName + ' — ' + centre.city}">Centre</option>
             </select>
           </label>
-          <label class="text-sm font-semibold">Appointment date<input required type="date" name="appointmentDate" th:min="${earliestDate}" th:max="${latestDate}" th:value="${earliestDate}" class="w-full mt-1.5 rounded-xl border-slate-300"/><span class="block mt-1 text-xs font-normal text-slate-500" th:text="|Available from ${earliestDate} to ${latestDate}|">Available for the next two weeks</span></label>
-          <label class="text-sm font-semibold">Time slot
-            <select required name="appointmentTime" class="w-full mt-1.5 rounded-xl border-slate-300">
-              <option value="09:00">09:00 AM</option><option value="09:30">09:30 AM</option><option value="10:00">10:00 AM</option><option value="10:30">10:30 AM</option><option value="11:00">11:00 AM</option><option value="11:30">11:30 AM</option><option value="13:00">01:00 PM</option><option value="13:30">01:30 PM</option><option value="14:00">02:00 PM</option><option value="14:30">02:30 PM</option><option value="15:00">03:00 PM</option><option value="15:30">03:30 PM</option><option value="16:00">04:00 PM</option>
-            </select>
-          </label>
+          <input type="hidden" required name="slotId" value=""/>
+          <div class="mt-5 rounded-2xl border p-4" data-appointment-calendar>
+            <div class="flex items-center justify-between"><button type="button" data-calendar-previous class="rounded-lg border px-3 py-2 text-xs font-bold">← Previous</button><h2 data-calendar-month class="font-extrabold">Available dates</h2><button type="button" data-calendar-next class="rounded-lg border px-3 py-2 text-xs font-bold">Next →</button></div>
+            <div class="mt-4 grid grid-cols-7 text-center text-[11px] font-bold uppercase text-slate-400"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+            <div data-calendar-days class="mt-2 grid grid-cols-7 overflow-hidden rounded-xl border"></div>
+          </div>
+          <div class="mt-5"><h3 data-slot-heading class="font-bold">Select an available date</h3><div data-slot-list class="mt-3 grid sm:grid-cols-2 gap-3"></div></div>
         </div>
         <p data-capacity-message aria-live="polite" class="mt-3 text-xs text-slate-600">Select a centre and date to check availability.</p>
         <button type="submit" class="w-full mt-6 bg-sky-600 hover:bg-sky-700 text-white rounded-xl py-3 font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined">event_available</span>Confirm appointment</button>

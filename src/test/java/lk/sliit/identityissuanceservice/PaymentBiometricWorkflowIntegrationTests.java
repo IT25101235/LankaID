@@ -7,7 +7,9 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Cen
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentCheckInRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.BiometricCollectionRepository;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.BiometricAppointmentSlotRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BiometricScheduleService;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.GovernmentIdentityRecord;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
@@ -66,6 +68,8 @@ class PaymentBiometricWorkflowIntegrationTests {
     @Autowired BiometricCollectionRepository biometricRepository;
     @Autowired UserNotificationRepository userNotificationRepository;
     @Autowired CentreRepository centreRepository;
+    @Autowired BiometricAppointmentSlotRepository biometricSlotRepository;
+    @Autowired BiometricScheduleService biometricScheduleService;
 
     @Test
     void nicAndPassportCompletePaymentAppointmentQrAndBiometricCollection() throws Exception {
@@ -239,7 +243,7 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(content().string(containsString(serviceType + " application " + application.getApplicationNo())))
                 .andExpect(content().string(not(containsString("null application null"))))
                 .andExpect(content().string(containsString(LocalDate.now().plusDays(1).toString())))
-                .andExpect(content().string(containsString(LocalDate.now().plusDays(14).toString())));
+                .andExpect(content().string(containsString(LocalDate.now().plusDays(90).toString())));
 
         LocalDate appointmentDate = LocalDate.now().plusDays(1);
         // Each workflow gets its own centre so it does not compete for the same half-hour slot.
@@ -249,11 +253,16 @@ class PaymentBiometricWorkflowIntegrationTests {
         biometricCentre.setDistrict("Colombo");
         biometricCentre.setDailyCapacity(100);
         centreRepository.saveAndFlush(biometricCentre);
+        biometricScheduleService.publishDateRange(serviceType, biometricCentre.getCentreId(),
+                appointmentDate, appointmentDate, java.time.LocalTime.of(9, 0),
+                java.time.LocalTime.of(16, 30), 1, officer.getUserId());
+        var selectedSlot = biometricSlotRepository
+                .findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
+                        biometricCentre.getCentreId(), serviceType, appointmentDate, java.time.LocalTime.of(10, 0))
+                .orElseThrow();
         mockMvc.perform(post("/citizen/appointments/biometric")
                         .param("applicationId", application.getApplicationId().toString())
-                        .param("centreId", biometricCentre.getCentreId().toString())
-                        .param("appointmentDate", appointmentDate.toString())
-                        .param("appointmentTime", "10:00")
+                        .param("slotId", selectedSlot.getSlotId().toString())
                         .session(citizenSession))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(

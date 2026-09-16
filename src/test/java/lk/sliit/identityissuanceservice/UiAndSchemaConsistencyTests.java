@@ -39,6 +39,7 @@ class UiAndSchemaConsistencyTests {
                 "officers_frontends/application_review.html",
                 "officers_frontends/officer_application_tracking.html",
                 "officers_frontends/officer_appointments.html",
+                "officers_frontends/biometric_schedule.html",
                 "officers_frontends/biometric_collection.html",
                 "officers_frontends/csr_dashboard.html",
                 "officers_frontends/csr_support_requests.html",
@@ -83,6 +84,7 @@ class UiAndSchemaConsistencyTests {
     void everyOfficerTemplateExposesAuthenticatedIdentityToTheSharedSidebar() throws IOException {
         List<String> officerTemplates = List.of(
                 "application_review.html", "admin_dashboard.html", "biometric_collection.html",
+                "biometric_schedule.html",
                 "csr_dashboard.html", "csr_support_requests.html", "csr_complaints_detail.html",
                 "director_dashboard.html", "document_collection.html", "nic_verification_queue.html",
                 "officer_appointments.html", "officer_application_tracking.html",
@@ -168,6 +170,21 @@ class UiAndSchemaConsistencyTests {
         assertTrue(payment.contains("centreSelection.classList.toggle('hidden', home)"));
         assertTrue(payment.contains("centre.disabled = home"));
         assertTrue(payment.contains("if (home) centre.value = ''"));
+    }
+
+    @Test
+    void biometricAppointmentPagesExposeHistoryAndScheduleTabs() throws IOException {
+        String history = Files.readString(
+                TEMPLATE_ROOT.resolve("officers_frontends/officer_appointments.html"));
+        String schedule = Files.readString(
+                TEMPLATE_ROOT.resolve("officers_frontends/biometric_schedule.html"));
+
+        assertTrue(history.contains("Appointment History"));
+        assertTrue(history.contains("Schedule Settings"));
+        assertTrue(history.contains("${scheduleRoute}"));
+        assertTrue(schedule.contains("Appointment History"));
+        assertTrue(schedule.contains("Schedule Settings"));
+        assertTrue(schedule.contains("/appointments/schedule"));
     }
 
     @Test

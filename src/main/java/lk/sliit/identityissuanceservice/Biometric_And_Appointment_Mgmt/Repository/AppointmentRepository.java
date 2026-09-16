@@ -17,20 +17,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     Optional<Appointment> findByIdForChange(@org.springframework.data.repository.query.Param("id") Integer id);
 
     @org.springframework.data.jpa.repository.Query("""
-            select count(a) from Appointment a where a.appointmentType = 'BIOMETRIC'
-            and a.centreId = :centreId and a.scheduledAt >= :start and a.scheduledAt < :end
+            select count(a) from Appointment a where a.biometricSlotId = :slotId
             and a.appointmentStatus in ('CONFIRMED', 'CHECKED_IN', 'COMPLETED')
             and a.appointmentId <> :excludedId
             """)
-    long countBiometricBookings(Integer centreId, LocalDateTime start, LocalDateTime end, Integer excludedId);
+    long countActiveBiometricSlotBookings(Integer slotId, Integer excludedId);
 
-    @org.springframework.data.jpa.repository.Query("""
-            select count(a) from Appointment a where a.appointmentType = 'BIOMETRIC'
-            and a.centreId = :centreId and a.scheduledAt = :time
-            and a.appointmentStatus in ('CONFIRMED', 'CHECKED_IN', 'COMPLETED')
-            and a.appointmentId <> :excludedId
-            """)
-    long countBiometricSlotBookings(Integer centreId, LocalDateTime time, Integer excludedId);
+    List<Appointment> findAllByBiometricSlotIdAndAppointmentStatusIn(
+            Integer biometricSlotId, Collection<String> statuses);
+
+    boolean existsByBiometricSlotId(Integer biometricSlotId);
 
     Optional<Appointment> findByApplicationIdAndAppointmentType(Integer applicationId, String appointmentType);
 

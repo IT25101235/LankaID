@@ -2,39 +2,31 @@ package lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service;
 
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BookingChangeRequest;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
-import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.*;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
-import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.AppointmentChangePaymentService;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Service
 public class BiometricBookingChangeService {
     private final AppointmentRepository appointments;
-    private final CentreRepository centres;
     private final AppointmentCheckInRepository checkIns;
     private final CitizenApplicationRepository applications;
-    private final AppointmentService bookingService;
+    private final BiometricScheduleService schedules;
     private final PaymentService payments;
-    private final AppointmentChangePaymentService changePayments;
     private final NotificationService notifications;
 
-    public BiometricBookingChangeService(AppointmentRepository appointments, CentreRepository centres,
+    public BiometricBookingChangeService(AppointmentRepository appointments,
             AppointmentCheckInRepository checkIns, CitizenApplicationRepository applications,
-            AppointmentService bookingService, PaymentService payments,
-            AppointmentChangePaymentService changePayments, NotificationService notifications) {
+            BiometricScheduleService schedules,
+            PaymentService payments, NotificationService notifications) {
         this.appointments = appointments;
-        this.centres = centres;
         this.checkIns = checkIns;
         this.applications = applications;
-        this.bookingService = bookingService;
+        this.schedules = schedules;
         this.payments = payments;
-        this.changePayments = changePayments;
         this.notifications = notifications;
     }
 
@@ -50,36 +42,32 @@ public class BiometricBookingChangeService {
         applications.save(application);
         notifications.sendToCitizen(citizenId, null, "APPOINTMENT_CANCELLED",
                 "Booking " + appointment.getReferenceNo() + " was cancelled and its place released. "
-                + "Your original payment is retained. Pay LKR 300 when rebooking to continue your application.");
+                + "Your original payment is retained. Book another available slot without paying again to continue your application.");
         return appointment;
     }
 
     @Transactional
-    public Appointment payAndChange(Integer citizenId, BookingChangeRequest request,
-                                    Integer centreId, LocalDate date, LocalTime time) {
-        if (centreId == null) throw new IllegalArgumentException("Select a service centre.");
-        Centre centre = centres.findByIdForBooking(centreId)
-                .orElseThrow(() -> new IllegalArgumentException("Select a valid service centre."));
+    public Appointment changeBooking(Integer citizenId, BookingChangeRequest request, Integer slotId) {
         Appointment appointment = ownedBooking(citizenId, request);
+        var application = applications.findById(appointment.getApplicationId()).orElseThrow();
         boolean rebooking = "CANCELLED".equals(appointment.getAppointmentStatus());
         if (!rebooking) BookingChangePolicy.requireChangeAllowed(appointment);
-        bookingService.validateSelection(centre, date, time, appointment.getAppointmentId());
-        var newTime = date.atTime(time);
-        if (!rebooking && centreId.equals(appointment.getCentreId()) && newTime.equals(appointment.getScheduledAt())) {
-            throw new IllegalArgumentException("Choose a different date, time or centre. No payment is needed for an unchanged booking.");
+        var slot = schedules.lockBookableSlot(slotId, application.getServiceType(), appointment.getAppointmentId());
+        var newTime = slot.getSlotDate().atTime(slot.getSlotTime());
+        if (!rebooking && slot.getSlotId().equals(appointment.getBiometricSlotId())) {
+            throw new IllegalArgumentException("Choose a different appointment slot.");
         }
-        changePayments.record(appointment, newTime, rebooking ? "REBOOK" : "RESCHEDULE", request.token());
-        appointment.setCentreId(centreId);
+        appointment.setCentreId(slot.getCentreId());
+        appointment.setBiometricSlotId(slot.getSlotId());
         appointment.setScheduledAt(newTime);
         appointment.setAppointmentStatus("CONFIRMED");
         appointment.setQrCode(appointment.getReferenceNo());
         appointments.save(appointment);
-        var application = applications.findById(appointment.getApplicationId()).orElseThrow();
         application.setCurrentStatus("APPOINTMENT_BOOKED");
         applications.save(application);
         notifications.sendToCitizen(citizenId, null, "APPOINTMENT_CONFIRMED",
-                "LKR 300 received. Booking " + appointment.getReferenceNo() + " is confirmed for "
-                + newTime + ". Download the updated appointment pass.");
+                "Booking " + appointment.getReferenceNo() + " is confirmed for " + newTime
+                        + ". Your original payment was retained; no additional payment was required.");
         return appointment;
     }
 
