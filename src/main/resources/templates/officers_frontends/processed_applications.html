@@ -2,33 +2,46 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Processed Applications | LankaID</title>
+  <title>Reviewed Applications | LankaID</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="/css/portal-shell.css?v=20260915-signout" rel="stylesheet"/>
   <style>body{font-family:'Public Sans',sans-serif}</style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
-<header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="${queueRoute}" class="text-sm text-slate-300 hover:text-white flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>Pending queue</a><div class="h-6 w-px bg-slate-700"></div><h1 class="font-bold"><span th:text="${documentType}">NIC</span> Processed Applications</h1><a th:href="${biometricRoute}" class="ml-auto rounded-lg bg-cyan-600 hover:bg-cyan-700 px-4 py-2 text-xs font-bold">Biometric collection</a></div></header>
+<header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="${queueRoute}" class="text-sm text-slate-300">← Pending queue</a><h1 class="font-bold" th:text="|${documentType} Reviewed Applications|">Reviewed Applications</h1><a th:href="${biometricRoute}" class="ml-auto rounded-lg bg-cyan-600 px-4 py-2 text-xs font-bold">Biometric collection</a></div></header>
 <main class="max-w-7xl mx-auto p-5 sm:p-6">
-  <div class="flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-2xl font-bold">Review history</h2><p class="text-sm text-slate-500 mt-1">Applications already decided by this officer.</p></div><span class="text-xs bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full">Static demonstration data</span></div>
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mt-5">
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      <input id="search" oninput="filterRows()" class="rounded-xl border-slate-300 text-sm" placeholder="Search name or reference"/>
-      <select id="decision" onchange="filterRows()" class="rounded-xl border-slate-300 text-sm"><option value="all">All decisions</option><option value="approved">Approved</option><option value="correction">Correction requested</option><option value="rejected">Rejected</option></select>
-      <input type="date" class="rounded-xl border-slate-300 text-sm" value="2026-08-01"/>
-      <button onclick="alert('The filter has been reset for the prototype.')" class="rounded-xl border border-slate-300 text-sm font-semibold">Reset filters</button>
-    </div>
-  </section>
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm mt-5 overflow-hidden">
+  <h2 class="text-2xl font-bold">Review history</h2>
+  <p class="text-sm text-slate-500 mt-1" th:text="|Saved ${documentType} decisions. Each row is one review; an application can have several reviews.|">Saved decisions</p>
+  <form method="get" th:action="${reviewedRoute}" class="bg-white rounded-2xl border shadow-sm p-4 mt-5 grid sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+    <label class="text-xs font-bold">Name or reference<input name="search" th:value="${search}" maxlength="100" class="block w-full mt-2 rounded-xl border-slate-300 text-sm" placeholder="Search citizen or application"/></label>
+    <label class="text-xs font-bold">Decision<select name="decision" class="block w-full mt-2 rounded-xl border-slate-300 text-sm"><option value="">All decisions</option><option value="APPROVED" th:selected="${decision == 'APPROVED'}">Approved</option><option value="CORRECTION_REQUIRED" th:selected="${decision == 'CORRECTION_REQUIRED'}">Correction requested</option><option value="REJECTED" th:selected="${decision == 'REJECTED'}">Rejected</option></select></label>
+    <label class="text-xs font-bold">Reviewed on<input name="date" type="date" th:value="${date}" class="block w-full mt-2 rounded-xl border-slate-300 text-sm"/></label>
+    <button class="rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 text-sm font-bold">Apply filters</button>
+    <a th:href="${reviewedRoute}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-center">Reset filters</a>
+  </form>
+  <p th:if="${filterError}" role="alert" class="mt-4 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700" th:text="${filterError}"></p>
+  <section class="bg-white rounded-2xl border shadow-sm mt-5 overflow-hidden">
+    <div class="p-4 border-b text-sm"><strong th:text="${reviews.totalElements}">0</strong> matching reviews</div>
     <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="text-left p-4">Citizen</th><th class="text-left p-4">Reference</th><th class="text-left p-4">Type</th><th class="text-left p-4">Decision</th><th class="text-left p-4">Reviewed</th><th class="text-right p-4">Action</th></tr></thead>
-      <tbody id="rows" class="divide-y divide-slate-100">
-        <tr data-decision="approved"><td class="p-4 font-semibold">Kamal Perera</td><td class="p-4 font-mono text-xs">LK-2026-00183</td><td class="p-4">Renewal</td><td class="p-4"><span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Approved</span></td><td class="p-4 text-slate-500">22 Aug 2026</td><td class="p-4 text-right"><a th:href="${queueRoute + '/LK-2026-00183'}" class="text-sky-700 font-semibold text-xs">View</a></td></tr>
-        <tr data-decision="correction"><td class="p-4 font-semibold">Dilani Silva</td><td class="p-4 font-mono text-xs">LK-2026-00174</td><td class="p-4">Lost / damaged</td><td class="p-4"><span class="bg-amber-50 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">Correction requested</span></td><td class="p-4 text-slate-500">21 Aug 2026</td><td class="p-4 text-right"><a th:href="${queueRoute + '/LK-2026-00174'}" class="text-sky-700 font-semibold text-xs">View</a></td></tr>
-        <tr data-decision="rejected"><td class="p-4 font-semibold">Ruwan Fernando</td><td class="p-4 font-mono text-xs">LK-2026-00159</td><td class="p-4">New</td><td class="p-4"><span class="bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-bold">Rejected</span></td><td class="p-4 text-slate-500">19 Aug 2026</td><td class="p-4 text-right"><a th:href="${queueRoute + '/LK-2026-00159'}" class="text-sky-700 font-semibold text-xs">View</a></td></tr>
+      <tbody class="divide-y divide-slate-100">
+        <tr th:each="item : ${reviews.content}" data-review-row="true">
+          <td class="p-4 font-semibold" th:text="${item.citizenName()}">Citizen</td>
+          <td class="p-4"><p class="font-mono text-xs" th:text="${item.application.applicationNo}">Reference</p><p class="text-xs text-slate-500 mt-1" th:text="|Review ${item.review.reviewSequence}|">Review</p></td>
+          <td class="p-4" th:text="${item.kindLabel()}">Type</td>
+          <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold" th:classappend="${item.review.decision == 'APPROVED' ? 'bg-emerald-50 text-emerald-700' : (item.review.decision == 'REJECTED' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700')}" th:text="${item.decisionLabel()}">Decision</span></td>
+          <td class="p-4 text-slate-500" th:text="${item.review.reviewedAt == null ? 'Not recorded' : #temporals.format(item.review.reviewedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+          <td class="p-4 text-right"><a th:href="${queueRoute + '/' + item.application.applicationNo}" class="text-sky-700 font-semibold text-xs">View application</a></td>
+        </tr>
+        <tr th:if="${reviews.empty}"><td colspan="6" class="p-8 text-center text-slate-500">No reviewed applications match these filters.</td></tr>
       </tbody>
     </table></div>
+    <div th:if="${reviews.totalPages > 0}" class="p-4 border-t flex flex-wrap justify-between gap-3 text-sm">
+      <span th:text="|Page ${reviews.number + 1} of ${reviews.totalPages}|">Page</span>
+      <div class="flex gap-4"><a th:if="${reviews.hasPrevious()}" th:href="@{${reviewedRoute}(search=${search},decision=${decision},date=${date},page=${reviews.number - 1})}" class="text-cyan-700 font-bold">Previous</a><a th:if="${reviews.hasNext()}" th:href="@{${reviewedRoute}(search=${search},decision=${decision},date=${date},page=${reviews.number + 1})}" class="text-cyan-700 font-bold">Next</a></div>
+    </div>
   </section>
 </main>
-<script>function filterRows(){const q=document.getElementById('search').value.toLowerCase(),d=document.getElementById('decision').value;document.querySelectorAll('#rows tr').forEach(r=>r.style.display=(r.textContent.toLowerCase().includes(q)&&(d==='all'||r.dataset.decision===d))?'':'none')}</script>
-<script src="/js/portal-shell.js"></script>
+<script src="/js/portal-shell.js?v=20260915-signout"></script>
 </body></html>

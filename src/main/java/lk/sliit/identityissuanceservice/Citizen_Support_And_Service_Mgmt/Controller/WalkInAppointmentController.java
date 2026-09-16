@@ -1,5 +1,7 @@
 package lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller;
 
+import lk.sliit.identityissuanceservice.User_Mgmt.Controller.DeletionFormToken;
+
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletResponse;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
@@ -464,6 +466,28 @@ public class WalkInAppointmentController {
         }
         redirectAttributes.addAttribute("scheduleOpen", true);
         redirectAttributes.addAttribute("scheduleMonth", parseScheduleMonth(scheduleMonth).toString());
+        return "redirect:/officer/csr/walk-ins";
+    }
+
+    @PostMapping("/officer/csr/walk-ins/schedule/slot/{slotId}/delete")
+    public String deleteSlot(@org.springframework.web.bind.annotation.PathVariable Integer slotId,
+            @RequestParam(required = false) String deleteToken,
+            @RequestParam(required = false) Integer scheduleCentreId, @RequestParam(required = false) String scheduleMonth,
+            HttpSession session, RedirectAttributes redirect) {
+        String access = csrAccessRedirect(session);
+        if (access != null) return access;
+        try {
+            DeletionFormToken.check(deleteToken, session);
+            walkInService.deleteUnusedSlot(slotId);
+            redirect.addFlashAttribute("walkInMessage", "Unused slot deleted.");
+        } catch (IllegalArgumentException exception) {
+            redirect.addFlashAttribute("walkInError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirect.addFlashAttribute("walkInError", "The slot could not be deleted. Reload the schedule and try again.");
+        }
+        redirect.addAttribute("scheduleOpen", true);
+        if (scheduleCentreId != null) redirect.addAttribute("scheduleCentreId", scheduleCentreId);
+        redirect.addAttribute("scheduleMonth", parseScheduleMonth(scheduleMonth).toString());
         return "redirect:/officer/csr/walk-ins";
     }
 

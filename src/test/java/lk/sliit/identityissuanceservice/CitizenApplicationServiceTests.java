@@ -153,6 +153,7 @@ class CitizenApplicationServiceTests {
         CitizenApplication application = application();
         when(applicationRepository.findByApplicationIdAndCitizenId(101, 25))
                 .thenReturn(Optional.of(application));
+        when(applicationRepository.findEditableForUpdate(101, 25)).thenReturn(Optional.of(application));
         ApplicationDocument photograph = new ApplicationDocument();
         photograph.setDocumentType("PHOTOGRAPH");
         when(documentRepository.findAllByApplicationIdOrderByUploadedAtAsc(101))

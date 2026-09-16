@@ -23,6 +23,8 @@
     </div>
   </div>
 
+  <p th:if="${supportMessage}" role="status" class="mt-4 p-4 rounded-xl bg-emerald-50 text-emerald-700" th:text="${supportMessage}"></p>
+  <p th:if="${supportError}" role="alert" class="mt-4 p-4 rounded-xl bg-red-50 text-red-700" th:text="${supportError}"></p>
   <div class="grid sm:grid-cols-3 gap-3 mt-5">
     <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Waiting for CSR</p><p class="text-2xl font-bold mt-1" th:text="${openCount}">0</p></div>
     <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Responded</p><p class="text-2xl font-bold text-sky-700 mt-1" th:text="${respondedCount}">0</p></div>

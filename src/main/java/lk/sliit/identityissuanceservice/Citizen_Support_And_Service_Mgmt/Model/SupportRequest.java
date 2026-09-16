@@ -53,6 +53,12 @@ public class SupportRequest {
     }
 
     public Integer getRequestId() { return requestId; }
+    public boolean isDeletableContact() {
+        return "CONTACT".equals(requestType) && "OPEN".equals(requestStatus)
+                && handledByStaffId == null && respondedAt == null
+                && (response == null || response.isBlank())
+                && !"Existing document verification".equals(subject);
+    }
     public void setRequestId(Integer requestId) { this.requestId = requestId; }
     public Integer getCitizenId() { return citizenId; }
     public void setCitizenId(Integer citizenId) { this.citizenId = citizenId; }

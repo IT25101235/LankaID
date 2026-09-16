@@ -1,5 +1,8 @@
 package lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Controller;
 
+import lk.sliit.identityissuanceservice.User_Mgmt.Controller.DeletionFormToken;
+import org.springframework.dao.DataAccessException;
+
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,6 +30,23 @@ import java.util.Locale;
 
 @Controller
 public class CitizenSupportController {
+
+    @PostMapping("/citizen/support/{reference}/delete")
+    public String deleteContact(@PathVariable String reference, @RequestParam(required = false) String deleteToken,
+            HttpSession session, RedirectAttributes redirect) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return "redirect:/login";
+        try {
+            DeletionFormToken.check(deleteToken, session);
+            supportService.deleteUnansweredContact(citizenId, reference);
+            redirect.addFlashAttribute("supportMessage", "Contact request deleted.");
+        } catch (IllegalArgumentException exception) {
+            redirect.addFlashAttribute("supportError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirect.addFlashAttribute("supportError", "The request could not be deleted. Reload and try again.");
+        }
+        return "redirect:/citizen/support";
+    }
 
     private final CitizenSupportService supportService;
     private final WalkInAppointmentService walkInService;

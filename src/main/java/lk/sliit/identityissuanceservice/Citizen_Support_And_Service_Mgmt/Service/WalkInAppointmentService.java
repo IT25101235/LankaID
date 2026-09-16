@@ -486,6 +486,22 @@ public class WalkInAppointmentService {
     }
 
     @Transactional
+    public void deleteUnusedSlot(Integer slotId) {
+        // Booking uses this same lock, so a slot cannot be booked while it is being deleted.
+        WalkInSlot slot = slotRepository.findByIdForBooking(slotId)
+                .orElseThrow(() -> new IllegalArgumentException("Walk-in slot was not found."));
+        LocalDateTime time = slot.getSlotDate().atTime(slot.getSlotTime());
+        if (!time.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Only future unused slots can be deleted.");
+        }
+        if (appointmentRepository.existsByAppointmentTypeAndCentreIdAndScheduledAt(WALK_IN, slot.getCentreId(), time)) {
+            throw new IllegalArgumentException("This slot has booking history and cannot be deleted. Close it if needed.");
+        }
+        slotRepository.delete(slot);
+        slotRepository.flush();
+    }
+
+    @Transactional
     public WalkInAppointmentView checkIn(String reference, Integer staffId, String method) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         Appointment appointment = appointmentRepository.findForChange(clean(reference))

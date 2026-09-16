@@ -333,6 +333,8 @@ public class DocumentRenewalReplacementService {
 
     @Transactional
     public CitizenApplication submitRequest(Integer citizenId, Integer applicationId) {
+        applicationRepository.findEditableForUpdate(applicationId, citizenId)
+                .orElseThrow(() -> new IllegalArgumentException("Only drafts or corrected requests can be submitted."));
         CitizenApplication application = getRequest(citizenId, applicationId);
         boolean resubmission = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
         if (!"DRAFT".equals(application.getCurrentStatus()) && !resubmission) {

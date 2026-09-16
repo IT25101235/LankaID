@@ -44,17 +44,6 @@ public class NicVerificationController {
         return "officers_frontends/nic_verification_queue";
     }
 
-    @GetMapping("/officer/nic/applications/processed")
-    public String processedNicApplications(Model model, HttpSession session) {
-        String accessResult = checkAccess(session);
-        if (accessResult != null) {
-            return accessResult;
-        }
-
-        addOfficerPageData(model, "NIC", "/officer/nic/applications", "/officer/nic/biometrics");
-        return "officers_frontends/processed_applications";
-    }
-
     @GetMapping("/officer/nic/applications/{reference}")
     public String reviewNicApplication(
             @PathVariable String reference,

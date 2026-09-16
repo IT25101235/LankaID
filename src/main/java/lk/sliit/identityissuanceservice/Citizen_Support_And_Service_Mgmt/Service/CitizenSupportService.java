@@ -139,7 +139,8 @@ public class CitizenSupportService {
 
     @Transactional
     public SupportRequestView respond(String reference, Integer staffId, String response) {
-        SupportRequest request = findRequest(reference);
+        SupportRequest request = supportRepository.findForUpdate(requestId(reference))
+                .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
         String cleanResponse = clean(response);
         if (cleanResponse.length() < 5 || cleanResponse.length() > 2000) {
             throw new IllegalArgumentException("Response must contain between 5 and 2000 characters.");
@@ -166,7 +167,8 @@ public class CitizenSupportService {
 
     @Transactional
     public SupportRequestView resolve(String reference, Integer staffId) {
-        SupportRequest request = findRequest(reference);
+        SupportRequest request = supportRepository.findForUpdate(requestId(reference))
+                .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
         if ("Existing document verification".equals(request.getSubject())) {
             throw new IllegalArgumentException("Use the identity verification decision form to close this request.");
         }
@@ -294,6 +296,18 @@ public class CitizenSupportService {
 
     private String shortMessage(String message) {
         return message.length() <= 160 ? message : message.substring(0, 157) + "...";
+    }
+
+    @Transactional
+    public void deleteUnansweredContact(Integer citizenId, String reference) {
+        SupportRequest request = supportRepository.findForUpdate(requestId(reference))
+                .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
+        if (!citizenId.equals(request.getCitizenId())) throw new IllegalArgumentException("Support request was not found.");
+        if (!request.isDeletableContact()) {
+            throw new IllegalArgumentException("Only unanswered Contact Us requests can be deleted. Complaints and identity verification requests are retained.");
+        }
+        supportRepository.delete(request);
+        supportRepository.flush();
     }
 
     private String clean(String value) {

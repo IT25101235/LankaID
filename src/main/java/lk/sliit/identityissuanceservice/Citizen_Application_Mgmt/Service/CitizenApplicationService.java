@@ -1,5 +1,8 @@
 package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenProfileMapper;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
@@ -358,11 +361,44 @@ public class CitizenApplicationService {
 
     @Transactional
     public CitizenApplication submitNewApplication(Integer citizenId, Integer applicationId) {
+        applicationRepository.findEditableForUpdate(applicationId, citizenId)
+                .orElseThrow(() -> new IllegalArgumentException("Only drafts or corrected applications can be submitted."));
         CitizenApplication application = getNewApplication(citizenId, applicationId);
         checkNewEligibility(getEligibility(citizenId), application.getServiceType());
         submitWhenDocumentsComplete(application, requiredNewDocumentTypes(application));
         application = applicationRepository.save(application);
         sendSubmissionNotification(application);
+        return application;
+    }
+
+    /** Shared by new applications, renewals and replacements. Submitted evidence is retained. */
+    @Transactional
+    public CitizenApplication deleteDraftDocument(Integer citizenId, Integer applicationId, Integer documentId) {
+        CitizenApplication application = applicationRepository.findEditableForUpdate(applicationId, citizenId)
+                .orElseThrow(() -> new IllegalArgumentException("Only documents in your unsubmitted draft can be deleted."));
+        if (!"DRAFT".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("Only documents in an unsubmitted draft can be deleted.");
+        }
+        ApplicationDocument document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new IllegalArgumentException("Document was not found."));
+        if (!applicationId.equals(document.getApplicationId()) || !"PENDING".equals(document.getVerificationStatus())) {
+            throw new IllegalArgumentException("Only an unreviewed document belonging to this draft can be deleted.");
+        }
+        Path file = uploadRoot.resolve(document.getFilePath()).normalize();
+        if (!file.startsWith(uploadRoot)) throw new IllegalArgumentException("Invalid document path.");
+        documentRepository.delete(document);
+        documentRepository.flush();
+        // Remove the file only after the database delete commits, so rollback keeps the upload usable.
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override public void afterCommit() {
+                        try { Files.deleteIfExists(file); }
+                        catch (IOException exception) {
+                            System.getLogger(CitizenApplicationService.class.getName()).log(
+                                    System.Logger.Level.WARNING, "Draft document deleted; file cleanup failed.", exception);
+                        }
+                    }
+                });
         return application;
     }
 

@@ -1,5 +1,9 @@
 package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository;
 
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import jakarta.persistence.LockModeType;
+
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +16,13 @@ import java.util.Optional;
 
 @Repository
 public interface CitizenApplicationRepository extends JpaRepository<CitizenApplication, Integer> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select a from CitizenApplication a where a.applicationId = :applicationId and a.citizenId = :citizenId
+            and a.currentStatus in ('DRAFT', 'CORRECTION_REQUIRED')
+            """)
+    Optional<CitizenApplication> findEditableForUpdate(Integer applicationId, Integer citizenId);
 
     boolean existsByApplicationNo(String applicationNo);
 

@@ -12,6 +12,8 @@ import java.util.Optional;
 
 public interface WalkInAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
+    boolean existsByAppointmentTypeAndCentreIdAndScheduledAt(String appointmentType, Integer centreId, LocalDateTime scheduledAt);
+
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select a from Appointment a where a.referenceNo = :reference and a.appointmentType = 'WALK_IN'")
     Optional<Appointment> findForChange(@org.springframework.data.repository.query.Param("reference") String reference);

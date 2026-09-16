@@ -44,17 +44,6 @@ public class PassportVerificationController {
         return "officers_frontends/passport_verification_queue";
     }
 
-    @GetMapping("/officer/passport/applications/processed")
-    public String processedPassportApplications(Model model, HttpSession session) {
-        String accessResult = checkAccess(session);
-        if (accessResult != null) {
-            return accessResult;
-        }
-
-        addOfficerPageData(model, "Passport", "/officer/passport/applications", "/officer/passport/biometrics");
-        return "officers_frontends/processed_applications";
-    }
-
     @GetMapping("/officer/passport/applications/{reference}")
     public String reviewPassportApplication(
             @PathVariable String reference,

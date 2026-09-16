@@ -1,5 +1,9 @@
 package lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository;
 
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import jakarta.persistence.LockModeType;
+
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Model.SupportRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +15,9 @@ import java.util.List;
 
 @Repository
 public interface SupportRequestRepository extends JpaRepository<SupportRequest, Integer> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from SupportRequest r where r.requestId = :id")
+    Optional<SupportRequest> findForUpdate(Integer id);
     Optional<SupportRequest> findFirstByCitizenIdAndRequestTypeAndSubjectOrderByRequestIdDesc(
             Integer citizenId, String requestType, String subject);
 
