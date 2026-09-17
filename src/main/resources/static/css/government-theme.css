@@ -1194,6 +1194,10 @@ body.gov-landing-page > main {
   border-color: #c98eac !important;
 }
 
+.gov-reference-text {
+  color: var(--gov-maroon) !important;
+}
+
 .service-card {
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }

@@ -81,7 +81,7 @@
         <tbody id="readyRows" class="divide-y divide-slate-800">
         <tr th:each="row : ${readyApplications}" th:attr="data-service=${row.serviceType}">
           <td class="p-4"><input class="print-record rounded text-purple-500" type="checkbox" name="applicationIds" th:value="${row.applicationId}" onchange="updateSelection()"/></td>
-          <td class="p-4 font-mono text-xs text-cyan-300" th:text="${row.applicationNo}">Application</td>
+          <td class="gov-reference-text p-4 font-mono text-xs font-bold" th:text="${row.applicationNo}">Application</td>
           <td class="p-4"><span class="font-bold" th:text="${row.serviceType}">NIC</span><span class="block text-xs text-slate-500" th:text="${#strings.replace(row.applicationKind, '_', ' ')}">NEW</span></td>
           <td class="p-4"><span class="font-semibold" th:text="${row.citizenName}">Citizen</span><span class="block text-xs text-slate-500" th:text="${row.email}">Email</span></td>
           <td class="p-4 text-slate-300" th:text="${row.dateOfBirth == null ? 'Not recorded' : #temporals.format(row.dateOfBirth, 'dd MMM yyyy')}">DOB</td>
@@ -111,7 +111,7 @@
         <thead class="bg-slate-950 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Document number</th><th class="p-4 text-left">Application</th><th class="p-4 text-left">Type</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Contact</th></tr></thead>
         <tbody class="divide-y divide-slate-800">
         <tr th:each="row : ${printedApplications}">
-          <td class="p-4 font-mono font-bold text-emerald-300" th:text="${row.documentNumber}">Number</td>
+          <td class="gov-reference-text p-4 font-mono font-bold" th:text="${row.documentNumber}">Number</td>
           <td class="p-4 font-mono text-xs" th:text="${row.applicationNo}">Application</td>
           <td class="p-4" th:text="${row.serviceType}">NIC</td>
           <td class="p-4" th:text="${row.citizenName}">Citizen</td>
