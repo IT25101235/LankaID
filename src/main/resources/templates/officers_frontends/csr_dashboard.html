@@ -9,14 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>
-  body { font-family: 'Public Sans', sans-serif; }
-  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
-  .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-  .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
-  .sidebar-link .material-symbols-outlined { font-size: 20px; }
-</style>
-<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 

@@ -6,10 +6,10 @@
   const isCitizen = path.startsWith('/citizen/') || path === '/walk-in' || path.startsWith('/walk-in/');
   if (!isOfficer && !isCitizen) return;
 
-  if (!document.querySelector('link[href^="/css/portal-shell.css"]')) {
+  if (!document.querySelector('link[href^="/css/government-theme.css"]')) {
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = '/css/portal-shell.css?v=20260915-signout';
+    stylesheet.href = '/css/government-theme.css?v=20260917';
     document.head.appendChild(stylesheet);
   }
 
@@ -130,9 +130,9 @@
   }
 
   function brandMarkup() {
-    return '<span class="portal-brand-mark"><span class="material-symbols-outlined">account_balance</span></span>' +
+    return '<span class="portal-brand-mark"><img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"></span>' +
       '<span><span class="portal-brand-name">Lanka<span>ID</span></span>' +
-      '<span class="portal-brand-subtitle">Digital Government Services</span></span>';
+      '<span class="portal-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு<br>Government of Sri Lanka</span></span>';
   }
 
   function navItem(item) {

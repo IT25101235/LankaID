@@ -8,44 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>
-  body { font-family: 'Public Sans', sans-serif; }
-  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
-  .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-  .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
-  .sidebar-link .material-symbols-outlined { font-size: 20px; }
-  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; }
-  input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(8,145,178,0.16); border-color: #0891b2 !important; }
-  .light-admin-table { background: #fff; color: #334155; }
-  .light-admin-table thead { background: #f8fafc; }
-  .light-admin-table thead tr, .light-admin-table th { color: #475569 !important; }
-  .light-admin-table tbody { color: #334155 !important; }
-  .light-admin-table tbody tr:hover { background: #f1f5f9 !important; }
-  .light-admin-table .text-white { color: #0f172a !important; }
-  .light-admin-table .text-slate-300,
-  .light-admin-table .text-slate-400,
-  .light-admin-table .text-slate-500 { color: #475569 !important; }
-  .light-admin-table .bg-slate-700 { background: #e2e8f0 !important; color: #334155 !important; }
-  .light-admin-table .hover\:bg-slate-600:hover { background: #cbd5e1 !important; }
-  .light-admin-table .hover\:bg-amber-900\/50:hover { background: #fef3c7 !important; }
-  .light-admin-table .hover\:bg-red-900\/50:hover { background: #fee2e2 !important; }
-  .light-admin-table .bg-sky-900\/50 { background: #e0f2fe !important; }
-  .light-admin-table .text-sky-400 { color: #0369a1 !important; }
-  .light-admin-table .border-sky-800 { border-color: #bae6fd !important; }
-  .light-admin-table .bg-emerald-900\/50 { background: #d1fae5 !important; }
-  .light-admin-table .text-emerald-400 { color: #047857 !important; }
-  .light-admin-table .border-emerald-800 { border-color: #a7f3d0 !important; }
-  .light-admin-table .bg-indigo-900\/50 { background: #e0e7ff !important; }
-  .light-admin-table .text-indigo-400 { color: #4338ca !important; }
-  .light-admin-table .border-indigo-800 { border-color: #c7d2fe !important; }
-  .light-admin-table .bg-cyan-900\/50 { background: #cffafe !important; }
-  .light-admin-table .text-cyan-400 { color: #0e7490 !important; }
-  .light-admin-table .border-cyan-800 { border-color: #a5f3fc !important; }
-  .light-admin-table .bg-purple-900\/50 { background: #f3e8ff !important; }
-  .light-admin-table .text-purple-400 { color: #7e22ce !important; }
-  .light-admin-table .border-purple-800 { border-color: #e9d5ff !important; }
-</style>
-<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 

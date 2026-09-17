@@ -8,15 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-  <link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
-  <style>
-    body { font-family: 'Public Sans', sans-serif; }
-    .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; color:#94a3b8; font-size:14px; font-weight:600; transition:.15s; }
-    .sidebar-link:hover,.sidebar-link.active { background:rgba(34,211,238,.12); color:#67e8f9; }
-    .metric-card { background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; color:#0f172a; box-shadow:0 8px 24px rgba(15,39,71,.06); }
-    .metric-card .text-slate-400,.metric-card .text-slate-500 { color:#475569 !important; }
-    .metric-card .bg-slate-800 { background:#e2e8f0 !important; }
-  </style>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <aside class="w-64 min-h-screen bg-slate-950 fixed inset-y-0 left-0 z-30 border-r border-slate-800 flex flex-col">
@@ -113,8 +105,8 @@ const monthLabels = /*[[${stats.monthLabels}]]*/ [];
 const nicMonthly = /*[[${stats.monthlyNicApplications}]]*/ [];
 const passportMonthly = /*[[${stats.monthlyPassportApplications}]]*/ [];
 const chartOptions = {responsive:true,plugins:{legend:{labels:{color:'#334155'}}},scales:{x:{grid:{color:'rgba(100,116,139,.14)'},ticks:{color:'#475569'}},y:{beginAtZero:true,grid:{color:'rgba(100,116,139,.14)'},ticks:{color:'#475569',precision:0}}}};
-new Chart(document.getElementById('volumeChart'),{type:'line',data:{labels:monthLabels,datasets:[{label:'NIC',data:nicMonthly,borderColor:'#0284c7',backgroundColor:'rgba(14,165,233,.12)',fill:true,tension:.35},{label:'Passport',data:passportMonthly,borderColor:'#4f46e5',backgroundColor:'rgba(99,102,241,.10)',fill:true,tension:.35}]},options:chartOptions});
-new Chart(document.getElementById('applicationChart'),{type:'bar',data:{labels:monthLabels,datasets:[{label:'NIC',data:nicMonthly,backgroundColor:'#0ea5e9'},{label:'Passport',data:passportMonthly,backgroundColor:'#6366f1'}]},options:chartOptions});
+new Chart(document.getElementById('volumeChart'),{type:'line',data:{labels:monthLabels,datasets:[{label:'NIC',data:nicMonthly,borderColor:'#1f6e8c',backgroundColor:'rgba(31,110,140,.12)',fill:true,tension:.35},{label:'Passport',data:passportMonthly,borderColor:'#681042',backgroundColor:'rgba(104,16,66,.10)',fill:true,tension:.35}]},options:chartOptions});
+new Chart(document.getElementById('applicationChart'),{type:'bar',data:{labels:monthLabels,datasets:[{label:'NIC',data:nicMonthly,backgroundColor:'#1f6e8c'},{label:'Passport',data:passportMonthly,backgroundColor:'#681042'}]},options:chartOptions});
 function showSection(section) {
   ['overview','applications','officers'].forEach(name => {
     document.getElementById('section-' + name).classList.toggle('hidden', name !== section);

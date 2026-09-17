@@ -109,12 +109,14 @@ class UiAndSchemaConsistencyTests {
                 TEMPLATE_ROOT.resolve("officers_frontends/csr_complaints_detail.html"));
         String director = Files.readString(
                 TEMPLATE_ROOT.resolve("officers_frontends/director_dashboard.html"));
+        String governmentTheme = Files.readString(Path.of(
+                "src", "main", "resources", "static", "css", "government-theme.css"));
         String portalShell = Files.readString(Path.of(
                 "src", "main", "resources", "static", "js", "portal-shell.js"));
 
         assertTrue(supportReview.contains("support-back-button"));
         assertTrue(supportReview.contains("Back to support queue"));
-        assertTrue(director.contains(".metric-card { background:#ffffff"));
+        assertTrue(governmentTheme.contains(".metric-card {"));
         assertTrue(director.contains("legend:{labels:{color:'#334155'}}"));
         assertTrue(portalShell.contains("/officer/admin?section=centres"));
     }
@@ -124,7 +126,7 @@ class UiAndSchemaConsistencyTests {
         String portalShell = Files.readString(Path.of(
                 "src", "main", "resources", "static", "js", "portal-shell.js"));
         String portalStyles = Files.readString(Path.of(
-                "src", "main", "resources", "static", "css", "portal-shell.css"));
+                "src", "main", "resources", "static", "css", "government-theme.css"));
         String landingPage = Files.readString(TEMPLATE_ROOT.resolve("index.html"));
         String citizenNavigation = portalShell.substring(
                 portalShell.indexOf("function citizenConfig()"),
@@ -145,7 +147,7 @@ class UiAndSchemaConsistencyTests {
         assertTrue(portalStyles.contains(".citizen-topbar"));
         assertTrue(portalStyles.contains("background: var(--portal-secondary) !important"));
         assertTrue(portalStyles.contains("position: sticky"));
-        assertTrue(landingPage.contains("bg-[#0f2747] border-b border-[#1e3a5f]"));
+        assertTrue(landingPage.contains("gov-site-header gov-official-strip"));
         assertTrue(landingPage.contains("Access Dashboard"));
         assertTrue(landingPage.contains("th:if=\"${!landingSignedIn}\""));
     }
