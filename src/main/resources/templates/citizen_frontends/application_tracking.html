@@ -56,6 +56,10 @@
         </div>
         <span class="self-start text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1.5 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
       </div>
+      <div th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p class="font-bold">Officer requested a correction</p>
+        <p class="mt-1"><span class="font-semibold">Items to correct:</span> <span th:text="${correctionMessages.get(citizenApplication.applicationId) != null ? correctionMessages.get(citizenApplication.applicationId) : 'Review the application form and uploaded documents.'}">Application form details</span></p>
+      </div>
       <div class="application-progress mt-6 overflow-x-auto pb-1" th:attr="data-status=${citizenApplication.currentStatus},data-delivery-status=${deliveryInfo == null ? '' : deliveryInfo.delivery.deliveryStatus}">
         <div class="application-progress-line"></div>
         <div class="grid grid-cols-7 min-w-[680px]">

@@ -178,25 +178,29 @@ public class VerificationReviewService {
 
         List<ApplicationDocument> documents = documentRepository
                 .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId());
-        for (ApplicationDocument document : documents) {
-            if (selectedDocumentIds.contains(document.getDocumentId())) {
-                document.setVerificationStatus("REJECTED");
-                document.setVerifiedByStaffId(null);
-                document.setVerifiedAt(null);
-            }
+        List<ApplicationDocument> selectedDocuments = documents.stream()
+                .filter(document -> selectedDocumentIds.contains(document.getDocumentId()))
+                .toList();
+        if (!correctForm && selectedDocuments.isEmpty()) {
+            throw new IllegalArgumentException("Select the application form or at least one document.");
+        }
+
+        List<String> requestedItems = new java.util.ArrayList<>();
+        if (correctForm) requestedItems.add("Application form details");
+        selectedDocuments.stream()
+                .map(document -> displayDocumentType(document.getDocumentType()))
+                .forEach(requestedItems::add);
+        String correctionMessage = String.join(", ", requestedItems);
+
+        for (ApplicationDocument document : selectedDocuments) {
+            document.setVerificationStatus("REJECTED");
+            document.setVerifiedByStaffId(null);
+            document.setVerifiedAt(null);
         }
         documentRepository.saveAll(documents);
 
         application.setCurrentStatus("CORRECTION_REQUIRED");
         applicationRepository.save(application);
-
-        List<String> requestedItems = new java.util.ArrayList<>();
-        if (correctForm) requestedItems.add("application form");
-        documents.stream()
-                .filter(document -> selectedDocumentIds.contains(document.getDocumentId()))
-                .map(ApplicationDocument::getDocumentType)
-                .forEach(requestedItems::add);
-        String correctionMessage = "Correct: " + String.join(", ", requestedItems);
         saveReview(application, staffId, "CORRECTION_REQUIRED", correctionMessage);
         notificationService.sendToCitizen(
                 application.getCitizenId(),
@@ -302,6 +306,11 @@ public class VerificationReviewService {
 
     private String clean(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String displayDocumentType(String documentType) {
+        String label = clean(documentType).toLowerCase(Locale.ROOT).replace('_', ' ');
+        return label.isEmpty() ? "Document" : Character.toUpperCase(label.charAt(0)) + label.substring(1);
     }
 
     private String contentTypeFromName(String fileName) {

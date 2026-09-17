@@ -117,6 +117,10 @@
         </summary>
 
         <div class="border-t border-slate-100 px-4 sm:px-5 py-5">
+          <div th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p class="font-bold">Officer requested a correction</p>
+            <p class="mt-1"><span class="font-semibold">Items to correct:</span> <span th:text="${correctionMessages.get(citizenApplication.applicationId) != null ? correctionMessages.get(citizenApplication.applicationId) : 'Review the application form and uploaded documents.'}">Application form details</span></p>
+          </div>
           <div class="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
             <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Next action</span>
             <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>

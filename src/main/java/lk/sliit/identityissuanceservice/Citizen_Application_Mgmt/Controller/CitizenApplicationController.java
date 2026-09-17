@@ -7,6 +7,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicAppli
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewPassportApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.springframework.stereotype.Controller;
@@ -26,15 +27,18 @@ public class CitizenApplicationController {
     private final CitizenApplicationService applicationService;
     private final NotificationService notificationService;
     private final DocumentDeliveryService deliveryService;
+    private final CitizenCorrectionRequestService correctionRequestService;
 
     public CitizenApplicationController(
             CitizenApplicationService applicationService,
             NotificationService notificationService,
-            DocumentDeliveryService deliveryService
+            DocumentDeliveryService deliveryService,
+            CitizenCorrectionRequestService correctionRequestService
     ) {
         this.applicationService = applicationService;
         this.notificationService = notificationService;
         this.deliveryService = deliveryService;
+        this.correctionRequestService = correctionRequestService;
     }
 
     @GetMapping("/citizen/dashboard")
@@ -58,6 +62,7 @@ public class CitizenApplicationController {
                 applicationService.hasActiveApplication(citizenId, CitizenApplicationService.PASSPORT)
         );
         model.addAttribute("applications", applicationService.getCitizenApplications(citizenId));
+        model.addAttribute("correctionMessages", correctionRequestService.getCurrentCorrectionMessages(citizenId));
         model.addAttribute("deliveryByApplicationId", deliveryService.getCitizenDeliveryMap(citizenId));
         model.addAttribute("unreadNotificationCount", notificationService.getUnreadCount(citizenId));
         return "citizen_frontends/citizen_dashboard";
@@ -104,7 +109,7 @@ public class CitizenApplicationController {
         }
         if (bindingResult.hasErrors()) {
             addNewFormData(model, "NIC");
-            addEditFormData(model, editingApplication);
+            addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/nic_application_form";
         }
 
@@ -117,7 +122,7 @@ public class CitizenApplicationController {
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
             addNewFormData(model, "NIC");
-            addEditFormData(model, editingApplication);
+            addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/nic_application_form";
         }
     }
@@ -156,7 +161,7 @@ public class CitizenApplicationController {
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewNicCorrection(citizenId, applicationId));
             addNewFormData(model, "NIC");
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/nic_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -205,7 +210,7 @@ public class CitizenApplicationController {
         }
         if (bindingResult.hasErrors()) {
             addNewFormData(model, "Passport");
-            addEditFormData(model, editingApplication);
+            addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/passport_application_form";
         }
 
@@ -218,7 +223,7 @@ public class CitizenApplicationController {
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
             addNewFormData(model, "Passport");
-            addEditFormData(model, editingApplication);
+            addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/passport_application_form";
         }
     }
@@ -260,7 +265,7 @@ public class CitizenApplicationController {
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewPassportCorrection(citizenId, applicationId));
             addNewFormData(model, "Passport");
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/passport_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -327,6 +332,7 @@ public class CitizenApplicationController {
             model.addAttribute("servicePath", service);
             model.addAttribute("workflowPath", "applications");
             model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
+            addCorrectionMessage(model, citizenId, application);
             applicationService.getNicApplication(applicationId)
                     .ifPresent(value -> model.addAttribute("nicApplication", value));
             applicationService.getPassportApplication(applicationId)
@@ -407,12 +413,17 @@ public class CitizenApplicationController {
         model.addAttribute("servicePath", service);
         model.addAttribute("workflowPath", "applications");
         model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
+        addCorrectionMessage(model, citizenId, application);
     }
 
-    private void addCorrectionFormData(Model model, Integer applicationId) {
+    private void addCorrectionFormData(Model model, Integer citizenId, Integer applicationId) {
         if (applicationId != null) {
             model.addAttribute("correctionApplicationId", applicationId);
             model.addAttribute("pageTitle", "Correct Application Details");
+            model.addAttribute(
+                    "correctionMessage",
+                    correctionRequestService.getCurrentCorrectionMessage(citizenId, applicationId)
+            );
         }
     }
 
@@ -421,12 +432,21 @@ public class CitizenApplicationController {
         model.addAttribute("pageTitle", "Edit Saved Draft");
     }
 
-    private void addEditFormData(Model model, CitizenApplication application) {
+    private void addEditFormData(Model model, Integer citizenId, CitizenApplication application) {
         if (application == null) return;
         if ("CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
-            addCorrectionFormData(model, application.getApplicationId());
+            addCorrectionFormData(model, citizenId, application.getApplicationId());
         } else {
             addDraftEditFormData(model, application.getApplicationId());
+        }
+    }
+
+    private void addCorrectionMessage(Model model, Integer citizenId, CitizenApplication application) {
+        if ("CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            model.addAttribute(
+                    "correctionMessage",
+                    correctionRequestService.getCurrentCorrectionMessage(citizenId, application.getApplicationId())
+            );
         }
     }
 

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.PassportRenewalReplacementForm;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentRenewalReplacementService;
@@ -22,9 +23,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class DocumentRenewalReplacementController {
 
     private final DocumentRenewalReplacementService renewalService;
+    private final CitizenCorrectionRequestService correctionRequestService;
 
-    public DocumentRenewalReplacementController(DocumentRenewalReplacementService renewalService) {
+    public DocumentRenewalReplacementController(
+            DocumentRenewalReplacementService renewalService,
+            CitizenCorrectionRequestService correctionRequestService
+    ) {
         this.renewalService = renewalService;
+        this.correctionRequestService = correctionRequestService;
     }
 
     @GetMapping("/citizen/applications/nic/{formKind:renewal|replacement}")
@@ -58,7 +64,7 @@ public class DocumentRenewalReplacementController {
         if (citizenId == null) return "redirect:/login";
         if (bindingResult.hasErrors()) {
             addFormData(model, citizenId, "NIC", formKind);
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/nic_application_form";
         }
 
@@ -70,7 +76,7 @@ public class DocumentRenewalReplacementController {
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("renewal.failed", exception.getMessage());
             addFormData(model, citizenId, "NIC", formKind);
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/nic_application_form";
         }
     }
@@ -106,7 +112,7 @@ public class DocumentRenewalReplacementController {
         if (citizenId == null) return "redirect:/login";
         if (bindingResult.hasErrors()) {
             addFormData(model, citizenId, "Passport", formKind);
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/passport_application_form";
         }
 
@@ -118,7 +124,7 @@ public class DocumentRenewalReplacementController {
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("renewal.failed", exception.getMessage());
             addFormData(model, citizenId, "Passport", formKind);
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/passport_application_form";
         }
     }
@@ -146,7 +152,7 @@ public class DocumentRenewalReplacementController {
                 model.addAttribute("applicationForm", renewalService.preparePassportCorrection(citizenId, applicationId));
                 addFormData(model, citizenId, "Passport", formKind);
             }
-            addCorrectionFormData(model, applicationId);
+            addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/" + service + "_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -213,6 +219,7 @@ public class DocumentRenewalReplacementController {
             model.addAttribute("servicePath", service);
             model.addAttribute("workflowPath", "renewals");
             model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
+            addCorrectionMessage(model, citizenId, application);
             renewalService.getNicRequest(applicationId)
                     .ifPresent(value -> model.addAttribute("nicApplication", value));
             renewalService.getPassportRequest(applicationId)
@@ -277,12 +284,26 @@ public class DocumentRenewalReplacementController {
         model.addAttribute("servicePath", service);
         model.addAttribute("workflowPath", "renewals");
         model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
+        addCorrectionMessage(model, citizenId, application);
     }
 
-    private void addCorrectionFormData(Model model, Integer applicationId) {
+    private void addCorrectionFormData(Model model, Integer citizenId, Integer applicationId) {
         if (applicationId != null) {
             model.addAttribute("correctionApplicationId", applicationId);
             model.addAttribute("pageTitle", "Correct Application Details");
+            model.addAttribute(
+                    "correctionMessage",
+                    correctionRequestService.getCurrentCorrectionMessage(citizenId, applicationId)
+            );
+        }
+    }
+
+    private void addCorrectionMessage(Model model, Integer citizenId, CitizenApplication application) {
+        if ("CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            model.addAttribute(
+                    "correctionMessage",
+                    correctionRequestService.getCurrentCorrectionMessage(citizenId, application.getApplicationId())
+            );
         }
     }
 

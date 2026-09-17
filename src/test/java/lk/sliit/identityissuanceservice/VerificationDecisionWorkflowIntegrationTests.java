@@ -104,12 +104,29 @@ class VerificationDecisionWorkflowIntegrationTests {
         assertEquals("CORRECTION_REQUIRED", applicationRepository.findById(application.getApplicationId()).orElseThrow().getCurrentStatus());
         assertEquals("REJECTED", documentRepository.findById(photograph.getDocumentId()).orElseThrow().getVerificationStatus());
 
+        mockMvc.perform(get("/citizen/dashboard").session(citizenSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Items to correct:")))
+                .andExpect(content().string(containsString("Application form details")))
+                .andExpect(content().string(containsString("Photograph")));
+
         mockMvc.perform(get("/citizen/applications/nic/correction")
                         .param("applicationId", application.getApplicationId().toString())
                         .session(citizenSession))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Officer correction requested")))
+                .andExpect(content().string(containsString("Items to correct:")))
+                .andExpect(content().string(containsString("Application form details")))
+                .andExpect(content().string(containsString("Photograph")))
                 .andExpect(content().string(containsString("Nimal")));
+
+        mockMvc.perform(get("/citizen/applications/nic/documents")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Items to correct:")))
+                .andExpect(content().string(containsString("Application form details")))
+                .andExpect(content().string(containsString("Photograph")));
 
         mockMvc.perform(validProfile(post("/citizen/applications/nic/new")
                         .param("applicationId", application.getApplicationId().toString())

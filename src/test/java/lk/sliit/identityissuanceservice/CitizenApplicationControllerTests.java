@@ -5,6 +5,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenElig
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +42,20 @@ class CitizenApplicationControllerTests {
     @Mock
     private DocumentDeliveryService deliveryService;
 
+    @Mock
+    private CitizenCorrectionRequestService correctionRequestService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(
-                new CitizenApplicationController(applicationService, notificationService, deliveryService)
+                new CitizenApplicationController(
+                        applicationService,
+                        notificationService,
+                        deliveryService,
+                        correctionRequestService
+                )
         ).build();
     }
 

@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Controller.DocumentRenewalReplacementController;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentRenewalReplacementService;
@@ -25,11 +26,14 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 class DocumentRenewalReplacementControllerTests {
 
     @Mock private DocumentRenewalReplacementService renewalService;
+    @Mock private CitizenCorrectionRequestService correctionRequestService;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = standaloneSetup(new DocumentRenewalReplacementController(renewalService)).build();
+        mockMvc = standaloneSetup(
+                new DocumentRenewalReplacementController(renewalService, correctionRequestService)
+        ).build();
     }
 
     @Test
