@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountDashboardDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.CitizenAccountDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import org.springframework.stereotype.Controller;
@@ -24,13 +26,16 @@ public class AdminController {
 
     private final OfficerAccountService officerAccountService;
     private final ServiceCentreService serviceCentreService;
+    private final CitizenAccountDashboardService citizenAccountDashboardService;
 
     public AdminController(
             OfficerAccountService officerAccountService,
-            ServiceCentreService serviceCentreService
+            ServiceCentreService serviceCentreService,
+            CitizenAccountDashboardService citizenAccountDashboardService
     ) {
         this.officerAccountService = officerAccountService;
         this.serviceCentreService = serviceCentreService;
+        this.citizenAccountDashboardService = citizenAccountDashboardService;
     }
 
     @GetMapping({"/officer/admin", "/officer/admin/officers"})
@@ -207,6 +212,11 @@ public class AdminController {
         model.addAttribute("csrCount", countRole(officers, OfficerAccountService.CSR));
         model.addAttribute("directorCount", countRole(officers, OfficerAccountService.DIRECTOR));
         model.addAttribute("centres", serviceCentreService.getAllCentres());
+        CitizenAccountDashboardDto citizenDashboard = citizenAccountDashboardService.getDashboard();
+        model.addAttribute("citizens", citizenDashboard.citizens());
+        model.addAttribute("citizenAccountCount", citizenDashboard.citizenAccountCount());
+        model.addAttribute("registeredThisMonthCount", citizenDashboard.registeredThisMonthCount());
+        model.addAttribute("suspendedCitizenCount", citizenDashboard.suspendedCitizenCount());
     }
 
     private long countRole(List<OfficerDetailsDto> officers, String roleCode) {

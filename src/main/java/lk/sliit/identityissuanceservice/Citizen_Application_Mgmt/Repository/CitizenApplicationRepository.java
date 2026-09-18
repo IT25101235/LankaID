@@ -8,6 +8,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -16,6 +17,22 @@ import java.util.Optional;
 
 @Repository
 public interface CitizenApplicationRepository extends JpaRepository<CitizenApplication, Integer> {
+
+    interface ApplicationCount {
+        Integer getCitizenId();
+        String getServiceType();
+        Long getApplicationCount();
+    }
+
+    @Query("""
+            select a.citizenId as citizenId, a.serviceType as serviceType, count(a) as applicationCount
+            from CitizenApplication a
+            where a.citizenId in :citizenIds
+            group by a.citizenId, a.serviceType
+            """)
+    List<ApplicationCount> countApplicationsByCitizenAndServiceType(
+            @Param("citizenIds") Collection<Integer> citizenIds
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

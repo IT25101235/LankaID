@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
@@ -121,18 +121,31 @@
             <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'COLLECTED'}" class="text-sm font-bold text-emerald-700">Document handed over</span>
             <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'DELIVERED'}" class="text-sm font-bold text-emerald-700">Delivered</span>
           </div>
-        <div class="application-progress mt-6 overflow-x-auto pb-1" th:attr="data-status=${citizenApplication.currentStatus},data-delivery-status=${deliveryInfo == null ? '' : deliveryInfo.delivery.deliveryStatus}">
-          <div class="application-progress-line"></div>
-          <div class="grid grid-cols-7 min-w-[650px]">
-            <div class="progress-step"><span class="progress-dot">1</span><span class="block text-[10px] mt-2">Application</span></div>
-            <div class="progress-step"><span class="progress-dot">2</span><span class="block text-[10px] mt-2">Verification</span></div>
-            <div class="progress-step"><span class="progress-dot">3</span><span class="block text-[10px] mt-2">Approved</span></div>
-            <div class="progress-step"><span class="progress-dot">4</span><span class="block text-[10px] mt-2">Appointment</span></div>
-            <div class="progress-step"><span class="progress-dot">5</span><span class="block text-[10px] mt-2">Biometrics</span></div>
-            <div class="progress-step"><span class="progress-dot">6</span><span class="block text-[10px] mt-2">Printed</span></div>
-            <div class="progress-step"><span class="progress-dot">7</span><span class="block text-[10px] mt-2">Delivery</span></div>
+        <section class="application-journey mt-5"
+                 role="progressbar" aria-label="Application progress" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1"
+                 th:attr="data-status=${citizenApplication.currentStatus},data-delivery-status=${deliveryInfo == null ? '' : deliveryInfo.delivery.deliveryStatus}">
+          <div class="journey-status">
+            <span class="journey-status-icon material-symbols-outlined" aria-hidden="true">hourglass_top</span>
+            <div class="journey-status-copy">
+              <span class="journey-eyebrow">Current stage</span>
+              <strong class="journey-status-title">Checking progress</strong>
+              <p class="journey-status-message">Your latest application update will appear here.</p>
+            </div>
+            <span class="journey-step-count"><span class="journey-step-current">1</span> of 7</span>
           </div>
-        </div>
+          <div class="journey-track" aria-hidden="true">
+            <div class="journey-track-rail"><span class="journey-track-fill"></span></div>
+            <ol class="journey-steps">
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">edit_document</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Application</strong><small>Details submitted</small></span></li>
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">fact_check</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Verification</strong><small>Officer review</small></span></li>
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">verified</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Approval</strong><small>Decision issued</small></span></li>
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">calendar_month</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Appointment</strong><small>Visit scheduled</small></span></li>
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">fingerprint</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Biometrics</strong><small>Identity captured</small></span></li>
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">print</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Printing</strong><small>Document produced</small></span></li>
+              <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">local_shipping</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Delivery</strong><small>Safe handover</small></span></li>
+            </ol>
+          </div>
+        </section>
         <div th:if="${deliveryInfo != null}" class="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-900">
           <div class="flex flex-wrap justify-between gap-2"><span class="font-bold" th:text="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' ? 'Home delivery' : 'Service-centre collection'}">Method</span><span class="font-mono font-bold" th:text="${deliveryInfo.delivery.trackingReference}">DEL-REF</span></div>
           <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY'}" th:text="${deliveryInfo.delivery.deliveryAddress}">Address</p>
@@ -144,24 +157,7 @@
     </div>
   </section>
 </main>
-<script>
-const progressByStatus = {DRAFT:0,SUBMITTED:1,RESUBMITTED:1,UNDER_REVIEW:1,CORRECTION_REQUIRED:1,REJECTED:1,APPROVED:2,APPOINTMENT_BOOKED:3,BIOMETRIC_COLLECTED:4,ISSUED:5};
-document.querySelectorAll('.application-progress').forEach(path => {
-  const status = path.dataset.status;
-  const deliveryStatus = path.dataset.deliveryStatus;
-  const deliveryComplete = deliveryStatus === 'COLLECTED' || deliveryStatus === 'DELIVERED';
-  let current = progressByStatus[status] ?? 0;
-  if (status === 'ISSUED' && deliveryStatus && deliveryStatus !== 'PREPARING') current = 6;
-  const steps = path.querySelectorAll('.progress-step');
-  steps.forEach((step, index) => {
-    if (index < current || deliveryComplete) step.classList.add('complete');
-    if (index === current && !deliveryComplete) step.classList.add('current');
-  });
-  if (status === 'CORRECTION_REQUIRED') path.classList.add('correction');
-  if (status === 'REJECTED') path.classList.add('rejected');
-  setTimeout(() => path.style.setProperty('--progress', deliveryComplete ? '100%' : (current * 100 / (steps.length - 1)) + '%'), 120);
-});
-</script>
+<script src="/js/application-journey.js?v=20260918"></script>
 <script src="/js/portal-shell.js?v=20260915-signout"></script>
 </body>
 </html>

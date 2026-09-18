@@ -1244,56 +1244,187 @@ body.gov-landing-page > main {
 .auth-field { transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease; }
 .auth-field:hover { background-color: #ffffff; }
 
-/* Functional component styles consolidated from page-level style blocks. */
-.application-progress { position: relative; }
-.application-progress-line {
+/* Citizen application journey. Shared by the dashboard and full tracking view. */
+.application-journey {
+  --journey-accent: var(--gov-maroon);
+  --journey-accent-soft: var(--gov-maroon-soft);
+  --journey-progress: 0%;
+  overflow: hidden;
+  border: 1px solid var(--gov-border);
+  border-radius: 16px;
+  background: var(--gov-surface);
+  box-shadow: 0 8px 22px rgb(23 53 79 / 0.07);
+}
+
+.journey-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--gov-border);
+  background: linear-gradient(110deg, var(--journey-accent-soft), #ffffff 72%);
+}
+
+.journey-status-icon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #ffffff;
+  background: var(--journey-accent);
+  box-shadow: 0 6px 16px rgb(104 16 66 / 0.2);
+}
+
+.journey-status-copy { min-width: 0; }
+.journey-eyebrow {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--gov-muted);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.journey-status-title {
+  display: block;
+  color: var(--gov-text);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.journey-status-message {
+  margin: 0.16rem 0 0;
+  color: var(--gov-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+.journey-step-count {
+  min-width: 4.2rem;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid rgb(104 16 66 / 0.18);
+  border-radius: 999px;
+  color: var(--journey-accent);
+  background: #ffffff;
+  font-size: 0.73rem;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.journey-track {
+  position: relative;
+  padding: 1.35rem 0.65rem 1.2rem;
+}
+.journey-track-rail {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 15px;
+  top: 2.63rem;
+  left: calc(7.14% + 0.55rem);
+  right: calc(7.14% + 0.55rem);
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
   background: #e5ded1;
 }
-.application-progress-line::after {
+.journey-track-fill {
   display: block;
-  width: var(--progress, 0%);
+  width: 0;
   height: 100%;
-  content: "";
   border-radius: inherit;
   background: linear-gradient(90deg, var(--gov-maroon), var(--gov-gold), var(--gov-success));
-  transition: width 1s ease;
+  transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.progress-step { position: relative; z-index: 1; min-width: 58px; color: #8b98a5; text-align: center; }
-.progress-dot {
-  width: 32px;
-  height: 32px;
+.application-journey.is-ready .journey-track-fill { width: var(--journey-progress); }
+
+.journey-steps {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.journey-step {
+  min-width: 0;
+  color: #788592;
+  text-align: center;
+}
+.journey-marker {
+  position: relative;
+  width: 46px;
+  height: 46px;
   margin: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid #cfc7b8;
+  border: 3px solid #d7d0c4;
   border-radius: 999px;
-  background: white;
-  font-size: 15px;
-  font-weight: 800;
-  transition: all 500ms ease;
+  color: #6b7785;
+  background: #ffffff;
+  transition: color 240ms ease, background-color 240ms ease, border-color 240ms ease, transform 240ms ease;
 }
-.progress-step.complete { color: var(--gov-success); }
-.progress-step.complete .progress-dot { color: white; background: #10b981; border-color: #10b981; }
-.progress-step.current { color: var(--gov-maroon); font-weight: 700; }
-.progress-step.current .progress-dot {
-  color: white;
-  background: var(--gov-maroon);
-  border-color: #e2b9cf;
-  box-shadow: 0 0 0 5px rgb(104 16 66 / 0.14);
-  animation: progressPulse 1.8s infinite;
+.journey-marker-icon { font-size: 20px; }
+.journey-marker-check { display: none; font-size: 20px; font-weight: 800; }
+.journey-step-copy { display: block; margin-top: 0.62rem; }
+.journey-step-copy strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
 }
-.application-progress.correction .progress-step.current { color: #9a6700; }
-.application-progress.correction .progress-step.current .progress-dot { background: #d19a17; border-color: #f5dda2; }
-.application-progress.rejected .progress-step.current { color: var(--gov-danger); }
-.application-progress.rejected .progress-step.current .progress-dot { background: #dc2626; border-color: #fecaca; animation: none; }
+.journey-step-copy small {
+  display: block;
+  margin-top: 0.18rem;
+  color: #8a96a2;
+  font-size: 0.61rem;
+  line-height: 1.3;
+}
+.journey-step.is-complete { color: var(--gov-success); }
+.journey-step.is-complete .journey-marker { color: #ffffff; border-color: var(--gov-success); background: var(--gov-success); }
+.journey-step.is-complete .journey-marker-icon { display: none; }
+.journey-step.is-complete .journey-marker-check { display: inline-block; }
+.journey-step.is-current { color: var(--journey-accent); }
+.journey-step.is-current .journey-marker {
+  color: #ffffff;
+  border-color: var(--journey-accent);
+  background: var(--journey-accent);
+  transform: translateY(-2px);
+}
+.journey-step.is-current .journey-marker::after {
+  position: absolute;
+  inset: -7px;
+  border: 2px solid var(--journey-accent);
+  border-radius: inherit;
+  content: "";
+  animation: journeyPulse 2s ease-out infinite;
+}
+.journey-step.is-current .journey-step-copy strong { font-weight: 800; }
+
+.application-journey.is-correction {
+  --journey-accent: #9a6700;
+  --journey-accent-soft: #fff7dd;
+}
+.application-journey.is-rejected {
+  --journey-accent: var(--gov-danger);
+  --journey-accent-soft: #fff1f0;
+}
+.application-journey.is-rejected .journey-step.is-current .journey-marker::after { animation: none; }
+.application-journey.is-complete {
+  --journey-accent: var(--gov-success);
+  --journey-accent-soft: #ecfdf5;
+}
+.application-journey.is-ready .journey-status { animation: journeyReveal 360ms ease-out both; }
+.application-journey.is-ready .journey-step { animation: journeyReveal 360ms ease-out both; }
+.application-journey.is-ready .journey-step:nth-child(2) { animation-delay: 40ms; }
+.application-journey.is-ready .journey-step:nth-child(3) { animation-delay: 80ms; }
+.application-journey.is-ready .journey-step:nth-child(4) { animation-delay: 120ms; }
+.application-journey.is-ready .journey-step:nth-child(5) { animation-delay: 160ms; }
+.application-journey.is-ready .journey-step:nth-child(6) { animation-delay: 200ms; }
+.application-journey.is-ready .journey-step:nth-child(7) { animation-delay: 240ms; }
 .application-accordion > summary::-webkit-details-marker { display: none; }
 .application-accordion > summary { list-style: none; }
 
@@ -1486,14 +1617,66 @@ textarea:focus {
 body > header.registration-header { background: var(--gov-maroon) !important; border-color: #8a315f !important; }
 body:not(.portal-shell) > header.bg-white { border-top: 3px solid var(--gov-gold); }
 
-@keyframes progressPulse {
-  50% { transform: scale(1.08); box-shadow: 0 0 0 9px rgb(104 16 66 / 0.06); }
+@keyframes journeyPulse {
+  0% { opacity: 0.58; transform: scale(0.84); }
+  72%, 100% { opacity: 0; transform: scale(1.22); }
+}
+@keyframes journeyReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes scan { 0%, 100% { top: 15%; } 50% { top: 82%; } }
 
 @media (max-width: 900px) {
   .gov-hero { min-height: auto; background-position: 62% center; }
   .gov-hero > div { padding-top: 3.5rem !important; padding-bottom: 4rem !important; }
+}
+
+@media (max-width: 720px) {
+  .journey-status {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.9rem;
+  }
+  .journey-status-icon { grid-row: 1 / span 2; width: 40px; height: 40px; }
+  .journey-step-count {
+    grid-column: 2;
+    min-width: 0;
+    justify-self: start;
+    padding: 0.28rem 0.55rem;
+    font-size: 0.68rem;
+  }
+  .journey-track { padding: 0.95rem 0.9rem 0.7rem; }
+  .journey-track-rail {
+    top: 2.25rem;
+    bottom: 3.15rem;
+    left: 2.1rem;
+    right: auto;
+    width: 4px;
+    height: auto;
+  }
+  .journey-track-fill {
+    width: 100%;
+    height: 0;
+    background: linear-gradient(180deg, var(--gov-maroon), var(--gov-gold), var(--gov-success));
+    transition-property: height;
+  }
+  .application-journey.is-ready .journey-track-fill { width: 100%; height: var(--journey-progress); }
+  .journey-steps { grid-template-columns: 1fr; }
+  .journey-step {
+    min-height: 70px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+    text-align: left;
+  }
+  .journey-marker { width: 42px; height: 42px; margin: 0; }
+  .journey-step-copy { margin: 0; padding: 0.5rem 0.65rem; border-radius: 10px; }
+  .journey-step-copy strong { font-size: 0.79rem; }
+  .journey-step-copy small { font-size: 0.68rem; }
+  .journey-step.is-current .journey-step-copy { background: var(--journey-accent-soft); }
 }
 
 @media (max-width: 640px) {

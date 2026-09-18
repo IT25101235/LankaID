@@ -3,6 +3,9 @@ package lk.sliit.identityissuanceservice;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Controller.AdminController;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountDashboardDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountRowDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.CitizenAccountDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,17 +26,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 class AdminControllerSessionTests {
 
     private MockMvc mockMvc;
     private OfficerAccountService officerAccountService;
     private ServiceCentreService serviceCentreService;
+    private CitizenAccountDashboardService citizenAccountDashboardService;
 
     @BeforeEach
     void setUp() {
         officerAccountService = mock(OfficerAccountService.class);
         serviceCentreService = mock(ServiceCentreService.class);
-        mockMvc = standaloneSetup(new AdminController(officerAccountService, serviceCentreService)).build();
+        citizenAccountDashboardService = mock(CitizenAccountDashboardService.class);
+        when(citizenAccountDashboardService.getDashboard())
+                .thenReturn(new CitizenAccountDashboardDto(List.of(), 0, 0, 0));
+        mockMvc = standaloneSetup(new AdminController(
+                officerAccountService, serviceCentreService, citizenAccountDashboardService)).build();
     }
 
     @Test
@@ -48,11 +58,20 @@ class AdminControllerSessionTests {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("loggedInAdminId", 50);
         session.setAttribute("loggedInAdminEmail", "admin@gov.lk");
+        CitizenAccountRowDto citizen = new CitizenAccountRowDto(
+                7, "CTZ-000007", "Nimali Perera", "nimali@example.com", 2, 1,
+                "ACTIVE", "Active", true, true);
+        when(citizenAccountDashboardService.getDashboard())
+                .thenReturn(new CitizenAccountDashboardDto(List.of(citizen), 1, 1, 0));
 
         mockMvc.perform(get("/officer/admin").session(session))
                 .andExpect(status().isOk())
                 .andExpect(view().name("officers_frontends/admin_dashboard"))
-                .andExpect(model().attribute("loggedInAdminEmail", "admin@gov.lk"));
+                .andExpect(model().attribute("loggedInAdminEmail", "admin@gov.lk"))
+                .andExpect(model().attribute("citizens", List.of(citizen)))
+                .andExpect(model().attribute("citizenAccountCount", 1L))
+                .andExpect(model().attribute("registeredThisMonthCount", 1L))
+                .andExpect(model().attribute("suspendedCitizenCount", 0L));
     }
 
     @Test

@@ -221,31 +221,47 @@
   <!-- ===== CITIZEN ACCOUNTS ===== -->
   <div id="section-citizens" class="p-6 hidden">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Citizen accounts</p><p class="text-3xl font-bold text-slate-900 mt-1">1,247</p></div>
-      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Active this month</p><p class="text-3xl font-bold text-emerald-700 mt-1">803</p></div>
-      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Suspended</p><p class="text-3xl font-bold text-amber-700 mt-1">6</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Citizen accounts</p><p class="text-3xl font-bold text-slate-900 mt-1" th:text="${citizenAccountCount}">0</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Registered this month</p><p class="text-3xl font-bold text-emerald-700 mt-1" th:text="${registeredThisMonthCount}">0</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Suspended</p><p class="text-3xl font-bold text-amber-700 mt-1" th:text="${suspendedCitizenCount}">0</p></div>
     </div>
 
     <div class="card p-4 mb-4 flex flex-wrap gap-3">
       <div class="relative flex-1 min-w-64">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg">search</span>
-        <input id="citizenSearch" oninput="filterCitizens()" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400" placeholder="Search name, account ID or application reference"/>
+        <input id="citizenSearch" oninput="filterCitizens()" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400" placeholder="Search name, email or account ID"/>
       </div>
       <select id="citizenStatusFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
         <option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option>
       </select>
+      <select id="citizenApplicationFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
+        <option value="">All applications</option><option value="nic">NIC applicants</option><option value="passport">Passport applicants</option><option value="both">NIC and passport</option><option value="none">No applications</option>
+      </select>
+      <select id="citizenRegistrationFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
+        <option value="">Any registration date</option><option value="this-month">Registered this month</option><option value="earlier">Registered earlier</option>
+      </select>
+      <button type="button" onclick="resetCitizenFilters()" class="border border-slate-300 text-slate-700 rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">Reset</button>
     </div>
 
     <div class="card overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm light-admin-table">
           <thead class="border-b border-slate-200"><tr>
-            <th class="p-4 text-left font-semibold uppercase text-xs">Citizen account</th><th class="p-4 text-left font-semibold uppercase text-xs">Account ID</th><th class="p-4 text-center font-semibold uppercase text-xs">NIC applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Passport applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Total</th><th class="p-4 text-left font-semibold uppercase text-xs">Status</th><th class="p-4 text-right font-semibold uppercase text-xs">Account action</th>
+            <th class="p-4 text-left font-semibold uppercase text-xs">Citizen account</th><th class="p-4 text-left font-semibold uppercase text-xs">Account ID</th><th class="p-4 text-center font-semibold uppercase text-xs">NIC applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Passport applications</th><th class="p-4 text-left font-semibold uppercase text-xs">Status</th><th class="p-4 text-right font-semibold uppercase text-xs">Account action</th>
           </tr></thead>
           <tbody id="citizenRows" class="divide-y divide-slate-200 text-slate-700">
-            <tr data-status="active"><td class="p-4"><p class="font-semibold text-slate-900">Kamal Perera</p><p class="text-xs text-slate-600">kamal.p@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001247</td><td class="p-4 text-center">2</td><td class="p-4 text-center">1</td><td class="p-4 text-center font-bold text-slate-900">3</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Active</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-amber-700 text-xs font-semibold hover:underline">Suspend account</button></td></tr>
-            <tr data-status="active"><td class="p-4"><p class="font-semibold text-slate-900">Nadeesha Kumari</p><p class="text-xs text-slate-600">nadeesha.k@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001246</td><td class="p-4 text-center">1</td><td class="p-4 text-center">0</td><td class="p-4 text-center font-bold text-slate-900">1</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Active</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-amber-700 text-xs font-semibold hover:underline">Suspend account</button></td></tr>
-            <tr data-status="suspended"><td class="p-4"><p class="font-semibold text-slate-900">Ruwan Fernando</p><p class="text-xs text-slate-600">ruwan.f@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001198</td><td class="p-4 text-center">1</td><td class="p-4 text-center">2</td><td class="p-4 text-center font-bold text-slate-900">3</td><td class="p-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">Suspended</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-emerald-700 text-xs font-semibold hover:underline">Reactivate account</button></td></tr>
+            <tr th:if="${#lists.isEmpty(citizens)}">
+              <td colspan="6" class="p-10 text-center text-sm text-slate-500">No citizen accounts have been registered yet.</td>
+            </tr>
+            <tr th:each="citizen : ${citizens}" th:attr="data-status=${#strings.toLowerCase(citizen.status)},data-nic-count=${citizen.nicApplicationCount},data-passport-count=${citizen.passportApplicationCount},data-registered-this-month=${citizen.registeredThisMonth}">
+              <td class="p-4"><p class="font-semibold text-slate-900" th:text="${citizen.displayName}">Citizen name</p><p class="text-xs text-slate-600" th:text="${citizen.email}">citizen@example.com</p></td>
+              <td class="p-4 font-mono text-xs text-slate-700" th:text="${citizen.accountId}">CTZ-000001</td>
+              <td class="p-4 text-center" th:text="${citizen.nicApplicationCount}">0</td>
+              <td class="p-4 text-center" th:text="${citizen.passportApplicationCount}">0</td>
+              <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold" th:classappend="${citizen.active ? ' bg-emerald-100 text-emerald-700' : ' bg-amber-100 text-amber-700'}" th:text="${citizen.statusLabel}">Active</span></td>
+              <td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-xs font-semibold hover:underline" th:classappend="${citizen.active ? ' text-amber-700' : ' text-emerald-700'}" th:text="${citizen.active ? 'Suspend account' : 'Reactivate account'}">Suspend account</button></td>
+            </tr>
+            <tr id="citizenNoMatches" class="hidden"><td colspan="6" class="p-10 text-center text-sm text-slate-500">No citizen accounts match the selected filters.</td></tr>
           </tbody>
         </table>
       </div>
@@ -547,16 +563,42 @@ function filterUsers() {
 function filterCitizens() {
   const query = document.getElementById('citizenSearch').value.toLowerCase().trim();
   const status = document.getElementById('citizenStatusFilter').value;
-  document.querySelectorAll('#citizenRows tr').forEach(row => {
+  const application = document.getElementById('citizenApplicationFilter').value;
+  const registration = document.getElementById('citizenRegistrationFilter').value;
+  const rows = document.querySelectorAll('#citizenRows tr[data-status]');
+  let visibleRows = 0;
+  rows.forEach(row => {
+    const nicCount = Number(row.dataset.nicCount || 0);
+    const passportCount = Number(row.dataset.passportCount || 0);
+    const registeredThisMonth = row.dataset.registeredThisMonth === 'true';
     const matchesQuery = row.textContent.toLowerCase().includes(query);
     const matchesStatus = !status || row.dataset.status === status;
-    row.style.display = matchesQuery && matchesStatus ? '' : 'none';
+    const matchesApplication = !application
+      || (application === 'nic' && nicCount > 0)
+      || (application === 'passport' && passportCount > 0)
+      || (application === 'both' && nicCount > 0 && passportCount > 0)
+      || (application === 'none' && nicCount === 0 && passportCount === 0);
+    const matchesRegistration = !registration
+      || (registration === 'this-month' && registeredThisMonth)
+      || (registration === 'earlier' && !registeredThisMonth);
+    const visible = matchesQuery && matchesStatus && matchesApplication && matchesRegistration;
+    row.style.display = visible ? '' : 'none';
+    if (visible) visibleRows++;
   });
+  document.getElementById('citizenNoMatches').classList.toggle('hidden', rows.length === 0 || visibleRows > 0);
+}
+
+function resetCitizenFilters() {
+  document.getElementById('citizenSearch').value = '';
+  document.getElementById('citizenStatusFilter').value = '';
+  document.getElementById('citizenApplicationFilter').value = '';
+  document.getElementById('citizenRegistrationFilter').value = '';
+  filterCitizens();
 }
 
 function toggleAccount(button) {
   const row = button.closest('tr');
-  const badge = row.querySelector('td:nth-child(6) span');
+  const badge = row.querySelector('td:nth-child(5) span');
   const reactivate = row.dataset.status === 'suspended';
   if (!confirm((reactivate ? 'Reactivate' : 'Suspend') + ' this citizen account?')) return;
   row.dataset.status = reactivate ? 'active' : 'suspended';

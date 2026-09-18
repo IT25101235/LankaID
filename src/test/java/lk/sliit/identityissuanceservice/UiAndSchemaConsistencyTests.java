@@ -175,6 +175,30 @@ class UiAndSchemaConsistencyTests {
     }
 
     @Test
+    void citizenApplicationTrackingUsesTheSharedResponsiveJourney() throws IOException {
+        String dashboard = Files.readString(
+                TEMPLATE_ROOT.resolve("citizen_frontends/citizen_dashboard.html"));
+        String tracking = Files.readString(
+                TEMPLATE_ROOT.resolve("citizen_frontends/application_tracking.html"));
+        String journeyScript = Files.readString(Path.of(
+                "src", "main", "resources", "static", "js", "application-journey.js"));
+        String governmentTheme = Files.readString(Path.of(
+                "src", "main", "resources", "static", "css", "government-theme.css"));
+
+        for (String template : List.of(dashboard, tracking)) {
+            assertTrue(template.contains("class=\"application-journey"));
+            assertTrue(template.contains("role=\"progressbar\""));
+            assertTrue(template.contains("/js/application-journey.js"));
+            assertFalse(template.contains("application-progress"));
+        }
+        assertTrue(journeyScript.contains("PAYMENT_PENDING"));
+        assertTrue(journeyScript.contains("READY_FOR_COLLECTION"));
+        assertTrue(journeyScript.contains("requestAnimationFrame"));
+        assertTrue(governmentTheme.contains("@media (max-width: 720px)"));
+        assertTrue(governmentTheme.contains("@media (prefers-reduced-motion: reduce)"));
+    }
+
+    @Test
     void biometricAppointmentPagesExposeHistoryAndScheduleTabs() throws IOException {
         String history = Files.readString(
                 TEMPLATE_ROOT.resolve("officers_frontends/officer_appointments.html"));
