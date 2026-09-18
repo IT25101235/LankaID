@@ -354,18 +354,21 @@ sequenceDiagram
     autonumber
     actor Citizen as Citizen Applicant
     participant UI as Browser (Thymeleaf Portal)
-    participant Auth as UserController & Svc
+    participant Auth as Registration Controller & OTP Services
     participant AppSvc as CitizenApplicationService
     participant Officer as Verification Officer
     participant PaySvc as PaymentService
     participant Sched as BiometricScheduleService
     participant DB as MS SQL Server Database
 
-    Citizen->>UI: Register with Email & Password
+    Citizen->>UI: Enter email
+    UI->>Auth: POST /register/email/send and /verify
+    Auth-->>Citizen: Email OTP via SMTP
+    Citizen->>UI: Enter mobile number
+    UI->>Auth: POST /register/phone/send and /verify
+    Auth-->>Citizen: Mobile OTP via SMS
+    Citizen->>UI: Create password on the same page
     UI->>Auth: POST /register
-    Auth->>DB: Send 6-digit OTP via SMTP & save challenge
-    Citizen->>UI: Enter verification code
-    UI->>Auth: POST /register/verify
     Auth->>DB: Persist UserAccount & CitizenAccount
     
     Citizen->>UI: Fill New NIC Form & Upload Documents
@@ -634,8 +637,8 @@ The frontend is constructed using **Server-Side Rendered (SSR) Thymeleaf 3.x HTM
 | :--- | :--- | :--- | :--- |
 | `index.html` | Public landing page explaining services and eligibility | General Public | `UserController` (`GET /`) |
 | `login_portal.html` | Unified tabbed login portal for Citizens and Staff | All Roles | `UserController` (`POST /login`, `POST /login/officer`) |
-| `citizen_register.html` | New citizen registration form | Citizen | `UserController` (`POST /register`) |
-| `citizen_email_verification.html` | 6-digit email OTP verification screen | Citizen | `UserController` (`POST /register/verify`) |
+| `citizen_register.html` | Inline email OTP, SMS OTP, and password registration flow | Citizen | `CitizenRegistrationController` (`/register/*`) |
+| `forgot_password.html` | Email-verified citizen password reset | Citizen | `PasswordResetController` (`/forgot-password/*`) |
 | `citizen_dashboard.html` | Primary citizen home view showing status, notifications & actions | Citizen | `CitizenApplicationController` (`GET /citizen/dashboard`) |
 | `nic_application_form.html` | Multi-step form for first-time, renewal, or correction NICs | Citizen | `CitizenApplicationController` (`/citizen/applications/nic/*`) |
 | `passport_application_form.html`| Form for Standard/Express travel documents | Citizen | `CitizenApplicationController` (`/citizen/applications/passport/*`) |
@@ -795,9 +798,10 @@ LankaID uses standard Spring MVC request mappings. Form actions consume `applica
 | `POST` | `/login` | Authenticate citizen | `email`, `password`, `rememberMe` | Redirect `/citizen/dashboard` | No |
 | `POST` | `/login/officer` | Authenticate staff/admin | `email`, `password`, `role`, `rememberMe` | Redirect to role dashboard | No |
 | `POST` | `/logout` | Invalidate active session | None | Redirect `/login` | Yes |
-| `POST` | `/register` | Submit registration form | `email`, `phone`, `password`, `confirmPassword` | Redirect `/register/verify` | No |
-| `POST` | `/register/verify` | Verify email OTP code | `code` (6-digit) | Redirect `/login` | No (Session) |
-| `POST` | `/register/verify/resend`| Resend email OTP code | None | Redirect `/register/verify` | No (Session) |
+| `POST` | `/register/email/send`, `/verify`, `/resend` | Verify registration email inline | `email` or `code` | Redirect `/register` | No (Session) |
+| `POST` | `/register/phone/send`, `/verify`, `/resend` | Verify registration mobile inline | `phone` or `code` | Redirect `/register` | No (Session) |
+| `POST` | `/register` | Create account after both verifications | `email`, `phone`, `password`, `confirmPassword` | Redirect `/login` | No (Session) |
+| `GET/POST` | `/forgot-password/*` | Verify citizen email and reset password | `email`, `code`, new password | Redirect `/login` | No (Session) |
 
 ### 2. Citizen Applications & Documents
 
@@ -962,15 +966,15 @@ flowchart LR
 
 # 20. MAJOR BUSINESS FLOWS
 
-## 1. Citizen Registration with Gmail SMTP Verification
-1. **Purpose:** Authenticate and verify citizen email identity before account creation.
+## 1. Citizen Registration with Email and SMS Verification
+1. **Purpose:** Verify both citizen contact methods before account creation.
 2. **User:** Citizen Applicant.
 3. **Preconditions:** Valid, accessible email address and mobile number.
 4. **Steps:**
-   - Citizen visits `/register`, inputs personal email, phone number, and password.
-   - System normalizes input, generates a 6-digit cryptographic OTP, hashes code with BCrypt, and sends email via Gmail SMTP.
-   - Citizen is redirected to `/register/verify` with a 10-minute expiry countdown.
-   - Citizen submits the 6-digit code.
+   - Citizen visits `/register`, enters an email, and verifies the email OTP without leaving the page.
+   - Citizen enters a mobile number and verifies the SMS OTP on the same page.
+   - A green verified state is shown after each step; password fields appear only after both pass.
+   - The shared OTP services enforce expiry, resend cooldowns, attempt limits, and recipient binding.
    - Upon verification, `UserAccount` and `CitizenAccount` rows are committed to the database.
 
 ## 2. First-Time NIC Application Submission

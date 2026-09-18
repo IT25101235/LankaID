@@ -103,7 +103,13 @@ public class SmsOtpService {
     public boolean isVerified(String phone, String purpose, HttpSession session) {
         synchronized (session) {
             OtpChallenge challenge = challenge(purpose, session);
-            return challenge != null && challenge.getPhone().equals(phone)
+            String normalizedPhone;
+            try {
+                normalizedPhone = SriLankanMobileNumber.normalize(phone);
+            } catch (IllegalArgumentException exception) {
+                return false;
+            }
+            return challenge != null && challenge.getPhone().equals(normalizedPhone)
                     && challenge.getVerifiedUntil() != null
                     && clock.instant().isBefore(challenge.getVerifiedUntil());
         }

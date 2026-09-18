@@ -70,6 +70,7 @@ class UiAndSchemaConsistencyTests {
                 "citizen_frontends/passport_application_form_replacement.html",
                 "citizen_frontends/passport_document_upload.html",
                 "citizen_frontends/passport_application_review.html",
+                "citizen_frontends/citizen_email_verification.html",
                 "officers_frontends/csr_walkin_booking.html",
                 "officers_frontends/director_command_center.html",
                 "officers_frontends/final_review_submission.html"
@@ -150,6 +151,22 @@ class UiAndSchemaConsistencyTests {
         assertTrue(landingPage.contains("gov-site-header gov-official-strip"));
         assertTrue(landingPage.contains("Access Dashboard"));
         assertTrue(landingPage.contains("th:if=\"${!landingSignedIn}\""));
+    }
+
+    @Test
+    void registrationPasswordResetAndWalkInUseTheNewGuidedFlows() throws IOException {
+        String registration = Files.readString(TEMPLATE_ROOT.resolve("citizen_frontends/citizen_register.html"));
+        String login = Files.readString(TEMPLATE_ROOT.resolve("login_portal.html"));
+        String walkIn = Files.readString(TEMPLATE_ROOT.resolve("citizen_frontends/walkin_appointment_booking.html"));
+        String calendar = Files.readString(Path.of("src", "main", "resources", "static", "js", "walkin-calendar.js"));
+
+        assertTrue(registration.contains("/register/email/verify"));
+        assertTrue(registration.contains("/register/phone/verify"));
+        assertTrue(registration.contains("th:if=\"${identityVerified}\""));
+        assertTrue(login.contains("@{/forgot-password}"));
+        assertTrue(walkIn.contains("data-walkin-calendar"));
+        assertTrue(walkIn.contains("/js/walkin-calendar.js"));
+        assertTrue(calendar.contains("Availability will be checked again"));
     }
 
     @Test

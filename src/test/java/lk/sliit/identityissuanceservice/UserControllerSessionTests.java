@@ -6,10 +6,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.UserController;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.OfficerSessionIdentityAdvice;
-import lk.sliit.identityissuanceservice.User_Mgmt.Dto.EmailVerificationChallenge;
-import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
-import lk.sliit.identityissuanceservice.User_Mgmt.Service.EmailVerificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +17,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,9 +38,6 @@ class UserControllerSessionTests {
     private UserAccountService userAccountService;
 
     @Mock
-    private EmailVerificationService emailVerificationService;
-
-    @Mock
     private AdminAccountService adminAccountService;
 
     @Mock
@@ -56,7 +49,6 @@ class UserControllerSessionTests {
     void setUp() {
         mockMvc = standaloneSetup(new UserController(
                 userAccountService,
-                emailVerificationService,
                 adminAccountService,
                 officerAccountService
         )).build();
@@ -235,44 +227,6 @@ class UserControllerSessionTests {
                 .andExpect(model().attribute("landingDashboardPath", "/officer/passport/applications"));
     }
 
-    @Test
-    void registrationRequiresEmailCodeBeforeCreatingAccount() throws Exception {
-        PreparedCitizenRegistration registration = new PreparedCitizenRegistration(
-                "citizen@example.com",
-                "+94771234567",
-                "bcrypt-hash"
-        );
-        EmailVerificationChallenge challenge = new EmailVerificationChallenge(
-                "code-hash",
-                Instant.now().plusSeconds(600),
-                Instant.now().plusSeconds(60)
-        );
-        when(userAccountService.prepareCitizenRegistration(
-                "citizen@example.com",
-                "0771234567",
-                "Password123!"
-        )).thenReturn(registration);
-        when(emailVerificationService.sendVerificationCode("citizen@example.com"))
-                .thenReturn(challenge);
-
-        MockHttpSession session = (MockHttpSession) mockMvc.perform(post("/register")
-                        .param("email", "citizen@example.com")
-                        .param("phone", "0771234567")
-                        .param("password", "Password123!")
-                        .param("confirmPassword", "Password123!"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/register/verify"))
-                .andReturn().getRequest().getSession(false);
-
-        when(emailVerificationService.isValid(challenge, "123456")).thenReturn(true);
-        mockMvc.perform(post("/register/verify")
-                        .session(session)
-                        .param("code", "123456"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
-
-        verify(userAccountService).registerVerifiedCitizen(registration);
-    }
 
     @Test
     void officerIdentityAdviceExposesTheSharedSidebarDetails() {
@@ -289,19 +243,4 @@ class UserControllerSessionTests {
         assertEquals("01 Sep 2026, 10:15", model.get("loggedInOfficerLoginTime"));
     }
 
-    @Test
-    void invalidRegistrationKeepsEmailAndReportsPhoneAndPasswordErrors() throws Exception {
-        mockMvc.perform(post("/register")
-                        .param("email", "citizen@example.com")
-                        .param("phone", "77123")
-                        .param("password", "weak").param("confirmPassword", "weak"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("citizen_frontends/citizen_register"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.model()
-                        .attributeHasFieldErrors("registrationRequest", "phone", "password"))
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.model()
-                        .attribute("registrationRequest", org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("citizen@example.com"))));
-        org.mockito.Mockito.verify(userAccountService, org.mockito.Mockito.never())
-                .prepareCitizenRegistration(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
-    }
 }

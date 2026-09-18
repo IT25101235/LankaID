@@ -56,6 +56,8 @@ class UserAccountServiceTests {
 
         assertEquals("citizen@example.com", savedUser.getEmail());
         assertEquals("+94771234567", savedUser.getPhone());
+        assertEquals("Y", savedUser.getEmailVerified());
+        assertEquals("Y", savedUser.getPhoneVerified());
         assertNotEquals("Password123!", savedUser.getPasswordHash());
         assertTrue(new BCryptPasswordEncoder().matches("Password123!", savedUser.getPasswordHash()));
 
@@ -93,6 +95,25 @@ class UserAccountServiceTests {
                 "citizen@example.com",
                 "wrongPassword"
         ).isEmpty());
+    }
+
+    @Test
+    void passwordResetReplacesTheStoredHashForAnActiveCitizen() {
+        UserAccount account = new UserAccount();
+        account.setUserId(25);
+        account.setEmail("citizen@example.com");
+        account.setEmailVerified("Y");
+        account.setPasswordHash(new BCryptPasswordEncoder().encode("OldPassword123!"));
+        when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatus("citizen@example.com", "ACTIVE"))
+                .thenReturn(Optional.of(account));
+        when(userAccountRepository.findByEmailIgnoreCase("citizen@example.com")).thenReturn(Optional.of(account));
+        when(citizenAccountRepository.existsById(25)).thenReturn(true);
+        UserAccountService service = new UserAccountService(userAccountRepository, citizenAccountRepository, applicationService);
+
+        service.resetCitizenPassword("citizen@example.com", "NewPassword123!");
+
+        assertTrue(new BCryptPasswordEncoder().matches("NewPassword123!", account.getPasswordHash()));
+        verify(userAccountRepository).save(account);
     }
 
     @Test

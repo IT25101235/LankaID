@@ -1,16 +1,12 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Controller;
 
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
-import lk.sliit.identityissuanceservice.User_Mgmt.Dto.CitizenRegistrationDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.LoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.OfficerLoginRequestDto;
-import lk.sliit.identityissuanceservice.User_Mgmt.Dto.EmailVerificationChallenge;
-import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
-import lk.sliit.identityissuanceservice.User_Mgmt.Service.EmailVerificationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import org.springframework.stereotype.Controller;
@@ -19,36 +15,27 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Objects;
 import java.util.Optional;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Controller
 public class UserController {
 
-    private static final String PENDING_REGISTRATION = "pendingCitizenRegistration";
-    private static final String EMAIL_CHALLENGE = "registrationEmailChallenge";
-
     private static final DateTimeFormatter OFFICER_LOGIN_TIME_FORMAT =
             DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
     private final UserAccountService userAccountService;
-    private final EmailVerificationService emailVerificationService;
     private final AdminAccountService adminAccountService;
     private final OfficerAccountService officerAccountService;
 
     public UserController(
             UserAccountService userAccountService,
-            EmailVerificationService emailVerificationService,
             AdminAccountService adminAccountService,
             OfficerAccountService officerAccountService) {
         this.userAccountService = userAccountService;
-        this.emailVerificationService = emailVerificationService;
         this.adminAccountService = adminAccountService;
         this.officerAccountService = officerAccountService;
     }
@@ -205,149 +192,6 @@ public class UserController {
         return "redirect:" + dashboardPath;
     }
 
-    @GetMapping("/register")
-    public String registrationPage(Model model) {
-        if (!model.containsAttribute("registrationRequest")) {
-            model.addAttribute("registrationRequest", new CitizenRegistrationDto());
-        }
-        return "citizen_frontends/citizen_register";
-    }
-
-    @PostMapping("/register")
-    public String registerCitizen(
-            @Valid @ModelAttribute("registrationRequest") CitizenRegistrationDto registrationRequest,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes,
-            HttpSession session) {
-        if (!Objects.equals(registrationRequest.getPassword(), registrationRequest.getConfirmPassword())) {
-            bindingResult.rejectValue(
-                    "confirmPassword",
-                    "password.mismatch",
-                    "Passwords do not match."
-            );
-        }
-
-        if (bindingResult.hasErrors()) {
-            return "citizen_frontends/citizen_register";
-        }
-
-        try {
-            PreparedCitizenRegistration pendingRegistration = userAccountService.prepareCitizenRegistration(
-                    registrationRequest.getEmail(),
-                    registrationRequest.getPhone(),
-                    registrationRequest.getPassword()
-            );
-            EmailVerificationChallenge challenge = emailVerificationService.sendVerificationCode(
-                    pendingRegistration.email()
-            );
-            session.setAttribute(PENDING_REGISTRATION, pendingRegistration);
-            session.setAttribute(EMAIL_CHALLENGE, challenge);
-        } catch (IllegalArgumentException exception) {
-            bindingResult.reject("registration.failed", exception.getMessage());
-            return "citizen_frontends/citizen_register";
-        } catch (RuntimeException exception) {
-            bindingResult.reject(
-                    "registration.email.failed",
-                    "We could not send the verification email. Check the mail configuration and try again."
-            );
-            return "citizen_frontends/citizen_register";
-        }
-
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "We sent a six-digit verification code to your email address."
-        );
-        return "redirect:/register/verify";
-    }
-
-    @GetMapping("/register/verify")
-    public String emailVerificationPage(HttpSession session, Model model) {
-        PreparedCitizenRegistration registration = pendingRegistration(session);
-        if (registration == null) {
-            return "redirect:/register";
-        }
-        addEmailVerificationModel(model, registration, emailChallenge(session));
-        return "citizen_frontends/citizen_email_verification";
-    }
-
-    @PostMapping("/register/verify")
-    public String verifyRegistrationEmail(
-            @RequestParam("code") String code,
-            HttpSession session,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-        PreparedCitizenRegistration registration = pendingRegistration(session);
-        EmailVerificationChallenge challenge = emailChallenge(session);
-        if (registration == null || challenge == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Start registration again to request a new code.");
-            return "redirect:/register";
-        }
-
-        if (challenge.isExpired(Instant.now())) {
-            addEmailVerificationModel(model, registration, challenge);
-            model.addAttribute("errorMessage", "That code has expired. Request a new code.");
-            return "citizen_frontends/citizen_email_verification";
-        }
-
-        if (!emailVerificationService.isValid(challenge, code == null ? "" : code.trim())) {
-            challenge.recordFailedAttempt();
-            addEmailVerificationModel(model, registration, challenge);
-            int remaining = emailVerificationService.attemptsRemaining(challenge);
-            model.addAttribute("errorMessage", remaining == 0
-                    ? "Too many incorrect attempts. Request a new code."
-                    : "Incorrect code. " + remaining + " attempt(s) remaining.");
-            return "citizen_frontends/citizen_email_verification";
-        }
-
-        try {
-            userAccountService.registerVerifiedCitizen(registration);
-        } catch (IllegalArgumentException exception) {
-            clearPendingRegistration(session);
-            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
-            return "redirect:/register";
-        }
-
-        clearPendingRegistration(session);
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Email verified and registration completed. You can now sign in."
-        );
-        return "redirect:/login";
-    }
-
-    @PostMapping("/register/verify/resend")
-    public String resendRegistrationEmail(
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-        PreparedCitizenRegistration registration = pendingRegistration(session);
-        EmailVerificationChallenge challenge = emailChallenge(session);
-        if (registration == null || challenge == null) {
-            return "redirect:/register";
-        }
-
-        Instant now = Instant.now();
-        if (!challenge.canResend(now)) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Please wait " + challenge.resendWaitSeconds(now) + " second(s) before requesting another code."
-            );
-            return "redirect:/register/verify";
-        }
-
-        try {
-            session.setAttribute(
-                    EMAIL_CHALLENGE,
-                    emailVerificationService.sendVerificationCode(registration.email())
-            );
-            redirectAttributes.addFlashAttribute("successMessage", "A new verification code was sent.");
-        } catch (RuntimeException exception) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "We could not resend the verification email. Check the mail configuration and try again."
-            );
-        }
-        return "redirect:/register/verify";
-    }
 
     @GetMapping("/dashboard/citizen")
     public String oldCitizenDashboardRoute() {
@@ -365,37 +209,6 @@ public class UserController {
         if (!model.containsAttribute("activeTab")) {
             model.addAttribute("activeTab", "citizen");
         }
-    }
-
-    private PreparedCitizenRegistration pendingRegistration(HttpSession session) {
-        Object value = session.getAttribute(PENDING_REGISTRATION);
-        return value instanceof PreparedCitizenRegistration registration ? registration : null;
-    }
-
-    private EmailVerificationChallenge emailChallenge(HttpSession session) {
-        Object value = session.getAttribute(EMAIL_CHALLENGE);
-        return value instanceof EmailVerificationChallenge challenge ? challenge : null;
-    }
-
-    private void addEmailVerificationModel(
-            Model model,
-            PreparedCitizenRegistration registration,
-            EmailVerificationChallenge challenge) {
-        model.addAttribute("maskedEmail", maskEmail(registration.email()));
-        model.addAttribute("canResend", challenge == null || challenge.canResend(Instant.now()));
-    }
-
-    private String maskEmail(String email) {
-        int separator = email.indexOf('@');
-        if (separator <= 1) {
-            return "***" + email.substring(Math.max(separator, 0));
-        }
-        return email.charAt(0) + "***" + email.substring(separator);
-    }
-
-    private void clearPendingRegistration(HttpSession session) {
-        session.removeAttribute(PENDING_REGISTRATION);
-        session.removeAttribute(EMAIL_CHALLENGE);
     }
 
     private String currentOfficerLoginTime() {

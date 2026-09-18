@@ -21,7 +21,7 @@ class UiRouteSmokeTests {
     void allUiPagesOpenSuccessfully() throws Exception {
         // Keep this list in sync with ROUTES.md when a new demonstration page is added.
         String[] routes = {
-                "/", "/login", "/register", "/walk-in", "/walk-in/recover",
+                "/", "/login", "/register", "/forgot-password", "/walk-in", "/walk-in/recover",
                 "/citizen/payment",
                 "/citizen/notifications",
                 "/citizen/appointments/biometric",

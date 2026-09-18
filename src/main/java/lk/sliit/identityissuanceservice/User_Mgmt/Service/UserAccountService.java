@@ -39,10 +39,9 @@ public class UserAccountService {
 
     public PreparedCitizenRegistration prepareCitizenRegistration(String email, String phone, String password) {
         PasswordRules.validate(password);
-        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
-        String normalizedPhone = SriLankanMobileNumber.normalize(phone);
+        String normalizedEmail = validateRegistrationEmail(email);
+        String normalizedPhone = validateRegistrationPhone(phone);
 
-        assertRegistrationAvailable(normalizedEmail, normalizedPhone);
         return new PreparedCitizenRegistration(
                 normalizedEmail,
                 normalizedPhone,
@@ -65,12 +64,34 @@ public class UserAccountService {
         }
     }
 
+    public String validateRegistrationEmail(String email) {
+        if (email == null) throw new IllegalArgumentException("Enter a valid email address.");
+        String normalized = email.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isBlank() || normalized.length() > 100
+                || !normalized.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("Enter a valid email address.");
+        }
+        if (userAccountRepository.existsByEmailIgnoreCase(normalized)) {
+            throw new IllegalArgumentException("An account already uses this email address.");
+        }
+        return normalized;
+    }
+
+    public String validateRegistrationPhone(String phone) {
+        String normalized = SriLankanMobileNumber.normalize(phone);
+        if (userAccountRepository.existsByPhone(normalized)) {
+            throw new IllegalArgumentException("An account already uses this phone number.");
+        }
+        return normalized;
+    }
+
     private UserAccount saveCitizen(PreparedCitizenRegistration registration, boolean emailVerified) {
         UserAccount account = new UserAccount();
         account.setEmail(registration.email());
         account.setPhone(registration.phone());
         account.setPasswordHash(registration.passwordHash());
         account.setEmailVerified(emailVerified ? "Y" : "N");
+        account.setPhoneVerified(emailVerified ? "Y" : "N");
 
         UserAccount savedAccount = userAccountRepository.save(account);
         citizenAccountRepository.save(new CitizenAccount(savedAccount.getUserId()));
@@ -86,6 +107,28 @@ public class UserAccountService {
                 .findByEmailIgnoreCaseAndAccountStatusAndEmailVerified(normalizedEmail, "ACTIVE", "Y")
                 .filter(account -> citizenAccountRepository.existsById(account.getUserId()))
                 .filter(account -> passwordEncoder.matches(password, account.getPasswordHash()));
+    }
+
+    public String requirePasswordResetCitizen(String email) {
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Enter your registered email address.");
+        String normalized = email.trim().toLowerCase(Locale.ROOT);
+        UserAccount account = userAccountRepository.findByEmailIgnoreCaseAndAccountStatus(normalized, "ACTIVE")
+                .filter(item -> citizenAccountRepository.existsById(item.getUserId()))
+                .orElseThrow(() -> new IllegalArgumentException("No active citizen account uses this email address."));
+        if (!"Y".equals(account.getEmailVerified())) {
+            throw new IllegalArgumentException("This email address has not been verified.");
+        }
+        return account.getEmail();
+    }
+
+    @Transactional
+    public void resetCitizenPassword(String email, String newPassword) {
+        PasswordRules.validate(newPassword);
+        String normalized = requirePasswordResetCitizen(email);
+        UserAccount account = userAccountRepository.findByEmailIgnoreCase(normalized)
+                .orElseThrow(() -> new IllegalArgumentException("Citizen account was not found."));
+        account.setPasswordHash(passwordEncoder.encode(newPassword));
+        userAccountRepository.save(account);
     }
 
 }
