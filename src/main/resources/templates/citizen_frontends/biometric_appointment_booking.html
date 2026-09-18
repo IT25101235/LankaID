@@ -6,10 +6,10 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen text-slate-800">
-<header class="bg-white border-b shadow-sm"><div class="max-w-5xl mx-auto h-16 px-4 flex items-center justify-between"><a th:href="@{/citizen/applications}" class="text-sm font-semibold text-slate-600 flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_back</span>My applications</a><span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span><a th:href="@{/citizen/notifications}" class="material-symbols-outlined text-slate-500">notifications</a></div></header>
+<body class="portal-shell portal-citizen min-h-screen text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='biometrics')}"></header>
 
 <main class="max-w-5xl mx-auto px-4 py-7">
   <div th:if="${appointmentUnavailable}" class="bg-white border rounded-2xl p-8 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">event_busy</span><h1 class="font-bold text-xl mt-3">No application selected</h1><p class="text-sm text-slate-500 mt-1">Pay for an approved application before booking biometric collection.</p><a th:href="@{/citizen/applications}" class="inline-block mt-5 bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">My applications</a></div>
@@ -54,6 +54,6 @@
   </div>
 </main>
 <script src="/Biometric_And_Appointment_Mgmt/booking-availability.js"></script>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

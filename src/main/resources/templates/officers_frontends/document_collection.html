@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 <link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="bg-slate-950 text-white border-b border-slate-800">
   <div class="max-w-6xl mx-auto h-16 px-5 flex items-center gap-4">
     <a th:href="@{/officer/csr}" class="text-sm text-slate-300 hover:text-white flex items-center gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>CSR dashboard</a>

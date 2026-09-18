@@ -88,22 +88,25 @@
   }
 
   function mountCitizenTopbar(publicAccess) {
-    const header = document.createElement('header');
-    header.className = 'citizen-topbar';
-    header.innerHTML =
-      '<div class="citizen-topbar-inner">' +
-        '<a class="citizen-brand" href="' + config.home + '" aria-label="LankaID home">' + brandMarkup() + '</a>' +
-        '<button class="citizen-menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="citizen-primary-nav">' +
-          '<span class="material-symbols-outlined">menu</span><span class="citizen-menu-label">Menu</span>' +
-        '</button>' +
-        '<nav class="citizen-primary-nav" id="citizen-primary-nav" aria-label="Citizen navigation">' +
-          config.items.map(citizenNavItem).join('') +
-          (publicAccess
-            ? ''
-            : '<form class="citizen-signout-form" action="/logout" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>') +
-        '</nav>' +
-      '</div>';
-    document.body.prepend(header);
+    let header = document.querySelector('body > .citizen-topbar');
+    if (!header) {
+      header = document.createElement('header');
+      header.className = 'citizen-topbar';
+      header.innerHTML =
+        '<div class="citizen-topbar-inner">' +
+          '<a class="citizen-brand" href="' + config.home + '" aria-label="LankaID home">' + brandMarkup() + '</a>' +
+          '<button class="citizen-menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="citizen-primary-nav">' +
+            '<span class="material-symbols-outlined">menu</span><span class="citizen-menu-label">Menu</span>' +
+          '</button>' +
+          '<nav class="citizen-primary-nav" id="citizen-primary-nav" aria-label="Citizen navigation">' +
+            config.items.map(citizenNavItem).join('') +
+            (publicAccess
+              ? ''
+              : '<form class="citizen-signout-form" action="/logout" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>') +
+          '</nav>' +
+        '</div>';
+      document.body.prepend(header);
+    }
 
     const menuButton = header.querySelector('.citizen-menu-button');
     const nav = header.querySelector('.citizen-primary-nav');

@@ -4,10 +4,11 @@
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title th:text="${pageTitle} + ' | LankaID'">NIC Application | LankaID</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800">
-<header class="bg-white border-b"><div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between"><a th:href="@{/citizen/dashboard}" class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></a><span class="text-sm font-semibold text-slate-500">NIC Application</span></div></header>
+<body class="portal-shell portal-citizen min-h-screen bg-slate-100 text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
 <main class="max-w-5xl mx-auto px-4 py-7">
   <div class="mb-6"><a th:href="@{/citizen/dashboard}" class="text-sm text-sky-700 font-semibold">← Back to dashboard</a><h1 class="text-2xl font-bold mt-3" th:text="${pageTitle}">New NIC Application</h1></div>
   <form th:action="@{/citizen/applications/nic/{kind}(kind=${formKind})}" th:object="${applicationForm}" method="post" data-validate data-application-form class="space-y-5">
@@ -83,5 +84,5 @@
 </main>
 <script src="/Citizen_Application_Mgmt/application-form.js"></script>
 <script src="/js/form-errors.js"></script>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body></html>

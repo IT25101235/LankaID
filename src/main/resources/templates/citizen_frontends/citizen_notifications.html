@@ -6,12 +6,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen text-slate-800">
-<header class="bg-white border-b shadow-sm"><div class="max-w-3xl mx-auto h-16 px-4 flex items-center justify-between"><a th:href="@{/citizen/dashboard}" class="text-sm font-semibold text-slate-600 flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_back</span>Dashboard</a><span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span><form th:action="@{/citizen/notifications/read-all}" method="post"><button class="text-xs font-bold text-sky-700">Mark all read</button></form></div></header>
+<body class="portal-shell portal-citizen min-h-screen text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='notifications')}"></header>
 <main class="max-w-3xl mx-auto px-4 py-7">
-  <div class="flex items-end justify-between"><div><h1 class="text-2xl font-extrabold">Notifications</h1><p class="text-sm text-slate-500 mt-1"><span th:text="${unreadCount}">0</span> unread</p></div><a th:href="@{/citizen/applications}" class="text-sm font-bold text-sky-700">My applications</a></div>
+  <div class="flex items-end justify-between gap-4"><div><h1 class="text-2xl font-extrabold">Notifications</h1><p class="text-sm text-slate-500 mt-1"><span th:text="${unreadCount}">0</span> unread</p></div><form th:if="${unreadCount > 0}" th:action="@{/citizen/notifications/read-all}" method="post"><button class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100">Mark all read</button></form></div>
 
   <div th:if="${#lists.isEmpty(notifications)}" class="mt-6 bg-white border border-dashed rounded-2xl p-10 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">notifications_none</span><p class="font-bold mt-2">No notifications yet</p><p class="text-sm text-slate-500 mt-1">Application, payment, appointment, and biometric updates will appear here.</p></div>
 
@@ -22,6 +22,6 @@
     </article>
   </div>
 </main>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

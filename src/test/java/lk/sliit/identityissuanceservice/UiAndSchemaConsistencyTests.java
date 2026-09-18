@@ -153,6 +153,41 @@ class UiAndSchemaConsistencyTests {
     }
 
     @Test
+    void authenticatedCitizenPagesUseOneServerRenderedNavbarWithUnreadTag() throws IOException {
+        String navbar = Files.readString(TEMPLATE_ROOT.resolve("fragments/citizen_navbar.html"));
+        List<String> citizenTemplates = List.of(
+                "citizen_dashboard.html", "application_tracking.html", "nic_application_form.html",
+                "passport_application_form.html", "application_document_upload.html",
+                "citizen_application_review.html", "payment_gateway.html",
+                "biometric_appointment_booking.html", "biometric_appointment_pass.html",
+                "citizen_notifications.html", "citizen_support_requests.html",
+                "citizen_support_detail.html", "citizen_complaints.html", "citizen_identity_link.html"
+        );
+
+        assertTrue(navbar.contains("th:fragment=\"navbar(activeSection)\""));
+        assertTrue(navbar.contains("citizen-notification-tag"));
+        assertTrue(navbar.contains("unreadNotificationCount > 0"));
+        for (String template : citizenTemplates) {
+            String html = Files.readString(TEMPLATE_ROOT.resolve("citizen_frontends").resolve(template));
+            assertTrue(html.contains("fragments/citizen_navbar"), template + " must use the shared citizen navbar");
+            assertTrue(html.contains("portal-shell portal-citizen"), template + " must reserve its final shell before paint");
+        }
+    }
+
+    @Test
+    void officerPagesReserveTheFinalSidebarLayoutBeforeJavascriptRuns() throws IOException {
+        try (var templates = Files.list(TEMPLATE_ROOT.resolve("officers_frontends"))) {
+            for (Path template : templates.filter(path -> path.toString().endsWith(".html")).toList()) {
+                String html = Files.readString(template);
+                if (html.contains("/js/portal-shell.js")) {
+                    assertTrue(html.contains("portal-shell portal-officer"),
+                            template.getFileName() + " must not flash its legacy header before the shared sidebar loads");
+                }
+            }
+        }
+    }
+
+    @Test
     void citizenSupportRenewalAndHomeDeliveryControlsRemainUsable() throws IOException {
         String support = Files.readString(
                 TEMPLATE_ROOT.resolve("citizen_frontends/citizen_support_requests.html"));

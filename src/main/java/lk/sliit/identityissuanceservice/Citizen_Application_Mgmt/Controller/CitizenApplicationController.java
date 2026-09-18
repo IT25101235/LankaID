@@ -9,7 +9,6 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,18 +24,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CitizenApplicationController {
 
     private final CitizenApplicationService applicationService;
-    private final NotificationService notificationService;
     private final DocumentDeliveryService deliveryService;
     private final CitizenCorrectionRequestService correctionRequestService;
 
     public CitizenApplicationController(
             CitizenApplicationService applicationService,
-            NotificationService notificationService,
             DocumentDeliveryService deliveryService,
             CitizenCorrectionRequestService correctionRequestService
     ) {
         this.applicationService = applicationService;
-        this.notificationService = notificationService;
         this.deliveryService = deliveryService;
         this.correctionRequestService = correctionRequestService;
     }
@@ -64,7 +60,6 @@ public class CitizenApplicationController {
         model.addAttribute("applications", applicationService.getCitizenApplications(citizenId));
         model.addAttribute("correctionMessages", correctionRequestService.getCurrentCorrectionMessages(citizenId));
         model.addAttribute("deliveryByApplicationId", deliveryService.getCitizenDeliveryMap(citizenId));
-        model.addAttribute("unreadNotificationCount", notificationService.getUnreadCount(citizenId));
         return "citizen_frontends/citizen_dashboard";
     }
 

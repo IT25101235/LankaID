@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 <link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="bg-slate-950 text-white"><div class="max-w-6xl mx-auto min-h-16 px-4 py-3 flex items-center gap-4"><a th:href="@{/officer/csr/support}" class="text-sm text-slate-300 flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>Support queue</a><div class="h-6 w-px bg-slate-700"></div><p class="font-bold">Review support request</p><div class="ml-auto text-right"><p class="text-xs font-semibold" th:text="${loggedInOfficerRoleLabel}">CSR</p><p class="text-[11px] text-slate-400" th:text="${loggedInOfficerEmployeeNo + ' · ' + loggedInOfficerEmail}">Officer</p></div></div></header>
 <main class="max-w-6xl mx-auto p-4 sm:p-6">
   <a th:href="@{/officer/csr/support}" class="support-back-button mb-5 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:border-cyan-600 hover:text-cyan-700">

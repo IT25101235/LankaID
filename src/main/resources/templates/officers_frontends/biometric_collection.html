@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 <link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="${queueRoute}" class="text-sm text-slate-300">← Applications</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold"><span th:text="${documentType}">NIC</span> biometric collection</p><p class="text-xs text-slate-400">Webcam QR scan or manual appointment reference</p></div><a th:href="@{/officer/{service}/appointments(service=${servicePath})}" class="ml-auto border border-slate-700 rounded-lg px-4 py-2 text-xs font-bold">Appointments</a></div></header>
 
 <main class="max-w-7xl mx-auto p-4 sm:p-6">

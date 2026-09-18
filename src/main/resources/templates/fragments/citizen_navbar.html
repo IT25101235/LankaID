@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="citizen-topbar" th:fragment="navbar(activeSection)">
+  <div class="citizen-topbar-inner">
+    <a class="citizen-brand" th:href="@{/citizen/dashboard}" aria-label="LankaID home">
+      <span class="portal-brand-mark"><img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/></span>
+      <span>
+        <span class="portal-brand-name">Lanka<span>ID</span></span>
+        <span class="portal-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு<br/>Government of Sri Lanka</span>
+      </span>
+    </a>
+    <button class="citizen-menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="citizen-primary-nav">
+      <span class="material-symbols-outlined">menu</span><span class="citizen-menu-label">Menu</span>
+    </button>
+    <nav class="citizen-primary-nav" id="citizen-primary-nav" aria-label="Citizen navigation">
+      <a class="citizen-nav-link" th:classappend="${activeSection == 'home'} ? ' active'" th:attr="aria-current=${activeSection == 'home' ? 'page' : null}" th:href="@{/citizen/dashboard}">
+        <span class="material-symbols-outlined">home</span><span>Home</span>
+      </a>
+      <a class="citizen-nav-link" th:classappend="${activeSection == 'applications'} ? ' active'" th:attr="aria-current=${activeSection == 'applications' ? 'page' : null}" th:href="@{/citizen/applications}">
+        <span class="material-symbols-outlined">description</span><span>My applications</span>
+      </a>
+      <a class="citizen-nav-link" th:classappend="${activeSection == 'biometrics'} ? ' active'" th:attr="aria-current=${activeSection == 'biometrics' ? 'page' : null}" th:href="@{/citizen/appointments/biometric}">
+        <span class="material-symbols-outlined">fingerprint</span><span>Biometrics</span>
+      </a>
+      <a class="citizen-nav-link" th:classappend="${activeSection == 'notifications'} ? ' active'" th:attr="aria-current=${activeSection == 'notifications' ? 'page' : null},aria-label=${unreadNotificationCount != null and unreadNotificationCount > 0 ? 'Notifications, ' + unreadNotificationCount + ' unread' : 'Notifications'}" th:href="@{/citizen/notifications}">
+        <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
+        <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}" class="citizen-notification-tag" th:text="${unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}">1</span>
+      </a>
+      <a class="citizen-nav-link" th:classappend="${activeSection == 'support'} ? ' active'" th:attr="aria-current=${activeSection == 'support' ? 'page' : null}" th:href="@{/citizen/support}">
+        <span class="material-symbols-outlined">support_agent</span><span>Contact / Complaint</span>
+      </a>
+      <form class="citizen-signout-form" th:action="@{/logout}" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>
+    </nav>
+  </div>
+</header>
+</body>
+</html>

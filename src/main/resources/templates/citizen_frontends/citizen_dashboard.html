@@ -9,24 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen flex flex-col text-slate-800">
-<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2">
-      <span class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center material-symbols-outlined">verified_user</span>
-      <span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span>
-    </a>
-    <nav class="hidden md:flex gap-6 text-sm font-semibold">
-      <a th:href="@{/citizen/dashboard}" class="text-sky-600">Home</a>
-      <a th:href="@{/citizen/applications}" class="text-slate-600 hover:text-sky-600">My Applications</a>
-      <a th:href="@{/citizen/notifications}" class="text-slate-600 hover:text-sky-600 flex items-center gap-1">Notifications<span th:if="${unreadNotificationCount > 0}" class="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center" th:text="${unreadNotificationCount}">1</span></a>
-      <a th:href="@{/citizen/support}" class="text-slate-600 hover:text-sky-600">Support</a>
-    </nav>
-    <form th:action="@{/logout}" method="post">
-      <button type="submit" class="citizen-session-link">Sign out</button>
-    </form>
-  </div>
-</header>
+<body class="portal-shell portal-citizen min-h-screen flex flex-col text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='home')}"></header>
 
 <main class="max-w-6xl mx-auto px-4 sm:px-6 py-7 w-full flex-1">
   <div th:if="${applicationMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${applicationMessage}"></div>
@@ -158,6 +142,6 @@
   </section>
 </main>
 <script src="/js/application-journey.js?v=20260918"></script>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

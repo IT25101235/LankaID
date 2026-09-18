@@ -6,10 +6,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-<header class="bg-white border-b"><div class="max-w-4xl mx-auto h-16 px-4 flex items-center"><a th:href="@{/citizen/support}" class="text-sm text-slate-600 flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>My support requests</a></div></header>
+<body class="portal-shell portal-citizen min-h-screen bg-slate-50 text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='support')}"></header>
 <main class="max-w-4xl mx-auto p-4 sm:p-6">
   <div th:if="${supportMessage}" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-semibold text-emerald-700" th:text="${supportMessage}"></div>
   <div th:if="${supportError}" class="rounded-2xl bg-red-50 border border-red-200 p-8 text-center"><p class="font-bold text-red-700" th:text="${supportError}">Not found</p><a th:href="@{/citizen/support}" class="inline-block mt-4 text-sm font-bold text-sky-700">Return to support requests</a></div>
@@ -48,6 +48,6 @@
     </section>
   </div>
 </main>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

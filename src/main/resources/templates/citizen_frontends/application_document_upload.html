@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Upload Documents | LankaID</title><script src="https://cdn.tailwindcss.com?plugins=forms"></script><link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Upload Documents | LankaID</title><script src="https://cdn.tailwindcss.com?plugins=forms"></script><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/><link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800">
-<header class="bg-white border-b"><div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between"><a th:href="@{/citizen/dashboard}" class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></a><span class="text-sm font-semibold">Document Upload</span></div></header>
+<body class="portal-shell portal-citizen min-h-screen bg-slate-100 text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
 <main class="max-w-4xl mx-auto p-4 py-7">
   <h1 class="text-2xl font-bold">Upload supporting documents</h1><p class="text-sm text-slate-500 mt-1">Application <span class="font-mono font-semibold" th:text="${currentApplication.applicationNo}">LK-NIC-2026-123456</span></p>
   <a th:if="${!correctionMode and workflowPath == 'applications'}" th:href="@{/citizen/applications/{service}/edit(service=${servicePath},applicationId=${currentApplication.applicationId})}" class="inline-flex items-center gap-1 mt-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-bold text-sky-700 hover:bg-sky-100"><span class="material-symbols-outlined text-lg">edit</span>Edit bio data</a>
@@ -27,4 +27,4 @@
       </form></div>
   </section>
   <div class="flex flex-wrap justify-between mt-6 gap-3"><div class="flex flex-wrap gap-2"><a th:href="@{/citizen/dashboard}" class="border bg-white rounded-xl px-5 py-2.5 text-sm font-semibold">Save and return later</a><form th:if="${currentApplication.currentStatus == 'DRAFT'}" th:action="@{/citizen/applications/{applicationId}/delete(applicationId=${currentApplication.applicationId})}" method="post" onsubmit="return confirm('Delete this unsubmitted draft? This cannot be undone.')"><button type="submit" class="rounded-xl border border-red-200 bg-red-50 px-5 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100">Delete draft</button></form></div><a th:href="@{/citizen/{workflow}/{service}/review(workflow=${workflowPath},service=${servicePath},applicationId=${currentApplication.applicationId})}" class="bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Review application</a></div>
-</main><script src="/js/portal-shell.js?v=20260915-signout"></script></body></html>
+</main><script src="/js/portal-shell.js?v=20260918-navbar"></script></body></html>

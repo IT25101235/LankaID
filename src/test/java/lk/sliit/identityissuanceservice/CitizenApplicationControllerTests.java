@@ -7,7 +7,6 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,9 +36,6 @@ class CitizenApplicationControllerTests {
     private CitizenApplicationService applicationService;
 
     @Mock
-    private NotificationService notificationService;
-
-    @Mock
     private DocumentDeliveryService deliveryService;
 
     @Mock
@@ -52,7 +48,6 @@ class CitizenApplicationControllerTests {
         mockMvc = standaloneSetup(
                 new CitizenApplicationController(
                         applicationService,
-                        notificationService,
                         deliveryService,
                         correctionRequestService
                 )

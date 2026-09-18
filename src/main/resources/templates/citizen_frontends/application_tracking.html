@@ -9,14 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen text-slate-800">
-<header class="bg-white border-b shadow-sm">
-  <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-    <a th:href="@{/citizen/dashboard}" class="text-sm font-semibold text-slate-600 hover:text-sky-700 flex items-center gap-1"><span class="material-symbols-outlined text-lg">arrow_back</span>Dashboard</a>
-    <span class="font-extrabold text-lg">Lanka<span class="text-sky-600">ID</span></span>
-    <a th:href="@{/citizen/notifications}" class="relative text-slate-500 hover:text-sky-700"><span class="material-symbols-outlined">notifications</span><span th:if="${unreadNotificationCount > 0}" class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center" th:text="${unreadNotificationCount}">1</span></a>
-  </div>
-</header>
+<body class="portal-shell portal-citizen min-h-screen text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
 <main class="max-w-5xl mx-auto px-4 py-7">
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
     <div><h1 class="text-2xl font-extrabold">My Applications</h1><p class="text-sm text-slate-500 mt-1">Applications saved in your citizen account.</p></div>
@@ -98,6 +92,6 @@
   </div>
 </main>
 <script src="/js/application-journey.js?v=20260918"></script>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

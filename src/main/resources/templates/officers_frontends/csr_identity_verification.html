@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${session.loggedInOfficerEmail},data-officer-rank=${session.loggedInOfficerRoleLabel},data-officer-login-time=${session.loggedInOfficerLoginTime}">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${session.loggedInOfficerEmail},data-officer-rank=${session.loggedInOfficerRoleLabel},data-officer-login-time=${session.loggedInOfficerLoginTime}">
 <main class="max-w-2xl mx-auto px-4 py-8">
   <a th:href="@{/officer/csr/support/{id}(id=${supportRequest.request.requestId})}" class="text-cyan-700 font-semibold">Back to support request</a>
   <h1 class="text-2xl font-bold mt-5">Verify existing identity</h1>

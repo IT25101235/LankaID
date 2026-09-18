@@ -6,22 +6,18 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-<header class="bg-white border-b">
-  <div class="max-w-4xl mx-auto min-h-16 px-4 py-3 flex items-center gap-3">
-    <a th:href="@{/citizen/support}" class="text-sm text-slate-600 flex items-center gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>My requests</a>
-    <div class="ml-auto flex gap-2">
-      <a th:href="@{/citizen/support/contact-us}" class="rounded-lg border px-3 py-2 text-xs font-bold"
-         th:classappend="${supportForm.requestType == 'CONTACT' ? ' border-sky-600 bg-sky-50 text-sky-700' : ' border-slate-300'}">Contact Us</a>
-      <a th:href="@{/citizen/support/complaint}" class="rounded-lg border px-3 py-2 text-xs font-bold"
-         th:classappend="${supportForm.requestType == 'COMPLAINT' ? ' border-orange-500 bg-orange-50 text-orange-700' : ' border-slate-300'}">Complaint</a>
-    </div>
-  </div>
-</header>
+<body class="portal-shell portal-citizen min-h-screen bg-slate-50 text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='support')}"></header>
 
 <main class="max-w-4xl mx-auto p-4 sm:p-6">
+  <div class="mb-4 flex flex-wrap justify-end gap-2">
+    <a th:href="@{/citizen/support/contact-us}" class="rounded-lg border px-3 py-2 text-xs font-bold"
+       th:classappend="${supportForm.requestType == 'CONTACT' ? ' border-sky-600 bg-sky-50 text-sky-700' : ' border-slate-300'}">Contact Us</a>
+    <a th:href="@{/citizen/support/complaint}" class="rounded-lg border px-3 py-2 text-xs font-bold"
+       th:classappend="${supportForm.requestType == 'COMPLAINT' ? ' border-orange-500 bg-orange-50 text-orange-700' : ' border-slate-300'}">Complaint</a>
+  </div>
   <div class="mb-5">
     <h1 class="text-2xl font-extrabold" th:text="${formTitle}">Contact Us</h1>
     <p class="text-sm text-slate-500 mt-1" th:text="${formDescription}">Send a message to CSR.</p>
@@ -73,6 +69,6 @@ const characterCount = document.getElementById('characterCount');
 function updateCount(){characterCount.textContent = supportMessage.value.length}
 supportMessage.addEventListener('input', updateCount); updateCount();
 </script>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

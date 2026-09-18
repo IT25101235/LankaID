@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,18 +12,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ApplicationTrackingController {
 
     private final CitizenApplicationService applicationService;
-    private final NotificationService notificationService;
     private final DocumentDeliveryService deliveryService;
     private final CitizenCorrectionRequestService correctionRequestService;
 
     public ApplicationTrackingController(
             CitizenApplicationService applicationService,
-            NotificationService notificationService,
             DocumentDeliveryService deliveryService,
             CitizenCorrectionRequestService correctionRequestService
     ) {
         this.applicationService = applicationService;
-        this.notificationService = notificationService;
         this.deliveryService = deliveryService;
         this.correctionRequestService = correctionRequestService;
     }
@@ -39,7 +35,6 @@ public class ApplicationTrackingController {
         model.addAttribute("applications", applicationService.getCitizenApplications(citizenId));
         model.addAttribute("correctionMessages", correctionRequestService.getCurrentCorrectionMessages(citizenId));
         model.addAttribute("deliveryByApplicationId", deliveryService.getCitizenDeliveryMap(citizenId));
-        model.addAttribute("unreadNotificationCount", notificationService.getUnreadCount(citizenId));
         return "citizen_frontends/application_tracking";
     }
 

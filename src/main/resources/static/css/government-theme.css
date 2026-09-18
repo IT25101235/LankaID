@@ -795,6 +795,22 @@ body.portal-shell.portal-officer > main {
 
 .citizen-nav-link .material-symbols-outlined { font-size: 1.05rem; }
 
+.citizen-notification-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .citizen-session-link {
   margin-left: 0.35rem;
   padding-inline: 1rem;
