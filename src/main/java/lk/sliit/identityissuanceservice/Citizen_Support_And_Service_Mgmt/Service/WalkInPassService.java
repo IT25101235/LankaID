@@ -48,9 +48,7 @@ public class WalkInPassService {
         graphics.fillRoundRect(60, 50, 780, 170, 35, 35);
         graphics.fillRect(60, 170, 780, 50);
 
-        graphics.setColor(Color.WHITE);
-        graphics.setFont(new Font("SansSerif", Font.BOLD, 40));
-        graphics.drawString("LankaID", 105, 120);
+        qrService.drawOfficialBrand(graphics, 105, 70, Color.WHITE);
         graphics.setFont(new Font("SansSerif", Font.PLAIN, 25));
         graphics.drawString("Walk-in Service Appointment Pass", 105, 170);
 

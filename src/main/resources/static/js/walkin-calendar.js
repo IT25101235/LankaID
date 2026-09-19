@@ -4,7 +4,6 @@
 
   const centre = form.querySelector('[data-walkin-centre]');
   const slotSelect = form.querySelector('[data-walkin-slot]');
-  const fallback = form.querySelector('[data-slot-fallback]');
   const calendarUi = form.querySelector('[data-calendar-ui]');
   const days = form.querySelector('[data-calendar-days]');
   const monthLabel = form.querySelector('[data-calendar-month]');
@@ -14,8 +13,8 @@
   const timeHeading = form.querySelector('[data-time-heading]');
   const timeSlots = form.querySelector('[data-time-slots]');
   const message = form.querySelector('[data-calendar-message]');
-  const slots = [...slotSelect.options].slice(1).map(option => ({
-    id: option.value,
+  const slots = [...form.querySelectorAll('[data-walkin-slot-option]')].map(option => ({
+    id: option.dataset.slotId,
     centreId: option.dataset.centreId,
     centreName: option.dataset.centreName,
     date: option.dataset.date,
@@ -26,7 +25,6 @@
 
   const uniqueCentres = new Map(slots.map(slot => [slot.centreId, slot.centreName]));
   uniqueCentres.forEach((name, id) => centre.add(new Option(name, id)));
-  fallback.hidden = true;
   calendarUi.hidden = false;
   let displayedMonth = monthStart(parseDate(slots[0].date));
   let selectedDate = '';

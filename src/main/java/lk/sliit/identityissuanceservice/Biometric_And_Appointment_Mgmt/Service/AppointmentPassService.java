@@ -15,6 +15,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -51,9 +52,7 @@ public class AppointmentPassService {
         graphics.fillRoundRect(60, 50, 780, 170, 35, 35);
         graphics.fillRect(60, 170, 780, 50);
 
-        graphics.setColor(Color.WHITE);
-        graphics.setFont(new Font("SansSerif", Font.BOLD, 40));
-        graphics.drawString("LankaID", 105, 120);
+        drawOfficialBrand(graphics, 105, 70, Color.WHITE);
         graphics.setFont(new Font("SansSerif", Font.PLAIN, 25));
         graphics.drawString("Biometric Collection Appointment Pass", 105, 170);
 
@@ -89,6 +88,22 @@ public class AppointmentPassService {
         drawCentered(graphics, "The QR code contains only the appointment reference shown above.", 1090, pass.getWidth());
         graphics.dispose();
         return writePng(pass);
+    }
+
+    /** Draws the same emblem and three-language LankaID mark used by the web pages. */
+    public void drawOfficialBrand(Graphics2D graphics, int x, int y, Color textColor) {
+        try (InputStream stream = getClass().getResourceAsStream("/static/images/sri-lanka-government-emblem.png")) {
+            if (stream == null) throw new IOException("Government emblem was not found.");
+            BufferedImage emblem = ImageIO.read(stream);
+            graphics.drawImage(emblem, x, y, 68, 78, null);
+        } catch (IOException exception) {
+            throw new IllegalArgumentException("The government emblem could not be loaded.");
+        }
+        graphics.setColor(textColor);
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 36));
+        graphics.drawString("LankaID", x + 84, y + 35);
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        graphics.drawString("ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka", x + 84, y + 57);
     }
 
     private void drawCentered(Graphics2D graphics, String text, int y, int width) {

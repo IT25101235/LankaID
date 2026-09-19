@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 class CitizenAccountDashboardServiceTests {
 
@@ -51,7 +52,7 @@ class CitizenAccountDashboardServiceTests {
 
         CitizenAccountRowDto suspendedRow = dashboard.citizens().get(0);
         assertEquals("CTZ-000042", suspendedRow.accountId());
-        assertEquals("Profile not completed", suspendedRow.displayName());
+        assertEquals("Citizen CTZ-000042", suspendedRow.displayName());
         assertEquals(1, suspendedRow.nicApplicationCount());
         assertEquals(0, suspendedRow.passportApplicationCount());
         assertFalse(suspendedRow.active());
@@ -77,6 +78,29 @@ class CitizenAccountDashboardServiceTests {
 
         assertTrue(dashboard.citizens().isEmpty());
         assertEquals(0, dashboard.citizenAccountCount());
+    }
+
+    @Test
+    void deletingCitizenReleasesContactsAndPreservesGovernmentRecord() {
+        CitizenAccountRepository citizenRepository = mock(CitizenAccountRepository.class);
+        UserAccountRepository userRepository = mock(UserAccountRepository.class);
+        CitizenApplicationRepository applicationRepository = mock(CitizenApplicationRepository.class);
+        CitizenAccount citizen = citizen(44, "Nimali", "Perera");
+        citizen.setGovernmentRecordId(9);
+        UserAccount user = user(44, "nimali@example.com", "ACTIVE", LocalDateTime.now());
+        user.setPhone("+94771234567");
+        when(citizenRepository.findById(44)).thenReturn(java.util.Optional.of(citizen));
+        when(userRepository.findById(44)).thenReturn(java.util.Optional.of(user));
+
+        new CitizenAccountDashboardService(citizenRepository, userRepository, applicationRepository)
+                .removeCitizenAccount(44);
+
+        assertEquals(null, citizen.getGovernmentRecordId());
+        assertEquals("REMOVED", user.getAccountStatus());
+        assertEquals("deleted-44@removed.invalid", user.getEmail());
+        assertEquals("DEL-44", user.getPhone());
+        verify(citizenRepository).save(citizen);
+        verify(userRepository).save(user);
     }
 
     private CitizenAccount citizen(int id, String givenName, String familyName) {

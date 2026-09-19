@@ -5,7 +5,6 @@ public class OfficerDetailsDto {
     private final Integer userId;
     private final String employeeNo;
     private final String email;
-    private final String phone;
     private final String roleCode;
     private final String roleLabel;
     private final String roleFilter;
@@ -15,7 +14,6 @@ public class OfficerDetailsDto {
             Integer userId,
             String employeeNo,
             String email,
-            String phone,
             String roleCode,
             String roleLabel,
             String roleFilter,
@@ -23,7 +21,6 @@ public class OfficerDetailsDto {
         this.userId = userId;
         this.employeeNo = employeeNo;
         this.email = email;
-        this.phone = phone;
         this.roleCode = roleCode;
         this.roleLabel = roleLabel;
         this.roleFilter = roleFilter;
@@ -40,10 +37,6 @@ public class OfficerDetailsDto {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getPhone() {
-        return phone;
     }
 
     public String getRoleCode() {

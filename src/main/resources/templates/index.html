@@ -23,13 +23,7 @@
 <!-- Government header -->
 <header class="gov-site-header gov-official-strip border-b sticky top-0 z-50 text-white shadow-sm">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 h-[4.75rem] flex items-center justify-between">
-    <a th:href="@{/}" class="gov-brand" aria-label="LankaID, Government of Sri Lanka home">
-      <img class="gov-emblem" src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/>
-      <div>
-        <span class="gov-brand-title">Lanka<span>ID</span></span>
-        <span class="gov-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</span>
-      </div>
-    </a>
+    <div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div>
     <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-200" aria-label="Primary navigation">
       <a class="text-cyan-300" href="#top">Home</a>
       <a class="hover:text-white transition-colors" href="#services">Services</a>
@@ -215,13 +209,7 @@
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
     <div class="grid md:grid-cols-[1.2fr_0.8fr] gap-10 pb-9 border-b border-slate-800">
       <div class="max-w-lg">
-        <div class="flex items-center gap-3">
-          <img class="gov-emblem gov-emblem-sm" src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/>
-          <div>
-            <p class="font-extrabold text-lg text-white leading-none">Lanka<span class="officer-accent-text">ID</span></p>
-            <p class="text-xs text-slate-400 mt-1">National Identity Portal</p>
-          </div>
-        </div>
+        <div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div>
         <p class="text-sm text-slate-400 leading-relaxed mt-5">The official digital identity and citizen verification service of Sri Lanka.</p>
       </div>
 

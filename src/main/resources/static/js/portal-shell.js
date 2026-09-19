@@ -28,7 +28,10 @@
   const officerLoginTime = isOfficer ? (document.body.dataset.officerLoginTime || '') : '';
   document.body.classList.add('portal-shell', isOfficer ? 'portal-officer' : 'portal-citizen');
 
-  if (isOfficer) mountOfficerSidebar();
+  if (isOfficer) {
+    mountOfficerSidebar();
+    if (role !== 'SYSTEM_ADMIN') refreshOfficerNotificationBadge();
+  }
   else mountCitizenTopbar(publicWalkIn);
 
   function mountOfficerSidebar() {
@@ -87,6 +90,23 @@
     });
   }
 
+  function refreshOfficerNotificationBadge() {
+    fetch('/officer/notifications/unread-count', { credentials: 'same-origin' })
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .then(function (result) {
+        const count = result ? Number(result.unreadCount || 0) : 0;
+        if (count < 1) return;
+        const link = document.querySelector('.portal-nav-link[href="/officer/notifications"]');
+        if (!link) return;
+        const badge = document.createElement('span');
+        badge.className = 'portal-notification-tag';
+        badge.textContent = count > 99 ? '99+' : String(count);
+        link.appendChild(badge);
+        link.setAttribute('aria-label', 'Notifications, ' + count + ' unread');
+      })
+      .catch(function () { /* Navigation remains usable if the count cannot be loaded. */ });
+  }
+
   function mountCitizenTopbar(publicAccess) {
     let header = document.querySelector('body > .citizen-topbar');
     if (!header) {
@@ -135,7 +155,7 @@
   function brandMarkup() {
     return '<span class="portal-brand-mark"><img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"></span>' +
       '<span><span class="portal-brand-name">Lanka<span>ID</span></span>' +
-      '<span class="portal-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு<br>Government of Sri Lanka</span></span>';
+      '<span class="portal-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</span></span>';
   }
 
   function navItem(item) {
@@ -220,7 +240,8 @@
         items: [
           item('/officer/director', 'space_dashboard', 'Executive overview', ['/officer/director']),
           item('/officer/director/printing', 'print', 'Printing and export', ['/officer/director/printing*']),
-          item('/officer/application-tracking', 'timeline', 'Application tracking', ['/officer/application-tracking*'])
+          item('/officer/application-tracking', 'timeline', 'Application tracking', ['/officer/application-tracking*']),
+          item('/officer/notifications', 'notifications', 'Notifications', ['/officer/notifications*'])
         ]
       };
     }
@@ -231,7 +252,8 @@
           item('/officer/csr', 'space_dashboard', 'Dashboard', ['/officer/csr']),
           item('/officer/csr/support', 'support_agent', 'Support queue', ['/officer/csr/support*', '/officer/csr/complaints*']),
           item('/officer/csr/walk-ins', 'event_available', 'Walk-in management', ['/officer/csr/walk-ins*']),
-          item('/officer/csr/deliveries', 'inventory_2', 'Document collection', ['/officer/csr/deliveries*'])
+          item('/officer/csr/deliveries', 'inventory_2', 'Document collection', ['/officer/csr/deliveries*']),
+          item('/officer/notifications', 'notifications', 'Notifications', ['/officer/notifications*'])
         ]
       };
     }
@@ -246,7 +268,8 @@
         item('/officer/' + service + '/applications/processed', 'task_alt', 'Reviewed applications', ['/officer/' + service + '/applications/processed']),
         item('/officer/application-tracking', 'timeline', 'Application tracking', ['/officer/application-tracking*']),
         item('/officer/' + service + '/appointments', 'event_available', 'Appointments', ['/officer/' + service + '/appointments*']),
-        item('/officer/' + service + '/biometrics', 'fingerprint', 'Biometric collection', ['/officer/' + service + '/biometrics*'])
+        item('/officer/' + service + '/biometrics', 'fingerprint', 'Biometric collection', ['/officer/' + service + '/biometrics*']),
+        item('/officer/notifications', 'notifications', 'Notifications', ['/officer/notifications*'])
       ]
     };
   }

@@ -50,7 +50,7 @@ class CitizenRegistrationControllerTests {
                 .thenReturn(prepared);
 
         mvc.perform(post("/register").session(session)
-                        .param("email", "citizen@example.com").param("phone", "+94771234567")
+                        .param("email", "citizen@example.com").param("phone", "771234567")
                         .param("password", "Password123!").param("confirmPassword", "Password123!"))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
         verify(accounts).registerVerifiedCitizen(prepared);

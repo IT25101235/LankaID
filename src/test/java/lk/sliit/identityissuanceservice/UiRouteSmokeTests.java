@@ -48,6 +48,7 @@ class UiRouteSmokeTests {
                 "/officer/csr/walk-ins/register",
                 "/officer/director",
                 "/officer/director/printing",
+                "/officer/notifications",
                 "/officer/admin",
                 "/officer/admin/officers",
                 "/officer/admin/citizens",
@@ -71,6 +72,9 @@ class UiRouteSmokeTests {
                 request.sessionAttr("loggedInOfficerRole", "CSR");
             } else if (route.startsWith("/officer/director")) {
                 request.sessionAttr("loggedInOfficerRole", "DIRECTOR");
+            } else if (route.equals("/officer/notifications")) {
+                request.sessionAttr("loggedInOfficerId", 1);
+                request.sessionAttr("loggedInOfficerRole", "CSR");
             }
 
             if (route.equals("/officer/nic/applications/NIC-2023-8891")

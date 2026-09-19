@@ -12,7 +12,7 @@
 <body class="min-h-screen bg-slate-100 text-slate-800">
 <header class="bg-white border-b">
   <div class="max-w-4xl mx-auto h-16 px-4 flex items-center">
-    <a th:href="@{/}" class="font-extrabold">Lanka<span class="text-cyan-600">ID</span></a>
+    <div th:replace="~{fragments/government_brand :: brand(@{/}, 'light')}"></div>
     <a th:href="@{/walk-in}" class="ml-auto text-sm font-bold text-cyan-700">Book appointment</a>
   </div>
 </header>

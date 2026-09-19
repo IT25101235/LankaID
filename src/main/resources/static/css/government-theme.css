@@ -422,6 +422,7 @@ body.officer-dashboard-shell {
    former dark theme is translated to slate by the rules above. */
 .admin-dashboard-main .bg-cyan-600.text-white,
 .admin-dashboard-main .bg-emerald-600.text-white,
+.admin-dashboard-main .bg-indigo-600.text-white,
 .admin-dashboard-main .bg-red-500.text-white,
 .admin-dashboard-main .bg-red-600.text-white,
 .admin-light-modal .bg-cyan-600.text-white,
@@ -803,6 +804,22 @@ body.portal-shell.portal-officer > main {
   height: 1.35rem;
   padding: 0 0.35rem;
   border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.portal-notification-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  margin-left: auto;
+  padding: 0 0.35rem;
   border-radius: 999px;
   background: #dc2626;
   color: #ffffff;
@@ -1208,6 +1225,39 @@ body.gov-landing-page > main {
   color: var(--gov-maroon-dark) !important;
   background: var(--gov-maroon-soft) !important;
   border-color: #c98eac !important;
+}
+
+.official-government-brand-light { color: #0f2747; }
+.official-government-brand-light .gov-brand-title > span { color: #0891b2; }
+.official-government-brand-light .gov-brand-subtitle { color: #475569; }
+
+.password-field-shell {
+  position: relative;
+  width: 100%;
+}
+
+.password-field-shell > input {
+  padding-right: 4.25rem !important;
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  min-width: 2.8rem;
+  border: 0;
+  background: transparent;
+  color: #0e7490;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.password-visibility-toggle:hover,
+.password-visibility-toggle:focus-visible {
+  color: #164e63;
+  text-decoration: underline;
 }
 
 .gov-reference-text {
@@ -1697,7 +1747,13 @@ body:not(.portal-shell) > header.bg-white { border-top: 3px solid var(--gov-gold
 
 @media (max-width: 640px) {
   .gov-emblem { height: 2.5rem; }
-  .gov-brand-subtitle { display: none; }
+  .gov-brand-subtitle {
+    display: block;
+    max-width: 10rem;
+    font-size: 0.55rem;
+    line-height: 0.72rem;
+    white-space: normal;
+  }
   .gov-hero { background-position: 68% center; }
 }
 

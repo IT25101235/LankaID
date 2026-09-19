@@ -166,7 +166,50 @@ class UiAndSchemaConsistencyTests {
         assertTrue(login.contains("@{/forgot-password}"));
         assertTrue(walkIn.contains("data-walkin-calendar"));
         assertTrue(walkIn.contains("/js/walkin-calendar.js"));
+        assertTrue(walkIn.contains("type=\"hidden\" name=\"slotId\""));
+        assertFalse(walkIn.contains("<select name=\"slotId\""));
+        assertFalse(walkIn.contains("Available Appointment"));
         assertTrue(calendar.contains("Availability will be checked again"));
+    }
+
+    @Test
+    void passwordInputsUseVisibilityControlAndOfficialBrandIsCentralized() throws IOException {
+        String passwordScript = Files.readString(Path.of(
+                "src", "main", "resources", "static", "js", "password-visibility.js"));
+        String brand = Files.readString(TEMPLATE_ROOT.resolve("fragments/government_brand.html"));
+        List<String> passwordTemplates = List.of(
+                "login_portal.html",
+                "citizen_frontends/citizen_register.html",
+                "citizen_frontends/forgot_password.html",
+                "citizen_frontends/payment_gateway.html",
+                "citizen_frontends/booking_change.html",
+                "officers_frontends/admin_dashboard.html"
+        );
+
+        assertTrue(passwordScript.contains("input[type=\"password\"]"));
+        assertTrue(passwordScript.contains("password-visibility-toggle"));
+        for (String template : passwordTemplates) {
+            assertTrue(Files.readString(TEMPLATE_ROOT.resolve(template)).contains("password-visibility.js"),
+                    template + " must load the shared password visibility control");
+        }
+        assertTrue(brand.contains("sri-lanka-government-emblem.png"));
+        assertTrue(brand.contains("ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka"));
+        assertTrue(Files.readString(Path.of(
+                "src", "main", "resources", "static", "js", "portal-shell.js"))
+                .contains("ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka"));
+    }
+
+    @Test
+    void adminOfficerFormUsesGovernmentEmailAndCitizenRemovalIsServerBacked() throws IOException {
+        String admin = Files.readString(TEMPLATE_ROOT.resolve("officers_frontends/admin_dashboard.html"));
+
+        assertFalse(admin.contains("th:field=\"*{phone}\""));
+        assertFalse(admin.contains("editOfficerPhone"));
+        assertFalse(admin.contains("Phone Number"));
+        assertTrue(admin.contains("@gov\\.lk"));
+        assertTrue(admin.contains("bg-white border border-slate-200"));
+        assertTrue(admin.contains("/citizens/{id}/delete"));
+        assertFalse(admin.contains("toggleAccount("));
     }
 
     @Test

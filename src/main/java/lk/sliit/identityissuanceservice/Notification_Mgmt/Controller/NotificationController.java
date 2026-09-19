@@ -8,8 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class NotificationController {
@@ -47,9 +49,52 @@ public class NotificationController {
         return "redirect:/citizen/notifications";
     }
 
+    @GetMapping("/officer/notifications")
+    public String officerNotifications(HttpSession session, Model model) {
+        Integer officerId = loggedInOfficerId(session);
+        if (officerId == null) return "redirect:/login";
+
+        List<CitizenNotificationDto> notifications = notificationService.getCitizenNotifications(officerId);
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("unreadCount", notifications.stream().filter(item -> !item.read()).count());
+        model.addAttribute("loggedInOfficerRole", session.getAttribute("loggedInOfficerRole"));
+        model.addAttribute("loggedInOfficerEmail", session.getAttribute("loggedInOfficerEmail"));
+        model.addAttribute("loggedInOfficerRoleLabel", session.getAttribute("loggedInOfficerRoleLabel"));
+        model.addAttribute("loggedInOfficerLoginTime", session.getAttribute("loggedInOfficerLoginTime"));
+        return "officers_frontends/officer_notifications";
+    }
+
+    @PostMapping("/officer/notifications/{notificationId}/read")
+    public String markOfficerNotificationRead(@PathVariable Integer notificationId, HttpSession session) {
+        Integer officerId = loggedInOfficerId(session);
+        if (officerId == null) return "redirect:/login";
+        notificationService.markAsRead(officerId, notificationId);
+        return "redirect:/officer/notifications";
+    }
+
+    @PostMapping("/officer/notifications/read-all")
+    public String markAllOfficerNotificationsRead(HttpSession session) {
+        Integer officerId = loggedInOfficerId(session);
+        if (officerId == null) return "redirect:/login";
+        notificationService.markAllAsRead(officerId);
+        return "redirect:/officer/notifications";
+    }
+
+    @ResponseBody
+    @GetMapping("/officer/notifications/unread-count")
+    public Map<String, Long> officerUnreadCount(HttpSession session) {
+        Integer officerId = loggedInOfficerId(session);
+        return Map.of("unreadCount", officerId == null ? 0L : notificationService.getUnreadCount(officerId));
+    }
+
     private Integer loggedInCitizenId(HttpSession session) {
         Object userId = session.getAttribute("loggedInUserId");
         Object role = session.getAttribute("loggedInUserRole");
         return userId instanceof Integer id && "CITIZEN".equals(role) ? id : null;
+    }
+
+    private Integer loggedInOfficerId(HttpSession session) {
+        Object userId = session.getAttribute("loggedInOfficerId");
+        return userId instanceof Integer id ? id : null;
     }
 }

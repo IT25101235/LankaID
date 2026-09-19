@@ -127,10 +127,12 @@ public class CitizenRegistrationController {
         if (!Objects.equals(request.getPassword(), request.getConfirmPassword())) {
             binding.rejectValue("confirmPassword", "password.mismatch", "Passwords do not match.");
         }
-        if (!email.equals(request.getEmail()) || !emailOtp.isVerified(email, EMAIL_PURPOSE, session)) {
+        // The verified session values are canonical. Form values are display-only and
+        // may use the local phone format (77...) instead of the stored +947... form.
+        if (!emailOtp.isVerified(email, EMAIL_PURPOSE, session)) {
             binding.reject("email.unverified", "Verify your email address before creating the account.");
         }
-        if (!phone.equals(request.getPhone()) || !smsOtp.isVerified(phone, PHONE_PURPOSE, session)) {
+        if (!smsOtp.isVerified(phone, PHONE_PURPOSE, session)) {
             binding.reject("phone.unverified", "Verify your mobile number before creating the account.");
         }
         if (binding.hasErrors()) {

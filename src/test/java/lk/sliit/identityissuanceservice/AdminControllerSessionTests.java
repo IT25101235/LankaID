@@ -93,7 +93,6 @@ class AdminControllerSessionTests {
         mockMvc.perform(post("/officer/admin/officers")
                         .session(session)
                         .param("email", "nic.officer@gov.lk")
-                        .param("phone", "+94771234567")
                         .param("role", "nic-officer")
                         .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
@@ -111,7 +110,6 @@ class AdminControllerSessionTests {
         mockMvc.perform(post("/officer/admin/officers/90/edit")
                         .session(session)
                         .param("email", "updated.officer@gov.lk")
-                        .param("phone", "+94771112233")
                         .param("role", "csr")
                         .param("newPassword", ""))
                 .andExpect(status().is3xxRedirection())
@@ -149,6 +147,20 @@ class AdminControllerSessionTests {
     }
 
     @Test
+    void adminCanDeleteCitizenLoginWhileServicePreservesIdentityHistory() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+
+        mockMvc.perform(post("/officer/admin/citizens/44/delete").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=citizens"))
+                .andExpect(flash().attribute("citizenActionMessage",
+                        "Citizen login deleted. Government identity records and application history were preserved."));
+
+        verify(citizenAccountDashboardService).removeCitizenAccount(44);
+    }
+
+    @Test
     void onlyLoggedInAdminCanAddServiceCentre() throws Exception {
         mockMvc.perform(post("/officer/admin/centres")
                         .param("centreName", "Kandy Service Centre")
@@ -182,13 +194,13 @@ class AdminControllerSessionTests {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("loggedInAdminId", 50);
         mockMvc.perform(post("/officer/admin/officers").session(session)
-                        .param("email", "officer@gov.lk").param("phone", "123")
+                        .param("email", "officer@example.com")
                         .param("role", "csr").param("password", "weak"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("openOfficerModal", true))
-                .andExpect(model().attributeHasFieldErrors("officerRegistration", "phone", "password"))
+                .andExpect(model().attributeHasFieldErrors("officerRegistration", "email", "password"))
                 .andExpect(model().attribute("officerRegistration",
-                        org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("officer@gov.lk"))));
+                        org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("officer@example.com"))));
         org.mockito.Mockito.verify(officerAccountService, org.mockito.Mockito.never()).createOfficer(any());
     }
 
@@ -197,13 +209,13 @@ class AdminControllerSessionTests {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("loggedInAdminId", 50);
         mockMvc.perform(post("/officer/admin/officers/12/edit").session(session)
-                        .param("email", "officer@gov.lk").param("phone", "123")
+                        .param("email", "officer@example.com")
                         .param("role", "csr").param("newPassword", "weak"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("officers_frontends/admin_dashboard"))
                 .andExpect(model().attribute("editOfficerId", 12))
-                .andExpect(model().attributeHasFieldErrors("officerUpdate", "phone", "newPassword"))
+                .andExpect(model().attributeHasFieldErrors("officerUpdate", "email", "newPassword"))
                 .andExpect(model().attribute("officerUpdate",
-                        org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("officer@gov.lk"))));
+                        org.hamcrest.Matchers.hasProperty("email", org.hamcrest.Matchers.is("officer@example.com"))));
     }
 }

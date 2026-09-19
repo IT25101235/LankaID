@@ -24,6 +24,7 @@ public class CitizenAccountDashboardService {
 
     private static final String ACTIVE = "ACTIVE";
     private static final String SUSPENDED = "SUSPENDED";
+    private static final String REMOVED = "REMOVED";
     private static final String NIC = "NIC";
     private static final String PASSPORT = "PASSPORT";
 
@@ -65,6 +66,47 @@ public class CitizenAccountDashboardService {
         return new CitizenAccountDashboardDto(rows, rows.size(), registeredThisMonth, suspended);
     }
 
+    @Transactional
+    public String toggleCitizenStatus(Integer citizenId) {
+        CitizenAccount citizen = citizenAccountRepository.findById(citizenId)
+                .orElseThrow(() -> new IllegalArgumentException("Citizen account was not found."));
+        UserAccount user = userAccountRepository.findById(citizen.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Citizen user account was not found."));
+        if (REMOVED.equals(normalize(user.getAccountStatus()))) {
+            throw new IllegalArgumentException("This citizen account has already been deleted.");
+        }
+        String status = SUSPENDED.equals(normalize(user.getAccountStatus())) ? ACTIVE : SUSPENDED;
+        user.setAccountStatus(status);
+        userAccountRepository.save(user);
+        return status;
+    }
+
+    /**
+     * Retires the login while retaining applications and the government identity record.
+     * Tombstone contact values release the verified email and phone for a fresh registration.
+     */
+    @Transactional
+    public void removeCitizenAccount(Integer citizenId) {
+        CitizenAccount citizen = citizenAccountRepository.findById(citizenId)
+                .orElseThrow(() -> new IllegalArgumentException("Citizen account was not found."));
+        UserAccount user = userAccountRepository.findById(citizen.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Citizen user account was not found."));
+        if (REMOVED.equals(normalize(user.getAccountStatus()))) {
+            throw new IllegalArgumentException("This citizen account has already been deleted.");
+        }
+
+        // Only the account link is removed. GovernmentIdentityRecord is deliberately untouched.
+        citizen.setGovernmentRecordId(null);
+        citizenAccountRepository.save(citizen);
+
+        user.setAccountStatus(REMOVED);
+        user.setEmail("deleted-" + citizenId + "@removed.invalid");
+        user.setPhone("DEL-" + citizenId);
+        user.setEmailVerified("N");
+        user.setPhoneVerified("N");
+        userAccountRepository.save(user);
+    }
+
     private Map<Integer, Map<String, Long>> applicationCounts(List<Integer> citizenIds) {
         Map<Integer, Map<String, Long>> counts = new HashMap<>();
         if (citizenIds.isEmpty()) {
@@ -91,6 +133,9 @@ public class CitizenAccountDashboardService {
         long nicCount = counts.getOrDefault(NIC, 0L);
         long passportCount = counts.getOrDefault(PASSPORT, 0L);
         String status = normalize(user.getAccountStatus());
+        if (REMOVED.equals(status)) {
+            return null;
+        }
         return new CitizenAccountRowDto(
                 citizen.getUserId(),
                 "CTZ-%06d".formatted(citizen.getUserId()),
@@ -107,7 +152,7 @@ public class CitizenAccountDashboardService {
 
     private String displayName(CitizenAccount citizen) {
         String name = (clean(citizen.getGivenName()) + " " + clean(citizen.getFamilyName())).trim();
-        return name.isBlank() ? "Profile not completed" : name;
+        return name.isBlank() ? "Citizen CTZ-%06d".formatted(citizen.getUserId()) : name;
     }
 
     private String statusLabel(String status) {

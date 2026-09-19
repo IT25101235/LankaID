@@ -50,7 +50,6 @@ class OfficerAccountServiceTests {
     void createOfficerSavesHashedUserAndStaffRole() {
         OfficerRegistrationDto request = new OfficerRegistrationDto();
         request.setEmail("NIC.Officer@GOV.LK");
-        request.setPhone("+94771234567");
         request.setRole("nic-officer");
         request.setPassword("Password123!");
 
@@ -73,6 +72,7 @@ class OfficerAccountServiceTests {
         verify(staffAccountRepository).save(staffCaptor.capture());
 
         assertEquals("nic.officer@gov.lk", userCaptor.getValue().getEmail());
+        assertEquals("EMP-NIC-004", userCaptor.getValue().getPhone());
         assertTrue(new BCryptPasswordEncoder().matches(
                 "Password123!",
                 userCaptor.getValue().getPasswordHash()
@@ -85,11 +85,10 @@ class OfficerAccountServiceTests {
     @Test
     void createOfficerRejectsEmailAlreadyUsedByCitizenAccount() {
         OfficerRegistrationDto request = new OfficerRegistrationDto();
-        request.setEmail("Citizen@Example.com");
-        request.setPhone("+94771234567");
+        request.setEmail("Existing@GOV.LK");
         request.setRole("nic-officer");
         request.setPassword("Password123!");
-        when(userAccountRepository.existsByEmailIgnoreCase("citizen@example.com"))
+        when(userAccountRepository.existsByEmailIgnoreCase("existing@gov.lk"))
                 .thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(
@@ -100,6 +99,22 @@ class OfficerAccountServiceTests {
         assertEquals("That email address is already registered.", exception.getMessage());
         verify(userAccountRepository, never()).save(any(UserAccount.class));
         verify(staffAccountRepository, never()).save(any(StaffAccount.class));
+    }
+
+    @Test
+    void createOfficerRejectsNonGovernmentEmail() {
+        OfficerRegistrationDto request = new OfficerRegistrationDto();
+        request.setEmail("officer@example.com");
+        request.setRole("csr");
+        request.setPassword("Password123!");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> officerAccountService.createOfficer(request)
+        );
+
+        assertEquals("Officer email must end with @gov.lk.", exception.getMessage());
+        verify(userAccountRepository, never()).save(any());
     }
 
     @Test
@@ -147,7 +162,6 @@ class OfficerAccountServiceTests {
 
         OfficerUpdateDto request = new OfficerUpdateDto();
         request.setEmail("NEW.Officer@GOV.LK");
-        request.setPhone("+94771112233");
         request.setRole("csr");
         request.setNewPassword("NewPassword123!");
 
@@ -155,15 +169,13 @@ class OfficerAccountServiceTests {
         when(userAccountRepository.findById(83)).thenReturn(Optional.of(user));
         when(userAccountRepository.findByEmailIgnoreCase("new.officer@gov.lk"))
                 .thenReturn(Optional.empty());
-        when(userAccountRepository.findByPhone("+94771112233"))
-                .thenReturn(Optional.empty());
         when(staffAccountRepository.findByEmployeeNoStartingWith("EMP-CSR-"))
                 .thenReturn(List.of(staffAccount(20, "EMP-CSR-002", OfficerAccountService.CSR)));
 
         officerAccountService.updateOfficer(83, request);
 
         assertEquals("new.officer@gov.lk", user.getEmail());
-        assertEquals("+94771112233", user.getPhone());
+        assertEquals("EMP-CSR-003", user.getPhone());
         assertTrue(new BCryptPasswordEncoder().matches("NewPassword123!", user.getPasswordHash()));
         assertEquals(OfficerAccountService.CSR, staff.getStaffRole());
         assertEquals("EMP-CSR-003", staff.getEmployeeNo());

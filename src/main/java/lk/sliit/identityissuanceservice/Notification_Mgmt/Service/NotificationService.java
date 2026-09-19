@@ -31,16 +31,34 @@ public class NotificationService {
 
     @Transactional
     public void sendToCitizen(Integer citizenId, Integer staffId, String type, String message) {
+        sendToUsers(List.of(citizenId), staffId, type, message, false);
+    }
+
+    @Transactional
+    public int sendToUsers(List<Integer> userIds, Integer staffId, String type, String message, boolean broadcast) {
+        List<Integer> recipients = userIds == null ? List.of() : userIds.stream()
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+        if (recipients.isEmpty()) {
+            throw new IllegalArgumentException("No eligible recipients matched your selection.");
+        }
+
         Notification notification = new Notification();
         notification.setSentByStaffId(staffId);
         notification.setNotificationType(type);
         notification.setMessage(message);
-        notification.setBroadcast("N");
+        notification.setBroadcast(broadcast ? "Y" : "N");
         notification = notificationRepository.save(notification);
 
-        UserNotification recipient = new UserNotification();
-        recipient.setId(new UserNotificationId(notification.getNotificationId(), citizenId));
-        userNotificationRepository.save(recipient);
+        Integer notificationId = notification.getNotificationId();
+        List<UserNotification> deliveries = recipients.stream().map(userId -> {
+            UserNotification recipient = new UserNotification();
+            recipient.setId(new UserNotificationId(notificationId, userId));
+            return recipient;
+        }).toList();
+        userNotificationRepository.saveAll(deliveries);
+        return deliveries.size();
     }
 
     @Transactional(readOnly = true)

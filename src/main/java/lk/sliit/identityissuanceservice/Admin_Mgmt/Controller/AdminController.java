@@ -219,6 +219,45 @@ public class AdminController {
         model.addAttribute("suspendedCitizenCount", citizenDashboard.suspendedCitizenCount());
     }
 
+    @PostMapping("/officer/admin/citizens/{userId}/status")
+    public String changeCitizenStatus(
+            @PathVariable Integer userId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+        try {
+            String status = citizenAccountDashboardService.toggleCitizenStatus(userId);
+            redirectAttributes.addFlashAttribute("citizenActionMessage", "ACTIVE".equals(status)
+                    ? "Citizen account reactivated successfully."
+                    : "Citizen account suspended successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("citizenActionError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=citizens";
+    }
+
+    @PostMapping("/officer/admin/citizens/{userId}/delete")
+    public String deleteCitizen(
+            @PathVariable Integer userId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+        try {
+            citizenAccountDashboardService.removeCitizenAccount(userId);
+            redirectAttributes.addFlashAttribute(
+                    "citizenActionMessage",
+                    "Citizen login deleted. Government identity records and application history were preserved."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("citizenActionError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=citizens";
+    }
+
     private long countRole(List<OfficerDetailsDto> officers, String roleCode) {
         return officers.stream()
                 .filter(officer -> roleCode.equals(officer.getRoleCode()))

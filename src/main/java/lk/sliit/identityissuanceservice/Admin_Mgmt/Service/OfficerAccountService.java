@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.PasswordRules;
-import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -43,8 +42,7 @@ public class OfficerAccountService {
     @Transactional
     public void createOfficer(OfficerRegistrationDto request) {
         PasswordRules.validate(request.getPassword());
-        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
-        String phone = SriLankanMobileNumber.normalize(request.getPhone());
+        String email = normalizeOfficerEmail(request.getEmail());
         String roleCode = roleCodeFromForm(request.getRole());
 
         if (roleCode == null) {
@@ -53,14 +51,13 @@ public class OfficerAccountService {
         if (userAccountRepository.existsByEmailIgnoreCase(email)) {
             throw new IllegalArgumentException("That email address is already registered.");
         }
-        if (userAccountRepository.existsByPhone(phone)) {
-            throw new IllegalArgumentException("That phone number is already registered.");
-        }
         String employeeNo = generateEmployeeNo(roleCode);
 
         UserAccount userAccount = new UserAccount();
         userAccount.setEmail(email);
-        userAccount.setPhone(phone);
+        // UserAccount.phone is required by the shared schema. Officers use their
+        // generated employee number as a private technical identifier instead.
+        userAccount.setPhone(employeeNo);
         userAccount.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         userAccount.setAccountStatus(ACTIVE);
         userAccount.setEmailVerified("Y");
@@ -90,8 +87,7 @@ public class OfficerAccountService {
         StaffAccount staffAccount = findManageableOfficer(userId);
         UserAccount userAccount = findUser(userId);
 
-        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
-        String phone = SriLankanMobileNumber.normalize(request.getPhone());
+        String email = normalizeOfficerEmail(request.getEmail());
         String roleCode = roleCodeFromForm(request.getRole());
 
         if (roleCode == null) {
@@ -103,13 +99,7 @@ public class OfficerAccountService {
             throw new IllegalArgumentException("That email address is already registered.");
         }
 
-        Optional<UserAccount> phoneOwner = userAccountRepository.findByPhone(phone);
-        if (phoneOwner.isPresent() && !phoneOwner.get().getUserId().equals(userId)) {
-            throw new IllegalArgumentException("That phone number is already registered.");
-        }
-
         userAccount.setEmail(email);
-        userAccount.setPhone(phone);
 
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
             PasswordRules.validate(request.getNewPassword());
@@ -120,6 +110,7 @@ public class OfficerAccountService {
             staffAccount.setStaffRole(roleCode);
             staffAccount.setEmployeeNo(generateEmployeeNo(roleCode));
         }
+        userAccount.setPhone(staffAccount.getEmployeeNo());
 
         userAccountRepository.save(userAccount);
         staffAccountRepository.save(staffAccount);
@@ -188,7 +179,6 @@ public class OfficerAccountService {
                         user.getUserId(),
                         staffAccount.getEmployeeNo(),
                         user.getEmail(),
-                        user.getPhone(),
                         staffAccount.getStaffRole(),
                         roleLabel(staffAccount.getStaffRole()),
                         roleFilter(staffAccount.getStaffRole()),
@@ -226,6 +216,14 @@ public class OfficerAccountService {
             case "director" -> DIRECTOR;
             default -> null;
         };
+    }
+
+    private String normalizeOfficerEmail(String value) {
+        String email = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+        if (!email.matches("^[a-z0-9._%+-]+@gov\\.lk$")) {
+            throw new IllegalArgumentException("Officer email must end with @gov.lk.");
+        }
+        return email;
     }
 
     private String generateEmployeeNo(String roleCode) {

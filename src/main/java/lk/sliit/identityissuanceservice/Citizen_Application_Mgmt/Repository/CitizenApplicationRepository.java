@@ -43,6 +43,8 @@ public interface CitizenApplicationRepository extends JpaRepository<CitizenAppli
 
     boolean existsByApplicationNo(String applicationNo);
 
+    boolean existsByCitizenIdAndServiceType(Integer citizenId, String serviceType);
+
     boolean existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
             Integer citizenId,
             String serviceType,

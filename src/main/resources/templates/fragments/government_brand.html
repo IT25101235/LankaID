@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<a th:fragment="brand(homeUrl, tone)"
+   th:href="${homeUrl}"
+   class="gov-brand official-government-brand"
+   th:classappend="${tone == 'light'} ? ' official-government-brand-light'"
+   aria-label="LankaID, Government of Sri Lanka home">
+  <img class="gov-emblem" src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/>
+  <span>
+    <span class="gov-brand-title">Lanka<span>ID</span></span>
+    <span class="gov-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</span>
+  </span>
+</a>
+</body>
+</html>

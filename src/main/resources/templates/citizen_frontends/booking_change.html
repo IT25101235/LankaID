@@ -10,7 +10,7 @@
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800" th:classappend="${biometric} ? ' portal-shell portal-citizen'">
 <header th:if="${biometric}" th:replace="~{fragments/citizen_navbar :: navbar(activeSection='biometrics')}"></header>
-<header th:unless="${biometric}" class="bg-slate-950 text-white"><div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between"><a th:href="${backUrl}" class="text-sm font-semibold">← Back to my bookings</a><span class="font-extrabold">LankaID</span></div></header>
+<header th:unless="${biometric}" class="bg-slate-950 text-white"><div class="max-w-3xl mx-auto px-4 min-h-20 flex items-center justify-between gap-4"><a th:href="${backUrl}" class="text-sm font-semibold">← Back to my bookings</a><div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div></div></header>
 <main class="max-w-3xl mx-auto px-4 py-8">
   <h1 class="text-2xl font-extrabold" th:text="${rebooking ? 'Book biometrics again' : 'Manage your booking'}">Manage your booking</h1>
   <div th:if="${changeMessage}" role="status" class="mt-4 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800" th:text="${changeMessage}"></div>
@@ -71,5 +71,6 @@
 <script src="/Payment_Mgmt/payment-form.js"></script>
 <script src="/Biometric_And_Appointment_Mgmt/booking-availability.js"></script>
 <script src="/js/portal-shell.js?v=20260918-navbar"></script>
+<script src="/js/password-visibility.js"></script>
 </body>
 </html>

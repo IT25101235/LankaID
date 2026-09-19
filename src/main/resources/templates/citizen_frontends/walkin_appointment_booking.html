@@ -9,7 +9,7 @@
 <link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
-<header class="bg-white border-b"><div class="max-w-4xl mx-auto h-16 px-4 flex items-center"><a th:href="@{/}" class="font-extrabold text-lg">Lanka<span class="text-cyan-600">ID</span></a><a th:href="@{/walk-in/recover}" class="ml-auto text-sm font-bold text-cyan-700">Recover my booking</a></div></header>
+<header class="bg-white border-b"><div class="max-w-4xl mx-auto min-h-20 px-4 flex items-center justify-between gap-4"><div th:replace="~{fragments/government_brand :: brand(@{/}, 'light')}"></div><a th:href="@{/walk-in/recover}" class="text-sm font-bold text-cyan-700">Recover my booking</a></div></header>
 <main class="max-w-4xl mx-auto px-4 py-8">
   <div class="mb-6"><p class="text-xs font-bold uppercase tracking-wider text-cyan-700">No account required</p><h1 class="text-3xl font-extrabold mt-2">Book a walk-in appointment</h1><p class="text-sm text-slate-500 mt-2">Verify your phone, select a slot, and pay before downloading your QR appointment pass.</p><p class="text-sm font-bold text-cyan-700 mt-2" th:text="${'Standard walk-in fee: LKR ' + #numbers.formatDecimal(walkInFee, 1, 'COMMA', 2, 'POINT')}">Standard walk-in fee: LKR 1,500.00</p></div>
   <div th:if="${walkInMessage}" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${walkInMessage}"></div>
@@ -53,7 +53,12 @@
     <form th:unless="${#lists.isEmpty(slots)}" th:action="@{/walk-in/book}" method="post" class="mt-6 space-y-6" data-walkin-calendar>
       <label class="block text-sm font-bold">Required service<select name="visitorService" required class="mt-2 w-full rounded-xl border-slate-300"><option value="">Select service</option><option value="NIC_APPLICATION_HELP">NIC walk-in service</option><option value="PASSPORT_APPLICATION_HELP">Passport walk-in service</option></select></label>
       <label class="block text-sm font-bold">Service centre<select data-walkin-centre required class="mt-2 w-full rounded-xl border-slate-300"><option value="">Select a service centre</option></select></label>
-      <label class="block text-sm font-bold" data-slot-fallback>Available appointment<select name="slotId" data-walkin-slot required class="mt-2 w-full rounded-xl border-slate-300"><option value="">Select a centre, date and time</option><option th:each="slot : ${slots}" th:value="${slot.slotId}" th:attr="data-centre-id=${slot.centreId},data-centre-name=${slot.centreName},data-date=${slot.slotDate},data-time=${slot.slotTime},data-remaining=${slot.remainingPlaces}" th:text="${slot.centreName + ' — ' + #temporals.format(slot.slotDate, 'dd MMM yyyy') + ' at ' + #temporals.format(slot.slotTime, 'hh:mm a') + ' — ' + slot.remainingPlaces + ' place(s) left'}">Centre — date — time</option></select></label>
+      <input type="hidden" name="slotId" data-walkin-slot/>
+      <div hidden data-walkin-slot-data>
+        <span th:each="slot : ${slots}"
+              data-walkin-slot-option
+              th:attr="data-slot-id=${slot.slotId},data-centre-id=${slot.centreId},data-centre-name=${slot.centreName},data-date=${slot.slotDate},data-time=${slot.slotTime},data-remaining=${slot.remainingPlaces}"></span>
+      </div>
       <div data-calendar-ui hidden class="overflow-hidden rounded-2xl border border-slate-200">
         <div class="flex items-center justify-between bg-slate-50 px-4 py-3"><button type="button" data-calendar-previous class="rounded-lg border bg-white px-3 py-2 text-sm font-bold" aria-label="Previous month">‹</button><h3 data-calendar-month class="font-bold">Month</h3><button type="button" data-calendar-next class="rounded-lg border bg-white px-3 py-2 text-sm font-bold" aria-label="Next month">›</button></div>
         <div class="grid grid-cols-7 border-t bg-slate-50 text-center text-[11px] font-bold uppercase text-slate-500"><span class="py-2">Sun</span><span class="py-2">Mon</span><span class="py-2">Tue</span><span class="py-2">Wed</span><span class="py-2">Thu</span><span class="py-2">Fri</span><span class="py-2">Sat</span></div>
