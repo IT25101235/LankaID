@@ -10,7 +10,7 @@
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
 <link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="portal-shell portal-officer min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime},data-admin-section=${activeAdminSection}">
 
 <!-- Sidebar -->
 <aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
@@ -25,7 +25,11 @@
 
   <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
     <p class="text-xs font-semibold text-slate-500 uppercase px-3 py-2 mt-1">Administration</p>
-    <a href="/officer/admin/officers" class="sidebar-link active" id="nav-users">
+    <a href="/officer/admin" class="sidebar-link active" id="nav-overview">
+      <span class="material-symbols-outlined">dashboard</span>
+      Overview
+    </a>
+    <a href="/officer/admin?section=users" class="sidebar-link" id="nav-users">
       <span class="material-symbols-outlined">group</span>
       Officer Credentials
     </a>
@@ -75,11 +79,11 @@
 
   <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20 officer-topbar">
     <div class="flex-1">
-      <h1 class="text-lg font-bold text-slate-900" id="pageTitle">Officer Credential Management</h1>
-      <p class="text-xs text-slate-400" id="pageSubtitle">Create officer logins and manage their assigned roles</p>
+      <h1 class="text-lg font-bold text-slate-900" id="pageTitle">System Overview</h1>
+      <p class="text-xs text-slate-400" id="pageSubtitle">Current values calculated from the LankaID database</p>
     </div>
     <div class="flex items-center gap-3">
-      <button id="addOfficerButton" onclick="openAddUser()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors officer-primary-button">
+      <button id="addOfficerButton" onclick="openAddUser()" class="hidden bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors officer-primary-button">
         <span class="material-symbols-outlined text-base">person_add</span>
         Add Officer
       </button>
@@ -90,8 +94,117 @@
     </div>
   </header>
 
+  <!-- ===== SYSTEM OVERVIEW ===== -->
+  <div id="section-overview" class="p-6 space-y-6">
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-sky-600">groups</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${citizenAccountCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Citizen accounts</p>
+      </div>
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-emerald-600">badge</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${activeOfficerCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Active officers</p>
+      </div>
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-purple-600">location_city</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${serviceCentreCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Service centres</p>
+      </div>
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-cyan-700">assignment</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${adminOverview.totalApplications}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Total applications</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <div class="card p-6 xl:col-span-2">
+        <h2 class="font-bold text-slate-900">Application workload</h2>
+        <p class="text-xs text-slate-600 mt-1">Current application counts grouped by workflow stage</p>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+          <div class="rounded-xl bg-amber-50 border border-amber-200 p-4">
+            <p class="text-2xl font-bold text-amber-700" th:text="${adminOverview.pendingReview}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Pending review</p>
+          </div>
+          <div class="rounded-xl bg-sky-50 border border-sky-200 p-4">
+            <p class="text-2xl font-bold text-sky-700" th:text="${adminOverview.biometricPipeline}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Biometric pipeline</p>
+          </div>
+          <div class="rounded-xl bg-orange-50 border border-orange-200 p-4">
+            <p class="text-2xl font-bold text-orange-700" th:text="${adminOverview.correctionRequired}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Correction required</p>
+          </div>
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+            <p class="text-2xl font-bold text-emerald-700" th:text="${adminOverview.printedDocuments}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Documents issued</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="font-bold text-slate-900">Application types</h2>
+        <p class="text-xs text-slate-600 mt-1">NIC and passport application totals</p>
+        <div class="space-y-4 mt-5">
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div><p class="font-semibold text-slate-900">NIC</p><p class="text-xs text-slate-500">Identity card applications</p></div>
+            <p class="text-2xl font-bold text-emerald-700" th:text="${adminOverview.nicApplications}">0</p>
+          </div>
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div><p class="font-semibold text-slate-900">Passport</p><p class="text-xs text-slate-500">Passport applications</p></div>
+            <p class="text-2xl font-bold text-indigo-700" th:text="${adminOverview.passportApplications}">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <div class="card overflow-hidden xl:col-span-2">
+        <div class="p-5 border-b border-slate-200">
+          <h2 class="font-bold text-slate-900">Recent applications</h2>
+          <p class="text-xs text-slate-600 mt-1">The eight most recently created applications</p>
+        </div>
+        <div th:if="${#lists.isEmpty(adminOverview.recentApplications)}" class="p-8 text-center text-slate-500 text-sm">No application records found.</div>
+        <div th:unless="${#lists.isEmpty(adminOverview.recentApplications)}" class="overflow-x-auto">
+          <table class="w-full text-sm light-admin-table">
+            <thead><tr class="text-xs text-slate-500"><th class="text-left p-4">Application</th><th class="text-left p-4">Citizen</th><th class="text-left p-4">Service</th><th class="text-left p-4">Status</th><th class="text-left p-4">Created</th></tr></thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr th:each="row : ${adminOverview.recentApplications}">
+                <td class="p-4 font-mono text-xs text-cyan-700" th:text="${row.applicationNo}">Reference</td>
+                <td class="p-4 text-slate-700" th:text="${row.citizenName}">Citizen</td>
+                <td class="p-4"><b th:text="${row.serviceType}">NIC</b><span class="block text-xs text-slate-500" th:text="${#strings.replace(row.applicationKind, '_', ' ')}">NEW</span></td>
+                <td class="p-4"><span class="text-xs px-2.5 py-1 bg-slate-100 rounded-full" th:text="${#strings.replace(row.currentStatus, '_', ' ')}">Status</span></td>
+                <td class="p-4 text-xs text-slate-600" th:text="${row.createdAt == null ? '-' : #temporals.format(row.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="font-bold text-slate-900">Quick actions</h2>
+        <p class="text-xs text-slate-600 mt-1 mb-4">Open common administration tools</p>
+        <div class="space-y-3">
+          <button type="button" onclick="showSection('users')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-cyan-700">manage_accounts</span><span><b class="block text-sm">Manage officers</b><span class="text-xs text-slate-500">Create or update credentials</span></span>
+          </button>
+          <button type="button" onclick="showSection('centres')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-purple-700">location_city</span><span><b class="block text-sm">Service centres</b><span class="text-xs text-slate-500">View and add centres</span></span>
+          </button>
+          <button type="button" onclick="showSection('citizens')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-sky-700">groups</span><span><b class="block text-sm">Citizen accounts</b><span class="text-xs text-slate-500">Review account status</span></span>
+          </button>
+          <button type="button" onclick="showSection('notifications')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-amber-700">campaign</span><span><b class="block text-sm">Send notification</b><span class="text-xs text-slate-500">Contact citizens or officers</span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== USER MANAGEMENT ===== -->
-  <div id="section-users" class="p-6">
+  <div id="section-users" class="p-6 hidden">
 
     <div th:if="${officerCreatedMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${officerCreatedMessage}">
       Officer account created successfully.
@@ -312,41 +425,95 @@
     <div th:if="${centreMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${centreMessage}">Service centre added successfully.</div>
     <div th:if="${centreError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${centreError}">Unable to add the service centre.</div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-5 items-start">
-      <form th:action="@{/officer/admin/centres}" method="post" class="card p-6">
-        <h2 class="font-bold text-slate-900 text-base">Add Service Centre</h2>
-        <p class="text-xs text-slate-600 mt-1">Only the system administrator can register centres used for biometric and walk-in appointments.</p>
+    <div class="space-y-4">
+      <div class="card overflow-hidden">
+        <button type="button" onclick="showCentrePanel('add')" id="centreAddButton" aria-expanded="false" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-50">
+          <span><span class="font-bold text-slate-900">Add Service Centre</span><span class="block text-xs text-slate-600 mt-1">Register a new centre for appointments.</span></span>
+          <span id="centreAddIcon" class="material-symbols-outlined text-slate-500">expand_more</span>
+        </button>
+        <form id="centreAddPanel" th:action="@{/officer/admin/centres}" method="post" class="hidden border-t border-slate-200 p-6">
+          <p class="text-xs text-slate-600">Only the system administrator can register centres used for biometric and walk-in appointments.</p>
 
-        <div class="space-y-4 mt-5">
-          <div><label class="block text-xs font-semibold text-slate-700">Centre name</label><input required maxlength="100" name="centreName" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo Main Centre"/></div>
-          <div><label class="block text-xs font-semibold text-slate-700">Street address</label><input maxlength="150" name="street" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Street or building"/></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-xs font-semibold text-slate-700">City</label><input required maxlength="100" name="city" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Battaramulla"/></div>
-            <div><label class="block text-xs font-semibold text-slate-700">District</label><input required maxlength="100" name="district" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo"/></div>
+          <div class="space-y-4 mt-5 max-w-2xl">
+            <div><label class="block text-xs font-semibold text-slate-700">Centre name</label><input required maxlength="100" name="centreName" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo Main Centre"/></div>
+            <div><label class="block text-xs font-semibold text-slate-700">Street address</label><input maxlength="150" name="street" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Street or building"/></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="block text-xs font-semibold text-slate-700">City</label><input required maxlength="100" name="city" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Battaramulla"/></div>
+              <div><label class="block text-xs font-semibold text-slate-700">District</label><input required maxlength="100" name="district" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo"/></div>
+            </div>
+            <div><label class="block text-xs font-semibold text-slate-700">Daily appointment capacity</label><input required type="number" min="1" max="2000" name="dailyCapacity" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" value="100"/></div>
+            <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">add_location_alt</span>Add Centre</button>
           </div>
-          <div><label class="block text-xs font-semibold text-slate-700">Daily appointment capacity</label><input required type="number" min="1" max="2000" name="dailyCapacity" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" value="100"/></div>
-        </div>
-        <button type="submit" class="w-full mt-5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">add_location_alt</span>Add Centre</button>
-      </form>
+        </form>
+      </div>
 
       <div class="card overflow-hidden">
-        <div class="p-5 border-b border-slate-200"><h2 class="font-bold text-slate-900">Available Service Centres</h2><p class="text-xs text-slate-600 mt-1" th:text="|${#lists.size(centres)} centres available for citizen appointments|">Centres available for appointments</p></div>
-        <div class="overflow-x-auto">
+        <button type="button" onclick="showCentrePanel('list')" id="centreListButton" aria-expanded="true" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-50">
+          <span><span class="font-bold text-slate-900">Service Centres</span><span class="block text-xs text-slate-600 mt-1" th:text="|${#lists.size(centres)} registered centres · booking totals are for today|">Registered centres</span></span>
+          <span id="centreListIcon" class="material-symbols-outlined text-slate-500">expand_less</span>
+        </button>
+        <div id="centreListPanel" class="border-t border-slate-200 overflow-x-auto">
           <table class="w-full text-sm light-admin-table">
-            <thead class="border-b border-slate-200"><tr><th class="p-4 text-left text-xs font-semibold uppercase">Centre</th><th class="p-4 text-left text-xs font-semibold uppercase">Location</th><th class="p-4 text-left text-xs font-semibold uppercase">District</th><th class="p-4 text-center text-xs font-semibold uppercase">Daily capacity</th></tr></thead>
+            <thead class="border-b border-slate-200"><tr><th class="p-4 text-left text-xs font-semibold uppercase">Centre</th><th class="p-4 text-left text-xs font-semibold uppercase">Location</th><th class="p-4 text-left text-xs font-semibold uppercase">District</th><th class="p-4 text-center text-xs font-semibold uppercase">Today's bookings</th><th class="p-4 text-left text-xs font-semibold uppercase">Status</th><th class="p-4 text-left text-xs font-semibold uppercase">Actions</th></tr></thead>
             <tbody class="divide-y divide-slate-200">
-              <tr th:if="${#lists.isEmpty(centres)}"><td colspan="4" class="p-8 text-center text-slate-500">No service centres have been added yet.</td></tr>
+              <tr th:if="${#lists.isEmpty(centres)}"><td colspan="6" class="p-8 text-center text-slate-500">No service centres have been added yet.</td></tr>
               <tr th:each="centre : ${centres}">
                 <td class="p-4"><p class="font-semibold text-slate-900" th:text="${centre.centreName}">Centre name</p><p class="text-xs text-slate-500 mt-0.5" th:text="${centre.street ?: 'Address not provided'}">Address</p></td>
                 <td class="p-4 text-slate-700" th:text="${centre.city}">City</td>
                 <td class="p-4 text-slate-700" th:text="${centre.district}">District</td>
-                <td class="p-4 text-center font-semibold text-slate-900" th:text="${centre.dailyCapacity}">100</td>
+                <td class="p-4 text-center font-semibold text-slate-900"><span th:text="${centreBookingCounts[centre.centreId]}">0</span> / <span th:text="${centre.dailyCapacity}">100</span></td>
+                <td class="p-4">
+                  <span th:if="${centre.centreStatus == 'ACTIVE'}" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">ACTIVE</span>
+                  <span th:if="${centre.centreStatus == 'INACTIVE'}" class="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded-full">INACTIVE</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex gap-1">
+                    <button type="button" onclick="openEditCentre(this)"
+                            th:attr="data-centre-id=${centre.centreId},data-name=${centre.centreName},data-street=${centre.street},data-city=${centre.city},data-district=${centre.district},data-capacity=${centre.dailyCapacity}"
+                            title="Edit centre" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">
+                      <span class="material-symbols-outlined text-sm">edit</span>
+                    </button>
+                    <form th:action="@{/officer/admin/centres/{id}/status(id=${centre.centreId})}" method="post">
+                      <button type="submit" th:title="${centre.centreStatus == 'ACTIVE' ? 'Deactivate centre' : 'Activate centre'}" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">
+                        <span class="material-symbols-outlined text-sm" th:text="${centre.centreStatus == 'ACTIVE' ? 'block' : 'check_circle'}">block</span>
+                      </button>
+                    </form>
+                    <form th:action="@{/officer/admin/centres/{id}/delete(id=${centre.centreId})}" method="post" onsubmit="return confirm('Delete this centre? Centres with appointments or historical records cannot be deleted.');">
+                      <button type="submit" title="Delete centre" class="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                      </button>
+                    </form>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Edit Service Centre Modal -->
+  <div id="editCentreModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
+    <form id="editCentreForm" method="post" class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-bold text-slate-900 flex items-center gap-2"><span class="material-symbols-outlined text-cyan-700">edit_location_alt</span>Edit Service Centre</h2>
+        <button type="button" onclick="closeEditCentre()" class="text-slate-500 hover:text-slate-900"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="space-y-4">
+        <div><label class="block text-xs font-semibold text-slate-700">Centre name</label><input id="editCentreName" required maxlength="100" name="centreName" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+        <div><label class="block text-xs font-semibold text-slate-700">Street address</label><input id="editCentreStreet" maxlength="150" name="street" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-slate-700">City</label><input id="editCentreCity" required maxlength="100" name="city" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+          <div><label class="block text-xs font-semibold text-slate-700">District</label><input id="editCentreDistrict" required maxlength="100" name="district" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+        </div>
+        <div><label class="block text-xs font-semibold text-slate-700">Daily appointment capacity</label><input id="editCentreCapacity" required type="number" min="1" max="2000" name="dailyCapacity" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button type="button" onclick="closeEditCentre()" class="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-xl text-sm font-semibold">Cancel</button>
+        <button type="submit" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold">Save Changes</button>
+      </div>
+    </form>
   </div>
 
   <!-- ===== SYSTEM SETTINGS ===== -->
@@ -477,8 +644,8 @@
 
 <script>
 function showSection(s) {
-  const sections = ['users','roles','settings','centres','citizens','notifications'];
-  if (!sections.includes(s)) s = 'users';
+  const sections = ['overview','users','roles','settings','centres','citizens','notifications'];
+  if (!sections.includes(s)) s = 'overview';
   sections.forEach(t => {
     const el = document.getElementById('section-'+t);
     const nav = document.getElementById('nav-'+t);
@@ -490,6 +657,7 @@ function showSection(s) {
   const nav = document.getElementById('nav-'+s);
   if (nav) { nav.classList.add('active'); }
   const titles = {
+    overview: ['System Overview','Current values calculated from the LankaID database'],
     users: ['Officer Credential Management','Create officer logins and manage their assigned roles'],
     roles: ['Roles & Permissions','View and configure role-based access control'],
     settings: ['System Settings','Configure processing rules, fees and notifications'],
@@ -502,7 +670,7 @@ function showSection(s) {
     document.getElementById('pageSubtitle').textContent = titles[s][1];
   }
   document.getElementById('addOfficerButton').classList.toggle('hidden', s !== 'users');
-  const nextUrl = s === 'users' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
+  const nextUrl = s === 'overview' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
   window.history.replaceState(null, '', nextUrl);
   return false;
 }
@@ -534,6 +702,35 @@ function closeEditOfficer() {
   const modal = document.getElementById('editOfficerModal');
   modal.classList.add('hidden');
   modal.classList.remove('flex');
+}
+
+function openEditCentre(button) {
+  document.getElementById('editCentreForm').action =
+    '/officer/admin/centres/' + button.dataset.centreId + '/edit';
+  document.getElementById('editCentreName').value = button.dataset.name;
+  document.getElementById('editCentreStreet').value = button.dataset.street || '';
+  document.getElementById('editCentreCity').value = button.dataset.city;
+  document.getElementById('editCentreDistrict').value = button.dataset.district;
+  document.getElementById('editCentreCapacity').value = button.dataset.capacity;
+  const modal = document.getElementById('editCentreModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeEditCentre() {
+  const modal = document.getElementById('editCentreModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function showCentrePanel(panelName) {
+  const showAdd = panelName === 'add';
+  document.getElementById('centreAddPanel').classList.toggle('hidden', !showAdd);
+  document.getElementById('centreListPanel').classList.toggle('hidden', showAdd);
+  document.getElementById('centreAddButton').setAttribute('aria-expanded', showAdd);
+  document.getElementById('centreListButton').setAttribute('aria-expanded', !showAdd);
+  document.getElementById('centreAddIcon').textContent = showAdd ? 'expand_less' : 'expand_more';
+  document.getElementById('centreListIcon').textContent = showAdd ? 'expand_more' : 'expand_less';
 }
 
 function filterUsers() {
@@ -612,8 +809,10 @@ function confirmAdminDispatch(form, channel) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const requestedSection = new URLSearchParams(window.location.search).get('section');
-  if (requestedSection) showSection(requestedSection);
+  const querySection = new URLSearchParams(window.location.search).get('section');
+  const formSection = document.body.dataset.adminSection;
+  const pathSection = window.location.pathname.endsWith('/officers') ? 'users' : 'overview';
+  showSection(querySection || formSection || pathSection);
   const officerModal = document.getElementById('addUserModal');
   if (officerModal && officerModal.dataset.open === 'true') openAddUser();
   const editModal = document.getElementById('editOfficerModal');

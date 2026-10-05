@@ -3,6 +3,9 @@ package lk.sliit.identityissuanceservice;
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.StaffAccount;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.StaffAccountRepository;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
@@ -15,7 +18,10 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.Matchers.containsString;
@@ -23,6 +29,7 @@ import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,6 +50,9 @@ class AdminOfficerWorkflowIntegrationTests {
 
     @Autowired
     private CentreRepository centreRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     @Test
     void onlyAdminCanAddAServiceCentre() throws Exception {
@@ -79,7 +89,66 @@ class AdminOfficerWorkflowIntegrationTests {
                         .session(adminSession))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(centreName)))
-                .andExpect(content().string(containsString("Daily capacity")));
+                .andExpect(content().string(containsString("booking totals are for today")));
+    }
+
+    @Test
+    void adminCanManageCentreAndCannotDeleteItWithFutureAppointments() throws Exception {
+        String suffix = String.valueOf(System.nanoTime());
+        Centre centre = new Centre();
+        centre.setCentreName("Galle Centre " + suffix);
+        centre.setStreet("Main Street");
+        centre.setCity("Galle");
+        centre.setDistrict("Galle");
+        centre.setDailyCapacity(80);
+        centre = centreRepository.saveAndFlush(centre);
+
+        MockHttpSession adminSession = new MockHttpSession();
+        adminSession.setAttribute("loggedInAdminId", 1);
+        adminSession.setAttribute("loggedInAdminEmail", "admin@gov.lk");
+
+        mockMvc.perform(post("/officer/admin/centres/{centreId}/edit", centre.getCentreId())
+                        .session(adminSession)
+                        .param("centreName", "Galle Main Centre " + suffix)
+                        .param("street", "New Main Street")
+                        .param("city", "Galle")
+                        .param("district", "Galle")
+                        .param("dailyCapacity", "150"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("centreMessage", "Service centre updated successfully."));
+
+        Centre updated = centreRepository.findById(centre.getCentreId()).orElseThrow();
+        assertEquals("Galle Main Centre " + suffix, updated.getCentreName());
+        assertEquals(150, updated.getDailyCapacity());
+
+        mockMvc.perform(post("/officer/admin/centres/{centreId}/status", centre.getCentreId())
+                        .session(adminSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("centreMessage", "Service centre deactivated successfully."));
+        assertEquals("INACTIVE", centreRepository.findById(centre.getCentreId()).orElseThrow().getCentreStatus());
+
+        Appointment appointment = new Appointment();
+        appointment.setCentreId(centre.getCentreId());
+        appointment.setAppointmentType("WALK_IN");
+        appointment.setScheduledAt(LocalDateTime.now().plusDays(2));
+        appointment.setAppointmentStatus("CONFIRMED");
+        appointment.setReferenceNo("CENTRE-TEST-" + suffix);
+        appointmentRepository.saveAndFlush(appointment);
+
+        mockMvc.perform(post("/officer/admin/centres/{centreId}/delete", centre.getCentreId())
+                        .session(adminSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("centreError",
+                        "This centre has future appointments. Deactivate it instead of deleting it."));
+        assertTrue(centreRepository.existsById(centre.getCentreId()));
+
+        appointmentRepository.delete(appointment);
+        appointmentRepository.flush();
+        mockMvc.perform(post("/officer/admin/centres/{centreId}/delete", centre.getCentreId())
+                        .session(adminSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("centreMessage", "Service centre deleted successfully."));
+        assertFalse(centreRepository.existsById(centre.getCentreId()));
     }
 
     @Test
@@ -99,7 +168,7 @@ class AdminOfficerWorkflowIntegrationTests {
                         .param("role", "nic-officer")
                         .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/officer/admin"));
+                .andExpect(redirectedUrl("/officer/admin?section=users"));
 
         mockMvc.perform(get("/officer/admin").session(adminSession))
                 .andExpect(status().isOk())
@@ -147,7 +216,7 @@ class AdminOfficerWorkflowIntegrationTests {
                             .param("role", roles[index])
                             .param("password", "Password123!"))
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/officer/admin"));
+                    .andExpect(redirectedUrl("/officer/admin?section=users"));
         }
 
         mockMvc.perform(get("/officer/admin").session(adminSession))
@@ -211,7 +280,7 @@ class AdminOfficerWorkflowIntegrationTests {
                         .param("role", "passport-officer")
                         .param("newPassword", "Changed123!"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/officer/admin"));
+                .andExpect(redirectedUrl("/officer/admin?section=users"));
 
         mockMvc.perform(get("/officer/admin").session(adminSession))
                 .andExpect(status().isOk())

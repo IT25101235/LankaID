@@ -5,7 +5,9 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountDashboardDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountRowDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.DirectorDashboardStats;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.CitizenAccountDashboardService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.DirectorDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,16 +36,24 @@ class AdminControllerSessionTests {
     private OfficerAccountService officerAccountService;
     private ServiceCentreService serviceCentreService;
     private CitizenAccountDashboardService citizenAccountDashboardService;
+    private DirectorDashboardService directorDashboardService;
+    private DirectorDashboardStats overviewStats;
 
     @BeforeEach
     void setUp() {
         officerAccountService = mock(OfficerAccountService.class);
         serviceCentreService = mock(ServiceCentreService.class);
         citizenAccountDashboardService = mock(CitizenAccountDashboardService.class);
+        directorDashboardService = mock(DirectorDashboardService.class);
+        overviewStats = new DirectorDashboardStats(
+                12, 5, 2, 1, 7, 5, 3, 2, 1, 1,
+                List.of(), List.of(), List.of(), List.of(), List.of());
         when(citizenAccountDashboardService.getDashboard())
                 .thenReturn(new CitizenAccountDashboardDto(List.of(), 0, 0, 0));
+        when(directorDashboardService.getStats()).thenReturn(overviewStats);
         mockMvc = standaloneSetup(new AdminController(
-                officerAccountService, serviceCentreService, citizenAccountDashboardService)).build();
+                officerAccountService, serviceCentreService, citizenAccountDashboardService,
+                directorDashboardService)).build();
     }
 
     @Test
@@ -71,7 +81,10 @@ class AdminControllerSessionTests {
                 .andExpect(model().attribute("citizens", List.of(citizen)))
                 .andExpect(model().attribute("citizenAccountCount", 1L))
                 .andExpect(model().attribute("registeredThisMonthCount", 1L))
-                .andExpect(model().attribute("suspendedCitizenCount", 0L));
+                .andExpect(model().attribute("suspendedCitizenCount", 0L))
+                .andExpect(model().attribute("activeOfficerCount", 0L))
+                .andExpect(model().attribute("serviceCentreCount", 0))
+                .andExpect(model().attribute("adminOverview", overviewStats));
     }
 
     @Test
@@ -96,7 +109,7 @@ class AdminControllerSessionTests {
                         .param("role", "nic-officer")
                         .param("password", "Password123!"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/officer/admin"))
+                .andExpect(redirectedUrl("/officer/admin?section=users"))
                 .andExpect(flash().attribute("officerCreatedMessage", "Officer account created successfully."));
 
         verify(officerAccountService).createOfficer(any(OfficerRegistrationDto.class));
@@ -113,7 +126,7 @@ class AdminControllerSessionTests {
                         .param("role", "csr")
                         .param("newPassword", ""))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/officer/admin"))
+                .andExpect(redirectedUrl("/officer/admin?section=users"))
                 .andExpect(flash().attribute("officerActionMessage", "Officer account updated successfully."));
 
         verify(officerAccountService).updateOfficer(any(Integer.class), any(OfficerUpdateDto.class));
@@ -127,7 +140,7 @@ class AdminControllerSessionTests {
 
         mockMvc.perform(post("/officer/admin/officers/90/status").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/officer/admin"))
+                .andExpect(redirectedUrl("/officer/admin?section=users"))
                 .andExpect(flash().attribute("officerActionMessage", "Officer account disabled successfully."));
 
         verify(officerAccountService).toggleOfficerStatus(90);
@@ -140,7 +153,7 @@ class AdminControllerSessionTests {
 
         mockMvc.perform(post("/officer/admin/officers/90/delete").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/officer/admin"))
+                .andExpect(redirectedUrl("/officer/admin?section=users"))
                 .andExpect(flash().attribute("officerActionMessage", "Officer account deleted successfully."));
 
         verify(officerAccountService).removeOfficer(90);
@@ -187,6 +200,39 @@ class AdminControllerSessionTests {
 
         verify(serviceCentreService).addCentre(
                 "Kandy Service Centre", "Peradeniya Road", "Kandy", "Kandy", 120);
+    }
+
+    @Test
+    void adminCanEditChangeStatusAndDeleteAServiceCentre() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+        when(serviceCentreService.toggleCentreStatus(8)).thenReturn("INACTIVE");
+
+        mockMvc.perform(post("/officer/admin/centres/8/edit")
+                        .session(session)
+                        .param("centreName", "Kandy Main Centre")
+                        .param("street", "Peradeniya Road")
+                        .param("city", "Kandy")
+                        .param("district", "Kandy")
+                        .param("dailyCapacity", "150"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=centres"))
+                .andExpect(flash().attribute("centreMessage", "Service centre updated successfully."));
+
+        mockMvc.perform(post("/officer/admin/centres/8/status").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=centres"))
+                .andExpect(flash().attribute("centreMessage", "Service centre deactivated successfully."));
+
+        mockMvc.perform(post("/officer/admin/centres/8/delete").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=centres"))
+                .andExpect(flash().attribute("centreMessage", "Service centre deleted successfully."));
+
+        verify(serviceCentreService).updateCentre(
+                8, "Kandy Main Centre", "Peradeniya Road", "Kandy", "Kandy", 150);
+        verify(serviceCentreService).toggleCentreStatus(8);
+        verify(serviceCentreService).removeCentre(8);
     }
 
     @Test

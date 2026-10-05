@@ -321,7 +321,7 @@ public class WalkInAppointmentService {
 
     @Transactional(readOnly = true)
     public List<Centre> getCentres() {
-        return centreRepository.findAllByOrderByCentreNameAsc();
+        return centreRepository.findAllByCentreStatusOrderByCentreNameAsc("ACTIVE");
     }
 
     @Transactional(readOnly = true)

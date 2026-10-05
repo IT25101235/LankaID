@@ -57,6 +57,7 @@ CREATE TABLE [dbo].[Centre](
 	[city] [varchar](100) NOT NULL,
 	[district] [varchar](100) NOT NULL,
 	[daily_capacity] [int] NOT NULL,
+	[centre_status] [varchar](20) NOT NULL,
  CONSTRAINT [pk_centre] PRIMARY KEY CLUSTERED 
 (
 	[centre_id] ASC
@@ -653,6 +654,9 @@ GO
 ALTER TABLE [dbo].[WalkInSlot] ADD  CONSTRAINT [df_walk_in_slot_available]  DEFAULT ('Y') FOR [is_available]
 GO
 
+ALTER TABLE [dbo].[Centre] ADD  CONSTRAINT [df_centre_status]  DEFAULT ('ACTIVE') FOR [centre_status]
+GO
+
 ALTER TABLE [dbo].[StaffAccount] ADD  DEFAULT ('ACTIVE') FOR [staff_status]
 GO
 
@@ -975,6 +979,12 @@ ALTER TABLE [dbo].[Centre]  WITH CHECK ADD  CONSTRAINT [chk_centre_capacity] CHE
 GO
 
 ALTER TABLE [dbo].[Centre] CHECK CONSTRAINT [chk_centre_capacity]
+GO
+
+ALTER TABLE [dbo].[Centre]  WITH CHECK ADD  CONSTRAINT [chk_centre_status] CHECK  (([centre_status]='INACTIVE' OR [centre_status]='ACTIVE'))
+GO
+
+ALTER TABLE [dbo].[Centre] CHECK CONSTRAINT [chk_centre_status]
 GO
 
 ALTER TABLE [dbo].[GovernmentIdentityRecord]  WITH CHECK ADD  CONSTRAINT [chk_government_status] CHECK  (([identity_status]='CANCELLED' OR [identity_status]='DAMAGED' OR [identity_status]='LOST' OR [identity_status]='EXPIRED' OR [identity_status]='ACTIVE'))

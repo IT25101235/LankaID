@@ -46,7 +46,7 @@ public class BiometricScheduleService {
 
     @Transactional(readOnly = true)
     public List<Centre> getCentres() {
-        return centres.findAllByOrderByCentreNameAsc();
+        return centres.findAllByCentreStatusOrderByCentreNameAsc("ACTIVE");
     }
 
     @Transactional(readOnly = true)

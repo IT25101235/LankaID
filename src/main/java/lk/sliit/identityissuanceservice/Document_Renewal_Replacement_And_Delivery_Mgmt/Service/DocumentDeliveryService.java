@@ -70,7 +70,7 @@ public class DocumentDeliveryService {
 
     @Transactional(readOnly = true)
     public List<Centre> getAvailableCentres() {
-        return centreRepository.findAllByOrderByCentreNameAsc();
+        return centreRepository.findAllByCentreStatusOrderByCentreNameAsc("ACTIVE");
     }
 
     @Transactional(readOnly = true)
