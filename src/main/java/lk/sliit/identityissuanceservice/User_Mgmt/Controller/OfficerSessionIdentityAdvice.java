@@ -1,6 +1,8 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import lk.sliit.identityissuanceservice.Chatbot_Mgmt.Controller.ChatbotRequestScope;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -9,6 +11,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class OfficerSessionIdentityAdvice {
 
     @ModelAttribute
+    public void exposePageIdentity(HttpServletRequest request, Model model) {
+        // The public guide must not retrieve an officer identity.
+        if (ChatbotRequestScope.isChatbotRequest(request)) return;
+        HttpSession session = request.getSession(false);
+        if (session != null) exposeOfficerIdentity(session, model);
+    }
+
     public void exposeOfficerIdentity(HttpSession session, Model model) {
         copySessionAttribute(session, model, "loggedInOfficerEmail");
         copySessionAttribute(session, model, "loggedInOfficerRole");
