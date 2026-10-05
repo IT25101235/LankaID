@@ -9,12 +9,70 @@
 [![Database](https://img.shields.io/badge/Database-Microsoft%20SQL%20Server%202019+-CC292B?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
 [![Build Tool](https://img.shields.io/badge/Build-Maven%203.x-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)](https://maven.apache.org/)
 [![Architecture](https://img.shields.io/badge/Architecture-Layered%20MVC%20%2F%20SSR-007ACC?style=for-the-badge)](#9-system-architecture)
-[![Testing](https://img.shields.io/badge/Tests-38%20Integration%20%26%20Unit%20Suites-brightgreen?style=for-the-badge)](#33-testing)
-[![Status](https://img.shields.io/badge/Project%20Status-82%25%20Functional%20Prototype-blue?style=for-the-badge)](#41-project-status)
+[![Testing](https://img.shields.io/badge/Tests-Unit%20%26%20Integration-brightgreen?style=for-the-badge)](#33-testing)
+[![Status](https://img.shields.io/badge/Status-Academic%20Prototype-blue?style=for-the-badge)](#39-limitations)
+
+## Explore LankaID
+
+**[System workflow](#system-workflow)** · **[Member assignments](#member-assignments)** · **[Architecture](#9-system-architecture)** · **[Run locally](#44-quick-start)** · **[Demo checklist](#demo-checklist)**
+
+LankaID brings NIC and passport applications, officer review, appointment booking, and document handover into one citizen service portal. This is an academic prototype: payments, biometric hardware capture, and document production are simulated.
+
+| I want to… | Go to… |
+| :--- | :--- |
+| Understand the complete citizen journey | [Workflow and decision paths](#system-workflow) |
+| See who owns each major function | [Assignment map below](#member-assignments) and [member details](#37-team-members--contributions) |
+| Understand how the application is built | [Layered MVC architecture](#9-system-architecture) and [database diagram](#15-database) |
+| Try the project on my machine | [Quick start](#44-quick-start) and [configuration](#28-environment-variables) |
+| Present the project to an evaluator | [Guided demo checklist](#demo-checklist) |
+
+Expand the **▶ details** sections to explore member responsibilities, workflow messages, and the full reference index. Mermaid diagrams render in GitHub's README view; open the rendered preview to see them as diagrams.
+
+<a id="member-assignments"></a>
+
+## Major functions and assigned members
+
+The assignments below follow the team's existing contribution record in this README. Supporting modules such as OTP, payments, notifications, and administration connect these major functions.
+
+```mermaid
+flowchart LR
+    M["Marikcar A A A<br/>IT25101235"] --> U["User management<br/>Registration and authentication"]
+    M --> V["Verification and approval<br/>Officer queues and decisions"]
+    J["Jeniviya<br/>IT25100689"] --> A["Citizen applications<br/>New NIC and passport requests"]
+    W["Weerakoon W M Y B<br/>IT25100565"] --> B["Biometrics and appointments<br/>Slots, QR passes and check-in"]
+    R["Rithika<br/>IT25100885"] --> D["Renewal, replacement and delivery<br/>Existing documents and handover"]
+    S["Dharshan S<br/>IT25100604"] --> H["Citizen support and services<br/>Walk-ins and support requests"]
+
+    classDef marikcar fill:#dbeafe,stroke:#2563eb,color:#172554
+    classDef jeniviya fill:#ede9fe,stroke:#7c3aed,color:#2e1065
+    classDef weerakoon fill:#ccfbf1,stroke:#0d9488,color:#134e4a
+    classDef rithika fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef dharshan fill:#fce7f3,stroke:#db2777,color:#831843
+    class M,U,V marikcar
+    class J,A jeniviya
+    class W,B weerakoon
+    class R,D rithika
+    class S,H dharshan
+```
+
+| Member | Assigned major function | Explore responsibility |
+| :--- | :--- | :--- |
+| **Marikcar A A A** · `IT25101235` | User management; verification and approval | [Account access, officer decisions, OTP and payments](#member-marikcar) |
+| **Jeniviya** · `IT25100689` | Citizen application management | [First-time applications, drafts and uploads](#member-jeniviya) |
+| **Weerakoon W M Y B** · `IT25100565` | Biometric and appointment management | [Schedules, QR check-in and booking changes](#member-weerakoon) |
+| **Rithika** · `IT25100885` | Document renewal, replacement and delivery | [Renewals, replacements and document handover](#member-rithika) |
+| **Dharshan S** · `IT25100604` | Citizen support and service management | [Walk-in assistance and support requests](#member-dharshan) |
+
+> These are development assignments. Citizen, NIC officer, passport officer, CSR, director, and administrator are the system's user roles.
+
+[View the full system workflow ↓](#system-workflow)
 
 ---
 
 ## Table of Contents
+
+<details>
+<summary><strong>Expand the complete documentation index</strong></summary>
 
 - [1. Project Title](#1-project-title)
 - [2. Project Overview](#2-project-overview)
@@ -66,6 +124,8 @@
 - [48. License](#48-license)
 - [49. Contributing](#49-contributing)
 - [50. Final Project Map](#50-final-project-map)
+
+</details>
 
 ---
 
@@ -270,7 +330,132 @@ LankaID Identity Issuing Web Service Application
 
 ---
 
+<a id="system-workflow"></a>
+
 # 8. SYSTEM WORKFLOW
+
+## From registration to document handover
+
+Follow the arrows to see who acts at each stage. The correction branch returns to officer review; a rejected application ends that request. Renewal and replacement requests join the same review, payment, appointment, and issuance pipeline as first-time applications.
+
+```mermaid
+flowchart TD
+    subgraph Citizen["Citizen portal"]
+        Start(["Start"]) --> Register["Verify email and phone OTP<br/>Create account and log in"]
+        Register --> Kind{"Choose request"}
+        Kind -->|First-time NIC or passport| New["Eligibility check<br/>Create new application"]
+        Kind -->|Renewal or lost replacement| Existing["Verify or link existing identity<br/>Create renewal or replacement"]
+        New --> Draft["Save draft and upload supporting documents"]
+        Existing --> Draft
+        Draft --> Submit["Review and submit<br/>SUBMITTED"]
+        Fix["Correct flagged fields or documents<br/>RESUBMITTED"]
+    end
+
+    subgraph Review["NIC or passport officer"]
+        Inspect["Open application and inspect evidence<br/>UNDER_REVIEW"] --> Decision{"Review decision"}
+        Decision -->|Request correction| Correction["Record feedback<br/>CORRECTION_REQUIRED"]
+        Decision -->|Reject| Rejected(["REJECTED<br/>Citizen receives the reason"])
+        Decision -->|Approve| Approved["APPROVED<br/>Citizen can pay and book"]
+    end
+
+    Submit --> Inspect
+    Correction --> Fix
+    Fix --> Inspect
+
+    subgraph Booking["Citizen payment and booking"]
+        Pay["Choose home delivery or centre collection<br/>Complete simulated payment: PAID"] --> Slot["Choose published centre, date and slot<br/>APPOINTMENT_BOOKED"]
+        Slot --> Pass["Download or print the QR appointment pass"]
+    end
+    Approved --> Pay
+
+    subgraph Visit["Physical service-centre visit"]
+        Check["Officer scans QR or enters reference<br/>Appointment: CHECKED_IN"] --> Capture["Record simulated biometric capture<br/>BIOMETRIC_COLLECTED"]
+    end
+    Pass --> Check
+
+    subgraph Issue["Director and document handover"]
+        Print["Process printing batch and export CSV<br/>Application: ISSUED"] --> Method{"Chosen delivery method"}
+        Method -->|Home delivery| Dispatch["Delivery: DISPATCHED"]
+        Dispatch --> Delivered(["Citizen confirms receipt<br/>Delivery: DELIVERED"])
+        Method -->|Centre collection| Ready["Delivery: READY_FOR_COLLECTION"]
+        Ready --> Collected(["CSR records handover<br/>Delivery: COLLECTED"])
+    end
+    Capture --> Print
+
+    classDef action fill:#dbeafe,stroke:#2563eb,color:#172554
+    classDef choice fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef success fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef stop fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    class Register,New,Existing,Draft,Submit,Fix,Inspect,Pay,Slot,Pass,Check,Capture,Print,Dispatch,Ready action
+    class Kind,Decision,Method,Correction choice
+    class Approved,Delivered,Collected success
+    class Rejected stop
+```
+
+**Text walkthrough:** Register → choose request → save draft and upload → submit → officer review → approve → select delivery and pay → book biometrics → QR check-in → biometric completion → director printing export → delivery or collection. A correction loops back through resubmission; rejection ends that request.
+
+### How member functions connect
+
+| Stage | System actor | Assigned development member | Output passed to the next stage |
+| :--- | :--- | :--- | :--- |
+| Account creation and access | Citizen | **Marikcar A A A** | Verified citizen account and session |
+| First-time application | Citizen | **Jeniviya** | Submitted NIC/passport request and evidence |
+| Renewal or replacement | Citizen | **Rithika** | Existing-document request and evidence |
+| Verification and decision | NIC/passport officer | **Marikcar A A A** | Approval, correction feedback, or rejection reason |
+| Payment support | Citizen | **Marikcar A A A** | Payment record required for biometric booking |
+| Appointment and biometrics | Citizen and NIC/passport officer | **Weerakoon W M Y B** | Confirmed appointment, QR pass, and completed biometric record |
+| Printing export | Director | Administration module | Issued application and printing CSV |
+| Delivery and collection | Citizen and CSR | **Rithika**, with CSR workbench support from **Dharshan S** | Receipt confirmation or recorded handover |
+| Help throughout the journey | Guest/citizen and CSR | **Dharshan S** | Walk-in assistance or support response |
+
+### Reading the status labels
+
+Application, payment, appointment, and delivery each have their own status. Payment is recorded as `PAID`; booking moves the application from `APPROVED` to `APPOINTMENT_BOOKED`. Printing sets the application to `ISSUED`; delivery then progresses separately to `DELIVERED` or `COLLECTED`.
+
+<details>
+<summary><strong>Explore the application status lifecycle</strong></summary>
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT
+    DRAFT --> SUBMITTED: Citizen submits
+    SUBMITTED --> UNDER_REVIEW: Officer opens request
+    RESUBMITTED --> UNDER_REVIEW: Officer reopens request
+    UNDER_REVIEW --> CORRECTION_REQUIRED: Request correction
+    CORRECTION_REQUIRED --> RESUBMITTED: Citizen corrects and submits
+    UNDER_REVIEW --> REJECTED: Reject with reason
+    UNDER_REVIEW --> APPROVED: Approve
+    APPROVED --> APPOINTMENT_BOOKED: Paid citizen books a slot
+    APPOINTMENT_BOOKED --> APPROVED: Booking cancelled or slot removed
+    APPOINTMENT_BOOKED --> BIOMETRIC_COLLECTED: Officer completes biometrics
+    BIOMETRIC_COLLECTED --> ISSUED: Director processes printing batch
+    REJECTED --> [*]
+    ISSUED --> [*]
+```
+
+This diagram shows the main implemented application transitions. Delivery completion is tracked on the delivery record after issuance.
+
+</details>
+
+<details>
+<summary><strong>Explore the guest walk-in assistance workflow</strong></summary>
+
+```mermaid
+flowchart LR
+    Guest["Guest opens walk-in portal"] --> OTP["Verify phone by SMS OTP"]
+    OTP --> Book["Choose a CSR slot"]
+    Book --> Pay["Complete simulated walk-in payment"]
+    Pay --> Pass["Receive appointment pass"]
+    Pass --> Visit["CSR checks in visitor"]
+    Visit --> Help["Provide assistance and complete visit"]
+```
+
+Guest assistance is available without a citizen account. A visitor can also recover an appointment through the phone verification flow. Citizens can submit support requests, and CSRs review and respond from their workbench.
+
+</details>
+
+<details>
+<summary><strong>Explore the technical system context</strong></summary>
 
 ## High-Level System Flow
 
@@ -347,6 +532,11 @@ flowchart TD
     JPA --> MSSQL
 ```
 
+</details>
+
+<details>
+<summary><strong>Explore the request sequence between portal, services, and database</strong></summary>
+
 ## End-to-End Citizen Application & Issuance Workflow
 
 ```mermaid
@@ -356,9 +546,14 @@ sequenceDiagram
     participant UI as Browser (Thymeleaf Portal)
     participant Auth as Registration Controller & OTP Services
     participant AppSvc as CitizenApplicationService
-    participant Officer as Verification Officer
+    actor Officer as Verification Officer
+    participant ReviewSvc as VerificationReviewService
     participant PaySvc as PaymentService
-    participant Sched as BiometricScheduleService
+    participant ApptSvc as AppointmentService
+    participant BioSvc as BiometricService
+    actor Director as Director
+    participant PrintSvc as PrintingExportService
+    participant DeliverySvc as DocumentDeliveryService
     participant DB as MS SQL Server Database
 
     Citizen->>UI: Enter email
@@ -381,25 +576,39 @@ sequenceDiagram
     Officer->>UI: Open Officer Review Queue
     UI->>Officer: Display Application Details & Document Previews
     Officer->>UI: Click "Approve Application"
-    UI->>DB: Record ApplicationReview, Set status to APPROVED
+    UI->>ReviewSvc: Record approval
+    ReviewSvc->>DB: Save ApplicationReview and APPROVED status
     
     Citizen->>UI: Access Dashboard, Select Delivery & Pay Fee
     UI->>PaySvc: POST /citizen/payment (Card details)
-    PaySvc->>DB: Validate card & Insert Payment (COMPLETED)
+    PaySvc->>DeliverySvc: Save delivery or collection choice
+    PaySvc->>DB: Insert Payment (PAID)
     
     Citizen->>UI: Select Centre, Date & Biometric Slot
-    UI->>Sched: POST /citizen/appointments/biometric/book
-    Sched->>DB: Insert Appointment (CONFIRMED) & decrement slot
-    Sched->>UI: Render Appointment Pass with ZXing QR Code
+    UI->>ApptSvc: POST /citizen/appointments/biometric
+    ApptSvc->>DB: Lock slot, confirm appointment, set APPOINTMENT_BOOKED
+    ApptSvc-->>UI: Appointment reference for QR pass generation
     
     Citizen->>Officer: Present QR Pass at Centre
     Officer->>UI: Scan Pass with Webcam (jsQR)
-    UI->>DB: Record AppointmentCheckIn (QR)
+    UI->>ApptSvc: Validate reference and check in
+    ApptSvc->>DB: Record AppointmentCheckIn (QR)
     Officer->>UI: Simulate Biometric Capture (Fingerprints/Photo)
-    UI->>DB: Insert BiometricCollection, Set status to BIOMETRIC_COLLECTED
+    UI->>BioSvc: Complete simulated capture
+    BioSvc->>DB: Save BiometricCollection and BIOMETRIC_COLLECTED status
     
-    Note over DB,UI: Ready for Printing Export
+    Director->>UI: Select ready applications and process printing batch
+    UI->>PrintSvc: Process selected applications
+    PrintSvc->>DB: Assign document number and set ISSUED
+    PrintSvc->>DeliverySvc: Update delivery after printing
+    DeliverySvc->>DB: Set DISPATCHED or READY_FOR_COLLECTION
+    PrintSvc-->>Director: Download printing CSV
+    Note over Citizen,DeliverySvc: Citizen confirms receipt or CSR records collection
 ```
+
+</details>
+
+[Back to visual guide ↑](#explore-lankaid)
 
 ---
 
@@ -1033,7 +1242,7 @@ flowchart LR
    - Director logs in and opens `/officer/director/printing`.
    - System displays table of all ready applications across all centres.
    - Director selects applications and clicks "Process Printing Batch".
-   - Status updates to `PRINTED`.
+   - Application status updates to `ISSUED`; the delivery record becomes `DISPATCHED` or `READY_FOR_COLLECTION`.
    - System compiles demographic and biometric reference data into an RFC 4180-compliant CSV register.
    - Director downloads the CSV file via `/officer/director/printing/download`.
 
@@ -1269,9 +1478,8 @@ END;
 GO
 ```
 
-3. Open and execute the incremental table scripts located in the `database/` folder:
-   - Run [`database/biometric-appointment-scheduling.sql`](file:///e:/Yasiru%27s%20Workload/SLIIT/Y2%20S1/SE/Project/LankaID/database/biometric-appointment-scheduling.sql)
-   - Run [`database/appointment-change-payments.sql`](file:///e:/Yasiru%27s%20Workload/SLIIT/Y2%20S1/SE/Project/LankaID/database/appointment-change-payments.sql)
+3. For a fresh or empty database, run [the complete current schema](database/current-database-schema.sql). It creates the database and all application tables, and stops if application tables already exist.
+   - For an older schema, inspect [biometric appointment scheduling](database/biometric-appointment-scheduling.sql) and [appointment change payments](database/appointment-change-payments.sql) before applying the relevant incremental updates.
 4. Verify that Hibernate DDL validation is enabled in `src/main/resources/application.properties`:
    ```properties
    spring.jpa.hibernate.ddl-auto=validate
@@ -1281,21 +1489,21 @@ GO
 
 # 28. ENVIRONMENT VARIABLES
 
-The application runs using sensible defaults for local development. For email OTP and live SMS delivery, set these environment variables:
+The application uses local database defaults. Citizen registration requires working email and SMS delivery because both contacts must be verified. Configure the following values before demonstrating onboarding:
 
 | Variable | Purpose | Required | Example Value |
 | :--- | :--- | :---: | :--- |
-| `LANKAID_MAIL_USERNAME` | Gmail account used to send 6-digit registration codes | No (Local dev) | `lankaid.verify@gmail.com` |
-| `LANKAID_MAIL_APP_PASSWORD`| 16-character Google App Password (not Gmail login pass) | No (Local dev) | `abcd efgh ijkl mnop` |
+| `LANKAID_MAIL_USERNAME` | Gmail account used to send 6-digit registration codes | Yes, for email OTP | `your-email@gmail.com` |
+| `LANKAID_MAIL_APP_PASSWORD`| Google App Password for the sender account | Yes, for email OTP | `your-app-password` |
 | `LANKAID_MAIL_FROM` | Outbound sender address displayed to citizens | No | `no-reply@lankaid.gov.lk` |
-| `LANKAID_SMS_URL` | Full URL of the SMS gateway server | No (Defaults) | `http://10.48.19.179:8080/sms` |
-| `LANKAID_SMS_API_KEY` | Bearer authorization token for phone SMS API | No | `your-sms-api-key-here` |
+| `APP_SMS_URL` | Overrides `app.sms.url` with the full SMS gateway endpoint | Yes, if the configured endpoint is unavailable | `http://192.168.1.50:8080/sms` |
+| `LANKAID_SMS_API_KEY` | Bearer authorization token for phone SMS API | Yes, for SMS OTP | `your-sms-api-key-here` |
 
 ### Setting Environment Variables in PowerShell:
 ```powershell
 $env:LANKAID_MAIL_USERNAME="your-email@gmail.com"
 $env:LANKAID_MAIL_APP_PASSWORD="your-app-password"
-$env:LANKAID_SMS_URL="http://192.168.1.50:8080/sms"
+$env:APP_SMS_URL="http://192.168.1.50:8080/sms"
 $env:LANKAID_SMS_API_KEY="secret-api-key"
 ```
 
@@ -1419,7 +1627,7 @@ The project incorporates extensive automated test coverage spanning unit, integr
 | Problem | Root Cause | Solution |
 | :--- | :--- | :--- |
 | **`Login failed for user` or connection refused on port 1433** | SQL Server service is stopped or TCP/IP protocol is disabled. | Open **SQL Server Configuration Manager**, enable TCP/IP under Network Configuration, and start the SQL Server service. |
-| **`Schema-validation: missing table [dbo].[BiometricAppointmentSlot]`** | Database migration script was not executed. | Run [`database/biometric-appointment-scheduling.sql`](file:///e:/Yasiru%27s%20Workload/SLIIT/Y2%20S1/SE/Project/LankaID/database/biometric-appointment-scheduling.sql) in SSMS. |
+| **`Schema-validation: missing table [dbo].[BiometricAppointmentSlot]`** | Database migration script was not executed. | Inspect and apply [biometric appointment scheduling](database/biometric-appointment-scheduling.sql) in SSMS for an older schema, or use [the full schema](database/current-database-schema.sql) for a fresh database. |
 | **Registration email fails with `AuthenticationFailedException`** | Gmail App Password is not configured or normal password was used. | Create a 16-character App Password at `myaccount.google.com/apppasswords` and export `LANKAID_MAIL_APP_PASSWORD`. |
 | **SMS OTP not sending for walk-ins** | Phone gateway is unreachable or IP changed. | Ensure the phone server is on the same local Wi-Fi network and update `app.sms.url` in `application.properties`. |
 | **Webcam scanner does not open on officer check-in** | Browser blocked camera access or connection is not localhost/HTTPS. | Grant camera permissions in your browser settings for `http://localhost:8080`. |
@@ -1465,6 +1673,91 @@ timeline
 | **Weerakoon W M Y B** | `IT25100565`<br>`it25100565@my.sliit.lk` | Full-Stack Engineer / UI Architect | **Biometric & Appointment Management**, Biometric Slot Scheduling (`BiometricScheduleController`), Rescheduling Governance (`BookingChangePolicy`), System Admin Officer Management (`AdminController`), Portal Shell Theme & Styling. |
 | **Jeniviya** | `IT25100689`<br>`it25100689@my.sliit.lk` | Frontend & Application Engineer | **Citizen Application Management**, New NIC & Passport Multi-Step Forms, Multipart Document Uploader, Application Tracking Timeline. |
 | **Rithika** | `IT25100885`<br>`it25100885@my.sliit.lk` | Backend & Delivery Engineer | **Document Renewal, Replacement & Delivery Management**, NIC/Passport Renewal Forms, Courier Address Tracking, Collection Handovers. |
+
+### Explore each member's assigned function
+
+<a id="member-marikcar"></a>
+
+<details>
+<summary><strong>Marikcar A A A · IT25101235 — User management, verification and approval</strong></summary>
+
+**Major responsibilities:** Citizen registration and login, staff authentication, NIC/passport verification queues, evidence inspection, approval, rejection, and correction requests.
+
+**Supporting contributions:** Email/SMS OTP infrastructure, payment processing, and system integration tests.
+
+**Workflow contribution:** Creates the account access foundation, then turns submitted requests into review decisions. Approved requests proceed to payment and appointments; corrections return to the citizen.
+
+**Explore the implementation:** [Registration](src/main/java/lk/sliit/identityissuanceservice/User_Mgmt/Controller/CitizenRegistrationController.java) · [Login and account management](src/main/java/lk/sliit/identityissuanceservice/User_Mgmt/Controller/UserController.java) · [NIC review](src/main/java/lk/sliit/identityissuanceservice/Verification_And_Approval_Management/Controller/NicVerificationController.java) · [Passport review](src/main/java/lk/sliit/identityissuanceservice/Verification_And_Approval_Management/Controller/PassportVerificationController.java) · [Review decisions](src/main/java/lk/sliit/identityissuanceservice/Verification_And_Approval_Management/Service/VerificationReviewService.java)
+
+**Demo focus:** Verify both contact methods, create an account, open an officer queue, and demonstrate approval or a correction request with feedback.
+
+</details>
+
+<a id="member-jeniviya"></a>
+
+<details>
+<summary><strong>Jeniviya · IT25100689 — Citizen application management</strong></summary>
+
+**Major responsibilities:** First-time NIC and passport forms, draft creation and editing, supporting document uploads, submission, and application tracking.
+
+**Workflow contribution:** Turns citizen details and evidence into a submitted request. Citizens can update flagged fields or files and resubmit after officer feedback.
+
+**Explore the implementation:** [Application controller](src/main/java/lk/sliit/identityissuanceservice/Citizen_Application_Mgmt/Controller/CitizenApplicationController.java) · [Application service](src/main/java/lk/sliit/identityissuanceservice/Citizen_Application_Mgmt/Service/CitizenApplicationService.java) · [NIC form](src/main/resources/templates/citizen_frontends/nic_application_form.html) · [Citizen dashboard](src/main/resources/templates/citizen_frontends/citizen_dashboard.html)
+
+**Demo focus:** Create a draft, reopen it, upload the required documents, review the summary, submit, and show the tracking view.
+
+</details>
+
+<a id="member-weerakoon"></a>
+
+<details>
+<summary><strong>Weerakoon W M Y B · IT25100565 — Biometric and appointment management</strong></summary>
+
+**Major responsibilities:** Officer slot publishing, centre/date/time selection, booking capacity, QR passes, check-in, biometric completion, and booking change policies.
+
+**Supporting contributions:** Administrator officer management and shared portal theme/styling.
+
+**Workflow contribution:** Takes paid, approved applications through a confirmed service-centre visit and produces biometric-complete records for the director's printing queue.
+
+**Explore the implementation:** [Slot publishing](src/main/java/lk/sliit/identityissuanceservice/Biometric_And_Appointment_Mgmt/Controller/BiometricScheduleController.java) · [Appointments and passes](src/main/java/lk/sliit/identityissuanceservice/Biometric_And_Appointment_Mgmt/Controller/AppointmentController.java) · [Biometric workbench](src/main/java/lk/sliit/identityissuanceservice/Biometric_And_Appointment_Mgmt/Controller/BiometricController.java) · [Booking change policy](src/main/java/lk/sliit/identityissuanceservice/Biometric_And_Appointment_Mgmt/Service/BookingChangePolicy.java) · [Administrator controls](src/main/java/lk/sliit/identityissuanceservice/Admin_Mgmt/Controller/AdminController.java)
+
+**Demo focus:** Publish an available slot, book it after payment, download the QR pass, scan or enter its reference, and complete simulated biometrics.
+
+</details>
+
+<a id="member-rithika"></a>
+
+<details>
+<summary><strong>Rithika · IT25100885 — Document renewal, replacement and delivery</strong></summary>
+
+**Major responsibilities:** NIC/passport renewal and lost replacement requests, home delivery selection, collection centre selection, delivery tracking, and document handover.
+
+**Workflow contribution:** Brings existing-document requests into the review pipeline and manages the final delivery or collection stage after issuance.
+
+**Explore the implementation:** [Renewal/replacement controller](src/main/java/lk/sliit/identityissuanceservice/Document_Renewal_Replacement_And_Delivery_Mgmt/Controller/DocumentRenewalReplacementController.java) · [Renewal/replacement service](src/main/java/lk/sliit/identityissuanceservice/Document_Renewal_Replacement_And_Delivery_Mgmt/Service/DocumentRenewalReplacementService.java) · [Delivery controller](src/main/java/lk/sliit/identityissuanceservice/Document_Renewal_Replacement_And_Delivery_Mgmt/Controller/DocumentDeliveryController.java) · [Delivery and handover service](src/main/java/lk/sliit/identityissuanceservice/Document_Renewal_Replacement_And_Delivery_Mgmt/Service/DocumentDeliveryService.java)
+
+**Demo focus:** Create an eligible renewal/replacement request, select a delivery method, and demonstrate receipt confirmation or CSR collection handover after printing.
+
+</details>
+
+<a id="member-dharshan"></a>
+
+<details>
+<summary><strong>Dharshan S · IT25100604 — Citizen support and service management</strong></summary>
+
+**Major responsibilities:** Guest walk-in booking, phone OTP verification for walk-ins, CSR schedules and check-in, support request submission, CSR responses, and document handover assistance.
+
+**Workflow contribution:** Gives visitors an assisted service route and helps citizens resolve questions throughout the application journey. CSR handover connects the support workbench to the delivery module.
+
+**Explore the implementation:** [Walk-in controller](src/main/java/lk/sliit/identityissuanceservice/Citizen_Support_And_Service_Mgmt/Controller/WalkInAppointmentController.java) · [Walk-in booking service](src/main/java/lk/sliit/identityissuanceservice/Citizen_Support_And_Service_Mgmt/Service/WalkInAppointmentService.java) · [Support controller](src/main/java/lk/sliit/identityissuanceservice/Citizen_Support_And_Service_Mgmt/Controller/CitizenSupportController.java) · [Support service](src/main/java/lk/sliit/identityissuanceservice/Citizen_Support_And_Service_Mgmt/Service/CitizenSupportService.java)
+
+**Demo focus:** Verify a guest phone, book and pay for a walk-in slot, present the pass, complete CSR assistance, and respond to a citizen support request.
+
+</details>
+
+**Shared system handoff:** Notifications connect events across modules. The director's [printing service](src/main/java/lk/sliit/identityissuanceservice/Admin_Mgmt/Service/PrintingExportService.java) consumes biometric-complete applications and updates the delivery module after issuance. The contribution record does not name a primary owner for director printing, so it is shown as an administration function in the workflow.
+
+[Back to assignment map ↑](#member-assignments) · [Follow the workflow](#system-workflow)
 
 ---
 
@@ -1531,15 +1824,81 @@ timeline
 
 # 42. SCREENSHOTS / VISUAL GUIDE
 
+Use the links below to inspect the actual view templates. Live screens require the application, database, and role-specific accounts to be running locally.
+
 | Screen / View | Primary Purpose | File Location |
 | :--- | :--- | :--- |
-| **Landing Portal** | Overview of services and direct access to login/register | `templates/index.html` |
-| **Citizen Dashboard** | Central citizen portal with status tracking & active alerts | `templates/citizen_frontends/citizen_dashboard.html` |
-| **New Application Form**| Structured multi-tab form with client validation | `templates/citizen_frontends/nic_application_form.html` |
-| **Biometric QR Pass** | High-contrast appointment pass with scannable QR code | `templates/citizen_frontends/biometric_appointment_pass.html` |
-| **Officer Review Desk** | Side-by-side demographic and document audit view | `templates/officers_frontends/application_review.html` |
-| **Biometric Calendar** | Visual schedule showing daily capacity and slots | `templates/officers_frontends/biometric_schedule.html` |
-| **Director Dashboard** | National throughput charts and CSV export triggers | `templates/officers_frontends/director_dashboard.html` |
+| **Landing Portal** | Overview of services and direct access to login/register | [Landing template](src/main/resources/templates/index.html) |
+| **Citizen Dashboard** | Central citizen portal with status tracking & active alerts | [Dashboard template](src/main/resources/templates/citizen_frontends/citizen_dashboard.html) |
+| **New Application Form**| Structured multi-tab form with client validation | [NIC form template](src/main/resources/templates/citizen_frontends/nic_application_form.html) |
+| **Biometric QR Pass** | High-contrast appointment pass with scannable QR code | [QR pass template](src/main/resources/templates/citizen_frontends/biometric_appointment_pass.html) |
+| **Officer Review Desk** | Side-by-side demographic and document audit view | [Review template](src/main/resources/templates/officers_frontends/application_review.html) |
+| **Biometric Calendar** | Visual schedule showing daily capacity and slots | [Schedule template](src/main/resources/templates/officers_frontends/biometric_schedule.html) |
+| **Director Dashboard** | National throughput charts and CSV export triggers | [Director template](src/main/resources/templates/officers_frontends/director_dashboard.html) |
+
+<a id="demo-checklist"></a>
+
+## Guided system demo
+
+Prepare a local database, working email/SMS delivery, an available service centre, and the required staff accounts. Use sample citizen data and documents. Each expandable checklist follows a member's major function; the director stage completes the shared pipeline.
+
+<details>
+<summary><strong>1 · Account access and applications — Marikcar, Jeniviya, Rithika</strong></summary>
+
+- [ ] Open the registration page and verify email and phone OTPs.
+- [ ] Create a citizen account and log in.
+- [ ] Choose a first-time NIC/passport request, or an eligible renewal/replacement request with verified existing identity.
+- [ ] Save and reopen a draft, upload the required evidence, and submit.
+- [ ] Show the application reference and current status on the citizen portal.
+
+</details>
+
+<details>
+<summary><strong>2 · Review decisions and payment — Marikcar</strong></summary>
+
+- [ ] Log in as the matching NIC/passport officer and open the submitted request.
+- [ ] Inspect applicant details and document previews.
+- [ ] Request a correction, then show citizen correction and resubmission.
+- [ ] Approve the request and show the citizen notification.
+- [ ] Choose home delivery or centre collection and complete simulated payment.
+
+</details>
+
+<details>
+<summary><strong>3 · Appointment and biometric visit — Weerakoon</strong></summary>
+
+- [ ] Publish an available future slot from the officer schedule.
+- [ ] Book that slot from the paid citizen application.
+- [ ] Download or print the QR appointment pass.
+- [ ] Check in from the officer workbench using QR scanning or manual reference input.
+- [ ] Complete simulated biometric capture and show `BIOMETRIC_COLLECTED`.
+
+</details>
+
+<details>
+<summary><strong>4 · Issuance and delivery — Director function, Rithika, Dharshan</strong></summary>
+
+- [ ] Open the director printing queue and select the biometric-complete application.
+- [ ] Process the batch and download the CSV register.
+- [ ] Show application status `ISSUED` and the delivery tracking reference.
+- [ ] For home delivery, confirm receipt; for centre collection, have the CSR record handover.
+- [ ] Show delivery status `DELIVERED` or `COLLECTED`.
+
+</details>
+
+<details>
+<summary><strong>5 · Walk-in assistance and support — Dharshan</strong></summary>
+
+- [ ] Publish a CSR walk-in slot and open the guest walk-in portal.
+- [ ] Verify the guest phone, select a slot, complete simulated payment, and show the pass.
+- [ ] Check in the visitor and complete assistance from the CSR workbench.
+- [ ] Submit a citizen support request and show the CSR response.
+
+</details>
+
+The checklists are presentation guides; checkboxes in a README are static Markdown and do not save demo progress.
+
+[Back to visual guide ↑](#explore-lankaid)
 
 ---
 
@@ -1581,9 +1940,9 @@ sequenceDiagram
 git clone https://github.com/IT25101235/LankaID.git
 cd LankaID
 
-# 2. Configure database in SSMS
-# Run database/biometric-appointment-scheduling.sql
-# Run database/appointment-change-payments.sql
+# 2. Create the schema in SSMS using a fresh/empty database
+# Run database/current-database-schema.sql
+# See section 28 for email/SMS configuration before registration
 
 # 3. Compile and launch application
 .\mvnw.cmd spring-boot:run
