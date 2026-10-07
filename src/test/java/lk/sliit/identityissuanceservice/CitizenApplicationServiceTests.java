@@ -10,7 +10,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Gove
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -47,7 +47,7 @@ class CitizenApplicationServiceTests {
     @Mock NicApplicationRepository nicRepository;
     @Mock PassportApplicationRepository passportRepository;
     @Mock ApplicationDocumentRepository documentRepository;
-    @Mock NotificationService notificationService;
+    @Mock NotificationPublisher notificationPublisher;
 
     private final Path uploadDirectory = Path.of("target", "test-uploads").toAbsolutePath();
 
@@ -61,7 +61,7 @@ class CitizenApplicationServiceTests {
         service = new CitizenApplicationService(
                 userRepository, citizenRepository, governmentRepository,
                 applicationRepository, nicRepository, passportRepository,
-                documentRepository, notificationService, uploadDirectory.toString()
+                documentRepository, notificationPublisher, uploadDirectory.toString()
         );
         user = new UserAccount();
         user.setUserId(25);

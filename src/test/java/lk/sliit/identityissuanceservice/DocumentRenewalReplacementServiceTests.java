@@ -8,7 +8,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicA
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentRenewalReplacementService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class DocumentRenewalReplacementServiceTests {
     @Mock NicApplicationRepository nicRepository;
     @Mock PassportApplicationRepository passportRepository;
     @Mock ApplicationDocumentRepository documentRepository;
-    @Mock NotificationService notificationService;
+    @Mock NotificationPublisher notificationPublisher;
 
     private DocumentRenewalReplacementService renewalService;
 
@@ -45,7 +45,7 @@ class DocumentRenewalReplacementServiceTests {
                 nicRepository,
                 passportRepository,
                 documentRepository,
-                notificationService,
+                notificationPublisher,
                 "target/test-renewal-uploads"
         );
     }
