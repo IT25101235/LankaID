@@ -1237,7 +1237,7 @@ body.gov-landing-page > main {
 }
 
 .password-field-shell > input {
-  padding-right: 4.25rem !important;
+  padding-right: 3rem !important;
 }
 
 .password-visibility-toggle {
@@ -1245,20 +1245,29 @@ body.gov-landing-page > main {
   top: 50%;
   right: 0.75rem;
   transform: translateY(-50%);
-  min-width: 2.8rem;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
-  color: #0e7490;
-  font-size: 0.75rem;
-  font-weight: 800;
+  color: #0369a1;
   cursor: pointer;
 }
 
+.password-visibility-toggle .material-symbols-outlined { font-size: 1.35rem; }
+
 .password-visibility-toggle:hover,
 .password-visibility-toggle:focus-visible {
-  color: #164e63;
-  text-decoration: underline;
+  color: #075985;
+  background: #e0f2fe;
+  border-radius: 999px;
 }
+
+button[onclick^="togglePassword"] { color: #0369a1; }
+button[onclick^="togglePassword"]:hover,
+button[onclick^="togglePassword"]:focus-visible { color: #075985; }
 
 .gov-reference-text {
   color: var(--gov-maroon) !important;
@@ -1535,7 +1544,7 @@ th { white-space: nowrap; }
 
 /* Dynamic citizen/officer shell. */
 .portal-sidebar,
-.officer-sidebar { background: var(--gov-navy) !important; border-color: #294d69 !important; }
+.officer-sidebar { background: #0f172a !important; border-color: #1e293b !important; }
 .portal-brand { min-height: 5.5rem; }
 .portal-brand-mark,
 .officer-brand-icon {
@@ -1568,6 +1577,77 @@ th { white-space: nowrap; }
 .citizen-session-link { background: #ffffff; border-color: #ffffff; color: var(--gov-maroon) !important; }
 .citizen-session-link:hover { background: var(--gov-gold-soft); border-color: var(--gov-gold-soft); }
 .portal-menu-button { background: var(--gov-maroon); }
+
+/* Officer navigation stays compact until the user points to or focuses it. */
+@media (min-width: 901px) {
+  body.portal-officer { padding-left: 4.75rem !important; }
+
+  .portal-sidebar {
+    width: 4.75rem;
+    overflow-x: hidden;
+    transition: width 180ms ease;
+  }
+
+  .portal-sidebar:hover,
+  .portal-sidebar:focus-within { width: var(--portal-sidebar-width); }
+
+  .portal-sidebar .portal-brand {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0.85rem;
+  }
+
+  .portal-sidebar .portal-brand-copy,
+  .portal-sidebar .portal-nav-label,
+  .portal-sidebar .portal-logout-label {
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    white-space: nowrap;
+  }
+
+  .portal-sidebar .portal-role {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    opacity: 0;
+  }
+
+  .portal-sidebar .portal-nav-link { justify-content: center; gap: 0; }
+  .portal-sidebar .portal-sidebar-footer { padding-inline: 0.65rem; }
+  .portal-sidebar .portal-logout { gap: 0; padding-inline: 0; }
+
+  .portal-sidebar:hover .portal-brand,
+  .portal-sidebar:focus-within .portal-brand {
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding-inline: 1.25rem;
+  }
+
+  .portal-sidebar:hover .portal-brand-copy,
+  .portal-sidebar:hover .portal-nav-label,
+  .portal-sidebar:hover .portal-logout-label,
+  .portal-sidebar:focus-within .portal-brand-copy,
+  .portal-sidebar:focus-within .portal-nav-label,
+  .portal-sidebar:focus-within .portal-logout-label {
+    width: auto;
+    opacity: 1;
+  }
+
+  .portal-sidebar:hover .portal-role,
+  .portal-sidebar:focus-within .portal-role {
+    max-height: 10rem;
+    padding: 1.15rem 1.25rem 0.45rem;
+    opacity: 1;
+  }
+
+  .portal-sidebar:hover .portal-nav-link,
+  .portal-sidebar:focus-within .portal-nav-link { justify-content: flex-start; gap: 0.75rem; }
+  .portal-sidebar:hover .portal-sidebar-footer,
+  .portal-sidebar:focus-within .portal-sidebar-footer { padding-inline: 1rem; }
+  .portal-sidebar:hover .portal-logout,
+  .portal-sidebar:focus-within .portal-logout { gap: 0.55rem; padding-inline: 0.8rem; }
+}
 
 /* Tailwind color normalization. Layout and spacing utilities remain untouched. */
 .bg-cyan-50,
