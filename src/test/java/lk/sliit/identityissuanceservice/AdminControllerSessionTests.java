@@ -3,7 +3,11 @@ package lk.sliit.identityissuanceservice;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Controller.AdminController;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.SystemMaintenance;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
+import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
@@ -22,15 +26,30 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 class AdminControllerSessionTests {
 
     private MockMvc mockMvc;
     private OfficerAccountService officerAccountService;
+    private AdminAccountService adminAccountService;
+    private SystemMaintenanceService maintenanceService;
 
     @BeforeEach
     void setUp() {
         officerAccountService = mock(OfficerAccountService.class);
-        mockMvc = standaloneSetup(new AdminController(officerAccountService)).build();
+        adminAccountService = mock(AdminAccountService.class);
+        maintenanceService = mock(SystemMaintenanceService.class);
+        SystemMaintenance settings = new SystemMaintenance();
+        settings.setMaintenanceId(1);
+        settings.setMaintenanceActive(false);
+        settings.setMaintenanceMessage(SystemMaintenanceService.DEFAULT_MESSAGE);
+        when(maintenanceService.getSettings()).thenReturn(settings);
+        mockMvc = standaloneSetup(new AdminController(
+                officerAccountService,
+                adminAccountService,
+                maintenanceService
+        )).build();
     }
 
     @Test
@@ -111,6 +130,32 @@ class AdminControllerSessionTests {
                 .andExpect(flash().attribute("officerActionMessage", "Officer account disabled successfully."));
 
         verify(officerAccountService).toggleOfficerStatus(90);
+    }
+
+    @Test
+    void adminPasswordIsRequiredToEnableMaintenanceMode() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+        session.setAttribute("loggedInAdminEmail", "admin@gov.lk");
+
+        UserAccount admin = new UserAccount();
+        admin.setUserId(50);
+        when(adminAccountService.authenticateAdmin("admin@gov.lk", "admin12345"))
+                .thenReturn(Optional.of(admin));
+
+        mockMvc.perform(post("/officer/admin/maintenance")
+                        .session(session)
+                        .param("enable", "true")
+                        .param("message", "Scheduled maintenance")
+                        .param("password", "admin12345"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=maintenance"))
+                .andExpect(flash().attribute(
+                        "maintenanceMessage",
+                        "Maintenance mode activated. All non-admin operations are paused."
+                ));
+
+        verify(maintenanceService).updateMaintenance(true, "Scheduled maintenance");
     }
 
     @Test

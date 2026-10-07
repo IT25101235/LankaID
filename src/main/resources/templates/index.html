@@ -81,6 +81,17 @@
   </div>
 </header>
 
+<section th:if="${maintenanceActive}" class="bg-amber-50 border-b border-amber-300" role="alert">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-4 flex items-start gap-3">
+    <span class="material-symbols-outlined text-amber-700">engineering</span>
+    <div>
+      <p class="font-bold text-amber-900">LankaID is under maintenance</p>
+      <p class="text-sm text-amber-800 mt-1" th:text="${maintenanceWarning}">Identity services are temporarily unavailable.</p>
+      <p class="text-xs text-amber-700 mt-1">Citizen, officer and walk-in QR operations are currently paused.</p>
+    </div>
+  </div>
+</section>
+
 <main class="flex-grow">
 
 <!-- Hero -->

@@ -5,7 +5,9 @@ import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -21,9 +24,17 @@ import java.util.List;
 public class AdminController {
 
     private final OfficerAccountService officerAccountService;
+    private final AdminAccountService adminAccountService;
+    private final SystemMaintenanceService maintenanceService;
 
-    public AdminController(OfficerAccountService officerAccountService) {
+    public AdminController(
+            OfficerAccountService officerAccountService,
+            AdminAccountService adminAccountService,
+            SystemMaintenanceService maintenanceService
+    ) {
         this.officerAccountService = officerAccountService;
+        this.adminAccountService = adminAccountService;
+        this.maintenanceService = maintenanceService;
     }
 
     @GetMapping({"/officer/admin", "/officer/admin/officers"})
@@ -154,6 +165,40 @@ public class AdminController {
         return "redirect:/officer/admin?section=notifications";
     }
 
+    @PostMapping("/officer/admin/maintenance")
+    public String updateMaintenanceMode(
+            @RequestParam boolean enable,
+            @RequestParam(required = false) String message,
+            @RequestParam String password,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+
+        String adminEmail = String.valueOf(session.getAttribute("loggedInAdminEmail"));
+        if (password.isBlank()
+                || adminAccountService.authenticateAdmin(adminEmail, password).isEmpty()) {
+            redirectAttributes.addFlashAttribute(
+                    "maintenanceError", "The administrator password is incorrect.");
+            return "redirect:/officer/admin?section=maintenance";
+        }
+
+        try {
+            maintenanceService.updateMaintenance(enable, message);
+            redirectAttributes.addFlashAttribute(
+                    "maintenanceMessage",
+                    enable
+                            ? "Maintenance mode activated. All non-admin operations are paused."
+                            : "Maintenance mode ended. All system operations are available again."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("maintenanceError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=maintenance";
+    }
+
     @PostMapping("/officer/admin/logout")
     public String adminLogout(HttpSession session, RedirectAttributes redirectAttributes) {
         session.invalidate();
@@ -169,6 +214,7 @@ public class AdminController {
         model.addAttribute("passportOfficerCount", countRole(officers, OfficerAccountService.PASSPORT_OFFICER));
         model.addAttribute("csrCount", countRole(officers, OfficerAccountService.CSR));
         model.addAttribute("directorCount", countRole(officers, OfficerAccountService.DIRECTOR));
+        model.addAttribute("maintenanceSettings", maintenanceService.getSettings());
     }
 
     private long countRole(List<OfficerDetailsDto> officers, String roleCode) {

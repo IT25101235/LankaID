@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.CitizenRegistrationDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.LoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.OfficerLoginRequestDto;
@@ -28,24 +29,29 @@ public class UserController {
     private final UserAccountService userAccountService;
     private final AdminAccountService adminAccountService;
     private final OfficerAccountService officerAccountService;
+    private final SystemMaintenanceService maintenanceService;
 
     public UserController(
             UserAccountService userAccountService,
             AdminAccountService adminAccountService,
-            OfficerAccountService officerAccountService) {
+            OfficerAccountService officerAccountService,
+            SystemMaintenanceService maintenanceService) {
         this.userAccountService = userAccountService;
         this.adminAccountService = adminAccountService;
         this.officerAccountService = officerAccountService;
+        this.maintenanceService = maintenanceService;
     }
 
     @GetMapping("/")
-    public String index() {
+    public String index(Model model) {
+        addMaintenanceStatus(model);
         return "index";
     }
 
     @GetMapping("/login")
     public String loginPage(Model model) {
         addLoginForms(model);
+        addMaintenanceStatus(model);
         return "login_portal";
     }
 
@@ -58,6 +64,17 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
             model.addAttribute("activeTab", "citizen");
+            return "login_portal";
+        }
+
+        if (maintenanceService.isMaintenanceActive()) {
+            bindingResult.reject(
+                    "maintenance.active",
+                    "The system is under maintenance. Only the system administrator can sign in."
+            );
+            model.addAttribute("officerLoginRequest", new OfficerLoginRequestDto());
+            model.addAttribute("activeTab", "citizen");
+            addMaintenanceStatus(model);
             return "login_portal";
         }
 
@@ -101,6 +118,18 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("loginRequest", new LoginRequestDto());
             model.addAttribute("activeTab", "officer");
+            return "login_portal";
+        }
+
+        if (maintenanceService.isMaintenanceActive()
+                && !"admin".equals(officerLoginRequest.getRole())) {
+            bindingResult.reject(
+                    "maintenance.active",
+                    "The system is under maintenance. Only the system administrator can sign in."
+            );
+            model.addAttribute("loginRequest", new LoginRequestDto());
+            model.addAttribute("activeTab", "officer");
+            addMaintenanceStatus(model);
             return "login_portal";
         }
 
@@ -260,6 +289,12 @@ public class UserController {
         if (!model.containsAttribute("activeTab")) {
             model.addAttribute("activeTab", "citizen");
         }
+    }
+
+    private void addMaintenanceStatus(Model model) {
+        var settings = maintenanceService.getSettings();
+        model.addAttribute("maintenanceActive", settings.isMaintenanceActive());
+        model.addAttribute("maintenanceWarning", settings.getMaintenanceMessage());
     }
 
 }
