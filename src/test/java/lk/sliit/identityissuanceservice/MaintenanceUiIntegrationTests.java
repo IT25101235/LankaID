@@ -48,5 +48,10 @@ class MaintenanceUiIntegrationTests {
                         .sessionAttr("loggedInAdminEmail", "admin@gov.lk"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Maintenance Mode")));
+
+        mockMvc.perform(get("/js/portal-shell.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/officer/admin?section=maintenance")))
+                .andExpect(content().string(containsString("Maintenance mode")));
     }
 }
