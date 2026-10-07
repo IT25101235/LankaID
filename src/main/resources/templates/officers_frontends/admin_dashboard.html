@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-officer min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 
@@ -626,10 +626,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.admin-notification-form').forEach(updateNotificationAudience);
 });
 </script>
-<script src="/js/portal-shell.js"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 <script src="/User_Mgmt/password-rules.js"></script>
 <script src="/Admin_Mgmt/officer-form.js"></script>
 <script src="/js/form-errors.js"></script>
-<script src="/js/password-visibility.js"></script>
+<script src="/js/password-visibility.js?v=20261007-ui"></script>
 </body>
 </html>
