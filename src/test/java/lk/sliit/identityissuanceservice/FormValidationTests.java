@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.YearMonth;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,6 +90,16 @@ class FormValidationTests {
         assertThrows(IllegalArgumentException.class, () -> CitizenProfileMapper.validateConditionalFields(form));
         form.setPostalPostalCode("00100");
         assertDoesNotThrow(() -> CitizenProfileMapper.validateConditionalFields(form));
+    }
+
+    @Test
+    void nicApplicationRequiresTheApplicantToBeAtLeastFifteen() {
+        NewNicApplicationForm form = new NewNicApplicationForm();
+        form.setDateOfBirth(LocalDate.now().minusYears(15).plusDays(1));
+        assertFalse(validator.validateProperty(form, "oldEnoughForNic").isEmpty());
+
+        form.setDateOfBirth(LocalDate.now().minusYears(15));
+        assertTrue(validator.validateProperty(form, "oldEnoughForNic").isEmpty());
     }
 
     @Test
