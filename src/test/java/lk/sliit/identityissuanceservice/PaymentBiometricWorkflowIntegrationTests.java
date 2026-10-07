@@ -1,5 +1,6 @@
 package lk.sliit.identityissuanceservice;
 
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ApplicationFeeSettingsService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.StaffAccount;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Repository.StaffAccountRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
@@ -20,6 +21,7 @@ import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Deliver
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Repository.UserNotificationRepository;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -70,6 +72,40 @@ class PaymentBiometricWorkflowIntegrationTests {
     @Autowired CentreRepository centreRepository;
     @Autowired BiometricAppointmentSlotRepository biometricSlotRepository;
     @Autowired BiometricScheduleService biometricScheduleService;
+    @Autowired ApplicationFeeSettingsService feeSettingsService;
+    @Autowired PaymentService paymentService;
+
+    @Test
+    void configuredApplicationFeeIsUsedByThePaymentSummary() {
+        feeSettingsService.updateFees("2750.50", "12500.00");
+        String unique = UUID.randomUUID().toString().substring(0, 8);
+        UserAccount user = createUser("configured-fee-" + unique + "@example.com", "+94710000002");
+
+        CitizenAccount citizen = new CitizenAccount(user.getUserId());
+        citizen.setGivenName("Fee");
+        citizen.setFamilyName("Test");
+        citizen.setPermanentHouseNo("10");
+        citizen.setPermanentStreet("Main Street");
+        citizen.setPermanentCity("Colombo");
+        citizen.setPermanentPostalCode("00100");
+        citizenRepository.saveAndFlush(citizen);
+
+        CitizenApplication application = new CitizenApplication();
+        application.setApplicationNo("LK-NIC-FEE-" + unique);
+        application.setCitizenId(user.getUserId());
+        application.setServiceType("NIC");
+        application.setApplicationKind("NEW");
+        application.setCurrentStatus("APPROVED");
+        application.setDeclarationAccepted("Y");
+        application = applicationRepository.saveAndFlush(application);
+
+        assertEquals(
+                0,
+                new BigDecimal("2750.50").compareTo(
+                        paymentService.getPaymentSummary(
+                                user.getUserId(), application.getApplicationId()).amount())
+        );
+    }
 
     @Test
     void nicAndPassportCompletePaymentAppointmentQrAndBiometricCollection() throws Exception {
