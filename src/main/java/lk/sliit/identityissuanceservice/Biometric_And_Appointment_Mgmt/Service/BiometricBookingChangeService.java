@@ -4,7 +4,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.Booki
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.*;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,18 +16,18 @@ public class BiometricBookingChangeService {
     private final CitizenApplicationRepository applications;
     private final BiometricScheduleService schedules;
     private final PaymentService payments;
-    private final NotificationService notifications;
+    private final NotificationPublisher notificationPublisher;
 
     public BiometricBookingChangeService(AppointmentRepository appointments,
             AppointmentCheckInRepository checkIns, CitizenApplicationRepository applications,
             BiometricScheduleService schedules,
-            PaymentService payments, NotificationService notifications) {
+            PaymentService payments, NotificationPublisher notificationPublisher) {
         this.appointments = appointments;
         this.checkIns = checkIns;
         this.applications = applications;
         this.schedules = schedules;
         this.payments = payments;
-        this.notifications = notifications;
+        this.notificationPublisher = notificationPublisher;
     }
 
     @Transactional
@@ -40,7 +40,7 @@ public class BiometricBookingChangeService {
         var application = applications.findById(appointment.getApplicationId()).orElseThrow();
         application.setCurrentStatus("APPROVED");
         applications.save(application);
-        notifications.sendToCitizen(citizenId, null, "APPOINTMENT_CANCELLED",
+        notificationPublisher.sendToCitizen(citizenId, null, "APPOINTMENT_CANCELLED",
                 "Booking " + appointment.getReferenceNo() + " was cancelled and its place released. "
                 + "Your original payment is retained. Book another available slot without paying again to continue your application.");
         return appointment;
@@ -65,7 +65,7 @@ public class BiometricBookingChangeService {
         appointments.save(appointment);
         application.setCurrentStatus("APPOINTMENT_BOOKED");
         applications.save(application);
-        notifications.sendToCitizen(citizenId, null, "APPOINTMENT_CONFIRMED",
+        notificationPublisher.sendToCitizen(citizenId, null, "APPOINTMENT_CONFIRMED",
                 "Booking " + appointment.getReferenceNo() + " is confirmed for " + newTime
                         + ". Your original payment was retained; no additional payment was required.");
         return appointment;

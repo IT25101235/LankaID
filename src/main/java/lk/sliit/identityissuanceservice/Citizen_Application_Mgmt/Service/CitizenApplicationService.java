@@ -17,7 +17,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Citi
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -65,7 +65,7 @@ public class CitizenApplicationService {
     private final NicApplicationRepository nicRepository;
     private final PassportApplicationRepository passportRepository;
     private final ApplicationDocumentRepository documentRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final Path uploadRoot;
 
     public CitizenApplicationService(
@@ -76,7 +76,7 @@ public class CitizenApplicationService {
             NicApplicationRepository nicRepository,
             PassportApplicationRepository passportRepository,
             ApplicationDocumentRepository documentRepository,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             @Value("${app.upload.directory:uploads}") String uploadDirectory) {
         this.userRepository = userRepository;
         this.citizenRepository = citizenRepository;
@@ -85,7 +85,7 @@ public class CitizenApplicationService {
         this.nicRepository = nicRepository;
         this.passportRepository = passportRepository;
         this.documentRepository = documentRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.uploadRoot = Path.of(uploadDirectory).toAbsolutePath().normalize();
     }
 
@@ -563,7 +563,7 @@ public class CitizenApplicationService {
 
     private void sendSubmissionNotification(CitizenApplication application) {
         boolean resubmitted = "RESUBMITTED".equals(application.getCurrentStatus());
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 application.getCitizenId(),
                 null,
                 resubmitted ? "APPLICATION_RESUBMITTED" : "APPLICATION_SUBMITTED",

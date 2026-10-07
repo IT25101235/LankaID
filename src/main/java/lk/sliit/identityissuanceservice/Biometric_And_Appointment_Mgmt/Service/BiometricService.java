@@ -5,7 +5,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Bio
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.BiometricCollectionRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +18,20 @@ public class BiometricService {
     private final AppointmentRepository appointmentRepository;
     private final BiometricCollectionRepository biometricRepository;
     private final CitizenApplicationRepository applicationRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
 
     public BiometricService(
             AppointmentService appointmentService,
             AppointmentRepository appointmentRepository,
             BiometricCollectionRepository biometricRepository,
             CitizenApplicationRepository applicationRepository,
-            NotificationService notificationService
+            NotificationPublisher notificationPublisher
     ) {
         this.appointmentService = appointmentService;
         this.appointmentRepository = appointmentRepository;
         this.biometricRepository = biometricRepository;
         this.applicationRepository = applicationRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
     }
 
     @Transactional
@@ -57,7 +57,7 @@ public class BiometricService {
         details.application().setCurrentStatus("BIOMETRIC_COLLECTED");
         applicationRepository.save(details.application());
 
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 details.application().getCitizenId(),
                 staffId,
                 "BIOMETRIC_COMPLETED",

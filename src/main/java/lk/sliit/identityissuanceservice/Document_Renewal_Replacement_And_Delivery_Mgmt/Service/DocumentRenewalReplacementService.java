@@ -14,7 +14,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Pass
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.PassportRenewalReplacementForm;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +60,7 @@ public class DocumentRenewalReplacementService {
     private final NicApplicationRepository nicRepository;
     private final PassportApplicationRepository passportRepository;
     private final ApplicationDocumentRepository documentRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final Path uploadRoot;
 
     public DocumentRenewalReplacementService(
@@ -70,7 +70,7 @@ public class DocumentRenewalReplacementService {
             NicApplicationRepository nicRepository,
             PassportApplicationRepository passportRepository,
             ApplicationDocumentRepository documentRepository,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             @Value("${app.upload.directory:uploads}") String uploadDirectory) {
         this.eligibilityService = eligibilityService;
         this.citizenRepository = citizenRepository;
@@ -78,7 +78,7 @@ public class DocumentRenewalReplacementService {
         this.nicRepository = nicRepository;
         this.passportRepository = passportRepository;
         this.documentRepository = documentRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.uploadRoot = Path.of(uploadDirectory).toAbsolutePath().normalize();
     }
 
@@ -370,7 +370,7 @@ public class DocumentRenewalReplacementService {
         application.setSubmittedAt(LocalDateTime.now());
         application.setDeclarationAccepted("Y");
         application = applicationRepository.save(application);
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 application.getCitizenId(),
                 null,
                 resubmission ? "APPLICATION_RESUBMITTED" : "APPLICATION_SUBMITTED",

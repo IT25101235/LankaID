@@ -8,7 +8,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.BiometricAppointmentSlotRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,20 +28,20 @@ public class BiometricScheduleService {
     private final AppointmentRepository appointments;
     private final CentreRepository centres;
     private final CitizenApplicationRepository applications;
-    private final NotificationService notifications;
+    private final NotificationPublisher notificationPublisher;
 
     public BiometricScheduleService(
             BiometricAppointmentSlotRepository slots,
             AppointmentRepository appointments,
             CentreRepository centres,
             CitizenApplicationRepository applications,
-            NotificationService notifications
+            NotificationPublisher notificationPublisher
     ) {
         this.slots = slots;
         this.appointments = appointments;
         this.centres = centres;
         this.applications = applications;
-        this.notifications = notifications;
+        this.notificationPublisher = notificationPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -225,7 +225,7 @@ public class BiometricScheduleService {
                 application.setCurrentStatus("APPROVED");
                 applications.save(application);
             });
-            notifications.sendToCitizen(
+            notificationPublisher.sendToCitizen(
                     appointment.getCitizenId(),
                     null,
                     "APPOINTMENT_CANCELLED",

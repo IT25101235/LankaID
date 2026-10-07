@@ -12,7 +12,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -36,7 +36,7 @@ public class AppointmentService {
     private final CitizenApplicationRepository applicationRepository;
     private final CitizenAccountRepository citizenRepository;
     private final PaymentService paymentService;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final BiometricScheduleService scheduleService;
 
     public AppointmentService(
@@ -47,7 +47,7 @@ public class AppointmentService {
             CitizenApplicationRepository applicationRepository,
             CitizenAccountRepository citizenRepository,
             PaymentService paymentService,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             BiometricScheduleService scheduleService
     ) {
         this.appointmentRepository = appointmentRepository;
@@ -57,7 +57,7 @@ public class AppointmentService {
         this.applicationRepository = applicationRepository;
         this.citizenRepository = citizenRepository;
         this.paymentService = paymentService;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.scheduleService = scheduleService;
     }
 
@@ -117,7 +117,7 @@ public class AppointmentService {
         application.setCurrentStatus("APPOINTMENT_BOOKED");
         applicationRepository.save(application);
 
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
                 "APPOINTMENT_CONFIRMED",
@@ -207,7 +207,7 @@ public class AppointmentService {
 
         appointment.setAppointmentStatus("CHECKED_IN");
         appointmentRepository.save(appointment);
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 appointment.getCitizenId(),
                 staffId,
                 "APPOINTMENT_CHECKED_IN",

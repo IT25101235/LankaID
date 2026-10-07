@@ -8,7 +8,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.PaymentSummary;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
@@ -35,7 +35,7 @@ public class PaymentService {
     private final CentreRepository centreRepository;
     private final PaymentRepository paymentRepository;
     private final UserAccountRepository userRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final DocumentDeliveryService deliveryService;
 
     public PaymentService(
@@ -44,7 +44,7 @@ public class PaymentService {
             CentreRepository centreRepository,
             PaymentRepository paymentRepository,
             UserAccountRepository userRepository,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             DocumentDeliveryService deliveryService
     ) {
         this.applicationRepository = applicationRepository;
@@ -52,7 +52,7 @@ public class PaymentService {
         this.centreRepository = centreRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.deliveryService = deliveryService;
     }
 
@@ -143,7 +143,7 @@ public class PaymentService {
             CitizenApplication application,
             BigDecimal deliveryFee
     ) {
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
                 "PAYMENT_CONFIRMED",
@@ -159,7 +159,7 @@ public class PaymentService {
             Payment payment,
             boolean deliveryOnly
     ) {
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
                 "PAYMENT_CONFIRMED",

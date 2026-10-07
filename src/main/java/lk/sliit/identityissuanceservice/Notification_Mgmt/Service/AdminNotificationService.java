@@ -6,6 +6,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Citi
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.AdminNotificationRequest;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.AdminRecipient;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.EmailDispatchResult;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -33,7 +34,7 @@ public class AdminNotificationService {
     private final StaffAccountRepository staffAccountRepository;
     private final UserAccountRepository userAccountRepository;
     private final CitizenApplicationRepository citizenApplicationRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final OfficialNotificationEmailService emailService;
 
     public AdminNotificationService(
@@ -41,14 +42,14 @@ public class AdminNotificationService {
             StaffAccountRepository staffAccountRepository,
             UserAccountRepository userAccountRepository,
             CitizenApplicationRepository citizenApplicationRepository,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             OfficialNotificationEmailService emailService
     ) {
         this.citizenAccountRepository = citizenAccountRepository;
         this.staffAccountRepository = staffAccountRepository;
         this.userAccountRepository = userAccountRepository;
         this.citizenApplicationRepository = citizenApplicationRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.emailService = emailService;
     }
 
@@ -57,7 +58,7 @@ public class AdminNotificationService {
         List<AdminRecipient> recipients = resolveRecipients(request, false);
         String type = "ADMIN_" + normalizedCategory(request.getCategory());
         String message = request.getTitle().trim() + "\n\n" + request.getMessage().trim();
-        return notificationService.sendToUsers(
+        return notificationPublisher.sendToUsers(
                 recipients.stream().map(AdminRecipient::userId).toList(),
                 administratorId,
                 type,
