@@ -13,13 +13,13 @@
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'password-visibility-toggle';
-    toggle.textContent = 'Show';
+    toggle.innerHTML = '<span class="material-symbols-outlined">visibility</span>';
     toggle.setAttribute('aria-controls', input.id);
     toggle.setAttribute('aria-label', 'Show password');
     toggle.addEventListener('click', () => {
       const showing = input.type === 'text';
       input.type = showing ? 'password' : 'text';
-      toggle.textContent = showing ? 'Show' : 'Hide';
+      toggle.querySelector('span').textContent = showing ? 'visibility' : 'visibility_off';
       toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
     });
     shell.appendChild(toggle);

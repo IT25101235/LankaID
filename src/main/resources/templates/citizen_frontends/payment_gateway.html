@@ -6,7 +6,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-citizen min-h-screen text-slate-800">
 <header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
@@ -20,8 +20,6 @@
 
     <div class="grid lg:grid-cols-[1fr_330px] gap-5 items-start">
       <section class="bg-white border rounded-2xl shadow-sm p-5 sm:p-6">
-        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3"><span class="material-symbols-outlined text-amber-700">science</span><div><p class="font-bold text-amber-900 text-sm">Simulated government payment</p><p class="text-xs text-amber-800 mt-1">No real card is charged and card details are not saved. This records a successful project payment in SQL Server.</p></div></div>
-
         <div th:if="${paymentSummary.paid() and paymentSummary.deliverySelected()}" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
           <p class="font-bold text-emerald-800 flex items-center gap-2"><span class="material-symbols-outlined">check_circle</span>Payment and delivery confirmed</p>
           <p class="text-sm text-emerald-700 mt-2">Transaction: <span class="font-mono" th:text="${paymentSummary.payment.transactionReference}">PAY-REF</span></p>
@@ -134,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script src="/Payment_Mgmt/payment-form.js"></script>
 <script src="/js/form-errors.js"></script>
-<script src="/js/portal-shell.js?v=20260918-navbar"></script>
-<script src="/js/password-visibility.js"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
+<script src="/js/password-visibility.js?v=20261007-ui"></script>
 </body>
 </html>

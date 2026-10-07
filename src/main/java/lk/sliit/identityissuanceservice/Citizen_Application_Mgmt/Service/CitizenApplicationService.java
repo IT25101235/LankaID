@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
@@ -197,6 +198,7 @@ public class CitizenApplicationService {
     @Transactional
     public CitizenApplication createNewNicApplication(Integer citizenId, NewNicApplicationForm form) {
         checkNewEligibility(getEligibility(citizenId), NIC);
+        validateNicAge(form.getDateOfBirth());
         CitizenProfileMapper.validateConditionalFields(form);
         checkForActiveApplication(citizenId, NIC);
 
@@ -215,9 +217,10 @@ public class CitizenApplicationService {
     public CitizenApplication createNewPassportApplication(
             Integer citizenId,
             NewPassportApplicationForm form) {
-        checkNewEligibility(getEligibility(citizenId), PASSPORT);
+        CitizenEligibilityDto eligibility = getEligibility(citizenId);
+        checkNewEligibility(eligibility, PASSPORT);
         CitizenProfileMapper.validateConditionalFields(form);
-        validatePassportProof(form.getNicProofNo(), form.getParentNicNo());
+        validatePassportProof(eligibility, form.getNicProofNo(), form.getParentNicNo());
         checkForActiveApplication(citizenId, PASSPORT);
 
         CitizenAccount citizen = findCitizen(citizenId);
@@ -245,6 +248,7 @@ public class CitizenApplicationService {
         if (!NIC.equals(application.getServiceType())) {
             throw new IllegalArgumentException("This is not a new NIC application.");
         }
+        validateNicAge(form.getDateOfBirth());
         CitizenProfileMapper.validateConditionalFields(form);
         CitizenAccount citizen = findCitizen(citizenId);
         CitizenProfileMapper.updateCitizen(citizen, form);
@@ -263,7 +267,7 @@ public class CitizenApplicationService {
             throw new IllegalArgumentException("This is not a new passport application.");
         }
         CitizenProfileMapper.validateConditionalFields(form);
-        validatePassportProof(form.getNicProofNo(), form.getParentNicNo());
+        validatePassportProof(getEligibility(citizenId), form.getNicProofNo(), form.getParentNicNo());
 
         CitizenAccount citizen = findCitizen(citizenId);
         CitizenProfileMapper.updateCitizen(citizen, form);
@@ -364,7 +368,18 @@ public class CitizenApplicationService {
         applicationRepository.findEditableForUpdate(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Only drafts or corrected applications can be submitted."));
         CitizenApplication application = getNewApplication(citizenId, applicationId);
-        checkNewEligibility(getEligibility(citizenId), application.getServiceType());
+        CitizenEligibilityDto eligibility = getEligibility(citizenId);
+        checkNewEligibility(eligibility, application.getServiceType());
+        if (NIC.equals(application.getServiceType())) {
+            CitizenAccount citizen = findCitizen(citizenId);
+            LocalDate dateOfBirth = citizen.getDateOfBirth() == null
+                    ? null : citizen.getDateOfBirth().toLocalDate();
+            validateNicAge(dateOfBirth);
+        } else {
+            PassportApplication passport = passportRepository.findById(applicationId)
+                    .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
+            validatePassportProof(eligibility, passport.getNicProofNo(), passport.getParentNicNo());
+        }
         submitWhenDocumentsComplete(application, requiredNewDocumentTypes(application));
         application = applicationRepository.save(application);
         sendSubmissionNotification(application);
@@ -442,10 +457,37 @@ public class CitizenApplicationService {
         }
     }
 
-    private void validatePassportProof(String nicProofNo, String parentNicNo) {
-        if (CitizenProfileMapper.blankToNull(nicProofNo) == null
-                && CitizenProfileMapper.blankToNull(parentNicNo) == null) {
+    private void validateNicAge(LocalDate dateOfBirth) {
+        if (dateOfBirth == null || dateOfBirth.isAfter(LocalDate.now().minusYears(15))) {
+            throw new IllegalArgumentException("You must be at least 15 years old to apply for an NIC.");
+        }
+    }
+
+    private void validatePassportProof(
+            CitizenEligibilityDto eligibility,
+            String nicProofNo,
+            String parentNicNo
+    ) {
+        String nic = CitizenProfileMapper.blankToNull(nicProofNo);
+        String parentNic = CitizenProfileMapper.blankToNull(parentNicNo);
+
+        if (eligibility.isHasNic()) {
+            if (parentNic != null) {
+                throw new IllegalArgumentException(
+                        "A parent NIC cannot be used because your account already has an NIC record."
+                );
+            }
+            if (nic == null || !nic.equalsIgnoreCase(eligibility.getNicNumber())) {
+                throw new IllegalArgumentException("Use the NIC number registered to your account.");
+            }
+            return;
+        }
+
+        if (nic == null && parentNic == null) {
             throw new IllegalArgumentException("Enter the citizen's NIC number or a parent's NIC number.");
+        }
+        if (nic != null && parentNic != null) {
+            throw new IllegalArgumentException("Enter either the citizen's NIC number or a parent's NIC number, not both.");
         }
     }
 

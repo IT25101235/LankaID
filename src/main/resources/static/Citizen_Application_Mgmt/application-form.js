@@ -42,4 +42,10 @@
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   form.elements.namedItem('dateOfBirth').max = localDate(yesterday);
+
+  if (form.action.includes('/citizen/applications/nic/')) {
+    const minimumNicAge = new Date(today);
+    minimumNicAge.setFullYear(today.getFullYear() - 15);
+    form.elements.namedItem('dateOfBirth').max = localDate(minimumNicAge);
+  }
 })();

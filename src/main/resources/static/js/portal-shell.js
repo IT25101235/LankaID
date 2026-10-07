@@ -50,7 +50,7 @@
           '<span>Signed in ' + escapeHtml(officerLoginTime) + '</span></p>' : '') + '</div>' +
       '<nav class="portal-nav">' + config.items.map(navItem).join('') + '</nav>' +
       '<div class="portal-sidebar-footer"><form action="/logout" method="post">' +
-        '<button class="portal-logout" type="submit"><span class="material-symbols-outlined">logout</span>Sign out</button>' +
+        '<button class="portal-logout" type="submit"><span class="material-symbols-outlined">logout</span><span class="portal-logout-label">Sign out</span></button>' +
       '</form></div>';
 
     const menuButton = document.createElement('button');
@@ -154,7 +154,7 @@
 
   function brandMarkup() {
     return '<span class="portal-brand-mark"><img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"></span>' +
-      '<span><span class="portal-brand-name">Lanka<span>ID</span></span>' +
+      '<span class="portal-brand-copy"><span class="portal-brand-name">Lanka<span>ID</span></span>' +
       '<span class="portal-brand-subtitle">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</span></span>';
   }
 
@@ -162,7 +162,7 @@
     const active = isActive(item);
     return '<a class="portal-nav-link' + (active ? ' active' : '') + '" href="' + item.href + '"' +
       (active ? ' aria-current="page"' : '') + '><span class="material-symbols-outlined">' +
-      item.icon + '</span><span>' + item.label + '</span></a>';
+      item.icon + '</span><span class="portal-nav-label">' + item.label + '</span></a>';
   }
 
   function citizenNavItem(item) {

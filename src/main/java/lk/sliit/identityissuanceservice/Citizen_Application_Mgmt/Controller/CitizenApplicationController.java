@@ -73,7 +73,7 @@ public class CitizenApplicationController {
 
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewNicForm(citizenId));
-            addNewFormData(model, "NIC");
+            addNewFormData(model, citizenId, "NIC");
             return "citizen_frontends/nic_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -103,7 +103,7 @@ public class CitizenApplicationController {
             }
         }
         if (bindingResult.hasErrors()) {
-            addNewFormData(model, "NIC");
+            addNewFormData(model, citizenId, "NIC");
             addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/nic_application_form";
         }
@@ -116,7 +116,7 @@ public class CitizenApplicationController {
                     + application.getApplicationId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
-            addNewFormData(model, "NIC");
+            addNewFormData(model, citizenId, "NIC");
             addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/nic_application_form";
         }
@@ -134,7 +134,7 @@ public class CitizenApplicationController {
 
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewNicDraftEdit(citizenId, applicationId));
-            addNewFormData(model, "NIC");
+            addNewFormData(model, citizenId, "NIC");
             addDraftEditFormData(model, applicationId);
             return "citizen_frontends/nic_application_form";
         } catch (IllegalArgumentException exception) {
@@ -155,7 +155,7 @@ public class CitizenApplicationController {
 
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewNicCorrection(citizenId, applicationId));
-            addNewFormData(model, "NIC");
+            addNewFormData(model, citizenId, "NIC");
             addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/nic_application_form";
         } catch (IllegalArgumentException exception) {
@@ -174,7 +174,7 @@ public class CitizenApplicationController {
 
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewPassportForm(citizenId));
-            addNewFormData(model, "Passport");
+            addNewFormData(model, citizenId, "Passport");
             return "citizen_frontends/passport_application_form";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());
@@ -204,7 +204,7 @@ public class CitizenApplicationController {
             }
         }
         if (bindingResult.hasErrors()) {
-            addNewFormData(model, "Passport");
+            addNewFormData(model, citizenId, "Passport");
             addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/passport_application_form";
         }
@@ -217,7 +217,7 @@ public class CitizenApplicationController {
                     + application.getApplicationId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("application.failed", exception.getMessage());
-            addNewFormData(model, "Passport");
+            addNewFormData(model, citizenId, "Passport");
             addEditFormData(model, citizenId, editingApplication);
             return "citizen_frontends/passport_application_form";
         }
@@ -238,7 +238,7 @@ public class CitizenApplicationController {
                     "applicationForm",
                     applicationService.prepareNewPassportDraftEdit(citizenId, applicationId)
             );
-            addNewFormData(model, "Passport");
+            addNewFormData(model, citizenId, "Passport");
             addDraftEditFormData(model, applicationId);
             return "citizen_frontends/passport_application_form";
         } catch (IllegalArgumentException exception) {
@@ -259,7 +259,7 @@ public class CitizenApplicationController {
 
         try {
             model.addAttribute("applicationForm", applicationService.prepareNewPassportCorrection(citizenId, applicationId));
-            addNewFormData(model, "Passport");
+            addNewFormData(model, citizenId, "Passport");
             addCorrectionFormData(model, citizenId, applicationId);
             return "citizen_frontends/passport_application_form";
         } catch (IllegalArgumentException exception) {
@@ -383,11 +383,15 @@ public class CitizenApplicationController {
         return "redirect:/citizen/dashboard";
     }
 
-    private void addNewFormData(Model model, String service) {
+    private void addNewFormData(Model model, Integer citizenId, String service) {
         model.addAttribute("formKind", "new");
         model.addAttribute("applicationKind", "NEW");
         model.addAttribute("pageTitle", "New " + service + " Application");
         model.addAttribute("existingDocumentNo", null);
+        if ("Passport".equals(service)) {
+            CitizenEligibilityDto eligibility = applicationService.getEligibility(citizenId);
+            model.addAttribute("existingNicNo", eligibility.getNicNumber());
+        }
     }
 
     private void addNewDocumentData(

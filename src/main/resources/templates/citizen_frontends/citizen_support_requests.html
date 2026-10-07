@@ -6,7 +6,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-citizen min-h-screen bg-slate-50 text-slate-800">
 <header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='support')}"></header>
@@ -62,6 +62,6 @@
     <a th:if="${hasNext}" th:href="@{/citizen/support(page=${currentPage + 1})}" class="rounded-xl bg-sky-600 text-white px-4 py-2.5 text-sm font-bold">Load next 15</a><span th:unless="${hasNext}"></span>
   </nav>
 </main>
-<script src="/js/portal-shell.js?v=20260918-navbar"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 </body>
 </html>

@@ -2,12 +2,15 @@ package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto;
 
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
 
 /** Form data used only when a citizen applies for their first passport. */
 public class NewPassportApplicationForm extends CitizenProfileForm {
 
+    @NotBlank(message = "Service level is required.")
     @Pattern(regexp = "NORMAL", message = "Select Normal Service.")
     private String serviceLevel = "NORMAL";
+    @NotBlank(message = "Travel document type is required.")
     @Pattern(regexp = "ALL_COUNTRIES", message = "Select the All Countries travel document.")
     private String travelDocumentType = "ALL_COUNTRIES";
 
