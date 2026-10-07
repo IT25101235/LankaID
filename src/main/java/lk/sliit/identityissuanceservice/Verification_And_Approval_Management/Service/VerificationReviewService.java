@@ -1,5 +1,6 @@
 package lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Service;
 
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ApplicationFeeSettingsService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.ApplicationDocument;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
@@ -42,6 +43,7 @@ public class VerificationReviewService {
     private final PassportApplicationRepository passportRepository;
     private final ApplicationReviewRepository reviewRepository;
     private final NotificationService notificationService;
+    private final ApplicationFeeSettingsService feeSettingsService;
     private final Path uploadRoot;
 
     public VerificationReviewService(
@@ -53,6 +55,7 @@ public class VerificationReviewService {
             PassportApplicationRepository passportRepository,
             ApplicationReviewRepository reviewRepository,
             NotificationService notificationService,
+            ApplicationFeeSettingsService feeSettingsService,
             @Value("${app.upload.directory:uploads}") String uploadDirectory
     ) {
         this.applicationRepository = applicationRepository;
@@ -63,6 +66,7 @@ public class VerificationReviewService {
         this.passportRepository = passportRepository;
         this.reviewRepository = reviewRepository;
         this.notificationService = notificationService;
+        this.feeSettingsService = feeSettingsService;
         this.uploadRoot = Path.of(uploadDirectory).toAbsolutePath().normalize();
     }
 
@@ -126,7 +130,8 @@ public class VerificationReviewService {
         application.setCurrentStatus("APPROVED");
         applicationRepository.save(application);
         saveReview(application, staffId, "APPROVED", null);
-        String fee = NIC.equals(serviceType) ? "2,000" : "10,000";
+        String fee = String.format(Locale.US, "%,.2f",
+                feeSettingsService.getFee(application.getServiceType()));
         notificationService.sendToCitizen(
                 application.getCitizenId(),
                 staffId,
