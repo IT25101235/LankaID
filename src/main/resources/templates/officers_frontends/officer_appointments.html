@@ -6,7 +6,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-3"><a th:href="${queueRoute}" class="text-sm text-slate-300">← Applications</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold"><span th:text="${documentType}">NIC</span> biometric appointments</p><p class="text-xs text-slate-400">Schedule settings and appointment history</p></div><a th:href="${biometricRoute}" class="gov-button-primary ml-auto px-4 py-2 text-xs">Open biometric collection</a></div></header>
@@ -21,6 +21,6 @@
 <div th:unless="${#lists.isEmpty(appointments)}" class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Date &amp; time</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Application</th><th class="p-4 text-left">Appointment reference</th><th class="p-4 text-left">Centre</th><th class="p-4 text-left">Status</th><th class="p-4"></th></tr></thead><tbody class="divide-y"><tr th:each="item : ${appointments}"><td class="p-4 font-semibold" th:text="${#temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Date</td><td class="p-4" th:text="${item.applicantName}">Citizen</td><td class="p-4 font-mono text-xs" th:text="${item.application.applicationNo}">Application</td><td class="p-4 font-mono text-xs font-bold text-sky-700" th:text="${item.appointment.referenceNo}">Reference</td><td class="p-4" th:text="${item.centre.centreName}">Centre</td><td class="p-4"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold" th:text="${#strings.replace(item.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</span></td><td class="p-4 text-right"><a th:href="${biometricRoute + '?reference=' + item.appointment.referenceNo}" class="bg-sky-600 text-white rounded-lg px-3 py-2 text-xs font-bold">Open</a></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="/js/portal-shell.js"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 </body>
 </html>
