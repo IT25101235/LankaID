@@ -288,6 +288,7 @@ class UiAndSchemaConsistencyTests {
         }
         assertTrue(journeyScript.contains("PAYMENT_PENDING"));
         assertTrue(journeyScript.contains("READY_FOR_COLLECTION"));
+        assertFalse(journeyScript.contains("PREPARING: { step: 5"));
         assertTrue(journeyScript.contains("requestAnimationFrame"));
         assertTrue(governmentTheme.contains("@media (max-width: 720px)"));
         assertTrue(governmentTheme.contains("@media (prefers-reduced-motion: reduce)"));
