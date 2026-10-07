@@ -211,6 +211,26 @@ class CitizenApplicationWorkflowIntegrationTests {
     }
 
     @Test
+    void passportFormHidesParentNicWhenCitizenHasALinkedNic() throws Exception {
+        UserAccount user = createCitizen(false);
+        GovernmentIdentityRecord record = new GovernmentIdentityRecord();
+        record.setNicNo("200012345678");
+        record.setRegisteredEmail(user.getEmail());
+        record.setRegisteredPhone(user.getPhone());
+        record.setIdentityStatus("ACTIVE");
+        record = governmentRepository.saveAndFlush(record);
+
+        CitizenAccount citizen = citizenRepository.findById(user.getUserId()).orElseThrow();
+        citizen.setGovernmentRecordId(record.getGovernmentRecordId());
+        citizenRepository.saveAndFlush(citizen);
+
+        mockMvc.perform(get("/citizen/applications/passport/new").session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("200012345678")))
+                .andExpect(content().string(not(containsString("Parent NIC number"))));
+    }
+
+    @Test
     void unsubmittedDraftCanBeDeletedAndCitizenCanStartAgain() throws Exception {
         UserAccount user = createCitizen(false);
         MockHttpSession session = citizenSession(user);

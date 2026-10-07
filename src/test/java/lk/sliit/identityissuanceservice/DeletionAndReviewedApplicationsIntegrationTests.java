@@ -236,7 +236,9 @@ class DeletionAndReviewedApplicationsIntegrationTests {
     }
     private CitizenApplication application(String service, String kind, String status, String name) {
         var user = user(); var citizen = new CitizenAccount(user.getUserId());
-        citizen.setGivenName(name); citizen.setFamilyName("Perera"); citizens.saveAndFlush(citizen);
+        citizen.setGivenName(name); citizen.setFamilyName("Perera");
+        citizen.setDateOfBirth(LocalDateTime.of(2000, 1, 1, 0, 0));
+        citizens.saveAndFlush(citizen);
         var app = new CitizenApplication(); app.setCitizenId(user.getUserId());
         app.setApplicationNo("LK-" + service + "-DEL-" + unique()); app.setServiceType(service);
         app.setApplicationKind(kind); app.setCurrentStatus(status); app.setDeclarationAccepted("Y");
