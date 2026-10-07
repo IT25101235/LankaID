@@ -1,12 +1,11 @@
 package lk.sliit.identityissuanceservice.User_Mgmt.Controller;
 
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
-import lk.sliit.identityissuanceservice.User_Mgmt.Dto.CitizenRegistrationDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.LoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.OfficerLoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
@@ -17,14 +16,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Objects;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class UserController {
+
+    private static final DateTimeFormatter OFFICER_LOGIN_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
     private final UserAccountService userAccountService;
     private final AdminAccountService adminAccountService;
@@ -43,8 +45,11 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(HttpSession session, Model model) {
         addMaintenanceStatus(model);
+        String dashboardPath = landingDashboardPath(session);
+        model.addAttribute("landingSignedIn", dashboardPath != null);
+        model.addAttribute("landingDashboardPath", dashboardPath == null ? "" : dashboardPath);
         return "index";
     }
 
@@ -93,6 +98,8 @@ public class UserController {
         UserAccount account = authenticatedAccount.get();
         session.setAttribute("loggedInUserId", account.getUserId());
         session.setAttribute("loggedInUserEmail", account.getEmail());
+        session.setAttribute("loggedInUserRole", "CITIZEN");
+        session.setAttribute("loggedInDashboardPath", "/citizen/dashboard");
 
         int sessionTimeout = loginRequest.isRememberMe()
                 ? 7 * 24 * 60 * 60
@@ -150,6 +157,12 @@ public class UserController {
             session.setAttribute("loggedInAdminId", admin.getUserId());
             session.setAttribute("loggedInAdminEmail", admin.getEmail());
             session.setAttribute("loggedInAdminRole", "SYSTEM_ADMIN");
+            session.setAttribute("loggedInOfficerEmail", admin.getEmail());
+            session.setAttribute("loggedInOfficerRole", "SYSTEM_ADMIN");
+            session.setAttribute("loggedInOfficerRoleLabel", "System Administrator");
+            session.setAttribute("loggedInOfficerEmployeeNo", "ADMIN");
+            session.setAttribute("loggedInOfficerLoginTime", currentOfficerLoginTime());
+            session.setAttribute("loggedInDashboardPath", "/officer/admin");
 
             int sessionTimeout = officerLoginRequest.isRememberMe()
                     ? 7 * 24 * 60 * 60
@@ -197,6 +210,8 @@ public class UserController {
         session.setAttribute("loggedInOfficerRole", officer.getRoleCode());
         session.setAttribute("loggedInOfficerRoleLabel", officer.getRoleLabel());
         session.setAttribute("loggedInOfficerEmployeeNo", officer.getEmployeeNo());
+        session.setAttribute("loggedInOfficerLoginTime", currentOfficerLoginTime());
+        session.setAttribute("loggedInDashboardPath", dashboardPath);
 
         int sessionTimeout = officerLoginRequest.isRememberMe()
                 ? 7 * 24 * 60 * 60
@@ -206,72 +221,6 @@ public class UserController {
         return "redirect:" + dashboardPath;
     }
 
-    @GetMapping("/register")
-    public String registrationPage(Model model) {
-        if (!model.containsAttribute("registrationRequest")) {
-            model.addAttribute("registrationRequest", new CitizenRegistrationDto());
-        }
-        return "citizen_frontends/citizen_register";
-    }
-
-    @PostMapping("/register")
-    public String registerCitizen(
-            @Valid @ModelAttribute("registrationRequest") CitizenRegistrationDto registrationRequest,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
-        if (!Objects.equals(registrationRequest.getPassword(), registrationRequest.getConfirmPassword())) {
-            bindingResult.rejectValue(
-                    "confirmPassword",
-                    "password.mismatch",
-                    "Passwords do not match."
-            );
-        }
-
-        if (bindingResult.hasErrors()) {
-            return "citizen_frontends/citizen_register";
-        }
-
-        try {
-            userAccountService.registerCitizen(
-                    registrationRequest.getEmail(),
-                    registrationRequest.getPhone(),
-                    registrationRequest.getPassword()
-            );
-        } catch (IllegalArgumentException exception) {
-            bindingResult.reject("registration.failed", exception.getMessage());
-            return "citizen_frontends/citizen_register";
-        }
-
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Registration successful. You can now sign in."
-        );
-        return "redirect:/login";
-    }
-
-    @GetMapping("/citizen/dashboard")
-    public String citizenDashboard(
-            @RequestParam(defaultValue = "new") String profile,
-            Model model,
-            HttpSession session) {
-        if (session.getAttribute("loggedInUserId") == null) {
-            return "redirect:/login";
-        }
-
-        model.addAttribute("loggedInUserEmail", session.getAttribute("loggedInUserEmail"));
-
-        /*
-         * Temporary UI data only. Later these two values will come from the
-         * citizen's database record. The query parameter lets us demonstrate
-         * every dashboard state before the database is connected.
-         */
-        boolean hasNic = profile.equals("existing") || profile.equals("nic-only");
-        boolean hasPassport = profile.equals("existing");
-        model.addAttribute("hasNic", hasNic);
-        model.addAttribute("hasPassport", hasPassport);
-        model.addAttribute("demoProfile", profile);
-        return "citizen_frontends/citizen_dashboard";
-    }
 
     @GetMapping("/dashboard/citizen")
     public String oldCitizenDashboardRoute() {
@@ -297,4 +246,32 @@ public class UserController {
         model.addAttribute("maintenanceWarning", settings.getMaintenanceMessage());
     }
 
+    private String currentOfficerLoginTime() {
+        return LocalDateTime.now().format(OFFICER_LOGIN_TIME_FORMAT);
+    }
+
+    private String landingDashboardPath(HttpSession session) {
+        if (session.getAttribute("loggedInUserId") != null) {
+            return "/citizen/dashboard";
+        }
+
+        Object savedDashboard = session.getAttribute("loggedInDashboardPath");
+        if (savedDashboard instanceof String path && !path.isBlank()) {
+            return path;
+        }
+        if (session.getAttribute("loggedInAdminId") != null) {
+            return "/officer/admin";
+        }
+
+        Object officerRole = session.getAttribute("loggedInOfficerRole");
+        if (officerRole == null) return null;
+        return switch (officerRole.toString()) {
+            case "SYSTEM_ADMIN" -> "/officer/admin";
+            case OfficerAccountService.DIRECTOR -> "/officer/director";
+            case OfficerAccountService.CSR -> "/officer/csr";
+            case OfficerAccountService.PASSPORT_OFFICER -> "/officer/passport/applications";
+            case OfficerAccountService.NIC_OFFICER -> "/officer/nic/applications";
+            default -> null;
+        };
+    }
 }

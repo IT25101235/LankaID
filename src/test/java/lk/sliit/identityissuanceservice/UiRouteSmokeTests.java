@@ -21,29 +21,15 @@ class UiRouteSmokeTests {
     void allUiPagesOpenSuccessfully() throws Exception {
         // Keep this list in sync with ROUTES.md when a new demonstration page is added.
         String[] routes = {
-                "/", "/login", "/register", "/chatbot",
-                "/citizen/dashboard?profile=new",
-                "/citizen/dashboard?profile=nic-only",
-                "/citizen/dashboard?profile=existing",
-                "/citizen/applications",
-                "/citizen/applications/nic/new",
-                "/citizen/applications/nic/renewal",
-                "/citizen/applications/nic/replacement",
-                "/citizen/applications/passport/new",
-                "/citizen/applications/passport/renewal",
-                "/citizen/applications/passport/replacement",
-                "/citizen/applications/nic/documents",
-                "/citizen/applications/passport/documents",
-                "/citizen/applications/nic/review",
-                "/citizen/applications/passport/review",
-                "/citizen/applications/nic/LK-NIC-2026-00097/correct",
-                "/citizen/applications/passport/LK-PASS-2026-00041/correct",
+                "/", "/login", "/register", "/forgot-password", "/walk-in", "/walk-in/recover",
                 "/citizen/payment",
                 "/citizen/notifications",
                 "/citizen/appointments/biometric",
                 "/citizen/appointments/walk-in",
                 "/citizen/support",
                 "/citizen/support/new",
+                "/citizen/support/contact-us",
+                "/citizen/support/complaint",
                 "/citizen/support/CMP-2026-0102",
                 "/officer/nic/applications",
                 "/officer/nic/applications/NIC-2023-8891",
@@ -56,11 +42,13 @@ class UiRouteSmokeTests {
                 "/officer/passport/appointments",
                 "/officer/passport/biometrics",
                 "/officer/csr",
+                "/officer/csr/support",
                 "/officer/csr/complaints/CMP-2026-0102",
                 "/officer/csr/walk-ins",
                 "/officer/csr/walk-ins/register",
                 "/officer/director",
                 "/officer/director/printing",
+                "/officer/notifications",
                 "/officer/admin",
                 "/officer/admin/officers",
                 "/officer/admin/citizens",
@@ -72,6 +60,7 @@ class UiRouteSmokeTests {
 
             if (route.startsWith("/citizen/")) {
                 request.sessionAttr("loggedInUserId", 1);
+                request.sessionAttr("loggedInUserRole", "CITIZEN");
             }
             if (route.startsWith("/officer/admin")) {
                 request.sessionAttr("loggedInAdminId", 1);
@@ -83,9 +72,15 @@ class UiRouteSmokeTests {
                 request.sessionAttr("loggedInOfficerRole", "CSR");
             } else if (route.startsWith("/officer/director")) {
                 request.sessionAttr("loggedInOfficerRole", "DIRECTOR");
+            } else if (route.equals("/officer/notifications")) {
+                request.sessionAttr("loggedInOfficerId", 1);
+                request.sessionAttr("loggedInOfficerRole", "CSR");
             }
 
-            if (route.equals("/officer/admin/citizens")
+            if (route.equals("/officer/nic/applications/NIC-2023-8891")
+                    || route.equals("/officer/passport/applications/PP-2023-8891")) {
+                mockMvc.perform(request).andExpect(status().is3xxRedirection());
+            } else if (route.equals("/officer/admin/citizens")
                     || route.equals("/officer/admin/notifications")) {
                 mockMvc.perform(request).andExpect(status().is3xxRedirection());
             } else {

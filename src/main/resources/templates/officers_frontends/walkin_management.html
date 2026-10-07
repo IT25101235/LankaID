@@ -1,29 +1,326 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Walk-In Management | LankaID CSR</title><script src="https://cdn.tailwindcss.com?plugins=forms"></script><link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/><link href="/css/officer-dashboard-theme.css" rel="stylesheet"/><style>body{font-family:'Public Sans',sans-serif}.tab.active{background:#0891b2;color:white}</style></head>
-<body class="min-h-screen bg-slate-100 text-slate-800">
-<header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="@{/officer/csr}" class="text-sm text-slate-300 hover:text-white flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>CSR dashboard</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold">Walk-In Appointment Management</p><p class="text-xs text-slate-400">Requests, arrivals and check-in</p></div><a th:href="@{/officer/csr/walk-ins/register}" class="ml-auto bg-cyan-600 hover:bg-cyan-700 rounded-lg px-4 py-2 text-xs font-bold">Register unscheduled visitor</a></div></header>
-<main class="max-w-7xl mx-auto p-5 sm:p-6">
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Pending requests</p><p id="pendingCount" class="text-2xl font-bold text-amber-700 mt-1">4</p></div><div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Today booked</p><p class="text-2xl font-bold mt-1">21</p></div><div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Checked in</p><p class="text-2xl font-bold text-cyan-700 mt-1">9</p></div><div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Completed</p><p class="text-2xl font-bold text-emerald-700 mt-1">7</p></div></div>
-  <div class="flex flex-wrap gap-2 mt-5 bg-white rounded-xl border p-1.5 w-fit"><button id="requestsTab" onclick="showTab('requests')" class="tab active px-4 py-2 rounded-lg text-xs font-bold">Pending requests</button><button id="scheduleTab" onclick="showTab('schedule')" class="tab px-4 py-2 rounded-lg text-xs font-bold text-slate-600">Today’s schedule</button><button id="checkinTab" onclick="showTab('checkin')" class="tab px-4 py-2 rounded-lg text-xs font-bold text-slate-600">QR / reference check-in</button></div>
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Walk-in Management | LankaID CSR</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<script src="/js/portal-shell.js?v=20260915"></script>
+<header class="bg-slate-950 text-white"><div class="max-w-[1500px] mx-auto min-h-16 px-4 sm:px-6 py-3 flex items-center gap-4"><a th:href="@{/officer/csr}" class="text-sm text-slate-300">← CSR Dashboard</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold">Walk-in Appointment Management</p><p class="text-xs text-cyan-400">Published slots, visitor queue and QR check-in</p></div><div class="ml-auto text-right"><p class="text-xs font-bold" th:text="${loggedInOfficerRoleLabel}">CSR</p><p class="text-[11px] text-slate-400" th:text="${loggedInOfficerEmployeeNo + ' · ' + loggedInOfficerEmail}">Officer</p></div></div></header>
+<main class="max-w-[1500px] mx-auto p-4 sm:p-6">
+  <div th:if="${walkInMessage}" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700" th:text="${walkInMessage}"></div>
+  <div th:if="${walkInError}" class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700" th:text="${walkInError}"></div>
 
-  <section id="requestsPanel" class="mt-4 bg-white border rounded-2xl shadow-sm overflow-hidden"><div class="p-5 border-b"><h1 class="font-bold">Citizen booking requests</h1><p class="text-xs text-slate-500 mt-1">Accept, reschedule, or decline requests for physical service.</p></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Service</th><th class="p-4 text-left">Requested slot</th><th class="p-4 text-left">Reference</th><th class="p-4 text-right">Action</th></tr></thead><tbody id="requestRows" class="divide-y">
-    <tr><td class="p-4 font-semibold">Nadeesha Kumari</td><td class="p-4">NIC · New assistance</td><td class="p-4">27 Aug · 9:00 AM</td><td class="p-4 font-mono text-xs">WALK-2026-00428</td><td class="p-4"><div class="flex justify-end gap-2"><button onclick="decideRequest(this,'Accepted')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Accept</button><button onclick="reschedule(this)" class="border px-3 py-1.5 rounded-lg text-xs font-semibold">Reschedule</button><button onclick="decideRequest(this,'Declined')" class="text-red-700 px-2 text-xs font-semibold">Decline</button></div></td></tr>
-    <tr><td class="p-4 font-semibold">Mohamed Rizwan</td><td class="p-4">Passport · Renewal assistance</td><td class="p-4">27 Aug · 11:00 AM</td><td class="p-4 font-mono text-xs">WALK-2026-00429</td><td class="p-4"><div class="flex justify-end gap-2"><button onclick="decideRequest(this,'Accepted')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Accept</button><button onclick="reschedule(this)" class="border px-3 py-1.5 rounded-lg text-xs font-semibold">Reschedule</button><button onclick="decideRequest(this,'Declined')" class="text-red-700 px-2 text-xs font-semibold">Decline</button></div></td></tr>
-  </tbody></table></div></section>
+      <details id="schedulePanel" class="mb-5 bg-white border rounded-2xl shadow-sm overflow-hidden" th:open="${param.scheduleOpen != null}">
+        <summary class="cursor-pointer p-5 font-bold flex items-center">
+          <span class="material-symbols-outlined text-cyan-700 mr-2">calendar_month</span>
+          Schedule and capacity settings
+          <span class="material-symbols-outlined ml-auto">expand_more</span>
+        </summary>
+        <div class="border-t p-5">
+          <p class="mb-4 text-sm text-slate-500">Publish dates, close days, or adjust half-hour capacity here. Close this section to return to visitor check-in and the queue.</p>
+          <div class="grid xl:grid-cols-2 gap-4">
+            <form th:action="@{/officer/csr/walk-ins/schedule/day}" method="post" class="rounded-xl bg-slate-50 border p-4">
+              <h3 class="text-sm font-bold">Publish or change a date range</h3>
+              <p class="text-xs text-slate-500 mt-1">Closing time is the end of the final half-hour period.</p>
+              <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+                <label class="text-xs font-bold">Centre
+                  <select name="centreId" required class="w-full mt-1 rounded-lg border-slate-300 text-sm">
+                    <option value="">Select</option>
+                    <option th:each="centre : ${centres}" th:value="${centre.centreId}" th:text="${centre.centreName}">Centre</option>
+                  </select>
+                </label>
+                <label class="text-xs font-bold">Start date
+                  <input type="date" name="startDate" required th:min="${minimumDate}" class="w-full mt-1 rounded-lg border-slate-300 text-sm"/>
+                </label>
+                <label class="text-xs font-bold">End date
+                  <input type="date" name="endDate" required th:min="${minimumDate}" class="w-full mt-1 rounded-lg border-slate-300 text-sm"/>
+                </label>
+                <label class="text-xs font-bold">Opening time
+                  <input type="time" name="openingTime" value="09:00" step="1800" required class="w-full mt-1 rounded-lg border-slate-300 text-sm"/>
+                </label>
+                <label class="text-xs font-bold">Closing time
+                  <input type="time" name="closingTime" value="16:30" step="1800" required class="w-full mt-1 rounded-lg border-slate-300 text-sm"/>
+                </label>
+                <label class="text-xs font-bold">Capacity per slot
+                  <input type="number" name="capacity" min="1" max="100" value="5" required class="w-full mt-1 rounded-lg border-slate-300 text-sm"/>
+                </label>
+              </div>
+              <button class="mt-3 bg-cyan-600 text-white rounded-lg px-4 py-2 text-xs font-bold">Publish 30-minute slots</button>
+            </form>
 
-  <section id="schedulePanel" class="hidden mt-4 bg-white border rounded-2xl shadow-sm overflow-hidden"><div class="p-5 border-b flex items-center"><div><h1 class="font-bold">Today’s physical visit schedule</h1><p class="text-xs text-slate-500 mt-1">Accepted bookings and unscheduled visitors.</p></div><input class="ml-auto rounded-lg border-slate-300 text-sm" placeholder="Search reference"/></div><div class="divide-y"><div class="p-4 flex flex-wrap items-center gap-4"><span class="w-16 font-bold">09:00</span><div class="flex-1"><p class="font-semibold text-sm">Nadeesha Kumari</p><p class="text-xs text-slate-500">NIC · New application assistance · WALK-2026-00428</p></div><span class="bg-amber-50 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">Expected</span><button onclick="openCheckin('WALK-2026-00428')" class="border rounded-lg px-3 py-2 text-xs font-bold">Check in</button></div><div class="p-4 flex flex-wrap items-center gap-4 bg-cyan-50"><span class="w-16 font-bold">09:30</span><div class="flex-1"><p class="font-semibold text-sm">Kamal Perera</p><p class="text-xs text-slate-500">Passport · Renewal assistance · WALK-2026-00420</p></div><span class="bg-cyan-100 text-cyan-700 px-2 py-1 rounded-full text-xs font-bold">Checked in</span><button class="bg-cyan-600 text-white rounded-lg px-3 py-2 text-xs font-bold">Complete visit</button></div></div></section>
+            <form th:action="@{/officer/csr/walk-ins/schedule/day/close}" method="post" class="rounded-xl bg-red-50 border border-red-200 p-4" onsubmit="return confirm('Close every published day in this range and cancel its active walk-in appointments?')">
+              <h3 class="text-sm font-bold text-red-800">Close a date range</h3>
+              <p class="text-xs text-red-700 mt-1">Use this for holidays or temporary centre closures.</p>
+              <div class="grid sm:grid-cols-3 gap-3 mt-3">
+                <label class="text-xs font-bold">Centre
+                  <select name="centreId" required class="w-full mt-1 rounded-lg border-red-200 text-sm">
+                    <option value="">Select</option>
+                    <option th:each="centre : ${centres}" th:value="${centre.centreId}" th:text="${centre.centreName}">Centre</option>
+                  </select>
+                </label>
+                <label class="text-xs font-bold">Start date
+                  <input type="date" name="startDate" required th:min="${minimumDate}" class="w-full mt-1 rounded-lg border-red-200 text-sm"/>
+                </label>
+                <label class="text-xs font-bold">End date
+                  <input type="date" name="endDate" required th:min="${minimumDate}" class="w-full mt-1 rounded-lg border-red-200 text-sm"/>
+                </label>
+              </div>
+              <button class="mt-3 border border-red-300 text-red-700 rounded-lg px-4 py-2 text-xs font-bold">Close published days</button>
+            </form>
+          </div>
 
-  <section id="checkinPanel" class="hidden mt-4 grid lg:grid-cols-[360px_1fr] gap-5"><div class="bg-white border rounded-2xl shadow-sm p-5"><h1 class="font-bold">Find walk-in appointment</h1><p class="text-xs text-slate-500 mt-1">Scan the citizen’s QR or type their reference.</p><div class="mt-4 rounded-2xl aspect-square max-w-[220px] mx-auto bg-slate-900 flex items-center justify-center"><span class="material-symbols-outlined text-7xl text-cyan-400">qr_code_scanner</span></div><button onclick="lookupWalkin('WALK-2026-00428')" class="w-full mt-3 bg-cyan-600 text-white rounded-xl py-2.5 text-sm font-bold">Simulate QR scan</button><div class="relative my-4"><hr/><span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-xs text-slate-400">or</span></div><input id="walkinRef" class="w-full rounded-xl border-slate-300 font-mono text-sm" placeholder="WALK-2026-00428"/><button onclick="lookupWalkin(document.getElementById('walkinRef').value)" class="w-full mt-2 border border-slate-300 rounded-xl py-2.5 text-sm font-bold">Find by reference</button></div>
-    <div id="walkinResult" class="bg-white border rounded-2xl shadow-sm p-6 opacity-50 pointer-events-none"><div class="flex justify-between gap-3"><div><p class="text-xs font-bold uppercase text-cyan-700">Appointment found</p><h2 class="text-xl font-bold mt-1">Nadeesha Kumari</h2><p id="walkinFoundRef" class="text-xs font-mono text-slate-500 mt-1">WALK-2026-00428</p></div><span id="walkinState" class="bg-amber-50 text-amber-700 rounded-full px-3 py-1 h-fit text-xs font-bold">Expected</span></div><div class="grid sm:grid-cols-2 gap-3 mt-5"><div class="bg-slate-50 rounded-xl p-4"><p class="text-xs text-slate-400">Service</p><p class="font-bold text-sm mt-1">NIC · New application assistance</p></div><div class="bg-slate-50 rounded-xl p-4"><p class="text-xs text-slate-400">Time</p><p class="font-bold text-sm mt-1">27 Aug · 09:00 AM</p></div></div><label class="flex items-start gap-2 text-xs mt-5"><input id="idVerified" type="checkbox" class="rounded mt-0.5"/>I checked the citizen’s appointment confirmation and available identity document.</label><button onclick="completeWalkinCheckin()" class="mt-4 bg-cyan-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Confirm check-in & issue token</button></div>
-  </section>
+          <form id="calendarFilterForm" method="get" th:action="@{/officer/csr/walk-ins}" class="mt-5 rounded-xl border bg-white p-4">
+            <input type="hidden" name="scheduleOpen" value="true"/>
+            <input type="hidden" name="walkInService" th:value="${walkInService}"/>
+            <div class="flex flex-wrap items-end gap-3">
+              <label class="text-xs font-bold min-w-52">Service centre
+                <select name="scheduleCentreId" class="w-full mt-1 rounded-lg border-slate-300 text-sm">
+                  <option value="">All centres</option>
+                  <option th:each="centre : ${centres}" th:value="${centre.centreId}" th:text="${centre.centreName}" th:selected="${centre.centreId == scheduleCentreId}">Centre</option>
+                </select>
+              </label>
+              <button type="button" onclick="moveCalendarMonth(-1)" class="rounded-lg border px-3 py-2.5 text-sm font-bold" aria-label="Previous month">←</button>
+              <label class="text-xs font-bold">Calendar month
+                <input id="scheduleMonth" type="month" name="scheduleMonth" th:value="${scheduleMonth}" class="block mt-1 rounded-lg border-slate-300 text-sm"/>
+              </label>
+              <button type="button" onclick="moveCalendarMonth(1)" class="rounded-lg border px-3 py-2.5 text-sm font-bold" aria-label="Next month">→</button>
+              <button class="rounded-lg bg-cyan-600 text-white px-4 py-2.5 text-xs font-bold">Show calendar</button>
+            </div>
+          </form>
+
+          <div class="mt-4 flex flex-wrap gap-4 text-xs font-semibold text-slate-600">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span>Open</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-500"></span>Closed</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span>Partly open</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-300"></span>Not published</span>
+          </div>
+
+          <div class="mt-3 overflow-x-auto">
+            <div class="min-w-[720px]">
+              <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold uppercase text-slate-400">
+                <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+              </div>
+              <div id="walkInCalendar" class="grid grid-cols-7 gap-2" th:attr="data-month=${scheduleMonth}"></div>
+            </div>
+          </div>
+
+          <div id="calendarSlotData" class="hidden">
+            <span th:each="slot : ${schedule}" class="calendar-slot-data"
+                  th:attr="data-date=${slot.slotDate},data-open=${slot.available},data-booked=${slot.bookedCount},data-capacity=${slot.capacity}"></span>
+          </div>
+
+          <section class="mt-5 rounded-xl border bg-slate-50 p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div><p class="text-xs font-bold uppercase text-cyan-700">Selected day</p><h3 id="selectedCalendarDate" class="font-bold mt-1">Select a date</h3></div>
+              <span id="selectedCalendarStatus" class="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold">Not published</span>
+            </div>
+            <p id="noCalendarSlots" class="mt-4 rounded-lg border border-dashed bg-white p-5 text-center text-sm text-slate-500">Select a calendar date to view its slots.</p>
+            <div id="calendarSlotCards" class="mt-4 grid md:grid-cols-2 gap-3">
+              <article th:each="slot : ${schedule}" class="calendar-slot-card hidden rounded-xl border bg-white p-4" th:attr="data-slot-date=${slot.slotDate}">
+                <div class="flex items-start justify-between gap-3">
+                  <div><p class="font-bold" th:text="${#temporals.format(slot.slotTime, 'hh:mm a')}">09:00 AM</p><p class="text-xs text-slate-500 mt-1" th:text="${slot.centreName}">Centre</p></div>
+                  <span class="rounded-full px-2.5 py-1 text-[11px] font-bold" th:classappend="${slot.available ? ' bg-emerald-100 text-emerald-700' : ' bg-red-100 text-red-700'}" th:text="${slot.available ? 'OPEN' : 'CLOSED'}">OPEN</span>
+                </div>
+                <p class="mt-3 text-xs text-slate-600" th:text="${slot.bookedCount + ' booked · ' + slot.remainingPlaces + ' places remaining'}">0 booked</p>
+                <form th:action="@{/officer/csr/walk-ins/schedule/slot}" method="post" class="mt-3 flex flex-wrap items-end gap-2">
+                  <input type="hidden" name="slotId" th:value="${slot.slotId}"/>
+                  <input type="hidden" name="scheduleCentreId" th:value="${scheduleCentreId}"/>
+                  <input type="hidden" name="scheduleMonth" th:value="${scheduleMonth}"/>
+                  <label class="text-xs font-bold">Capacity<input type="number" name="capacity" min="1" max="100" th:value="${slot.capacity}" class="block mt-1 w-20 rounded-lg border-slate-300 text-sm"/></label>
+                  <label class="mb-2 text-xs font-bold flex items-center gap-1"><input type="checkbox" name="available" value="true" th:checked="${slot.available}" class="rounded"/>Open</label>
+                  <button class="ml-auto rounded-lg bg-cyan-600 text-white px-3 py-2 text-xs font-bold">Save slot</button>
+                </form>
+                <form th:if="${slot.bookedCount == 0}" th:action="@{/officer/csr/walk-ins/schedule/slot/{id}/delete(id=${slot.slotId})}" method="post" class="mt-3" onsubmit="return confirm('Delete this unused slot from the published schedule? Slots with any booking history cannot be deleted.')">
+                  <input type="hidden" name="deleteToken" th:value="${deleteToken}"/>
+                  <input type="hidden" name="scheduleCentreId" th:value="${scheduleCentreId}"/>
+                  <input type="hidden" name="scheduleMonth" th:value="${scheduleMonth}"/>
+                  <button class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700">Delete unused slot</button>
+                </form>
+              </article>
+            </div>
+          </section>
+        </div>
+      </details>
+
+  <div class="space-y-5">
+    <section class="bg-white border rounded-2xl shadow-sm p-5 h-fit">
+      <h2 class="font-bold">Visitor check-in</h2><p class="text-xs text-slate-500 mt-1">Scan the real QR pass or enter its reference.</p>
+      <div class="walkin-checkin-content">
+      <div>
+      <div class="walkin-camera-frame mt-4 rounded-2xl bg-slate-950 overflow-hidden aspect-video relative flex items-center justify-center"><video id="walkInCamera" class="w-full h-full object-cover hidden" playsinline muted></video><canvas id="walkInCanvas" class="hidden"></canvas><span id="cameraIcon" class="material-symbols-outlined text-6xl text-slate-600">qr_code_scanner</span><div id="scanLine" class="scan-line hidden absolute left-6 right-6 h-0.5 bg-cyan-400 shadow-[0_0_12px_#22d3ee]"></div><div class="absolute inset-7 border-2 border-cyan-300/70 rounded-xl pointer-events-none"></div></div>
+      <button id="cameraButton" type="button" onclick="startWalkInScanner()" class="w-full mt-3 bg-cyan-600 text-white rounded-xl py-2.5 text-sm font-bold">Start webcam QR scanner</button><p id="cameraStatus" class="text-xs text-slate-500 mt-2 text-center">Camera permission is requested only while scanning.</p>
+      </div>
+      <div>
+      <form id="walkInCheckInForm" th:action="@{/officer/csr/walk-ins/check-in}" method="post" class="mt-5"><input id="checkInMethod" type="hidden" name="method" value="REFERENCE_NUMBER"/><label class="text-xs font-bold text-slate-600">Walk-in reference<input id="walkInReference" name="reference" required class="w-full mt-1.5 rounded-xl border-slate-300 font-mono uppercase" placeholder="WALK-2026-..."/></label><button class="w-full mt-3 border border-slate-300 rounded-xl py-2.5 text-sm font-bold">Check in manually</button></form>
+      <div th:if="${selectedWalkIn != null}" class="mt-5 rounded-xl bg-cyan-50 border border-cyan-200 p-4 text-sm"><p class="text-xs font-bold uppercase text-cyan-700">Appointment found</p><p class="font-bold mt-2" th:text="${selectedWalkIn.appointment.visitorName}">Visitor</p><p class="font-mono text-xs mt-1" th:text="${selectedWalkIn.appointment.referenceNo}">Reference</p><p class="text-xs text-slate-600 mt-2" th:text="${selectedWalkIn.centreName + ' · ' + #temporals.format(selectedWalkIn.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Appointment</p><p class="font-bold text-xs mt-2" th:text="${selectedWalkIn.appointment.appointmentStatus}">Status</p></div>
+      </div>
+      </div>
+    </section>
+
+    <section class="space-y-5">
+
+
+      <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-5 border-b flex flex-wrap items-end justify-between gap-4">
+          <div><h2 class="font-bold">Walk-in appointment queue</h2><p class="text-xs text-slate-500 mt-1"><b th:text="${totalWalkIns}">0</b> appointment(s) · 15 loaded per page</p></div>
+          <form method="get" th:action="@{/officer/csr/walk-ins}" class="flex items-end gap-2">
+            <input type="hidden" name="scheduleCentreId" th:value="${scheduleCentreId}"/>
+            <input type="hidden" name="scheduleMonth" th:value="${scheduleMonth}"/>
+            <label class="text-xs font-bold">Service
+              <select name="walkInService" class="block mt-1 rounded-lg border-slate-300 text-sm">
+                <option value="" th:selected="${#strings.isEmpty(walkInService)}">All NIC and passport</option>
+                <option value="NIC_APPLICATION_HELP" th:selected="${walkInService == 'NIC_APPLICATION_HELP'}">NIC</option>
+                <option value="PASSPORT_APPLICATION_HELP" th:selected="${walkInService == 'PASSPORT_APPLICATION_HELP'}">Passport</option>
+              </select>
+            </label>
+            <button class="rounded-lg bg-cyan-600 text-white px-4 py-2.5 text-xs font-bold">Filter</button>
+          </form>
+        </div>
+        <div th:if="${#lists.isEmpty(walkIns)}" class="p-10 text-center text-slate-500">No matching walk-in appointments yet.</div>
+        <div th:unless="${#lists.isEmpty(walkIns)}" class="overflow-x-auto">
+          <table class="w-full min-w-[900px] text-sm">
+            <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Reference</th><th class="p-4 text-left">Visitor</th><th class="p-4 text-left">Service</th><th class="p-4 text-left">Centre and time</th><th class="p-4 text-left">Status</th><th class="p-4 text-right">Actions</th></tr></thead>
+            <tbody class="divide-y">
+              <tr th:each="item : ${walkIns}">
+                <td class="p-4 font-mono text-xs font-bold text-cyan-700" th:text="${item.appointment.referenceNo}">WALK</td>
+                <td class="p-4"><p class="font-bold" th:text="${item.appointment.visitorName}">Visitor</p><p class="text-xs text-slate-500" th:text="${item.appointment.visitorPhone}">Phone</p></td>
+                <td class="p-4"><span class="rounded-full px-3 py-1 text-xs font-bold" th:classappend="${item.appointment.visitorService == 'NIC_APPLICATION_HELP' ? ' bg-blue-100 text-blue-700' : ' bg-violet-100 text-violet-700'}" th:text="${item.appointment.visitorService == 'NIC_APPLICATION_HELP' ? 'NIC' : 'Passport'}">NIC</span></td>
+                <td class="p-4"><p class="font-semibold" th:text="${item.centreName}">Centre</p><p class="text-xs text-slate-500" th:text="${#temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Time</p></td>
+                <td class="p-4"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold" th:text="${item.appointment.appointmentStatus}">Status</span></td>
+                <td class="p-4"><div class="flex justify-end gap-2"><a th:href="@{/officer/csr/walk-ins(reference=${item.appointment.referenceNo},walkInService=${walkInService},scheduleCentreId=${scheduleCentreId},scheduleMonth=${scheduleMonth})}" class="border rounded-lg px-3 py-2 text-xs font-bold">Review</a><form th:if="${item.appointment.appointmentStatus == 'CONFIRMED'}" th:action="@{/officer/csr/walk-ins/check-in}" method="post"><input type="hidden" name="reference" th:value="${item.appointment.referenceNo}"/><input type="hidden" name="method" value="REFERENCE_NUMBER"/><button class="bg-cyan-600 text-white rounded-lg px-3 py-2 text-xs font-bold">Check in</button></form><form th:if="${item.appointment.appointmentStatus == 'CHECKED_IN'}" th:action="@{/officer/csr/walk-ins/complete}" method="post"><input type="hidden" name="reference" th:value="${item.appointment.referenceNo}"/><button class="bg-emerald-600 text-white rounded-lg px-3 py-2 text-xs font-bold">Complete</button></form></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 border-t flex justify-between"><a th:if="${hasPrevious}" th:href="@{/officer/csr/walk-ins(page=${currentPage - 1},walkInService=${walkInService},scheduleCentreId=${scheduleCentreId},scheduleMonth=${scheduleMonth})}" class="border rounded-lg px-4 py-2 text-sm font-bold">Previous 15</a><span th:unless="${hasPrevious}"></span><a th:if="${hasNext}" th:href="@{/officer/csr/walk-ins(page=${currentPage + 1},walkInService=${walkInService},scheduleCentreId=${scheduleCentreId},scheduleMonth=${scheduleMonth})}" class="bg-cyan-600 text-white rounded-lg px-4 py-2 text-sm font-bold">Next 15</a><span th:unless="${hasNext}"></span></div>
+      </div>
+    </section>
+  </div>
 </main>
-
+<script src="/webjars/jsqr/1.4.0/dist/jsQR.js"></script>
 <script>
-function showTab(name){['requests','schedule','checkin'].forEach(n=>{document.getElementById(n+'Panel').classList.toggle('hidden',n!==name);document.getElementById(n+'Tab').classList.toggle('active',n===name)});}
-function decideRequest(button,status){if(!confirm(status+' this appointment request?'))return;const row=button.closest('tr');row.querySelector('td:last-child').innerHTML=`<span class="text-xs font-bold ${status==='Accepted'?'text-emerald-700':'text-red-700'}">${status} · Citizen notified</span>`;document.getElementById('pendingCount').textContent=Math.max(0,Number(document.getElementById('pendingCount').textContent)-1)}
-function reschedule(button){const slot=prompt('Suggest a new date and time','28 Aug 2026, 10:00 AM');if(slot){button.closest('td').innerHTML=`<span class="text-xs font-bold text-amber-700">Reschedule proposed: ${slot}</span>`}}
-function openCheckin(ref){showTab('checkin');document.getElementById('walkinRef').value=ref;lookupWalkin(ref)}
-function lookupWalkin(ref){if(!ref||!ref.trim()){alert('Enter a walk-in reference.');return}document.getElementById('walkinFoundRef').textContent=ref.toUpperCase();const result=document.getElementById('walkinResult');result.classList.remove('opacity-50','pointer-events-none')}
-function completeWalkinCheckin(){if(!document.getElementById('idVerified').checked){alert('Confirm the citizen identity check first.');return}document.getElementById('walkinState').textContent='Checked in · Token A-028';document.getElementById('walkinState').className='bg-emerald-50 text-emerald-700 rounded-full px-3 py-1 h-fit text-xs font-bold';alert('Check-in completed. Token A-028 issued.')}
-</script></body></html>
+let walkInStream, walkInFrame, lastWalkInScan=0;
+async function startWalkInScanner(){const status=document.getElementById('cameraStatus');if(walkInStream){stopWalkInScanner();status.textContent='Camera stopped.';return}if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status.textContent='This browser cannot access a webcam.';return}if(typeof jsQR!=='function'){status.textContent='QR scanner library could not be loaded.';return}try{walkInStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});const video=document.getElementById('walkInCamera');video.srcObject=walkInStream;await video.play();video.classList.remove('hidden');document.getElementById('cameraIcon').classList.add('hidden');document.getElementById('scanLine').classList.remove('hidden');document.getElementById('cameraButton').textContent='Stop webcam scanner';status.textContent='Point the webcam at a LankaID walk-in QR pass.';walkInFrame=requestAnimationFrame(scanWalkInFrame)}catch(error){status.textContent=error.name==='NotAllowedError'?'Camera permission was blocked.':'The webcam could not be started.'}}
+function scanWalkInFrame(timestamp){if(!walkInStream)return;if(timestamp-lastWalkInScan<120){walkInFrame=requestAnimationFrame(scanWalkInFrame);return}lastWalkInScan=timestamp;const video=document.getElementById('walkInCamera'),canvas=document.getElementById('walkInCanvas'),context=canvas.getContext('2d',{willReadFrequently:true});if(video.readyState>=video.HAVE_ENOUGH_DATA&&video.videoWidth>0){canvas.width=video.videoWidth;canvas.height=video.videoHeight;context.drawImage(video,0,0);const image=context.getImageData(0,0,canvas.width,canvas.height),result=jsQR(image.data,image.width,image.height,{inversionAttempts:'attemptBoth'});if(result){const reference=result.data.trim().toUpperCase();if(reference.startsWith('WALK-')){stopWalkInScanner();document.getElementById('walkInReference').value=reference;document.getElementById('checkInMethod').value='QR';document.getElementById('walkInCheckInForm').submit();return}document.getElementById('cameraStatus').textContent='This is not a LankaID walk-in appointment QR code.'}}walkInFrame=requestAnimationFrame(scanWalkInFrame)}
+function stopWalkInScanner(){if(walkInFrame)cancelAnimationFrame(walkInFrame);if(walkInStream)walkInStream.getTracks().forEach(track=>track.stop());walkInStream=null;const video=document.getElementById('walkInCamera');video.pause();video.srcObject=null;video.classList.add('hidden');document.getElementById('cameraIcon').classList.remove('hidden');document.getElementById('scanLine').classList.add('hidden');document.getElementById('cameraButton').textContent='Start webcam QR scanner'}
+const calendarStatusStyles = {
+  OPEN: {label:'Open', cell:'border-emerald-200 bg-emerald-50 hover:bg-emerald-100', badge:'bg-emerald-100 text-emerald-700'},
+  CLOSED: {label:'Closed', cell:'border-red-200 bg-red-50 hover:bg-red-100', badge:'bg-red-100 text-red-700'},
+  MIXED: {label:'Partly open', cell:'border-amber-200 bg-amber-50 hover:bg-amber-100', badge:'bg-amber-100 text-amber-700'},
+  UNPUBLISHED: {label:'Not published', cell:'border-slate-200 bg-white hover:bg-slate-50', badge:'bg-slate-200 text-slate-600'}
+};
+
+function calendarKey(year, month, day){
+  return year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+}
+
+function buildWalkInCalendar(){
+  const calendar=document.getElementById('walkInCalendar');
+  if(!calendar||!/^[0-9]{4}-[0-9]{2}$/.test(calendar.dataset.month||''))return;
+  const [year,month]=calendar.dataset.month.split('-').map(Number);
+  const grouped=new Map();
+  document.querySelectorAll('.calendar-slot-data').forEach(item=>{
+    const date=item.dataset.date;
+    if(!grouped.has(date))grouped.set(date,[]);
+    grouped.get(date).push({
+      open:item.dataset.open==='true',
+      booked:Number(item.dataset.booked||0),
+      capacity:Number(item.dataset.capacity||0)
+    });
+  });
+
+  calendar.innerHTML='';
+  const firstWeekday=(new Date(year,month-1,1).getDay()+6)%7;
+  const daysInMonth=new Date(year,month,0).getDate();
+  for(let blank=0;blank<firstWeekday;blank++){
+    const spacer=document.createElement('div');
+    spacer.className='min-h-[104px] rounded-xl bg-slate-50/60';
+    calendar.appendChild(spacer);
+  }
+
+  for(let day=1;day<=daysInMonth;day++){
+    const date=calendarKey(year,month,day);
+    const slots=grouped.get(date)||[];
+    const openCount=slots.filter(slot=>slot.open).length;
+    const status=slots.length===0?'UNPUBLISHED':openCount===slots.length?'OPEN':openCount===0?'CLOSED':'MIXED';
+    const style=calendarStatusStyles[status];
+    const booked=slots.reduce((total,slot)=>total+slot.booked,0);
+    const capacity=slots.reduce((total,slot)=>total+slot.capacity,0);
+    const button=document.createElement('button');
+    button.type='button';
+    button.dataset.calendarDate=date;
+    button.dataset.status=status;
+    button.className='min-h-[104px] rounded-xl border p-2.5 text-left transition '+style.cell;
+
+    const top=document.createElement('div');
+    top.className='flex items-center justify-between gap-2';
+    const number=document.createElement('span');
+    number.className='font-extrabold text-sm';
+    number.textContent=day;
+    const dot=document.createElement('span');
+    dot.className='w-2.5 h-2.5 rounded-full '+(status==='OPEN'?'bg-emerald-500':status==='CLOSED'?'bg-red-500':status==='MIXED'?'bg-amber-500':'bg-slate-300');
+    top.append(number,dot);
+
+    const label=document.createElement('p');
+    label.className='mt-2 text-[11px] font-bold';
+    label.textContent=style.label;
+    const summary=document.createElement('p');
+    summary.className='mt-1 text-[10px] leading-4 text-slate-500';
+    summary.textContent=slots.length===0?'No slots':openCount+' open slot(s) · '+booked+'/'+capacity+' booked';
+    button.append(top,label,summary);
+    button.addEventListener('click',()=>showCalendarDay(date,status));
+    calendar.appendChild(button);
+  }
+
+  const today=new Date();
+  const todayKey=calendarKey(today.getFullYear(),today.getMonth()+1,today.getDate());
+  const initial=(today.getFullYear()===year&&today.getMonth()+1===month)
+    ? todayKey
+    : (Array.from(grouped.keys()).sort()[0]||calendarKey(year,month,1));
+  const initialButton=calendar.querySelector('[data-calendar-date="'+initial+'"]');
+  showCalendarDay(initial,initialButton?initialButton.dataset.status:'UNPUBLISHED');
+}
+
+function showCalendarDay(date,status){
+  document.querySelectorAll('[data-calendar-date]').forEach(day=>day.classList.remove('ring-2','ring-cyan-600'));
+  const selected=document.querySelector('[data-calendar-date="'+date+'"]');
+  if(selected)selected.classList.add('ring-2','ring-cyan-600');
+
+  const dateLabel=document.getElementById('selectedCalendarDate');
+  dateLabel.textContent=new Date(date+'T00:00:00').toLocaleDateString('en-LK',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const style=calendarStatusStyles[status]||calendarStatusStyles.UNPUBLISHED;
+  const statusLabel=document.getElementById('selectedCalendarStatus');
+  statusLabel.textContent=style.label;
+  statusLabel.className='rounded-full px-3 py-1 text-xs font-bold '+style.badge;
+
+  let visible=0;
+  document.querySelectorAll('.calendar-slot-card').forEach(card=>{
+    const show=card.dataset.slotDate===date;
+    card.classList.toggle('hidden',!show);
+    if(show)visible++;
+  });
+  const empty=document.getElementById('noCalendarSlots');
+  empty.classList.toggle('hidden',visible>0);
+  empty.textContent=visible>0?'':'No half-hour slots were published for this day.';
+}
+
+function moveCalendarMonth(change){
+  const input=document.getElementById('scheduleMonth');
+  if(!input||!input.value)return;
+  const [year,month]=input.value.split('-').map(Number);
+  const moved=new Date(year,month-1+change,1);
+  input.value=calendarKey(moved.getFullYear(),moved.getMonth()+1,1).substring(0,7);
+  document.getElementById('calendarFilterForm').submit();
+}
+
+buildWalkInCalendar();
+window.addEventListener('beforeunload',stopWalkInScanner);
+</script>
+
+</body>
+</html>

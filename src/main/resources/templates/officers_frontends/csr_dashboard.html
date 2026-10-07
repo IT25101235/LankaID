@@ -9,28 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>
-  body { font-family: 'Public Sans', sans-serif; }
-  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
-  .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-  .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
-  .sidebar-link .material-symbols-outlined { font-size: 20px; }
-</style>
-<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 flex officer-dashboard-shell">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 
 <!-- Sidebar -->
 <aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
   <div class="p-5 border-b border-slate-800">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md officer-brand-icon">
-        <span class="material-symbols-outlined text-white text-lg">support_agent</span>
+        <img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/>
       </div>
-      <div>
-        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p>
-        <p class="text-xs text-slate-400 mt-0.5">CSR Portal</p>
-      </div>
+      <div><p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p><p class="text-[10px] leading-3 text-slate-400 mt-1">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</p><p class="text-xs text-slate-400 mt-1">CSR Portal</p></div>
     </div>
   </div>
 
@@ -40,23 +30,18 @@
       <span class="material-symbols-outlined">dashboard</span>
       Overview
     </a>
-    <a href="#" onclick="showTab('complaints')" class="sidebar-link" id="nav-complaints">
+    <a href="/officer/csr/support" class="sidebar-link" id="nav-support">
       <span class="material-symbols-outlined">feedback</span>
-      Complaints
-      <span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">7</span>
+      Citizen Support
+      <span th:if="${openSupportCount > 0}" th:text="${openSupportCount}" class="ml-auto bg-red-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold">0</span>
     </a>
     <a href="/officer/csr/walk-ins" class="sidebar-link" id="nav-walkins">
       <span class="material-symbols-outlined">calendar_month</span>
       Walk-In Bookings
     </a>
-    <a href="/officer/csr/walk-ins" class="sidebar-link" id="nav-appointments">
-      <span class="material-symbols-outlined">event_available</span>
-      Appointments
-    </a>
-    <a href="/officer/csr/walk-ins/register" class="sidebar-link">
-      <span class="material-symbols-outlined">person_add</span>
-      Unscheduled Visitor
-      <span class="ml-auto bg-sky-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</span>
+    <a href="/officer/csr/deliveries" class="sidebar-link">
+      <span class="material-symbols-outlined">inventory_2</span>
+      Document Collection
     </a>
   </nav>
 
@@ -85,16 +70,16 @@
   <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20 officer-topbar">
     <div class="flex-1">
       <h1 class="text-lg font-bold text-slate-900" id="pageTitle">Overview</h1>
-      <p class="text-xs text-slate-500" id="pageSubtitle">Welcome back, Amara. Today is Friday, Aug 15, 2026.</p>
+      <p class="text-xs text-slate-500" id="pageSubtitle">Welcome back. Today is <span th:text="${dashboardDate}">Sunday, 30 August 2026</span>.</p>
     </div>
     <div class="flex items-center gap-3">
       <button onclick="window.location.href='/officer/csr/walk-ins'" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors">
-        <span class="material-symbols-outlined text-base">add</span>
-        New Walk-In Booking
+        <span class="material-symbols-outlined text-base">calendar_month</span>
+        Manage Walk-Ins
       </button>
-      <button class="relative text-slate-500 hover:text-slate-900 transition-colors">
+      <button onclick="window.location.href='/officer/csr/support'" class="relative text-slate-500 hover:text-slate-900 transition-colors" title="Open support requests">
         <span class="material-symbols-outlined text-xl">notifications</span>
-        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">3</span>
+        <span th:if="${openSupportCount > 0}" th:text="${openSupportCount}" class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">0</span>
       </button>
     </div>
   </header>
@@ -106,9 +91,9 @@
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
         <div class="flex items-start justify-between">
           <div>
-            <p class="text-xs text-slate-500 font-medium">Open Complaints</p>
-            <p class="text-3xl font-bold text-slate-900 mt-1">7</p>
-            <p class="text-xs text-red-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span>+2 since yesterday</p>
+            <p class="text-xs text-slate-500 font-medium">Open Support Requests</p>
+            <p class="text-3xl font-bold text-slate-900 mt-1" th:text="${openSupportCount}">0</p>
+            <p class="text-xs text-slate-500 mt-1">Waiting for a CSR response</p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
             <span class="material-symbols-outlined text-red-600">report_problem</span>
@@ -119,8 +104,8 @@
         <div class="flex items-start justify-between">
           <div>
             <p class="text-xs text-slate-500 font-medium">Today's Walk-Ins</p>
-            <p class="text-3xl font-bold text-slate-900 mt-1">14</p>
-            <p class="text-xs text-emerald-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span>6 completed</p>
+            <p class="text-3xl font-bold text-slate-900 mt-1" th:text="${todayWalkInCount}">0</p>
+            <p class="text-xs text-emerald-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span><span th:text="${todayCompletedWalkInCount + ' completed'}">0 completed</span></p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
             <span class="material-symbols-outlined text-cyan-600">calendar_today</span>
@@ -130,9 +115,9 @@
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
         <div class="flex items-start justify-between">
           <div>
-            <p class="text-xs text-slate-500 font-medium">Resolved Today</p>
-            <p class="text-3xl font-bold text-slate-900 mt-1">5</p>
-            <p class="text-xs text-emerald-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span>Avg 2.4 days</p>
+            <p class="text-xs text-slate-500 font-medium">Resolved Requests</p>
+            <p class="text-3xl font-bold text-slate-900 mt-1" th:text="${resolvedSupportCount}">0</p>
+            <p class="text-xs text-emerald-500 mt-1">Completed support cases</p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
             <span class="material-symbols-outlined text-emerald-600">task_alt</span>
@@ -143,8 +128,8 @@
         <div class="flex items-start justify-between">
           <div>
             <p class="text-xs text-slate-500 font-medium">Avg. Response Time</p>
-            <p class="text-3xl font-bold text-slate-900 mt-1">1.8<span class="text-lg text-slate-500 font-medium">d</span></p>
-            <p class="text-xs text-emerald-500 mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_down</span>Better than target</p>
+            <p class="text-3xl font-bold text-slate-900 mt-1" th:text="${averageResponseTime}">N/A</p>
+            <p class="text-xs text-slate-500 mt-1">Based on answered requests</p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
             <span class="material-symbols-outlined text-purple-600">timer</span>
@@ -156,58 +141,41 @@
     <!-- Two-column layout -->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
-      <!-- Recent Complaints -->
+      <!-- Recent Citizen Support Requests -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between p-5 border-b border-slate-100">
-          <h2 class="font-bold text-slate-900 text-sm">Recent Complaints</h2>
-          <button onclick="showTab('complaints')" class="text-xs text-sky-600 font-semibold hover:underline">View All</button>
+          <h2 class="font-bold text-slate-900 text-sm">Recent Citizen Support</h2>
+          <button onclick="window.location.href='/officer/csr/support'" class="text-xs text-sky-600 font-semibold hover:underline">View All</button>
         </div>
         <div class="divide-y divide-slate-100">
-          <div class="p-4 hover:bg-slate-50 cursor-pointer transition-colors" onclick="openComplaint('CMP-2026-0102')">
+          <a th:each="item : ${recentSupportRequests}"
+             th:href="@{/officer/csr/support/{reference}(reference=${item.reference})}"
+             class="block p-4 hover:bg-slate-50 transition-colors">
             <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-red-600 text-base">hourglass_empty</span>
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                   th:classappend="${item.request.requestType == 'COMPLAINT' ? ' bg-orange-100' : ' bg-sky-100'}">
+                <span class="material-symbols-outlined text-base"
+                      th:classappend="${item.request.requestType == 'COMPLAINT' ? ' text-orange-600' : ' text-sky-600'}"
+                      th:text="${item.request.requestType == 'COMPLAINT' ? 'report' : 'contact_support'}">contact_support</span>
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-800 truncate">Processing Delay</p>
-                  <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold ml-2 flex-shrink-0">High</span>
+                  <p class="text-sm font-semibold text-slate-800 truncate" th:text="${item.request.subject}">Subject</p>
+                  <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-semibold ml-2 flex-shrink-0"
+                        th:text="${item.request.requestStatus == 'IN_PROGRESS' ? 'Responded' : #strings.capitalize(#strings.toLowerCase(item.request.requestStatus))}">Open</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-0.5 truncate">My NIC application has been under review for 3 weeks now...</p>
-                <p class="text-xs text-slate-400 mt-1">CMP-2026-0102 · Kamal Perera · 2 hours ago</p>
+                <p class="text-xs text-slate-500 mt-0.5 truncate" th:text="${item.request.message}">Message</p>
+                <p class="text-xs text-slate-400 mt-1">
+                  <span th:text="${item.reference}">SUP</span>
+                  <span> · </span>
+                  <span th:text="${item.request.requestType == 'COMPLAINT' ? 'Complaint' : 'Contact Us'}">Type</span>
+                  <span> · </span>
+                  <span th:text="${item.citizenName}">Citizen</span>
+                </p>
               </div>
             </div>
-          </div>
-          <div class="p-4 hover:bg-slate-50 cursor-pointer transition-colors" onclick="openComplaint('CMP-2026-0101')">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-orange-600 text-base">bug_report</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-800 truncate">Technical Issue</p>
-                  <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold ml-2 flex-shrink-0">Medium</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5 truncate">Unable to upload documents, keeps showing error...</p>
-                <p class="text-xs text-slate-400 mt-1">CMP-2026-0101 · Dilani Silva · 5 hours ago</p>
-              </div>
-            </div>
-          </div>
-          <div class="p-4 hover:bg-slate-50 cursor-pointer transition-colors" onclick="openComplaint('CMP-2026-0099')">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-blue-600 text-base">local_shipping</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-800 truncate">Delivery Issue</p>
-                  <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold ml-2 flex-shrink-0">Low</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5 truncate">Passport was marked as delivered but I haven't received it...</p>
-                <p class="text-xs text-slate-400 mt-1">CMP-2026-0099 · Nuwan Fernando · Yesterday</p>
-              </div>
-            </div>
-          </div>
+          </a>
+          <div th:if="${#lists.isEmpty(recentSupportRequests)}" class="p-8 text-center text-sm text-slate-500">No citizen support requests yet.</div>
         </div>
       </div>
 
@@ -215,64 +183,23 @@
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between p-5 border-b border-slate-100">
           <h2 class="font-bold text-slate-900 text-sm">Today's Walk-In Schedule</h2>
-          <button onclick="showTab('walkins')" class="text-xs text-sky-600 font-semibold hover:underline">Manage All</button>
+          <button onclick="window.location.href='/officer/csr/walk-ins'" class="text-xs text-sky-600 font-semibold hover:underline">Manage All</button>
         </div>
         <div class="divide-y divide-slate-100">
-          <div class="p-4 flex items-center gap-3">
-            <div class="text-center w-12 flex-shrink-0">
-              <p class="text-xs text-slate-400">8:30</p>
-              <p class="text-xs text-slate-400">AM</p>
+          <a th:each="item : ${todayWalkIns}" th:href="@{/officer/csr/walk-ins(reference=${item.appointment.referenceNo})}" class="p-4 flex items-center gap-3 hover:bg-slate-50">
+            <div class="text-center w-14 flex-shrink-0">
+              <p class="text-xs font-bold text-cyan-700" th:text="${#temporals.format(item.appointment.scheduledAt, 'hh:mm')}">09:00</p>
+              <p class="text-[11px] text-slate-400" th:text="${#temporals.format(item.appointment.scheduledAt, 'a')}">AM</p>
             </div>
-            <div class="flex-1 border-l border-slate-200 pl-3">
-              <p class="text-sm font-semibold text-slate-800">Sanath Bandara</p>
-              <p class="text-xs text-slate-500">NIC — New Application · Token #A-01</p>
+            <div class="flex-1 border-l border-slate-200 pl-3 min-w-0">
+              <p class="text-sm font-semibold text-slate-800 truncate" th:text="${item.appointment.visitorName}">Visitor</p>
+              <p class="text-xs text-slate-500 truncate"><span th:text="${item.appointment.visitorService == 'NIC_APPLICATION_HELP' ? 'NIC walk-in' : 'Passport walk-in'}">Service</span><span> · </span><span th:text="${item.centreName}">Centre</span></p>
+              <p class="font-mono text-[11px] text-cyan-700 mt-0.5" th:text="${item.appointment.referenceNo}">WALK</p>
             </div>
-            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Done</span>
-          </div>
-          <div class="p-4 flex items-center gap-3">
-            <div class="text-center w-12 flex-shrink-0">
-              <p class="text-xs text-slate-400">9:00</p>
-              <p class="text-xs text-slate-400">AM</p>
-            </div>
-            <div class="flex-1 border-l border-slate-200 pl-3">
-              <p class="text-sm font-semibold text-slate-800">Priya Gunasekara</p>
-              <p class="text-xs text-slate-500">Passport — Renewal · Token #A-02</p>
-            </div>
-            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Done</span>
-          </div>
-          <div class="p-4 flex items-center gap-3 bg-cyan-50">
-            <div class="text-center w-12 flex-shrink-0">
-              <p class="text-xs font-bold text-cyan-700">Now</p>
-              <p class="text-xs text-cyan-600">10:30</p>
-            </div>
-            <div class="flex-1 border-l border-cyan-400 pl-3">
-              <p class="text-sm font-bold text-slate-900">Kamal Perera</p>
-              <p class="text-xs text-slate-600">NIC — Biometric Collection · Token #B-247</p>
-            </div>
-            <span class="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full font-semibold">In Progress</span>
-          </div>
-          <div class="p-4 flex items-center gap-3">
-            <div class="text-center w-12 flex-shrink-0">
-              <p class="text-xs text-slate-400">11:00</p>
-              <p class="text-xs text-slate-400">AM</p>
-            </div>
-            <div class="flex-1 border-l border-slate-200 pl-3">
-              <p class="text-sm font-semibold text-slate-800">Dilani Rathnayake</p>
-              <p class="text-xs text-slate-500">NIC — Lost/Damaged · Token #A-04</p>
-            </div>
-            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">Upcoming</span>
-          </div>
-          <div class="p-4 flex items-center gap-3">
-            <div class="text-center w-12 flex-shrink-0">
-              <p class="text-xs text-slate-400">11:30</p>
-              <p class="text-xs text-slate-400">AM</p>
-            </div>
-            <div class="flex-1 border-l border-slate-200 pl-3">
-              <p class="text-sm font-semibold text-slate-800">Roshan Fernando</p>
-              <p class="text-xs text-slate-500">Passport — New · Token #A-05</p>
-            </div>
-            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">Upcoming</span>
-          </div>
+            <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-semibold" th:text="${#strings.replace(item.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</span>
+          </a>
+          <div th:if="${#lists.isEmpty(todayWalkIns)}" class="p-8 text-center text-sm text-slate-500">No walk-in appointments are booked for today.</div>
+          <a th:if="${hasMoreTodayWalkIns}" href="/officer/csr/walk-ins" class="block p-3 text-center text-xs font-bold text-cyan-700 hover:bg-cyan-50">View remaining appointments</a>
         </div>
       </div>
     </div>
@@ -376,8 +303,8 @@
     <div class="flex items-center justify-between mb-5">
       <h2 class="text-lg font-bold text-slate-900">Walk-In Appointment Management</h2>
       <button onclick="window.location.href='/officer/csr/walk-ins'" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm">
-        <span class="material-symbols-outlined text-base">add</span>
-        Register Walk-In
+        <span class="material-symbols-outlined text-base">calendar_month</span>
+        Manage Walk-Ins
       </button>
     </div>
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -420,21 +347,11 @@
     </div>
   </div>
 
-  <!-- ===== APPOINTMENTS TAB ===== -->
-  <div id="tab-appointments" class="p-6 hidden">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
-      <span class="material-symbols-outlined text-5xl text-slate-300 block mb-3">event_available</span>
-      <h2 class="text-lg font-bold text-slate-700 mb-1">Appointment Management</h2>
-      <p class="text-slate-500 text-sm mb-4">Manage physical visit requests, arrivals and reception check-in.</p>
-      <button onclick="window.location.href='/officer/csr/walk-ins'" class="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-colors">Open Walk-In Management</button>
-    </div>
-  </div>
-
 </main>
 
 <script>
 function showTab(tab) {
-  ['overview','complaints','walkins','appointments'].forEach(t => {
+  ['overview','complaints','walkins'].forEach(t => {
     document.getElementById('tab-' + t).classList.add('hidden');
     const nav = document.getElementById('nav-' + t);
     if (nav) { nav.classList.remove('active'); }
@@ -442,7 +359,7 @@ function showTab(tab) {
   document.getElementById('tab-' + tab).classList.remove('hidden');
   const nav = document.getElementById('nav-' + tab);
   if (nav) { nav.classList.add('active'); }
-  const titles = { overview: ['Overview', 'Welcome back, Amara. Today is Friday, Aug 15, 2026.'], complaints: ['Complaints', 'Manage and respond to citizen complaints.'], walkins: ['Walk-In Bookings', 'Manage today\'s walk-in appointment queue.'], appointments: ['Appointments', 'Manage biometric appointment slots.'] };
+  const titles = { overview: ['Overview', 'Current CSR operations and today\'s activity.'], complaints: ['Complaints', 'Manage and respond to citizen complaints.'], walkins: ['Walk-In Bookings', 'Manage today\'s walk-in appointment queue.'] };
   document.getElementById('pageTitle').textContent = titles[tab][0];
   document.getElementById('pageSubtitle').textContent = titles[tab][1];
   return false;
@@ -452,5 +369,6 @@ function openComplaint(ref) {
   window.location.href = '/officer/csr/complaints/' + encodeURIComponent(ref);
 }
 </script>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>

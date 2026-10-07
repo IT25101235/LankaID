@@ -1,309 +1,59 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Book Biometric Appointment | LankaID Identity Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
-.slot-btn { transition: all 0.15s; }
-.slot-btn:hover:not(.taken) { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; }
-.slot-btn.selected { background: #2563eb; border-color: #2563eb; color: white; font-weight: 600; }
-.slot-btn.taken { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; }
-input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); border-color: #2563eb !important; }
-</style>
-<link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Biometrics | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="portal-shell portal-citizen min-h-screen text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='biometrics')}"></header>
 
-<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a th:href="@{/citizen/applications}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-      My Applications
-    </a>
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-sm">verified_user</span>
-      </div>
-      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span></span>
-    </div>
-    <div class="w-20"></div>
-  </div>
-</header>
+<main class="max-w-5xl mx-auto px-4 py-7">
+  <div th:if="${appointmentUnavailable}" class="bg-white border rounded-2xl p-8 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">event_busy</span><h1 class="font-bold text-xl mt-3">No application selected</h1><p class="text-sm text-slate-500 mt-1">Pay for an approved application before booking biometric collection.</p><a th:href="@{/citizen/applications}" class="inline-block mt-5 bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">My applications</a></div>
 
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+  <div th:if="${booking != null}">
+    <div th:if="${appointmentMessage}" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-semibold text-emerald-700" th:text="${appointmentMessage}"></div>
+    <div th:if="${appointmentError}" class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-semibold text-red-700" th:text="${appointmentError}"></div>
 
-  <!-- Alert Banner -->
-  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
-    <span class="material-symbols-outlined text-amber-500 text-xl mt-0.5 flex-shrink-0">calendar_month</span>
-    <div>
-      <p class="text-sm font-semibold text-amber-900">Biometric Appointment Required — Ref: LK-NIC-2026-00183</p>
-      <p class="text-xs text-amber-700 mt-0.5">Your NIC application has been approved. You must book a biometric appointment at a LankaID centre to complete the process. Please bring original documents on the appointment date.</p>
-    </div>
-  </div>
+    <div class="mb-5"><p class="text-xs font-bold text-sky-700 uppercase tracking-wide">Step 2 of 2</p><h1 class="text-2xl font-extrabold mt-1">Biometric collection appointment</h1><p class="text-sm text-slate-500 mt-1">Choose a date published by your document officer, then select an available time.</p></div>
 
-  <h1 class="text-2xl font-bold text-slate-900 mb-1">Book Biometric Appointment</h1>
-  <p class="text-slate-500 text-sm mb-6">Select a nearby centre, choose a date and a time slot that suits you.</p>
+    <div th:if="${appointment.appointmentStatus != 'PENDING_PAYMENT' and appointment.appointmentStatus != 'CANCELLED'}" class="bg-white border rounded-2xl p-7 text-center"><span class="material-symbols-outlined text-5xl text-emerald-600">event_available</span><h2 class="font-bold text-xl mt-2">Your appointment is confirmed</h2><p class="font-mono text-sky-700 font-bold mt-2" th:text="${appointment.referenceNo}">BIO-REF</p><a th:href="@{/citizen/appointments/{reference}/pass(reference=${appointment.referenceNo})}" class="inline-flex mt-5 bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Open QR appointment pass</a></div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Left: Booking Form -->
-    <div class="lg:col-span-2 space-y-5">
+    <section th:if="${appointment.appointmentStatus != 'PENDING_PAYMENT'}" class="mt-4 bg-white border rounded-2xl p-5">
+      <p th:if="${appointment.appointmentStatus == 'CANCELLED'}" class="text-sm mb-3">Your booking is cancelled. Choose another published slot to continue; your original payment is retained.</p>
+      <a th:href="@{/citizen/appointments/{reference}/manage(reference=${appointment.referenceNo})}" class="inline-block rounded-xl bg-slate-800 text-white px-5 py-3 text-sm font-bold">Manage booking / rebook</a>
+    </section>
 
-      <!-- Step 1: Choose Application -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-          <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">1</div>
-          <h2 class="font-semibold text-slate-800">Select Application</h2>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="relative cursor-pointer">
-            <input type="radio" name="application" value="nic-183" class="sr-only peer" checked/>
-            <div class="border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 rounded-xl p-4 transition-all">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="material-symbols-outlined text-blue-600 text-lg">badge</span>
-                <span class="text-sm font-semibold text-slate-800">NIC Application</span>
-              </div>
-              <p class="text-xs text-slate-500">Ref: LK-NIC-2026-00183</p>
-              <span class="inline-block mt-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Approved</span>
-            </div>
+    <form th:if="${appointment.appointmentStatus == 'PENDING_PAYMENT'}" th:action="@{/citizen/appointments/biometric}" method="post" class="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
+      <input type="hidden" name="applicationId" th:value="${citizenApplication.applicationId}"/>
+      <section class="bg-white border rounded-2xl shadow-sm p-5 sm:p-6">
+        <div class="rounded-xl bg-sky-50 border border-sky-200 p-4"><p class="font-bold text-sky-900" th:text="|${citizenApplication.serviceType} application ${citizenApplication.applicationNo}|">Application</p><p class="text-xs text-sky-700 mt-1">Payment confirmed. The reference and QR pass are issued when this appointment is confirmed.</p></div>
+        <div class="mt-5" data-biometric-selection th:attr="data-application-id=${citizenApplication.applicationId},data-earliest-date=${earliestDate},data-latest-date=${latestDate}">
+          <label class="sm:col-span-2 text-sm font-semibold">Service centre
+            <select required name="centreId" class="w-full mt-1.5 rounded-xl border-slate-300">
+              <option value="">Select a centre</option>
+              <option th:each="centre : ${centres}" th:value="${centre.centreId}" th:text="${centre.centreName + ' — ' + centre.city}">Centre</option>
+            </select>
           </label>
-        </div>
-      </div>
-
-      <!-- Step 2: Select Centre -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-          <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">2</div>
-          <h2 class="font-semibold text-slate-800">Select LankaID Centre</h2>
-        </div>
-        <div class="mb-3">
-          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Filter by District</label>
-          <select id="districtFilter" onchange="filterCentres()" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
-            <option value="">All Districts</option>
-            <option value="Colombo" selected>Colombo</option>
-            <option value="Gampaha">Gampaha</option>
-            <option value="Kandy">Kandy</option>
-            <option value="Galle">Galle</option>
-            <option value="Jaffna">Jaffna</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="centreList">
-          <label class="relative cursor-pointer">
-            <input type="radio" name="centre" value="col-main" class="sr-only peer" checked/>
-            <div class="border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 rounded-xl p-4 transition-all">
-              <p class="text-sm font-semibold text-slate-800">Colombo Main Centre</p>
-              <p class="text-xs text-slate-500 mt-0.5">Level 3, Unity Place, Colombo 02</p>
-              <div class="flex items-center gap-1 mt-2 text-xs text-slate-500">
-                <span class="material-symbols-outlined text-sm text-emerald-500">circle</span>
-                Available slots today
-              </div>
-            </div>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" name="centre" value="col-north" class="sr-only peer"/>
-            <div class="border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 rounded-xl p-4 transition-all">
-              <p class="text-sm font-semibold text-slate-800">Colombo North Centre</p>
-              <p class="text-xs text-slate-500 mt-0.5">No. 12, Maradana Road, Colombo 10</p>
-              <div class="flex items-center gap-1 mt-2 text-xs text-slate-500">
-                <span class="material-symbols-outlined text-sm text-emerald-500">circle</span>
-                Available slots today
-              </div>
-            </div>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" name="centre" value="col-south" class="sr-only peer"/>
-            <div class="border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 rounded-xl p-4 transition-all">
-              <p class="text-sm font-semibold text-slate-800">Dehiwala Service Centre</p>
-              <p class="text-xs text-slate-500 mt-0.5">45, Galle Road, Dehiwala</p>
-              <div class="flex items-center gap-1 mt-2 text-xs text-slate-500">
-                <span class="material-symbols-outlined text-sm text-amber-500">circle</span>
-                Limited slots
-              </div>
-            </div>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" name="centre" value="col-west" class="sr-only peer"/>
-            <div class="border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 rounded-xl p-4 transition-all">
-              <p class="text-sm font-semibold text-slate-800">Kelaniya Centre</p>
-              <p class="text-xs text-slate-500 mt-0.5">78, Kandy Road, Kelaniya</p>
-              <div class="flex items-center gap-1 mt-2 text-xs text-slate-500">
-                <span class="material-symbols-outlined text-sm text-emerald-500">circle</span>
-                Available slots
-              </div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Step 3: Select Date -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-          <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">3</div>
-          <h2 class="font-semibold text-slate-800">Select Date</h2>
-        </div>
-        <div class="flex items-center justify-between mb-4">
-          <button type="button" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><span class="material-symbols-outlined">chevron_left</span></button>
-          <h3 class="font-semibold text-slate-800">August 2026</h3>
-          <button type="button" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600"><span class="material-symbols-outlined">chevron_right</span></button>
-        </div>
-        <div class="grid grid-cols-7 text-center text-xs font-semibold text-slate-400 mb-2">
-          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-        </div>
-        <div class="grid grid-cols-7 text-center gap-1" id="calendar">
-          <!-- Empty cells for start of month -->
-          <div></div><div></div><div></div><div></div><div></div>
-          <!-- Days -->
-          <div id="day-script-placeholder"></div>
-        </div>
-        <div class="mt-3 flex items-center gap-4 text-xs text-slate-500">
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>Selected</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-200 inline-block"></span>Unavailable</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full border-2 border-blue-300 inline-block"></span>Available</span>
-        </div>
-      </div>
-
-      <!-- Step 4: Select Time Slot -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-          <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">4</div>
-          <h2 class="font-semibold text-slate-800">Select Time Slot</h2>
-          <span class="text-xs text-slate-400 ml-auto" id="selectedDateLabel">Aug 20, 2026</span>
-        </div>
-        <div class="mb-3">
-          <p class="text-xs font-semibold text-slate-500 mb-2">Morning</p>
-          <div class="grid grid-cols-3 sm:grid-cols-5 gap-2" id="morningSlots">
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">8:00 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">8:30 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">9:00 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '9:30 AM')">9:30 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '10:00 AM')">10:00 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs selected" onclick="selectSlot(this, '10:30 AM')">10:30 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '11:00 AM')">11:00 AM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">11:30 AM</button>
+          <input type="hidden" required name="slotId" value=""/>
+          <div class="mt-5 rounded-2xl border p-4" data-appointment-calendar>
+            <div class="flex items-center justify-between"><button type="button" data-calendar-previous class="rounded-lg border px-3 py-2 text-xs font-bold">← Previous</button><h2 data-calendar-month class="font-extrabold">Available dates</h2><button type="button" data-calendar-next class="rounded-lg border px-3 py-2 text-xs font-bold">Next →</button></div>
+            <div class="mt-4 grid grid-cols-7 text-center text-[11px] font-bold uppercase text-slate-400"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+            <div data-calendar-days class="mt-2 grid grid-cols-7 overflow-hidden rounded-xl border"></div>
           </div>
+          <div class="mt-5"><h3 data-slot-heading class="font-bold">Select an available date</h3><div data-slot-list class="mt-3 grid sm:grid-cols-2 gap-3"></div></div>
         </div>
-        <div>
-          <p class="text-xs font-semibold text-slate-500 mb-2">Afternoon</p>
-          <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '1:00 PM')">1:00 PM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">1:30 PM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '2:00 PM')">2:00 PM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '2:30 PM')">2:30 PM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">3:00 PM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs" onclick="selectSlot(this, '3:30 PM')">3:30 PM</button>
-            <button type="button" class="slot-btn border border-slate-200 rounded-lg px-2 py-2 text-xs taken">4:00 PM</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Right: Summary -->
-    <div class="space-y-4">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sticky top-20">
-        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <span class="material-symbols-outlined text-sky-600 text-lg">event_available</span>
-          Booking Summary
-        </h3>
-        <div class="space-y-3 text-xs text-slate-600 border-t border-slate-100 pt-3">
-          <div><p class="text-slate-400">Application</p><p class="font-semibold text-slate-800 mt-0.5">NIC — LK-NIC-2026-00183</p></div>
-          <div><p class="text-slate-400">Centre</p><p class="font-semibold text-slate-800 mt-0.5">Colombo Main Centre</p></div>
-          <div><p class="text-slate-400">Date</p><p class="font-semibold text-slate-800 mt-0.5" id="summaryDate">Aug 20, 2026</p></div>
-          <div><p class="text-slate-400">Time Slot</p><p class="font-semibold text-slate-800 mt-0.5" id="summaryTime">10:30 AM</p></div>
-        </div>
-        <button onclick="confirmBooking()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md">
-          <span class="material-symbols-outlined text-lg">check_circle</span>
-          Confirm Appointment
-        </button>
-        <p class="text-xs text-slate-400 text-center mt-2">You can reschedule up to 24 hours before your appointment</p>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 text-sm mb-3">What to Bring</h3>
-        <ul class="space-y-2 text-xs text-slate-600">
-          <li class="flex items-start gap-2"><span class="material-symbols-outlined text-sm text-sky-500 mt-0.5">check_circle</span>Original Birth Certificate</li>
-          <li class="flex items-start gap-2"><span class="material-symbols-outlined text-sm text-sky-500 mt-0.5">check_circle</span>Proof of Address (utility bill)</li>
-          <li class="flex items-start gap-2"><span class="material-symbols-outlined text-sm text-sky-500 mt-0.5">check_circle</span>Appointment Confirmation (printed or on phone)</li>
-          <li class="flex items-start gap-2"><span class="material-symbols-outlined text-sm text-amber-500 mt-0.5">info</span>Arrive 10 minutes before your slot</li>
-        </ul>
-      </div>
-    </div>
+        <p data-capacity-message aria-live="polite" class="mt-3 text-xs text-slate-600">Select a centre and date to check availability.</p>
+        <button type="submit" class="w-full mt-6 bg-sky-600 hover:bg-sky-700 text-white rounded-xl py-3 font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined">event_available</span>Confirm appointment</button>
+      </section>
+      <aside class="bg-white border rounded-2xl p-5 shadow-sm"><h2 class="font-bold">Bring with you</h2><ul class="mt-4 space-y-3 text-sm text-slate-600"><li class="flex gap-2"><span class="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>Downloaded QR appointment pass</li><li class="flex gap-2"><span class="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>Original supporting documents</li><li class="flex gap-2"><span class="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>Arrive 10 minutes before the slot</li></ul><p class="text-xs text-slate-400 mt-5">The QR code contains only your appointment reference number.</p></aside>
+    </form>
   </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div id="confirmModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-      <span class="material-symbols-outlined text-emerald-600 text-3xl">calendar_month</span>
-    </div>
-    <h2 class="text-xl font-bold text-slate-900 mb-1">Appointment Confirmed!</h2>
-    <p class="text-slate-500 text-sm mb-4">Your biometric appointment has been booked. A confirmation email and SMS has been sent to your registered contact details.</p>
-    <!-- Demonstration QR. A QR library will encode the reference after backend integration. -->
-    <div class="w-28 h-28 mx-auto mb-4 bg-white border border-slate-200 rounded-xl p-2 grid grid-cols-5 gap-1" aria-label="Appointment QR code preview">
-      <span class="bg-slate-900 col-span-2 row-span-2"></span><span></span><span class="bg-slate-900 col-span-2 row-span-2"></span>
-      <span></span><span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span>
-      <span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span>
-      <span class="bg-slate-900 col-span-2 row-span-2"></span><span></span><span class="bg-slate-900"></span><span></span><span class="bg-slate-900"></span>
-    </div>
-    <div class="bg-slate-50 rounded-xl p-4 text-left mb-5 text-xs text-slate-600 space-y-2">
-      <div class="flex justify-between"><span class="text-slate-400">Reference</span><span class="font-mono font-bold text-sky-700">BIO-2026-00427</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">Centre</span><span class="font-semibold">Colombo Main Centre</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">Date</span><span class="font-semibold">Aug 20, 2026</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">Time</span><span class="font-semibold">10:30 AM</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">Token No.</span><span class="font-semibold text-sky-700">#B-247</span></div>
-    </div>
-    <button onclick="window.location.href='/citizen/applications'" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
-      Back to My Applications
-    </button>
-  </div>
-</div>
-
-<script>
-let selectedSlot = '10:30 AM';
-
-function selectSlot(btn, time) {
-  document.querySelectorAll('.slot-btn:not(.taken)').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedSlot = time;
-  document.getElementById('summaryTime').textContent = time;
-}
-
-function confirmBooking() {
-  const modal = document.getElementById('confirmModal');
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
-
-// Build simple calendar
-(function() {
-  const cal = document.getElementById('calendar');
-  const today = 15;
-  const days = 31;
-  const unavailable = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,21,22,23,28,29,30,31];
-  let html = '<div></div><div></div><div></div><div></div><div></div>'; // Aug 1 = Saturday, so offset 6
-  for (let d = 1; d <= days; d++) {
-    if (unavailable.includes(d)) {
-      html += `<button class="w-8 h-8 rounded-full text-xs text-slate-300 cursor-not-allowed mx-auto">${d}</button>`;
-    } else if (d === 20) {
-      html += `<button class="w-8 h-8 rounded-full text-xs bg-blue-600 text-white font-bold mx-auto selected-day">${d}</button>`;
-    } else {
-      html += `<button class="w-8 h-8 rounded-full text-xs border-2 border-blue-200 text-blue-700 hover:bg-blue-50 mx-auto" onclick="selectDay(${d}, this)">${d}</button>`;
-    }
-  }
-  cal.innerHTML = html;
-})();
-
-function selectDay(d, btn) {
-  document.querySelectorAll('#calendar button').forEach(b => b.classList.remove('bg-blue-600','text-white','font-bold'));
-  btn.classList.add('bg-blue-600','text-white','font-bold');
-  document.getElementById('summaryDate').textContent = `Aug ${d}, 2026`;
-  document.getElementById('selectedDateLabel').textContent = `Aug ${d}, 2026`;
-}
-</script>
+</main>
+<script src="/Biometric_And_Appointment_Mgmt/booking-availability.js"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

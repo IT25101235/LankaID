@@ -1,0 +1,147 @@
+[
+  {
+    "topic": "nic",
+    "question": "How can a citizen apply for, renew, or replace a NIC?",
+    "text": "For a first NIC, create a LankaID account and verify your email and phone. Sign in, complete the NIC form, and upload the required photograph and birth certificate.\n\nAfter officer approval, choose delivery, complete payment, and book your biometric appointment. If you already have a NIC, link your existing identity and choose renewal or lost replacement.",
+    "links": [
+      {
+        "label": "Create an account",
+        "href": "/register"
+      },
+      {
+        "label": "Sign in",
+        "href": "/login"
+      }
+    ]
+  },
+  {
+    "topic": "passport",
+    "question": "How can a citizen apply for, renew, or replace a passport?",
+    "text": "Sign in to LankaID and choose a new passport application, renewal, or lost replacement. Complete the form and upload the supporting documents shown on your application.\n\nAn officer reviews your request before payment and biometric booking. Existing passport holders need to verify or link their identity before renewing or replacing a passport.",
+    "links": [
+      {
+        "label": "Sign in",
+        "href": "/login"
+      },
+      {
+        "label": "Explore services",
+        "href": "#services"
+      }
+    ]
+  },
+  {
+    "topic": "tracking",
+    "question": "How can a citizen view application progress and make requested corrections?",
+    "text": "Sign in and open My Applications to see your application status and the next available action. If an officer requests a correction, update the flagged information and resubmit the same request.\n\nYou can also follow the delivery or collection status once your document is issued. This chat provides general guidance; your dashboard holds your personal application details.",
+    "links": [
+      {
+        "label": "My applications",
+        "href": "/citizen/applications"
+      }
+    ]
+  },
+  {
+    "topic": "walkin",
+    "question": "How can a visitor book a walk-in appointment and recover its pass?",
+    "text": "You can book a walk-in appointment without a citizen account. Enter your name and phone number, verify the SMS code, choose an available service and slot, and complete the booking payment.\n\nKeep your appointment pass for check-in. If you lose it, use Recover my booking and verify the phone number used for the appointment.",
+    "links": [
+      {
+        "label": "Book a walk-in",
+        "href": "/walk-in"
+      },
+      {
+        "label": "Recover my booking",
+        "href": "/walk-in/recover"
+      }
+    ]
+  },
+  {
+    "topic": "appointments",
+    "question": "How can a citizen book or change a biometric appointment?",
+    "text": "Biometric appointments become available after your application is approved and the required payment is completed. Choose a published centre, date, and time, then download your QR pass.\n\nTo change an existing appointment, open Manage booking. Biometric cancellations and rescheduling are allowed at least 72 hours before a confirmed appointment.",
+    "links": [
+      {
+        "label": "My applications",
+        "href": "/citizen/applications"
+      }
+    ]
+  },
+  {
+    "topic": "account",
+    "question": "How can a citizen register, sign in, verify contacts, or reset a password?",
+    "text": "Create an account using an email address and mobile number you can access. Verify both codes, then set your password.\n\nAlready registered? Sign in with your email and password. Use Forgot password if you need to reset your citizen account password.",
+    "links": [
+      {
+        "label": "Register",
+        "href": "/register"
+      },
+      {
+        "label": "Reset password",
+        "href": "/forgot-password"
+      }
+    ]
+  },
+  {
+    "topic": "documents",
+    "question": "What supporting files and upload limits apply to citizen requests?",
+    "text": "Your application lists the supporting documents needed for the selected service. Upload clear PDF, JPG, or PNG files, each no larger than 5 MB.\n\nFirst-time requests generally include a photograph and birth certificate; passport requests also require NIC proof. Renewals and lost replacements have their own document checklist. Follow the list displayed in your form.",
+    "links": [
+      {
+        "label": "Open my applications",
+        "href": "/citizen/applications"
+      }
+    ]
+  },
+  {
+    "topic": "payment",
+    "question": "How does a citizen choose delivery and complete application payment?",
+    "text": "After officer approval, open the payment action on your application. Select home delivery or centre collection, then review the total shown before completing payment.\n\nThe current LankaID project uses simulated card payments. Once payment is recorded, you can select your biometric appointment.",
+    "links": [
+      {
+        "label": "My applications",
+        "href": "/citizen/applications"
+      }
+    ]
+  },
+  {
+    "topic": "support",
+    "question": "How can a citizen get general support or submit a complaint?",
+    "text": "For an application-specific question, sign in and submit a Contact Us request or complaint. A Citizen Service Representative can review it and respond.\n\nIf you would prefer in-person help, book a walk-in appointment.",
+    "links": [
+      {
+        "label": "Citizen support",
+        "href": "/citizen/support"
+      },
+      {
+        "label": "Book a walk-in",
+        "href": "/walk-in"
+      }
+    ]
+  },
+  {
+    "topic": "delivery",
+    "question": "How do document delivery and centre collection work?",
+    "text": "Choose home delivery or service-centre collection when completing the approved application payment. After issuance, the citizen portal shows dispatch or collection readiness and a tracking reference. Citizens can confirm receipt of home delivery; a CSR records centre handover. This assistant cannot retrieve a delivery status or change a delivery choice.",
+    "links": [
+      {
+        "label": "Citizen portal",
+        "href": "/login"
+      }
+    ]
+  },
+  {
+    "topic": "welcome",
+    "question": "Which general citizen services can LankaID help with?",
+    "text": "I can explain LankaID registration, NIC and passport requests, supporting documents, payments, appointments, delivery, and citizen support. Choose a suggested topic or ask a general service question. I cannot access personal records or perform actions. For personal application details, use your secure dashboard.",
+    "links": [
+      {
+        "label": "Explore services",
+        "href": "#services"
+      },
+      {
+        "label": "Citizen support",
+        "href": "/citizen/support"
+      }
+    ]
+  }
+]

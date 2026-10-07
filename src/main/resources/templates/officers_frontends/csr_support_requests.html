@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Citizen Support Queue | LankaID CSR</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<header class="bg-slate-950 text-white border-b border-slate-800">
+  <div class="max-w-[1500px] mx-auto min-h-16 px-4 sm:px-6 py-3 flex flex-wrap items-center gap-4">
+    <a th:href="@{/officer/csr}" class="text-sm text-slate-300 flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>CSR Dashboard</a>
+    <div class="h-6 w-px bg-slate-700"></div>
+    <div><p class="font-bold">Citizen Support Queue</p><p class="text-xs text-cyan-400">Complaints and Contact Us requests</p></div>
+    <div class="ml-auto text-right"><p class="text-xs font-semibold" th:text="${loggedInOfficerRoleLabel}">CSR</p><p class="text-[11px] text-slate-400" th:text="${loggedInOfficerEmployeeNo + ' · ' + loggedInOfficerEmail}">Officer</p></div>
+  </div>
+</header>
+
+<main class="max-w-[1500px] mx-auto p-4 sm:p-6">
+  <div class="grid sm:grid-cols-3 gap-3">
+    <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Waiting for response</p><p class="text-2xl font-bold mt-1" th:text="${openCount}">0</p></div>
+    <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Responded</p><p class="text-2xl font-bold text-sky-700 mt-1" th:text="${respondedCount}">0</p></div>
+    <div class="bg-white border rounded-2xl p-4"><p class="text-xs text-slate-500">Resolved</p><p class="text-2xl font-bold text-emerald-700 mt-1" th:text="${resolvedCount}">0</p></div>
+  </div>
+
+  <div class="mt-5 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    <div><h1 class="text-2xl font-extrabold">Support requests</h1><p class="text-sm text-slate-500 mt-1"><b th:text="${totalRequests}">0</b> matching request(s) · 15 loaded per page</p></div>
+    <form th:action="@{/officer/csr/support}" method="get" class="bg-white border rounded-xl p-3 flex flex-wrap gap-3 items-end">
+      <label class="text-xs font-bold text-slate-600">Request type
+        <select name="type" class="block mt-1 rounded-lg border-slate-300 text-sm">
+          <option value="">All types</option>
+          <option value="CONTACT" th:selected="${selectedType == 'CONTACT'}">Contact Us</option>
+          <option value="COMPLAINT" th:selected="${selectedType == 'COMPLAINT'}">Complaint</option>
+        </select>
+      </label>
+      <label class="text-xs font-bold text-slate-600">Status
+        <select name="status" class="block mt-1 rounded-lg border-slate-300 text-sm">
+          <option value="">All statuses</option>
+          <option value="OPEN" th:selected="${selectedStatus == 'OPEN'}">Open</option>
+          <option value="IN_PROGRESS" th:selected="${selectedStatus == 'IN_PROGRESS'}">Responded</option>
+          <option value="RESOLVED" th:selected="${selectedStatus == 'RESOLVED'}">Resolved</option>
+        </select>
+      </label>
+      <button class="rounded-lg bg-cyan-600 text-white px-4 py-2.5 text-sm font-bold">Apply filters</button>
+      <a th:href="@{/officer/csr/support}" class="rounded-lg border px-4 py-2.5 text-sm font-bold">Reset</a>
+    </form>
+  </div>
+
+  <div th:if="${#lists.isEmpty(supportRequests)}" class="mt-4 bg-white border border-dashed rounded-2xl p-10 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">inbox</span><p class="font-bold mt-2">No requests found</p></div>
+
+  <section th:unless="${#lists.isEmpty(supportRequests)}" class="mt-4 bg-white border rounded-2xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto"><table class="w-full min-w-[1100px] text-sm">
+      <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Reference</th><th class="p-4 text-left">Category</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Subject</th><th class="p-4 text-left">Status</th><th class="p-4 text-left">Submitted</th><th class="p-4 text-left">Handled by</th><th class="p-4 text-right">Actions</th></tr></thead>
+      <tbody class="divide-y">
+      <tr th:each="item : ${supportRequests}" class="align-top hover:bg-cyan-50/40">
+        <td class="p-4 font-mono text-xs font-bold text-cyan-700" th:text="${item.reference}">SUP</td>
+        <td class="p-4"><span class="rounded-full px-2.5 py-1 text-xs font-bold" th:classappend="${item.request.requestType == 'COMPLAINT' ? ' bg-orange-100 text-orange-700' : ' bg-sky-100 text-sky-700'}" th:text="${item.request.requestType == 'COMPLAINT' ? 'Complaint' : 'Contact Us'}">Type</span></td>
+        <td class="p-4"><p class="font-semibold whitespace-nowrap" th:text="${item.citizenName}">Citizen</p><p class="text-xs text-slate-500 mt-1" th:text="${item.citizenEmail}">Email</p></td>
+        <td class="p-4 max-w-xs"><p class="font-semibold" th:text="${item.request.subject}">Subject</p><p class="text-xs text-slate-500 mt-1 line-clamp-2" th:text="${item.request.message}">Message</p></td>
+        <td class="p-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold" th:text="${item.request.requestStatus == 'IN_PROGRESS' ? 'Responded' : #strings.capitalize(#strings.toLowerCase(item.request.requestStatus))}">Open</span></td>
+        <td class="p-4 text-xs text-slate-500 whitespace-nowrap" th:text="${item.request.createdAt == null ? '-' : #temporals.format(item.request.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+        <td class="p-4 text-xs" th:text="${item.handledByEmployeeNo}">Unassigned</td>
+        <td class="p-4">
+          <div class="flex justify-end gap-2">
+            <a th:href="@{/officer/csr/support/{reference}(reference=${item.reference})}" class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold">Review</a>
+            <a th:if="${item.request.requestStatus != 'RESOLVED'}" th:href="@{/officer/csr/support/{reference}(reference=${item.reference},reply=true)}" class="rounded-lg bg-cyan-600 text-white px-3 py-2 text-xs font-bold">Reply</a>
+            <form th:if="${item.request.requestStatus == 'IN_PROGRESS'}" th:action="@{/officer/csr/support/{reference}/resolve(reference=${item.reference})}" method="post"><button class="rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs font-bold" onclick="return confirm('Mark this request as resolved?')">Resolve</button></form>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <nav th:if="${totalPages > 1}" class="mt-5 flex items-center justify-between">
+    <a th:if="${hasPrevious}" th:href="@{/officer/csr/support(page=${currentPage - 1},type=${selectedType},status=${selectedStatus})}" class="rounded-xl border bg-white px-4 py-2.5 text-sm font-bold">Previous 15</a><span th:unless="${hasPrevious}"></span>
+    <span class="text-sm text-slate-500" th:text="${'Page ' + (currentPage + 1) + ' of ' + totalPages}">Page</span>
+    <a th:if="${hasNext}" th:href="@{/officer/csr/support(page=${currentPage + 1},type=${selectedType},status=${selectedStatus})}" class="rounded-xl bg-cyan-600 text-white px-4 py-2.5 text-sm font-bold">Load next 15</a><span th:unless="${hasNext}"></span>
+  </nav>
+</main>
+<script src="/js/portal-shell.js"></script>
+</body>
+</html>

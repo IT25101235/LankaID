@@ -1,246 +1,64 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Complaint Detail | LankaID CSR Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>
-  body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }
-  textarea:focus, input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(6,182,212,0.15); border-color: #06b6d4 !important; }
-</style>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Review Support Request | LankaID CSR</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<header class="bg-slate-950 text-white"><div class="max-w-6xl mx-auto min-h-16 px-4 py-3 flex items-center gap-4"><a th:href="@{/officer/csr/support}" class="text-sm text-slate-300 flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>Support queue</a><div class="h-6 w-px bg-slate-700"></div><p class="font-bold">Review support request</p><div class="ml-auto text-right"><p class="text-xs font-semibold" th:text="${loggedInOfficerRoleLabel}">CSR</p><p class="text-[11px] text-slate-400" th:text="${loggedInOfficerEmployeeNo + ' · ' + loggedInOfficerEmail}">Officer</p></div></div></header>
+<main class="max-w-6xl mx-auto p-4 sm:p-6">
+  <a th:href="@{/officer/csr/support}" class="support-back-button mb-5 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:border-cyan-600 hover:text-cyan-700">
+    <span class="material-symbols-outlined text-lg">arrow_back</span>Back to support queue
+  </a>
+  <div th:if="${supportMessage}" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-semibold text-emerald-700" th:text="${supportMessage}"></div>
+  <div th:if="${supportError}" class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-semibold text-red-700" th:text="${supportError}"></div>
 
-<header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
-    <a th:href="@{/officer/csr}" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-      Complaints
-    </a>
-    <div class="flex items-center gap-2 ml-2">
-      <span class="text-slate-600">|</span>
-      <span class="material-symbols-outlined text-cyan-400 text-base">feedback</span>
-      <span class="text-sm font-semibold text-white">Complaint Detail — <span th:text="${reference}">CMP-2026-0102</span></span>
+  <div th:if="${supportRequest != null}" class="grid lg:grid-cols-3 gap-5">
+    <div class="lg:col-span-2 space-y-5">
+      <section class="bg-white border rounded-2xl shadow-sm p-5">
+        <div class="flex flex-wrap justify-between gap-3">
+          <div><div class="flex gap-2"><span class="rounded-full px-2.5 py-1 text-xs font-bold" th:classappend="${supportRequest.request.requestType == 'COMPLAINT' ? ' bg-orange-100 text-orange-700' : ' bg-sky-100 text-sky-700'}" th:text="${supportRequest.request.requestType == 'COMPLAINT' ? 'Complaint' : 'Contact Us'}">Type</span><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold" th:text="${supportRequest.request.requestStatus == 'IN_PROGRESS' ? 'Responded' : #strings.capitalize(#strings.toLowerCase(supportRequest.request.requestStatus))}">Open</span></div><h1 class="text-xl font-bold mt-3" th:text="${supportRequest.request.subject}">Subject</h1><p class="font-mono text-xs text-cyan-700 mt-1" th:text="${supportRequest.reference}">Reference</p></div>
+          <p class="text-xs text-slate-500" th:text="${supportRequest.request.createdAt == null ? '-' : #temporals.format(supportRequest.request.createdAt, 'dd MMM yyyy, HH:mm')}">Date</p>
+        </div>
+        <div class="mt-5 rounded-xl bg-slate-50 border p-4 text-sm whitespace-pre-wrap" th:text="${supportRequest.request.message}">Message</div>
+      </section>
+
+      <section class="bg-white border rounded-2xl shadow-sm p-5">
+        <h2 class="font-bold">CSR response</h2>
+        <div th:if="${!#strings.isEmpty(supportRequest.request.response)}" class="mt-3 bg-emerald-50 border border-emerald-100 rounded-xl p-4"><p class="text-sm whitespace-pre-wrap" th:text="${supportRequest.request.response}">Response</p><p class="text-xs text-slate-500 mt-2" th:text="${supportRequest.handledByEmployeeNo}">Officer</p></div>
+        <p th:if="${#strings.isEmpty(supportRequest.request.response)}" class="text-sm text-slate-500 mt-3">No response has been sent yet.</p>
+
+        <form id="reply" th:if="${supportRequest.request.requestStatus != 'RESOLVED'}" th:action="@{/officer/csr/support/{reference}/respond(reference=${supportRequest.reference})}" method="post" class="border-t mt-5 pt-5">
+          <label class="text-sm font-bold text-slate-700">Response to citizen
+            <textarea name="response" required minlength="5" maxlength="2000" rows="6" class="w-full mt-2 rounded-xl border-slate-300 text-sm" placeholder="Write a clear response for the citizen" th:text="${supportRequest.request.response}"></textarea>
+          </label>
+          <button class="mt-3 bg-cyan-600 text-white rounded-xl px-5 py-3 text-sm font-bold">Send response</button>
+        </form>
+      </section>
     </div>
-    <div class="ml-auto flex items-center gap-2 text-sm font-semibold">
-      <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
-        <span class="material-symbols-outlined text-slate-300 text-base">person</span>
-      </div>
-      <span class="text-slate-300">Amara Wijesinghe</span>
-    </div>
+
+    <aside class="space-y-5">
+      <section class="bg-white border rounded-2xl shadow-sm p-5">
+        <h2 class="font-bold">Citizen information</h2>
+        <div class="mt-4 space-y-3 text-sm"><div><p class="text-xs text-slate-400">Name</p><p class="font-semibold" th:text="${supportRequest.citizenName}">Citizen</p></div><div><p class="text-xs text-slate-400">Email</p><p class="font-semibold break-all" th:text="${supportRequest.citizenEmail}">Email</p></div><div><p class="text-xs text-slate-400">Phone</p><p class="font-semibold" th:text="${supportRequest.citizenPhone}">Phone</p></div><div><p class="text-xs text-slate-400">Handled by</p><p class="font-semibold" th:text="${supportRequest.handledByEmployeeNo}">Officer</p></div></div>
+      </section>
+
+      <section class="bg-white border rounded-2xl shadow-sm p-5">
+        <h2 class="font-bold">Actions</h2>
+        <a th:if="${supportRequest.request.subject == 'Existing document verification' and supportRequest.request.requestStatus != 'RESOLVED'}" th:href="@{/officer/csr/identity/{id}(id=${supportRequest.request.requestId})}" class="block mt-4 rounded-xl bg-cyan-700 text-white p-3 text-sm font-bold">Review identity and record decision</a>
+        <p class="text-xs text-slate-500 mt-2">A response must be sent before the request can be resolved.</p>
+        <form th:if="${supportRequest.request.requestStatus == 'IN_PROGRESS' and supportRequest.request.subject != 'Existing document verification'}" th:action="@{/officer/csr/support/{reference}/resolve(reference=${supportRequest.reference})}" method="post"><button class="w-full mt-4 rounded-xl bg-emerald-600 text-white py-3 text-sm font-bold" onclick="return confirm('Mark this request as resolved?')">Mark as resolved</button></form>
+        <div th:if="${supportRequest.request.requestStatus == 'RESOLVED'}" class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700">This request is resolved.</div>
+      </section>
+    </aside>
   </div>
-</header>
 
-<div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    <!-- Left: Complaint Thread -->
-    <div class="lg:col-span-2 space-y-4">
-
-      <!-- Complaint Header Card -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <div class="flex items-start justify-between gap-3 mb-4">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">High Priority</span>
-              <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Open</span>
-              <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Processing Delay</span>
-            </div>
-            <h1 class="text-lg font-bold text-slate-900">NIC application under review for 3 weeks — no status update</h1>
-            <p class="text-xs text-slate-500 mt-1">Ref: CMP-2026-0102 &nbsp;·&nbsp; Submitted: Aug 15, 2026 at 8:23 AM</p>
-          </div>
-          <div class="flex gap-2 flex-shrink-0">
-            <button onclick="escalate()" class="border border-red-300 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">flag</span>
-              Escalate
-            </button>
-            <button onclick="closeComplaint()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">task_alt</span>
-              Mark Resolved
-            </button>
-          </div>
-        </div>
-
-        <!-- Original Complaint -->
-        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-7 h-7 rounded-full bg-slate-300 flex items-center justify-center">
-              <span class="material-symbols-outlined text-slate-600 text-sm">person</span>
-            </div>
-            <div>
-              <span class="text-xs font-bold text-slate-800">Kamal Perera</span>
-              <span class="text-xs text-slate-400 ml-2">Citizen &nbsp;·&nbsp; Aug 15, 2026 at 8:23 AM</span>
-            </div>
-          </div>
-          <p class="text-sm text-slate-700 leading-relaxed">My NIC application (reference: LK-NIC-2026-00097) has been under review for more than 3 weeks now. I have not received any status updates or communications from any officers. I need this urgently for employment purposes. Could you please provide an update on the timeline?</p>
-        </div>
-      </div>
-
-      <!-- Internal Notes / Communication Thread -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <h2 class="font-semibold text-slate-800 text-sm mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-cyan-600">forum</span>
-          Communication Thread
-        </h2>
-
-        <div class="space-y-4 mb-5">
-          <!-- System Note -->
-          <div class="flex gap-3">
-            <div class="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="material-symbols-outlined text-sky-600 text-sm">info</span>
-            </div>
-            <div class="flex-1 bg-sky-50 border border-sky-200 rounded-xl p-3 text-xs text-sky-700">
-              <span class="font-semibold">System</span> — Complaint auto-assigned to Amara Wijesinghe (CSR) · Aug 15, 2026 at 8:24 AM
-            </div>
-          </div>
-
-          <!-- CSR Internal Note -->
-          <div class="flex gap-3">
-            <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="material-symbols-outlined text-white text-sm">person</span>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-bold text-slate-800">Amara Wijesinghe</span>
-                <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium">Internal Note</span>
-                <span class="text-xs text-slate-400">Aug 15, 2026 at 9:00 AM</span>
-              </div>
-              <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-sm text-slate-700">
-                Checked with NIC Officer — application LK-NIC-2026-00097 is flagged pending a document review. Escalated to Kumara Silva to provide status update to citizen.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Reply Form -->
-        <div class="border-t border-slate-100 pt-4">
-          <h3 class="text-xs font-semibold text-slate-600 mb-2">Add Response or Note</h3>
-          <div class="flex gap-2 mb-3">
-            <button id="typePublic" onclick="setResponseType('public')" class="text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold">Reply to Citizen</button>
-            <button id="typeInternal" onclick="setResponseType('internal')" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Internal Note</button>
-          </div>
-          <textarea id="replyText" rows="4" placeholder="Type your response to the citizen here..." class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm resize-none"></textarea>
-
-          <!-- Canned Responses -->
-          <div class="mt-2 flex flex-wrap gap-2">
-            <button onclick="insertCanned('We have received your complaint and are investigating the matter. You will receive an update within 2 business days.')" class="text-xs border border-slate-200 text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50">+Investigation started</button>
-            <button onclick="insertCanned('Your complaint has been resolved. Please check your application status on the LankaID portal.')" class="text-xs border border-slate-200 text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50">+Resolved</button>
-            <button onclick="insertCanned('We apologize for the delay. Your application is being expedited and you will receive a status update shortly.')" class="text-xs border border-slate-200 text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50">+Delay apology</button>
-          </div>
-
-          <div class="flex items-center justify-between mt-3">
-            <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" class="rounded" id="notifyEmail" checked/>
-              Notify citizen by email
-            </label>
-            <button onclick="sendReply()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors">
-              <span class="material-symbols-outlined text-base">send</span>
-              Send Reply
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Right: Complaint Info -->
-    <div class="space-y-4">
-
-      <!-- Citizen Info -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <span class="material-symbols-outlined text-cyan-600 text-lg">account_circle</span>
-          Citizen Information
-        </h3>
-        <div class="space-y-2.5 text-xs text-slate-600">
-          <div><p class="text-slate-400">Full Name</p><p class="font-semibold text-slate-800 mt-0.5">Kamal Sandesh Perera</p></div>
-          <div><p class="text-slate-400">NIC Number</p><p class="font-semibold text-slate-800 mt-0.5">200012349876</p></div>
-          <div><p class="text-slate-400">Email</p><p class="font-semibold text-slate-800 mt-0.5">kamal.p@gmail.com</p></div>
-          <div><p class="text-slate-400">Mobile</p><p class="font-semibold text-slate-800 mt-0.5">+94 77 234 5678</p></div>
-          <div><p class="text-slate-400">District</p><p class="font-semibold text-slate-800 mt-0.5">Colombo</p></div>
-        </div>
-        <hr class="my-3 border-slate-100"/>
-        <p class="text-xs text-slate-400">Only the related reference and current status are shown to the CSR.</p>
-      </div>
-
-      <!-- Related Application -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <span class="material-symbols-outlined text-cyan-600 text-lg">assignment</span>
-          Related Application
-        </h3>
-        <div class="bg-slate-50 rounded-xl p-3 text-xs text-slate-700 space-y-2">
-          <div class="flex justify-between"><span class="text-slate-400">Reference</span><span class="font-mono font-bold text-sky-700">LK-NIC-2026-00097</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Type</span><span class="font-semibold">NIC — Lost/Damaged</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Submitted</span><span class="font-semibold">Jul 28, 2026</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Current Status</span><span class="text-red-600 font-semibold">Info Requested</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Assigned Officer</span><span class="font-semibold">Kumara Silva</span></div>
-        </div>
-      </div>
-
-      <!-- Status Actions -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 text-sm mb-3">Update Complaint Status</h3>
-        <select class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white mb-3">
-          <option value="open">Open</option>
-          <option value="inprogress">In Progress</option>
-          <option value="awaiting">Awaiting Citizen Response</option>
-          <option value="escalated">Escalated to Director</option>
-          <option value="resolved">Resolved</option>
-          <option value="closed">Closed</option>
-        </select>
-        <button class="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-xl text-xs font-semibold transition-colors">Update Status</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- Resolved Modal -->
-<div id="resolvedModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-7 text-center">
-    <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
-      <span class="material-symbols-outlined text-emerald-600 text-3xl">task_alt</span>
-    </div>
-    <h2 class="text-lg font-bold text-slate-900 mb-1">Complaint Resolved</h2>
-    <p class="text-xs text-slate-500 mb-4">The citizen has been notified that their complaint is resolved.</p>
-    <button onclick="window.location.href='/officer/csr'" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Back to Dashboard</button>
-  </div>
-</div>
-
-<script>
-let responseType = 'public';
-function setResponseType(type) {
-  responseType = type;
-  const pub = document.getElementById('typePublic');
-  const int = document.getElementById('typeInternal');
-  const txt = document.getElementById('replyText');
-  if (type === 'public') {
-    pub.className = 'text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold';
-    int.className = 'text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50';
-    txt.placeholder = 'Type your response to the citizen here...';
-  } else {
-    int.className = 'text-xs px-3 py-1.5 rounded-lg bg-purple-600 text-white font-semibold';
-    pub.className = 'text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50';
-    txt.placeholder = 'Add internal note (not visible to citizen)...';
-  }
-}
-function insertCanned(text) { document.getElementById('replyText').value = text; }
-function sendReply() {
-  const txt = document.getElementById('replyText').value;
-  if (!txt.trim()) { alert('Please enter a reply.'); return; }
-  alert('Reply sent!');
-  document.getElementById('replyText').value = '';
-}
-function closeComplaint() {
-  const m = document.getElementById('resolvedModal');
-  m.classList.remove('hidden'); m.classList.add('flex');
-}
-function escalate() { alert('Complaint escalated to Director.'); }
-</script>
+  <div th:if="${supportRequest == null}" class="bg-white border rounded-2xl p-8 text-center"><a th:href="@{/officer/csr/support}" class="text-cyan-700 font-bold">Return to support queue</a></div>
+</main>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>

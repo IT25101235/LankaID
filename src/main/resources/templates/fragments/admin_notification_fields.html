@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="audienceFields" class="mt-5 space-y-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div><label class="text-xs font-semibold text-slate-700">Recipient group</label><select name="recipientType" onchange="updateNotificationAudience(this.form)" class="notification-recipient-type w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option value="CITIZEN">Citizens</option><option value="OFFICER">Officers</option></select></div>
+    <div><label class="text-xs font-semibold text-slate-700">Audience</label><select name="audience" onchange="updateNotificationAudience(this.form)" class="notification-audience w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option value="ALL">All active recipients</option><option value="FILTERED">Filtered recipients</option><option value="SELECTED">Specific recipient(s)</option></select></div>
+  </div>
+
+  <div class="notification-filter-fields hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div><label class="text-xs font-semibold text-slate-700">Account status</label><select name="accountStatus" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option><option value="ALL">Active and suspended</option></select></div>
+      <div class="notification-citizen-filter"><label class="text-xs font-semibold text-slate-700">Application service</label><select name="citizenService" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option value="ALL">Any service</option><option value="NIC">NIC applicants</option><option value="PASSPORT">Passport applicants</option></select></div>
+      <div class="notification-officer-filter hidden"><label class="text-xs font-semibold text-slate-700">Officer role</label><select name="officerRole" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option value="ALL">Any officer role</option><option value="NIC_OFFICER">NIC officers</option><option value="PASSPORT_OFFICER">Passport officers</option><option value="CSR">Citizen service representatives</option><option value="DIRECTOR">Directors</option></select></div>
+    </div>
+  </div>
+
+  <div class="notification-selected-fields hidden">
+    <label class="text-xs font-semibold text-slate-700">Specific account(s)</label>
+    <select onchange="pickSpecificRecipient(this)" class="notification-citizen-picker w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900">
+      <option value="">Select a citizen, or enter identifiers below</option>
+      <option th:each="citizen : ${citizens}" th:value="${citizen.accountId}" th:text="|${citizen.displayName} · ${citizen.accountId} · ${citizen.email}|">Citizen</option>
+    </select>
+    <select onchange="pickSpecificRecipient(this)" class="notification-officer-picker hidden w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900">
+      <option value="">Select an officer, or enter identifiers below</option>
+      <option th:each="officer : ${officers}" th:value="${officer.employeeNo}" th:text="|${officer.employeeNo} · ${officer.roleLabel} · ${officer.email}|">Officer</option>
+    </select>
+    <textarea name="selectedRecipients" rows="3" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Citizen: CTZ-000007 or email&#10;Officer: employee number or @gov.lk email"></textarea>
+    <p class="text-[11px] text-slate-500 mt-1">Separate multiple recipients with commas or new lines. Every identifier is checked before anything is sent.</p>
+  </div>
+</div>
+</body>
+</html>

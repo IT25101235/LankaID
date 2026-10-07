@@ -15,68 +15,27 @@
     }
   };
 </script>
-<style>
-  html { scroll-behavior: smooth; }
-  body { font-family: 'Public Sans', sans-serif; }
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
-  .icon-fill { font-variation-settings: 'FILL' 1; }
-  .service-card {
-    transition: border-color 160ms ease, box-shadow 160ms ease;
-  }
-  .service-card:hover {
-    border-color: #a5f3fc;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  }
-  .reveal-step {
-    opacity: 1;
-    transform: none;
-  }
-  .reveal-ready .reveal-step {
-    opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 520ms ease, transform 520ms ease;
-    transition-delay: var(--reveal-delay, 0ms);
-  }
-  .reveal-ready .reveal-step.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .reveal-step {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-  }
-</style>
 <script>document.documentElement.classList.add('reveal-ready');</script>
-<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/Chatbot/chatbot.css?v=20261005" rel="stylesheet"/>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+<body id="top" class="gov-landing-page bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 
 <!-- Government header -->
-<header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
-    <a th:href="@{/}" class="flex items-center gap-3" aria-label="LankaID home">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center officer-brand-icon">
-        <span class="material-symbols-outlined text-white text-xl">account_balance</span>
-      </div>
-      <div>
-        <p class="font-extrabold text-base leading-none text-slate-900">Lanka<span class="text-cyan-600">ID</span></p>
-        <p class="text-[11px] text-slate-500 mt-1">Digital Government Services</p>
-      </div>
-    </a>
-    <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600" aria-label="Primary navigation">
-      <a class="text-cyan-700" href="#">Home</a>
-      <a class="hover:text-cyan-700 transition-colors" href="#services">Services</a>
-      <a class="hover:text-cyan-700 transition-colors" href="#process">How It Works</a>
-      <a class="hover:text-cyan-700 transition-colors" href="#support">Support</a>
+<header class="gov-site-header gov-official-strip border-b sticky top-0 z-50 text-white shadow-sm">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 h-[4.75rem] flex items-center justify-between">
+    <div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-200" aria-label="Primary navigation">
+      <a class="text-cyan-300" href="#top">Home</a>
+      <a class="hover:text-white transition-colors" href="#services">Services</a>
+      <a class="hover:text-white transition-colors" href="#process">How It Works</a>
+      <a class="hover:text-white transition-colors" href="#support">Support</a>
     </nav>
-    <a th:href="@{/login}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors">
+    <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
       Sign In
+    </a>
+    <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
+      Access Dashboard
     </a>
   </div>
 </header>
@@ -95,10 +54,11 @@
 <main class="flex-grow">
 
 <!-- Hero -->
-<section class="bg-slate-100 border-b border-slate-200">
+<section class="gov-hero bg-slate-100 border-b border-slate-200">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-16 lg:py-20 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
     <div>
-      <div class="inline-flex items-center gap-2 text-xs font-semibold text-cyan-800 bg-cyan-50 border border-cyan-200 rounded-full px-3 py-1.5 mb-6">
+      <p class="sr-only">Background photograph: the Old Parliament Building, home of the Presidential Secretariat, at Galle Face, Colombo.</p>
+      <div class="gov-hero-badge inline-flex items-center gap-2 text-xs font-semibold text-cyan-800 bg-cyan-50 border border-cyan-200 rounded-full px-3 py-1.5 mb-6">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         Official Government Identity Portal
       </div>
@@ -109,12 +69,20 @@
         Apply for identity documents, follow application progress, and access verified government services through one trusted LankaID account.
       </p>
       <div class="flex flex-wrap gap-3 mt-8">
-        <a th:href="@{/login}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+        <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
           Access LankaID
           <span class="material-symbols-outlined text-lg">arrow_forward</span>
         </a>
-        <a href="#process" class="inline-flex items-center h-12 px-6 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm font-bold hover:border-cyan-400 hover:text-cyan-700 transition-colors">
+        <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+          Access Dashboard
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a href="#process" class="gov-hero-secondary inline-flex items-center h-12 px-6 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm font-bold hover:border-cyan-400 hover:text-cyan-700 transition-colors">
           View the process
+        </a>
+        <a th:href="@{/walk-in}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors">
+          <span class="material-symbols-outlined text-lg">calendar_month</span>
+          Book a walk-in
         </a>
       </div>
     </div>
@@ -147,6 +115,17 @@
           </div>
           <span class="material-symbols-outlined text-slate-400">chevron_right</span>
         </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <p class="text-sm font-bold text-slate-900">Lost your walk-in QR pass?</p>
+        <form th:action="@{/walk-in/recover/otp/send}" method="post" class="flex gap-2 mt-3">
+          <label for="visitorPhone" class="sr-only">Mobile number used for booking, country code +94</label>
+          <div class="flex min-w-0 flex-1">
+            <span class="inline-flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-100 px-3 text-sm font-bold">+94</span>
+            <input id="visitorPhone" name="phone" required pattern="7[0-9]{8}" minlength="9" maxlength="9" inputmode="numeric" autocomplete="tel-national" title="Enter nine digits starting with 7, without the leading zero." class="w-full min-w-0 rounded-r-lg border-slate-300 text-sm" placeholder="771234567"/>
+          </div>
+          <button class="rounded-lg bg-cyan-600 text-white px-4 text-xs font-bold">Get your QR code</button>
+        </form>
       </div>
     </aside>
   </div>
@@ -211,22 +190,22 @@
     </div>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 0ms">
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
         <div class="w-10 h-10 rounded-xl bg-cyan-600 text-white font-bold flex items-center justify-center mb-5">1</div>
         <h3 class="text-base font-bold text-slate-900">Apply Online</h3>
         <p class="text-sm leading-relaxed text-slate-600 mt-2">Complete the relevant form and submit the required supporting documents.</p>
       </article>
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 90ms">
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
         <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">2</div>
         <h3 class="text-base font-bold text-slate-900">Book Appointment</h3>
         <p class="text-sm leading-relaxed text-slate-600 mt-2">Choose an available time at the most convenient service centre.</p>
       </article>
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 180ms">
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
         <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">3</div>
         <h3 class="text-base font-bold text-slate-900">Verify Identity</h3>
         <p class="text-sm leading-relaxed text-slate-600 mt-2">Attend the centre for document checks and biometric capture where required.</p>
       </article>
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6" style="--reveal-delay: 270ms">
+      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
         <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">4</div>
         <h3 class="text-base font-bold text-slate-900">Receive Document</h3>
         <p class="text-sm leading-relaxed text-slate-600 mt-2">Track the final status and receive the completed identity document securely.</p>
@@ -242,21 +221,18 @@
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
     <div class="grid md:grid-cols-[1.2fr_0.8fr] gap-10 pb-9 border-b border-slate-800">
       <div class="max-w-lg">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center officer-brand-icon">
-            <span class="material-symbols-outlined text-white">account_balance</span>
-          </div>
-          <div>
-            <p class="font-extrabold text-lg text-white leading-none">Lanka<span class="officer-accent-text">ID</span></p>
-            <p class="text-xs text-slate-400 mt-1">National Identity Portal</p>
-          </div>
-        </div>
+        <div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div>
         <p class="text-sm text-slate-400 leading-relaxed mt-5">The official digital identity and citizen verification service of Sri Lanka.</p>
       </div>
 
       <div>
         <h2 class="text-sm font-bold text-white">Support and assistance</h2>
         <div class="grid sm:grid-cols-2 gap-4 mt-5 text-sm">
+          <button type="button" class="lankaid-chatbot-support-link sm:col-span-2" data-chatbot-open>
+            <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+            <span>Chat with LankaID <small>Get help finding the right service</small></span>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
           <div class="flex gap-3">
             <span class="material-symbols-outlined text-cyan-400">call</span>
             <div><p class="font-semibold text-slate-200">National Helpline</p><p class="text-slate-400 mt-1">1919</p></div>
@@ -284,6 +260,72 @@
   </div>
 </footer>
 
+<!-- Landing-page assistant: assets are loaded only by this template. -->
+<div class="lankaid-chatbot" data-chatbot hidden>
+  <button type="button" class="lankaid-chatbot-launcher" data-chatbot-launcher
+          aria-controls="lankaid-chatbot-panel" aria-expanded="false" aria-label="Open LankaID assistant">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2v-10a9 9 0 0 1 18 0Z"/><path d="M7 11h10M7 15h6" stroke-linecap="round"/></svg>
+    <span>Ask LankaID</span>
+    <span class="lankaid-chatbot-launcher-spark" aria-hidden="true">✦</span>
+  </button>
+
+  <section id="lankaid-chatbot-panel" class="lankaid-chatbot-panel" role="dialog"
+           aria-modal="false" aria-labelledby="lankaid-chatbot-title" hidden>
+    <header class="lankaid-chatbot-header">
+      <div class="lankaid-chatbot-brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="8.5" cy="10" r="1.5"/><path d="M6 15c0-2.5 5-2.5 5 0M14 10h4M14 14h4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="lankaid-chatbot-header-copy">
+        <h2 id="lankaid-chatbot-title">LankaID Assistant</h2>
+        <p><span aria-hidden="true"></span>Service guidance</p>
+      </div>
+      <button type="button" class="lankaid-chatbot-icon-button" data-chatbot-reset aria-label="Start a new chat" title="Start a new chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 10a8 8 0 1 1 2 8M4 4v6h6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="lankaid-chatbot-icon-button" data-chatbot-close aria-label="Close chat" title="Close chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <div class="lankaid-chatbot-conversation" role="log" aria-label="Conversation with LankaID assistant"
+         aria-live="polite" aria-relevant="additions" data-chatbot-log>
+      <div class="lankaid-chatbot-welcome" data-chatbot-welcome>
+        <span class="lankaid-chatbot-welcome-tag">A LITTLE GUIDANCE, A SIMPLER JOURNEY</span>
+        <h3>Hello! How can we help?</h3>
+        <p>Find your next step for identity documents, appointments, and LankaID services.</p>
+        <div class="lankaid-chatbot-welcome-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7l-9-4Z"/><path d="m8 12 3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>For personal application details, use your secure dashboard.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lankaid-chatbot-topics" aria-label="Suggested questions">
+      <button type="button" data-chatbot-prompt="How do I apply for a NIC?">NIC applications <span aria-hidden="true">↗</span></button>
+      <button type="button" data-chatbot-prompt="How do I apply for a passport?">Passport services <span aria-hidden="true">↗</span></button>
+      <button type="button" data-chatbot-prompt="How can I track my application?">Track an application <span aria-hidden="true">↗</span></button>
+      <button type="button" data-chatbot-prompt="How do I book a walk-in appointment?">Book a walk-in <span aria-hidden="true">↗</span></button>
+    </div>
+
+    <form class="lankaid-chatbot-composer" data-chatbot-form>
+      <label for="lankaid-chatbot-input" class="lankaid-chatbot-sr-only">Your message to LankaID assistant</label>
+      <div class="lankaid-chatbot-input-wrap">
+        <textarea id="lankaid-chatbot-input" name="message" rows="1" maxlength="500"
+                  placeholder="How can we help you?" autocomplete="off" data-chatbot-input
+                  aria-describedby="lankaid-chatbot-input-help"></textarea>
+        <button type="submit" class="lankaid-chatbot-send" aria-label="Send message" disabled data-chatbot-send>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m3 3 18 9-18 9 4-9-4-9ZM7 12h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="lankaid-chatbot-composer-meta">
+        <span id="lankaid-chatbot-input-help">Enter to send · Shift + Enter for a new line</span>
+        <span data-chatbot-count aria-label="Message character count">0/500</span>
+      </div>
+    </form>
+    <div class="lankaid-chatbot-footer">LankaID <span aria-hidden="true">·</span> Helping you find your next step</div>
+  </section>
+</div>
+
 <script>
   const revealSteps = document.querySelectorAll('.reveal-step');
   if ('IntersectionObserver' in window) {
@@ -300,4 +342,7 @@
     revealSteps.forEach(step => step.classList.add('is-visible'));
   }
 </script>
+<script src="/js/walkin-phone.js"></script>
+<script src="/Chatbot/chatbot-guide.js?v=20261005" defer></script>
+<script src="/Chatbot/chatbot.js?v=20261005" defer></script>
 </body></html>

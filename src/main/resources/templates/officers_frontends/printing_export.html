@@ -1,11 +1,153 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Printing Export | LankaID Director</title><script src="https://cdn.tailwindcss.com?plugins=forms"></script><link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/><style>body{font-family:'Public Sans',sans-serif}</style></head>
-<body class="min-h-screen bg-slate-950 text-slate-100"><header class="border-b border-slate-800"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="@{/officer/director}" class="text-sm text-slate-400 hover:text-white flex gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>Director dashboard</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold">Printing Export</p><p class="text-xs text-slate-500">Prepare records for the external printing service</p></div><span class="ml-auto bg-purple-500/10 border border-purple-400/30 text-purple-300 px-3 py-1 rounded-full text-xs">Director access</span></div></header>
-<main class="max-w-7xl mx-auto p-5 sm:p-6"><div class="grid sm:grid-cols-4 gap-4"><div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-xs text-slate-400">Ready for printing</p><p class="text-3xl font-bold mt-1">86</p></div><div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-xs text-slate-400">NIC</p><p class="text-3xl font-bold text-cyan-400 mt-1">54</p></div><div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-xs text-slate-400">Passport</p><p class="text-3xl font-bold text-indigo-400 mt-1">32</p></div><div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-xs text-slate-400">Last export</p><p class="text-lg font-bold mt-2">22 Aug · 4:30 PM</p></div></div>
-  <section class="bg-slate-900 border border-slate-800 rounded-2xl mt-5 overflow-hidden"><div class="p-5 border-b border-slate-800"><div class="flex flex-wrap items-end gap-3"><div class="mr-auto"><h1 class="font-bold">Ready-to-print records</h1><p class="text-xs text-slate-500 mt-1">Only applications with completed biometrics appear here.</p></div><select id="docFilter" onchange="filterPrintRows()" class="bg-slate-950 border-slate-700 rounded-lg text-sm"><option value="all">NIC and Passport</option><option value="nic">NIC only</option><option value="passport">Passport only</option></select><select class="bg-slate-950 border-slate-700 rounded-lg text-sm"><option>All centres</option><option>Colombo</option><option>Kandy</option><option>Galle</option></select><button onclick="selectVisible()" class="border border-slate-700 rounded-lg px-4 py-2 text-xs font-bold">Select visible</button></div></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-950 text-xs uppercase text-slate-500"><tr><th class="p-4"><input id="selectAll" onchange="toggleAll(this)" type="checkbox" class="rounded text-purple-500"/></th><th class="p-4 text-left">Reference</th><th class="p-4 text-left">Document</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Centre</th><th class="p-4 text-left">Biometric complete</th><th class="p-4 text-left">Validation</th></tr></thead><tbody id="printRows" class="divide-y divide-slate-800">
-    <tr data-type="nic"><td class="p-4"><input type="checkbox" class="record rounded text-purple-500" onchange="updateSelection()"/></td><td class="p-4 font-mono text-xs">LK-NIC-2026-00183</td><td class="p-4">NIC Renewal</td><td class="p-4">Kamal Perera</td><td class="p-4">Colombo</td><td class="p-4">23 Aug 2026</td><td class="p-4"><span class="text-emerald-400 text-xs font-bold">Ready</span></td></tr>
-    <tr data-type="passport"><td class="p-4"><input type="checkbox" class="record rounded text-purple-500" onchange="updateSelection()"/></td><td class="p-4 font-mono text-xs">LK-PASS-2026-00041</td><td class="p-4">Passport Renewal</td><td class="p-4">Dilani Silva</td><td class="p-4">Kandy</td><td class="p-4">23 Aug 2026</td><td class="p-4"><span class="text-emerald-400 text-xs font-bold">Ready</span></td></tr>
-    <tr data-type="nic"><td class="p-4"><input type="checkbox" class="record rounded text-purple-500" onchange="updateSelection()"/></td><td class="p-4 font-mono text-xs">LK-NIC-2026-00179</td><td class="p-4">New NIC</td><td class="p-4">Nadeesha Kumari</td><td class="p-4">Galle</td><td class="p-4">22 Aug 2026</td><td class="p-4"><span class="text-emerald-400 text-xs font-bold">Ready</span></td></tr>
-  </tbody></table></div><div class="p-4 border-t border-slate-800 flex flex-wrap items-center gap-3"><p class="text-xs text-slate-400"><b id="selectedCount" class="text-white">0</b> records selected</p><div class="ml-auto flex gap-2"><button onclick="downloadDemo('CSV')" class="border border-slate-700 rounded-lg px-4 py-2 text-xs font-bold">Download CSV</button><button onclick="downloadDemo('PDF')" class="border border-slate-700 rounded-lg px-4 py-2 text-xs font-bold">Download PDF report</button><button onclick="createBatch()" class="bg-purple-600 hover:bg-purple-700 rounded-lg px-4 py-2 text-xs font-bold">Create printing batch</button></div></div></section>
-  <section class="bg-slate-900 border border-slate-800 rounded-2xl mt-5 p-5"><h2 class="font-bold">Recent batches</h2><div class="mt-4 overflow-x-auto"><table class="w-full text-sm"><thead class="text-xs text-slate-500"><tr><th class="text-left py-2">Batch</th><th class="text-left">Created</th><th class="text-left">Records</th><th class="text-left">Format</th><th class="text-left">Status</th></tr></thead><tbody><tr class="border-t border-slate-800"><td class="py-3 font-mono">PRINT-2026-0822-03</td><td>22 Aug, 4:30 PM</td><td>74</td><td>CSV + PDF</td><td class="text-emerald-400 font-bold">Exported</td></tr></tbody></table></div></section>
-</main><script>function visibleRows(){return[...document.querySelectorAll('#printRows tr')].filter(r=>r.style.display!=='none')}function filterPrintRows(){const type=document.getElementById('docFilter').value;document.querySelectorAll('#printRows tr').forEach(r=>r.style.display=(type==='all'||r.dataset.type===type)?'':'none');updateSelection()}function toggleAll(box){visibleRows().forEach(r=>r.querySelector('.record').checked=box.checked);updateSelection()}function selectVisible(){visibleRows().forEach(r=>r.querySelector('.record').checked=true);updateSelection()}function updateSelection(){document.getElementById('selectedCount').textContent=document.querySelectorAll('.record:checked').length}function selected(){return[...document.querySelectorAll('.record:checked')]}function downloadDemo(format){if(!selected().length){alert('Select at least one record.');return}alert(`${format} export preview prepared. Real file generation will be added with the backend.`)}function createBatch(){if(!selected().length){alert('Select at least one record.');return}if(confirm(`Create a printing batch with ${selected().length} records?`))alert('Printing batch created in the UI prototype. No database records were changed.')}</script></body></html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Printing Export | LankaID Director</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-officer min-h-screen bg-slate-950 text-slate-100" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<header class="border-b border-slate-800 bg-slate-950/95 sticky top-0 z-20">
+  <div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4">
+    <a th:href="@{/officer/director}" class="text-sm text-slate-400 hover:text-white flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>Director dashboard
+    </a>
+    <div class="h-6 w-px bg-slate-700"></div>
+    <div>
+      <p class="font-bold">Printing Export</p>
+      <p class="text-xs text-slate-500">Generate simulated government numbers and export printing data</p>
+    </div>
+    <div class="ml-auto text-right hidden sm:block">
+      <p class="text-xs font-bold text-purple-300" th:text="${loggedInOfficerEmployeeNo}">Employee number</p>
+      <p class="text-xs text-slate-500" th:text="${loggedInOfficerEmail}">Email</p>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto p-5 sm:p-6 space-y-5">
+  <div th:if="${printingMessage}" class="rounded-xl border border-emerald-700 bg-emerald-950/60 p-4 text-sm font-semibold text-emerald-300" th:text="${printingMessage}"></div>
+  <div th:if="${printingError}" class="rounded-xl border border-red-700 bg-red-950/60 p-4 text-sm font-semibold text-red-300" th:text="${printingError}"></div>
+
+  <section class="grid sm:grid-cols-3 gap-4">
+    <article class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <p class="text-xs text-slate-400">Ready for printing</p>
+      <p class="text-3xl font-bold text-cyan-400 mt-1" th:text="${#lists.size(readyApplications)}">0</p>
+    </article>
+    <article class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <p class="text-xs text-slate-400">NIC ready</p>
+      <p class="text-3xl font-bold mt-1" th:text="${readyApplications.?[serviceType == 'NIC'].size()}">0</p>
+    </article>
+    <article class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <p class="text-xs text-slate-400">Passport ready</p>
+      <p class="text-3xl font-bold mt-1" th:text="${readyApplications.?[serviceType == 'PASSPORT'].size()}">0</p>
+    </article>
+  </section>
+
+  <form th:action="@{/officer/director/printing/process}" method="post" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+    <div class="p-5 border-b border-slate-800 flex flex-wrap items-end gap-3">
+      <div class="mr-auto">
+        <h1 class="font-bold">Ready-to-print applications</h1>
+        <p class="text-xs text-slate-500 mt-1">Only applications with completed biometric collection appear here.</p>
+      </div>
+      <select id="serviceFilter" onchange="filterRows()" class="bg-slate-950 border-slate-700 rounded-lg text-sm">
+        <option value="all">NIC and Passport</option>
+        <option value="NIC">NIC only</option>
+        <option value="PASSPORT">Passport only</option>
+      </select>
+      <button type="button" onclick="selectVisible()" class="gov-button-secondary px-4 py-2 text-xs">Select visible</button>
+    </div>
+
+    <div th:if="${#lists.isEmpty(readyApplications)}" class="p-10 text-center">
+      <span class="material-symbols-outlined text-5xl text-slate-700">print_disabled</span>
+      <p class="font-bold mt-2">No applications are ready</p>
+      <p class="text-sm text-slate-500 mt-1">Applications appear after biometric collection is completed.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(readyApplications)}" class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-950 text-xs uppercase text-slate-500">
+        <tr>
+          <th class="p-4"><input id="selectAll" type="checkbox" onchange="toggleAll(this)" class="rounded text-purple-500"/></th>
+          <th class="p-4 text-left">Application</th>
+          <th class="p-4 text-left">Document</th>
+          <th class="p-4 text-left">Citizen</th>
+          <th class="p-4 text-left">Date of birth</th>
+          <th class="p-4 text-left">Ready since</th>
+        </tr>
+        </thead>
+        <tbody id="readyRows" class="divide-y divide-slate-800">
+        <tr th:each="row : ${readyApplications}" th:attr="data-service=${row.serviceType}">
+          <td class="p-4"><input class="print-record rounded text-purple-500" type="checkbox" name="applicationIds" th:value="${row.applicationId}" onchange="updateSelection()"/></td>
+          <td class="gov-reference-text p-4 font-mono text-xs font-bold" th:text="${row.applicationNo}">Application</td>
+          <td class="p-4"><span class="font-bold" th:text="${row.serviceType}">NIC</span><span class="block text-xs text-slate-500" th:text="${#strings.replace(row.applicationKind, '_', ' ')}">NEW</span></td>
+          <td class="p-4"><span class="font-semibold" th:text="${row.citizenName}">Citizen</span><span class="block text-xs text-slate-500" th:text="${row.email}">Email</span></td>
+          <td class="p-4 text-slate-300" th:text="${row.dateOfBirth == null ? 'Not recorded' : #temporals.format(row.dateOfBirth, 'dd MMM yyyy')}">DOB</td>
+          <td class="p-4 text-xs text-slate-400" th:text="${#temporals.format(row.readyAt, 'dd MMM yyyy, HH:mm')}">Ready</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(readyApplications)}" class="p-4 border-t border-slate-800 flex flex-wrap items-center gap-3">
+      <p class="text-xs text-slate-400"><b id="selectedCount" class="text-white">0</b> application(s) selected</p>
+      <button id="processButton" disabled class="gov-button-primary ml-auto px-5 py-2.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed">Generate numbers &amp; mark as printed</button>
+    </div>
+  </form>
+
+  <section class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+    <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+      <div>
+        <h2 class="font-bold">Printed document register</h2>
+        <p class="text-xs text-slate-500 mt-1">Government numbers already saved in GovernmentIdentityRecord.</p>
+      </div>
+      <a th:if="${!#lists.isEmpty(printedApplications)}" th:href="@{/officer/director/printing/download}" class="gov-button-primary ml-auto px-4 py-2 text-xs"><span class="material-symbols-outlined text-base">download</span>Download CSV</a>
+    </div>
+    <div th:if="${#lists.isEmpty(printedApplications)}" class="p-8 text-center text-sm text-slate-500">No printed documents are recorded yet.</div>
+    <div th:unless="${#lists.isEmpty(printedApplications)}" class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-950 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Document number</th><th class="p-4 text-left">Application</th><th class="p-4 text-left">Type</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Contact</th></tr></thead>
+        <tbody class="divide-y divide-slate-800">
+        <tr th:each="row : ${printedApplications}">
+          <td class="gov-reference-text p-4 font-mono font-bold" th:text="${row.documentNumber}">Number</td>
+          <td class="p-4 font-mono text-xs" th:text="${row.applicationNo}">Application</td>
+          <td class="p-4" th:text="${row.serviceType}">NIC</td>
+          <td class="p-4" th:text="${row.citizenName}">Citizen</td>
+          <td class="p-4 text-xs text-slate-400"><span th:text="${row.email}">Email</span><span class="block" th:text="${row.phone}">Phone</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+function visibleRows() {
+  return [...document.querySelectorAll('#readyRows tr')].filter(row => row.style.display !== 'none');
+}
+function filterRows() {
+  const service = document.getElementById('serviceFilter').value;
+  document.querySelectorAll('#readyRows tr').forEach(row => {
+    row.style.display = service === 'all' || row.dataset.service === service ? '' : 'none';
+  });
+  updateSelection();
+}
+function toggleAll(box) {
+  visibleRows().forEach(row => row.querySelector('.print-record').checked = box.checked);
+  updateSelection();
+}
+function selectVisible() {
+  visibleRows().forEach(row => row.querySelector('.print-record').checked = true);
+  updateSelection();
+}
+function updateSelection() {
+  const selected = document.querySelectorAll('.print-record:checked').length;
+  document.getElementById('selectedCount').textContent = selected;
+  document.getElementById('processButton').disabled = selected === 0;
+}
+</script>
+<script src="/js/portal-shell.js"></script>
+</body>
+</html>

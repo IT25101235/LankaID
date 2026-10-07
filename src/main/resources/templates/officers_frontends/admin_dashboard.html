@@ -8,64 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>
-  body { font-family: 'Public Sans', sans-serif; }
-  .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 500; transition: all 0.15s; text-decoration: none; }
-  .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-  .sidebar-link.active { background: rgba(34,211,238,0.15); color: #67e8f9; }
-  .sidebar-link .material-symbols-outlined { font-size: 20px; }
-  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; }
-  input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(8,145,178,0.16); border-color: #0891b2 !important; }
-  .light-admin-table { background: #fff; color: #334155; }
-  .light-admin-table thead { background: #f8fafc; }
-  .light-admin-table thead tr, .light-admin-table th { color: #475569 !important; }
-  .light-admin-table tbody { color: #334155 !important; }
-  .light-admin-table tbody tr:hover { background: #f1f5f9 !important; }
-  .light-admin-table .text-white { color: #0f172a !important; }
-  .light-admin-table .text-slate-300,
-  .light-admin-table .text-slate-400,
-  .light-admin-table .text-slate-500 { color: #475569 !important; }
-  .light-admin-table .bg-slate-700 { background: #e2e8f0 !important; color: #334155 !important; }
-  .light-admin-table .hover\:bg-slate-600:hover { background: #cbd5e1 !important; }
-  .light-admin-table .hover\:bg-amber-900\/50:hover { background: #fef3c7 !important; }
-  .light-admin-table .hover\:bg-red-900\/50:hover { background: #fee2e2 !important; }
-  .light-admin-table .bg-sky-900\/50 { background: #e0f2fe !important; }
-  .light-admin-table .text-sky-400 { color: #0369a1 !important; }
-  .light-admin-table .border-sky-800 { border-color: #bae6fd !important; }
-  .light-admin-table .bg-emerald-900\/50 { background: #d1fae5 !important; }
-  .light-admin-table .text-emerald-400 { color: #047857 !important; }
-  .light-admin-table .border-emerald-800 { border-color: #a7f3d0 !important; }
-  .light-admin-table .bg-indigo-900\/50 { background: #e0e7ff !important; }
-  .light-admin-table .text-indigo-400 { color: #4338ca !important; }
-  .light-admin-table .border-indigo-800 { border-color: #c7d2fe !important; }
-  .light-admin-table .bg-cyan-900\/50 { background: #cffafe !important; }
-  .light-admin-table .text-cyan-400 { color: #0e7490 !important; }
-  .light-admin-table .border-cyan-800 { border-color: #a5f3fc !important; }
-  .light-admin-table .bg-purple-900\/50 { background: #f3e8ff !important; }
-  .light-admin-table .text-purple-400 { color: #7e22ce !important; }
-  .light-admin-table .border-purple-800 { border-color: #e9d5ff !important; }
-</style>
-<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 flex officer-dashboard-shell">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime},data-admin-section=${activeAdminSection}">
 
 <!-- Sidebar -->
 <aside class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r border-slate-800 officer-sidebar">
   <div class="p-5 border-b border-slate-800">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-500 flex items-center justify-center shadow-md officer-brand-icon">
-        <span class="material-symbols-outlined text-white text-lg">shield</span>
+        <img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/>
       </div>
-      <div>
-        <p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p>
-        <p class="text-xs text-slate-400 mt-0.5">Admin Portal</p>
-      </div>
+      <div><p class="font-extrabold text-white text-base leading-none">Lanka<span class="text-cyan-400 officer-accent-text">ID</span></p><p class="text-[10px] leading-3 text-slate-400 mt-1">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</p><p class="text-xs text-slate-400 mt-1">Admin Portal</p></div>
     </div>
   </div>
 
   <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
     <p class="text-xs font-semibold text-slate-500 uppercase px-3 py-2 mt-1">Administration</p>
-    <a href="/officer/admin/officers" class="sidebar-link active" id="nav-users">
+    <a href="/officer/admin" class="sidebar-link active" id="nav-overview">
+      <span class="material-symbols-outlined">dashboard</span>
+      Overview
+    </a>
+    <a href="/officer/admin?section=users" class="sidebar-link" id="nav-users">
       <span class="material-symbols-outlined">group</span>
       Officer Credentials
     </a>
@@ -76,6 +40,10 @@
     <a href="#" onclick="showSection('settings')" class="sidebar-link" id="nav-settings">
       <span class="material-symbols-outlined">settings</span>
       System Settings
+    </a>
+    <a href="#" onclick="return showSection('centres')" class="sidebar-link" id="nav-centres">
+      <span class="material-symbols-outlined">location_city</span>
+      Service Centres
     </a>
     <a href="#" onclick="return showSection('maintenance')" class="sidebar-link" id="nav-maintenance">
       <span class="material-symbols-outlined">engineering</span>
@@ -88,7 +56,7 @@
     </a>
     <a href="#" onclick="return showSection('notifications')" class="sidebar-link" id="nav-notifications">
       <span class="material-symbols-outlined">campaign</span>
-      Citizen Notifications
+      Notifications
     </a>
   </nav>
 
@@ -115,11 +83,11 @@
 
   <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 sticky top-0 z-20 officer-topbar">
     <div class="flex-1">
-      <h1 class="text-lg font-bold text-slate-900" id="pageTitle">Officer Credential Management</h1>
-      <p class="text-xs text-slate-400" id="pageSubtitle">Create officer logins and manage their assigned roles</p>
+      <h1 class="text-lg font-bold text-slate-900" id="pageTitle">System Overview</h1>
+      <p class="text-xs text-slate-400" id="pageSubtitle">Current values calculated from the LankaID database</p>
     </div>
     <div class="flex items-center gap-3">
-      <button id="addOfficerButton" onclick="openAddUser()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors officer-primary-button">
+      <button id="addOfficerButton" onclick="openAddUser()" class="hidden bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors officer-primary-button">
         <span class="material-symbols-outlined text-base">person_add</span>
         Add Officer
       </button>
@@ -130,8 +98,117 @@
     </div>
   </header>
 
+  <!-- ===== SYSTEM OVERVIEW ===== -->
+  <div id="section-overview" class="p-6 space-y-6">
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-sky-600">groups</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${citizenAccountCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Citizen accounts</p>
+      </div>
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-emerald-600">badge</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${activeOfficerCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Active officers</p>
+      </div>
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-purple-600">location_city</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${serviceCentreCount}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Service centres</p>
+      </div>
+      <div class="card p-5">
+        <span class="material-symbols-outlined text-cyan-700">assignment</span>
+        <p class="text-3xl font-bold text-slate-900 mt-3" th:text="${adminOverview.totalApplications}">0</p>
+        <p class="text-xs text-slate-600 mt-1">Total applications</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <div class="card p-6 xl:col-span-2">
+        <h2 class="font-bold text-slate-900">Application workload</h2>
+        <p class="text-xs text-slate-600 mt-1">Current application counts grouped by workflow stage</p>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+          <div class="rounded-xl bg-amber-50 border border-amber-200 p-4">
+            <p class="text-2xl font-bold text-amber-700" th:text="${adminOverview.pendingReview}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Pending review</p>
+          </div>
+          <div class="rounded-xl bg-sky-50 border border-sky-200 p-4">
+            <p class="text-2xl font-bold text-sky-700" th:text="${adminOverview.biometricPipeline}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Biometric pipeline</p>
+          </div>
+          <div class="rounded-xl bg-orange-50 border border-orange-200 p-4">
+            <p class="text-2xl font-bold text-orange-700" th:text="${adminOverview.correctionRequired}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Correction required</p>
+          </div>
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+            <p class="text-2xl font-bold text-emerald-700" th:text="${adminOverview.printedDocuments}">0</p>
+            <p class="text-xs text-slate-600 mt-1">Documents issued</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="font-bold text-slate-900">Application types</h2>
+        <p class="text-xs text-slate-600 mt-1">NIC and passport application totals</p>
+        <div class="space-y-4 mt-5">
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div><p class="font-semibold text-slate-900">NIC</p><p class="text-xs text-slate-500">Identity card applications</p></div>
+            <p class="text-2xl font-bold text-emerald-700" th:text="${adminOverview.nicApplications}">0</p>
+          </div>
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div><p class="font-semibold text-slate-900">Passport</p><p class="text-xs text-slate-500">Passport applications</p></div>
+            <p class="text-2xl font-bold text-indigo-700" th:text="${adminOverview.passportApplications}">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <div class="card overflow-hidden xl:col-span-2">
+        <div class="p-5 border-b border-slate-200">
+          <h2 class="font-bold text-slate-900">Recent applications</h2>
+          <p class="text-xs text-slate-600 mt-1">The eight most recently created applications</p>
+        </div>
+        <div th:if="${#lists.isEmpty(adminOverview.recentApplications)}" class="p-8 text-center text-slate-500 text-sm">No application records found.</div>
+        <div th:unless="${#lists.isEmpty(adminOverview.recentApplications)}" class="overflow-x-auto">
+          <table class="w-full text-sm light-admin-table">
+            <thead><tr class="text-xs text-slate-500"><th class="text-left p-4">Application</th><th class="text-left p-4">Citizen</th><th class="text-left p-4">Service</th><th class="text-left p-4">Status</th><th class="text-left p-4">Created</th></tr></thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr th:each="row : ${adminOverview.recentApplications}">
+                <td class="p-4 font-mono text-xs text-cyan-700" th:text="${row.applicationNo}">Reference</td>
+                <td class="p-4 text-slate-700" th:text="${row.citizenName}">Citizen</td>
+                <td class="p-4"><b th:text="${row.serviceType}">NIC</b><span class="block text-xs text-slate-500" th:text="${#strings.replace(row.applicationKind, '_', ' ')}">NEW</span></td>
+                <td class="p-4"><span class="text-xs px-2.5 py-1 bg-slate-100 rounded-full" th:text="${#strings.replace(row.currentStatus, '_', ' ')}">Status</span></td>
+                <td class="p-4 text-xs text-slate-600" th:text="${row.createdAt == null ? '-' : #temporals.format(row.createdAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="font-bold text-slate-900">Quick actions</h2>
+        <p class="text-xs text-slate-600 mt-1 mb-4">Open common administration tools</p>
+        <div class="space-y-3">
+          <button type="button" onclick="showSection('users')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-cyan-700">manage_accounts</span><span><b class="block text-sm">Manage officers</b><span class="text-xs text-slate-500">Create or update credentials</span></span>
+          </button>
+          <button type="button" onclick="showSection('centres')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-purple-700">location_city</span><span><b class="block text-sm">Service centres</b><span class="text-xs text-slate-500">View and add centres</span></span>
+          </button>
+          <button type="button" onclick="showSection('citizens')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-sky-700">groups</span><span><b class="block text-sm">Citizen accounts</b><span class="text-xs text-slate-500">Review account status</span></span>
+          </button>
+          <button type="button" onclick="showSection('notifications')" class="w-full flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50">
+            <span class="material-symbols-outlined text-amber-700">campaign</span><span><b class="block text-sm">Send notification</b><span class="text-xs text-slate-500">Contact citizens or officers</span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== USER MANAGEMENT ===== -->
-  <div id="section-users" class="p-6">
+  <div id="section-users" class="p-6 hidden">
 
     <div th:if="${officerCreatedMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${officerCreatedMessage}">
       Officer account created successfully.
@@ -171,7 +248,7 @@
     <div class="card p-4 mb-4 flex flex-wrap gap-3 items-center">
       <div class="flex-1 min-w-48 relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-        <input id="officerSearch" type="text" placeholder="Search by email, phone or employee ID" oninput="filterUsers()" class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500"/>
+        <input id="officerSearch" type="text" placeholder="Search by email or employee ID" oninput="filterUsers()" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400"/>
       </div>
       <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200" id="roleFilter" onchange="filterUsers()">
         <option value="">All Roles</option>
@@ -195,18 +272,17 @@
             <th class="text-left px-4 py-3 font-semibold uppercase">Email</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Role</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Employee ID</th>
-            <th class="text-left px-4 py-3 font-semibold uppercase">Phone</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Status</th>
             <th class="text-left px-4 py-3 font-semibold uppercase">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-800 text-slate-300">
           <tr th:if="${#lists.isEmpty(officers)}">
-            <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">No officer accounts have been created yet.</td>
+            <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">No officer accounts have been created yet.</td>
           </tr>
           <tr th:each="officer : ${officers}"
               class="hover:bg-slate-800/50 transition-colors officer-row"
-              th:attr="data-role=${officer.roleFilter},data-status=${#strings.toLowerCase(officer.status)},data-search=${#strings.toLowerCase(officer.email + ' ' + officer.phone + ' ' + officer.employeeNo)}">
+              th:attr="data-role=${officer.roleFilter},data-status=${#strings.toLowerCase(officer.status)},data-search=${#strings.toLowerCase(officer.email + ' ' + officer.employeeNo)}">
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-cyan-900/50 flex items-center justify-center"><span class="material-symbols-outlined text-cyan-400 text-base">badge</span></div>
@@ -215,7 +291,6 @@
             </td>
             <td class="px-4 py-3"><span class="text-xs bg-cyan-900/50 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800" th:text="${officer.roleLabel}">Officer</span></td>
             <td class="px-4 py-3 font-mono text-xs text-slate-400" th:text="${officer.employeeNo}">EMP-001</td>
-            <td class="px-4 py-3 text-xs text-slate-400" th:text="${officer.phone}">+94770000000</td>
             <td class="px-4 py-3">
               <span th:if="${officer.status == 'ACTIVE'}" class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full" th:text="${officer.status}">ACTIVE</span>
               <span th:if="${officer.status == 'SUSPENDED'}" class="text-xs bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full" th:text="${officer.status}">SUSPENDED</span>
@@ -224,7 +299,7 @@
               <div class="flex gap-1">
                 <button type="button"
                         onclick="openEditOfficer(this)"
-                        th:attr="data-user-id=${officer.userId},data-email=${officer.email},data-phone=${officer.phone},data-role=${officer.roleFilter}"
+                        th:attr="data-user-id=${officer.userId},data-email=${officer.email},data-role=${officer.roleFilter}"
                         title="Edit officer"
                         class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">
                   <span class="material-symbols-outlined text-sm">edit</span>
@@ -257,32 +332,59 @@
 
   <!-- ===== CITIZEN ACCOUNTS ===== -->
   <div id="section-citizens" class="p-6 hidden">
+    <div th:if="${citizenActionMessage}" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800" th:text="${citizenActionMessage}" role="status"></div>
+    <div th:if="${citizenActionError}" class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${citizenActionError}" role="alert"></div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Citizen accounts</p><p class="text-3xl font-bold text-slate-900 mt-1">1,247</p></div>
-      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Active this month</p><p class="text-3xl font-bold text-emerald-700 mt-1">803</p></div>
-      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Suspended</p><p class="text-3xl font-bold text-amber-700 mt-1">6</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Citizen accounts</p><p class="text-3xl font-bold text-slate-900 mt-1" th:text="${citizenAccountCount}">0</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Registered this month</p><p class="text-3xl font-bold text-emerald-700 mt-1" th:text="${registeredThisMonthCount}">0</p></div>
+      <div class="card p-5"><p class="text-xs font-medium text-slate-600">Suspended</p><p class="text-3xl font-bold text-amber-700 mt-1" th:text="${suspendedCitizenCount}">0</p></div>
     </div>
 
     <div class="card p-4 mb-4 flex flex-wrap gap-3">
       <div class="relative flex-1 min-w-64">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg">search</span>
-        <input id="citizenSearch" oninput="filterCitizens()" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400" placeholder="Search name, account ID or application reference"/>
+        <input id="citizenSearch" oninput="filterCitizens()" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400" placeholder="Search name, email or account ID"/>
       </div>
       <select id="citizenStatusFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
         <option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option>
       </select>
+      <select id="citizenApplicationFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
+        <option value="">All applications</option><option value="nic">NIC applicants</option><option value="passport">Passport applicants</option><option value="both">NIC and passport</option><option value="none">No applications</option>
+      </select>
+      <select id="citizenRegistrationFilter" onchange="filterCitizens()" class="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
+        <option value="">Any registration date</option><option value="this-month">Registered this month</option><option value="earlier">Registered earlier</option>
+      </select>
+      <button type="button" onclick="resetCitizenFilters()" class="border border-slate-300 text-slate-700 rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-slate-50">Reset</button>
     </div>
 
     <div class="card overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm light-admin-table">
           <thead class="border-b border-slate-200"><tr>
-            <th class="p-4 text-left font-semibold uppercase text-xs">Citizen account</th><th class="p-4 text-left font-semibold uppercase text-xs">Account ID</th><th class="p-4 text-center font-semibold uppercase text-xs">NIC applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Passport applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Total</th><th class="p-4 text-left font-semibold uppercase text-xs">Status</th><th class="p-4 text-right font-semibold uppercase text-xs">Account action</th>
+            <th class="p-4 text-left font-semibold uppercase text-xs">Citizen account</th><th class="p-4 text-left font-semibold uppercase text-xs">Account ID</th><th class="p-4 text-center font-semibold uppercase text-xs">NIC applications</th><th class="p-4 text-center font-semibold uppercase text-xs">Passport applications</th><th class="p-4 text-left font-semibold uppercase text-xs">Status</th><th class="p-4 text-right font-semibold uppercase text-xs">Account action</th>
           </tr></thead>
           <tbody id="citizenRows" class="divide-y divide-slate-200 text-slate-700">
-            <tr data-status="active"><td class="p-4"><p class="font-semibold text-slate-900">Kamal Perera</p><p class="text-xs text-slate-600">kamal.p@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001247</td><td class="p-4 text-center">2</td><td class="p-4 text-center">1</td><td class="p-4 text-center font-bold text-slate-900">3</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Active</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-amber-700 text-xs font-semibold hover:underline">Suspend account</button></td></tr>
-            <tr data-status="active"><td class="p-4"><p class="font-semibold text-slate-900">Nadeesha Kumari</p><p class="text-xs text-slate-600">nadeesha.k@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001246</td><td class="p-4 text-center">1</td><td class="p-4 text-center">0</td><td class="p-4 text-center font-bold text-slate-900">1</td><td class="p-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Active</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-amber-700 text-xs font-semibold hover:underline">Suspend account</button></td></tr>
-            <tr data-status="suspended"><td class="p-4"><p class="font-semibold text-slate-900">Ruwan Fernando</p><p class="text-xs text-slate-600">ruwan.f@gmail.com</p></td><td class="p-4 font-mono text-xs text-slate-700">CTZ-001198</td><td class="p-4 text-center">1</td><td class="p-4 text-center">2</td><td class="p-4 text-center font-bold text-slate-900">3</td><td class="p-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">Suspended</span></td><td class="p-4 text-right"><button onclick="toggleAccount(this)" class="text-emerald-700 text-xs font-semibold hover:underline">Reactivate account</button></td></tr>
+            <tr th:if="${#lists.isEmpty(citizens)}">
+              <td colspan="6" class="p-10 text-center text-sm text-slate-500">No citizen accounts have been registered yet.</td>
+            </tr>
+            <tr th:each="citizen : ${citizens}" th:attr="data-status=${#strings.toLowerCase(citizen.status)},data-nic-count=${citizen.nicApplicationCount},data-passport-count=${citizen.passportApplicationCount},data-registered-this-month=${citizen.registeredThisMonth}">
+              <td class="p-4"><p class="font-semibold text-slate-900" th:text="${citizen.displayName}">Citizen name</p><p class="text-xs text-slate-600" th:text="${citizen.email}">citizen@example.com</p></td>
+              <td class="p-4 font-mono text-xs text-slate-700" th:text="${citizen.accountId}">CTZ-000001</td>
+              <td class="p-4 text-center" th:text="${citizen.nicApplicationCount}">0</td>
+              <td class="p-4 text-center" th:text="${citizen.passportApplicationCount}">0</td>
+              <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold" th:classappend="${citizen.active ? ' bg-emerald-100 text-emerald-700' : ' bg-amber-100 text-amber-700'}" th:text="${citizen.statusLabel}">Active</span></td>
+              <td class="p-4">
+                <div class="flex justify-end gap-3">
+                  <form th:action="@{/officer/admin/citizens/{id}/status(id=${citizen.userId})}" method="post" onsubmit="return confirm('Change this citizen account status?');">
+                    <button class="text-xs font-semibold hover:underline" th:classappend="${citizen.active ? ' text-amber-700' : ' text-emerald-700'}" th:text="${citizen.active ? 'Suspend' : 'Reactivate'}">Suspend</button>
+                  </form>
+                  <form th:action="@{/officer/admin/citizens/{id}/delete(id=${citizen.userId})}" method="post" onsubmit="return confirm('Delete this citizen login? Government identity records and application history will be preserved.');">
+                    <button class="text-xs font-semibold text-red-700 hover:underline">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr id="citizenNoMatches" class="hidden"><td colspan="6" class="p-10 text-center text-sm text-slate-500">No citizen accounts match the selected filters.</td></tr>
           </tbody>
         </table>
       </div>
@@ -290,44 +392,132 @@
     <p class="text-xs text-slate-600 mt-3">Account status and application counts only. Application personal data is not shown here.</p>
   </div>
 
-  <!-- ===== CITIZEN NOTIFICATIONS ===== -->
+  <!-- ===== NOTIFICATIONS ===== -->
   <div id="section-notifications" class="p-6 hidden">
-    <div class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
-      <form onsubmit="sendNotification(event)" class="card p-6">
-        <h2 class="font-bold text-slate-900 text-base">Compose Notification</h2>
-        <p class="text-xs text-slate-600 mt-1">Send a system announcement to everyone or a selected citizen group.</p>
+    <div th:if="${notificationMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" th:text="${notificationMessage}">Notification sent.</div>
+    <div th:if="${notificationError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${notificationError}">Unable to send.</div>
+    <div th:if="${emailNotificationMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" th:text="${emailNotificationMessage}">Email sent.</div>
+    <div th:if="${emailNotificationError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${emailNotificationError}">Unable to send email.</div>
 
-        <div class="mt-5">
-          <label class="text-xs font-semibold text-slate-700">Recipients</label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
-            <label class="notification-recipient border border-cyan-500 bg-cyan-50 rounded-xl p-4 cursor-pointer"><input onchange="changeAudience()" type="radio" name="audience" value="all" checked class="text-cyan-600"/><span class="ml-2 text-sm font-semibold text-slate-900">All citizens</span><p class="text-xs text-slate-600 mt-2">1,247 recipients</p></label>
-            <label class="notification-recipient border border-slate-200 bg-white rounded-xl p-4 cursor-pointer"><input onchange="changeAudience()" type="radio" name="audience" value="group" class="text-cyan-600"/><span class="ml-2 text-sm font-semibold text-slate-900">Citizen group</span><p class="text-xs text-slate-600 mt-2">Filter by district or service</p></label>
-            <label class="notification-recipient border border-slate-200 bg-white rounded-xl p-4 cursor-pointer"><input onchange="changeAudience()" type="radio" name="audience" value="selected" class="text-cyan-600"/><span class="ml-2 text-sm font-semibold text-slate-900">Selected citizens</span><p class="text-xs text-slate-600 mt-2">Account IDs or references</p></label>
-          </div>
-        </div>
+    <div class="mb-5 rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
+      <div class="flex gap-3"><span class="material-symbols-outlined text-cyan-700">verified_user</span><div><h2 class="font-bold text-slate-900">Administrator communications</h2><p class="text-xs text-slate-600 mt-1">In-app messages and official email are sent separately. This keeps the officer/citizen inbox reliable even when the external email gateway is unavailable.</p></div></div>
+    </div>
 
-        <div id="groupFilters" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-          <div><label class="text-xs font-medium text-slate-600">District</label><select class="w-full mt-1 bg-white border border-slate-300 rounded-lg text-sm text-slate-900"><option>All districts</option><option>Colombo</option><option>Kandy</option><option>Galle</option></select></div>
-          <div><label class="text-xs font-medium text-slate-600">Application group</label><select class="w-full mt-1 bg-white border border-slate-300 rounded-lg text-sm text-slate-900"><option>All citizens</option><option>Awaiting biometrics</option><option>Appointment tomorrow</option><option>NIC applicants</option><option>Passport applicants</option></select></div>
-        </div>
-        <div id="selectedCitizens" class="hidden mt-4"><label class="text-xs font-medium text-slate-600">Citizen account IDs or application references</label><textarea rows="2" class="w-full mt-1 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="CTZ-001247, LK-NIC-2026-00183"></textarea></div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
-          <div class="sm:col-span-2"><label class="text-xs font-semibold text-slate-700">Notification title</label><input id="notificationTitle" required maxlength="80" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Service centre closure"/></div>
-          <div><label class="text-xs font-semibold text-slate-700">Category</label><select class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option>General announcement</option><option>Service interruption</option><option>Appointment reminder</option><option>Application information</option><option>Emergency alert</option></select></div>
-          <div><label class="text-xs font-semibold text-slate-700">Priority</label><select class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option>Normal</option><option>Important</option><option>Urgent</option></select></div>
-          <div class="sm:col-span-2"><label class="text-xs font-semibold text-slate-700">Message</label><textarea id="notificationMessage" required rows="6" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Write a clear message for citizens..."></textarea></div>
-          <div><label class="text-xs font-semibold text-slate-700">Send time</label><select class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option>Send now</option><option>Schedule for later</option></select></div>
-          <div><label class="text-xs font-semibold text-slate-700">Channels</label><div class="flex gap-4 mt-3 text-xs text-slate-700"><label><input type="checkbox" checked class="rounded text-cyan-600"/> In-app</label><label><input type="checkbox" checked class="rounded text-cyan-600"/> Email</label><label><input type="checkbox" class="rounded text-cyan-600"/> SMS</label></div></div>
-        </div>
-        <div class="flex justify-end gap-3 mt-6"><button type="button" onclick="previewNotification()" class="border border-slate-300 text-slate-700 rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-slate-50">Preview</button><button class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Review & Send</button></div>
+    <div class="grid grid-cols-1 2xl:grid-cols-2 gap-5 items-start">
+      <form th:action="@{/officer/admin/notifications/in-app}" method="post" class="card p-6 admin-notification-form" onsubmit="return confirmAdminDispatch(this, 'in-app notification');">
+        <div class="flex items-start gap-3"><span class="material-symbols-outlined text-cyan-700 bg-cyan-50 rounded-xl p-2">notifications</span><div><h2 class="font-bold text-slate-900 text-base">Send in-app notification</h2><p class="text-xs text-slate-600 mt-1">Appears in the citizen or officer notification inbox.</p></div></div>
+        <div th:replace="~{fragments/admin_notification_fields :: audienceFields}"></div>
+        <div class="mt-4"><label class="text-xs font-semibold text-slate-700">Notification title</label><input name="title" required maxlength="120" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Service centre closure"/></div>
+        <div class="mt-4"><label class="text-xs font-semibold text-slate-700">Category</label><select name="category" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900"><option value="GENERAL">General announcement</option><option value="SERVICE_INTERRUPTION">Service interruption</option><option value="APPOINTMENT">Appointment information</option><option value="APPLICATION">Application information</option><option value="EMERGENCY">Emergency alert</option></select></div>
+        <div class="mt-4"><label class="text-xs font-semibold text-slate-700">Message</label><textarea name="message" required maxlength="1800" rows="6" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Write a clear official message..."></textarea></div>
+        <button class="w-full mt-5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Send in-app notification</button>
       </form>
 
-      <aside class="space-y-5">
-        <section class="card p-5"><h2 class="font-bold text-slate-900">Live Preview</h2><div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-4"><div class="flex gap-3"><span class="material-symbols-outlined text-cyan-700">campaign</span><div><p id="previewTitle" class="text-sm font-bold text-slate-900">Notification title</p><p id="previewMessage" class="text-xs text-slate-600 mt-1">Your message preview will appear here.</p><p class="text-[10px] text-slate-500 mt-2">Just now · LankaID Administration</p></div></div></div></section>
-        <section class="card p-5"><h2 class="font-bold text-slate-900">Recent Broadcasts</h2><div class="mt-4 space-y-4 text-xs"><div><p class="font-semibold text-slate-800">Colombo centre maintenance</p><p class="text-slate-600 mt-1">All citizens · 1,247 sent · 22 Aug</p></div><div class="border-t border-slate-200 pt-4"><p class="font-semibold text-slate-800">Biometric appointment reminder</p><p class="text-slate-600 mt-1">148 selected citizens · 21 Aug</p></div></div></section>
-      </aside>
+      <form th:action="@{/officer/admin/notifications/email}" method="post" class="card p-6 admin-notification-form" onsubmit="return confirmAdminDispatch(this, 'official email');">
+        <div class="flex items-start gap-3"><span class="material-symbols-outlined text-indigo-700 bg-indigo-50 rounded-xl p-2">forward_to_inbox</span><div><h2 class="font-bold text-slate-900 text-base">Send official email</h2><p class="text-xs text-slate-600 mt-1">Uses a standard Government of Sri Lanka / LankaID email template.</p></div></div>
+        <div th:replace="~{fragments/admin_notification_fields :: audienceFields}"></div>
+        <div class="mt-4"><label class="text-xs font-semibold text-slate-700">Email subject</label><input name="title" required maxlength="120" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Important LankaID service update"/></div>
+        <input type="hidden" name="category" value="GENERAL"/>
+        <div class="mt-4"><label class="text-xs font-semibold text-slate-700">Email message</label><textarea name="message" required maxlength="1800" rows="6" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Write the official message body..."></textarea><p class="text-[11px] text-slate-500 mt-1">The government heading, official-notification label, support details, and footer are added automatically.</p></div>
+        <button class="w-full mt-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Send official email</button>
+      </form>
     </div>
+  </div>
+
+  <!-- ===== SERVICE CENTRES ===== -->
+  <div id="section-centres" class="p-6 hidden">
+    <div th:if="${centreMessage}" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${centreMessage}">Service centre added successfully.</div>
+    <div th:if="${centreError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${centreError}">Unable to add the service centre.</div>
+
+    <div class="space-y-4">
+      <div class="card overflow-hidden">
+        <button type="button" onclick="showCentrePanel('add')" id="centreAddButton" aria-expanded="false" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-50">
+          <span><span class="font-bold text-slate-900">Add Service Centre</span><span class="block text-xs text-slate-600 mt-1">Register a new centre for appointments.</span></span>
+          <span id="centreAddIcon" class="material-symbols-outlined text-slate-500">expand_more</span>
+        </button>
+        <form id="centreAddPanel" th:action="@{/officer/admin/centres}" method="post" class="hidden border-t border-slate-200 p-6">
+          <p class="text-xs text-slate-600">Only the system administrator can register centres used for biometric and walk-in appointments.</p>
+
+          <div class="space-y-4 mt-5 max-w-2xl">
+            <div><label class="block text-xs font-semibold text-slate-700">Centre name</label><input required maxlength="100" name="centreName" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo Main Centre"/></div>
+            <div><label class="block text-xs font-semibold text-slate-700">Street address</label><input maxlength="150" name="street" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Street or building"/></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="block text-xs font-semibold text-slate-700">City</label><input required maxlength="100" name="city" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Battaramulla"/></div>
+              <div><label class="block text-xs font-semibold text-slate-700">District</label><input required maxlength="100" name="district" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" placeholder="Colombo"/></div>
+            </div>
+            <div><label class="block text-xs font-semibold text-slate-700">Daily appointment capacity</label><input required type="number" min="1" max="2000" name="dailyCapacity" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900" value="100"/></div>
+            <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">add_location_alt</span>Add Centre</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card overflow-hidden">
+        <button type="button" onclick="showCentrePanel('list')" id="centreListButton" aria-expanded="true" class="w-full p-5 flex items-center justify-between text-left hover:bg-slate-50">
+          <span><span class="font-bold text-slate-900">Service Centres</span><span class="block text-xs text-slate-600 mt-1" th:text="|${#lists.size(centres)} registered centres · booking totals are for today|">Registered centres</span></span>
+          <span id="centreListIcon" class="material-symbols-outlined text-slate-500">expand_less</span>
+        </button>
+        <div id="centreListPanel" class="border-t border-slate-200 overflow-x-auto">
+          <table class="w-full text-sm light-admin-table">
+            <thead class="border-b border-slate-200"><tr><th class="p-4 text-left text-xs font-semibold uppercase">Centre</th><th class="p-4 text-left text-xs font-semibold uppercase">Location</th><th class="p-4 text-left text-xs font-semibold uppercase">District</th><th class="p-4 text-center text-xs font-semibold uppercase">Today's bookings</th><th class="p-4 text-left text-xs font-semibold uppercase">Status</th><th class="p-4 text-left text-xs font-semibold uppercase">Actions</th></tr></thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr th:if="${#lists.isEmpty(centres)}"><td colspan="6" class="p-8 text-center text-slate-500">No service centres have been added yet.</td></tr>
+              <tr th:each="centre : ${centres}">
+                <td class="p-4"><p class="font-semibold text-slate-900" th:text="${centre.centreName}">Centre name</p><p class="text-xs text-slate-500 mt-0.5" th:text="${centre.street ?: 'Address not provided'}">Address</p></td>
+                <td class="p-4 text-slate-700" th:text="${centre.city}">City</td>
+                <td class="p-4 text-slate-700" th:text="${centre.district}">District</td>
+                <td class="p-4 text-center font-semibold text-slate-900"><span th:text="${centreBookingCounts[centre.centreId]}">0</span> / <span th:text="${centre.dailyCapacity}">100</span></td>
+                <td class="p-4">
+                  <span th:if="${centre.centreStatus == 'ACTIVE'}" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">ACTIVE</span>
+                  <span th:if="${centre.centreStatus == 'INACTIVE'}" class="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded-full">INACTIVE</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex gap-1">
+                    <button type="button" onclick="openEditCentre(this)"
+                            th:attr="data-centre-id=${centre.centreId},data-name=${centre.centreName},data-street=${centre.street},data-city=${centre.city},data-district=${centre.district},data-capacity=${centre.dailyCapacity}"
+                            title="Edit centre" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">
+                      <span class="material-symbols-outlined text-sm">edit</span>
+                    </button>
+                    <form th:action="@{/officer/admin/centres/{id}/status(id=${centre.centreId})}" method="post">
+                      <button type="submit" th:title="${centre.centreStatus == 'ACTIVE' ? 'Deactivate centre' : 'Activate centre'}" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">
+                        <span class="material-symbols-outlined text-sm" th:text="${centre.centreStatus == 'ACTIVE' ? 'block' : 'check_circle'}">block</span>
+                      </button>
+                    </form>
+                    <form th:action="@{/officer/admin/centres/{id}/delete(id=${centre.centreId})}" method="post" onsubmit="return confirm('Delete this centre? Centres with appointments or historical records cannot be deleted.');">
+                      <button type="submit" title="Delete centre" class="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Service Centre Modal -->
+  <div id="editCentreModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
+    <form id="editCentreForm" method="post" class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-bold text-slate-900 flex items-center gap-2"><span class="material-symbols-outlined text-cyan-700">edit_location_alt</span>Edit Service Centre</h2>
+        <button type="button" onclick="closeEditCentre()" class="text-slate-500 hover:text-slate-900"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="space-y-4">
+        <div><label class="block text-xs font-semibold text-slate-700">Centre name</label><input id="editCentreName" required maxlength="100" name="centreName" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+        <div><label class="block text-xs font-semibold text-slate-700">Street address</label><input id="editCentreStreet" maxlength="150" name="street" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold text-slate-700">City</label><input id="editCentreCity" required maxlength="100" name="city" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+          <div><label class="block text-xs font-semibold text-slate-700">District</label><input id="editCentreDistrict" required maxlength="100" name="district" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+        </div>
+        <div><label class="block text-xs font-semibold text-slate-700">Daily appointment capacity</label><input id="editCentreCapacity" required type="number" min="1" max="2000" name="dailyCapacity" class="w-full mt-1.5 bg-white border border-slate-300 rounded-xl text-sm"/></div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button type="button" onclick="closeEditCentre()" class="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-xl text-sm font-semibold">Cancel</button>
+        <button type="submit" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold">Save Changes</button>
+      </div>
+    </form>
   </div>
 
   <!-- ===== SYSTEM SETTINGS ===== -->
@@ -414,16 +604,16 @@
 
 <!-- Add User Modal -->
 <div id="addUserModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal" th:attr="data-open=${openOfficerModal}">
-  <form th:action="@{/officer/admin/officers}" th:object="${officerRegistration}" method="post" class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+  <form th:action="@{/officer/admin/officers}" th:object="${officerRegistration}" method="post" data-validate data-officer-form class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-lg w-full p-6">
     <div class="flex items-center justify-between mb-5">
-      <h2 class="font-bold text-white text-base flex items-center gap-2">
-        <span class="material-symbols-outlined text-red-400">person_add</span>
+      <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
+        <span class="material-symbols-outlined text-cyan-700">person_add</span>
         Create Officer Credentials
       </h2>
-      <button type="button" onclick="closeAddUser()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+      <button type="button" onclick="closeAddUser()" class="text-slate-500 hover:text-slate-900"><span class="material-symbols-outlined">close</span></button>
     </div>
 
-    <p class="mb-4 text-xs text-slate-400">Employee ID will be generated automatically after the role is selected.</p>
+    <p class="mb-4 text-xs text-slate-600">Employee ID is generated automatically. Officer emails must end with <b>@gov.lk</b>.</p>
 
     <div th:if="${#fields.hasGlobalErrors()}" class="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
       <p th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to create officer.</p>
@@ -431,64 +621,56 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label>
-        <input type="email" th:field="*{email}" required maxlength="100" placeholder="officer@gov.lk" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
-        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        <label class="block text-xs text-slate-700 mb-1.5">Government email <span class="text-red-600">*</span></label>
+        <input type="email" th:field="*{email}" required maxlength="100" pattern="[A-Za-z0-9._%+-]+@gov\.lk" title="Use an email address ending with @gov.lk" placeholder="officer@gov.lk" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400"/>
+        <p class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
       </div>
       <div>
-        <label class="block text-xs text-slate-400 mb-1.5">Phone Number <span class="text-red-400">*</span></label>
-        <input type="tel" th:field="*{phone}" required maxlength="15" pattern="\+?[0-9]{10,14}" placeholder="+94771234567" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
-        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-400 mb-1.5">Assign Role <span class="text-red-400">*</span></label>
-        <select th:field="*{role}" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white">
+        <label class="block text-xs text-slate-700 mb-1.5">Assign role <span class="text-red-600">*</span></label>
+        <select th:field="*{role}" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
           <option value="">Select Role</option>
           <option value="director">Director</option>
           <option value="csr">Citizen Service Representative</option>
           <option value="nic-officer">NIC Application Officer</option>
           <option value="passport-officer">Passport Application Officer</option>
         </select>
-        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
+        <p class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
       </div>
       <div class="sm:col-span-2">
-        <label class="block text-xs text-slate-400 mb-1.5">Temporary Password <span class="text-red-400">*</span></label>
-        <input type="password" th:field="*{password}" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimum 8 characters" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
-        <p class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        <label class="block text-xs text-slate-700 mb-1.5">Temporary password <span class="text-red-600">*</span></label>
+        <input type="password" th:field="*{password}" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s])\S{8,72}" title="Use 8-72 characters: uppercase, lowercase, number and symbol; no spaces" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Uppercase, lowercase, number and symbol" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400"/>
+        <p class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
       </div>
     </div>
     <div class="flex gap-3 mt-5">
-      <button type="button" onclick="closeAddUser()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+      <button type="button" onclick="closeAddUser()" class="flex-1 border border-slate-300 text-slate-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
       <button type="submit" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Create Officer</button>
     </div>
   </form>
 </div>
 
 <!-- Edit Officer Modal -->
-<div id="editOfficerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
-  <form id="editOfficerForm" method="post" class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+<div id="editOfficerModal" th:attr="data-open=${editOfficerId != null}" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 admin-light-modal">
+  <form id="editOfficerForm" th:action="${editOfficerId != null ? '/officer/admin/officers/' + editOfficerId + '/edit' : '/officer/admin'}" method="post" data-validate data-officer-form class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-lg w-full p-6">
     <div class="flex items-center justify-between mb-5">
-      <h2 class="font-bold text-white text-base flex items-center gap-2">
-        <span class="material-symbols-outlined text-cyan-400">edit</span>
+      <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
+        <span class="material-symbols-outlined text-cyan-700">edit</span>
         Edit Officer Credentials
       </h2>
-      <button type="button" onclick="closeEditOfficer()" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+      <button type="button" onclick="closeEditOfficer()" class="text-slate-500 hover:text-slate-900"><span class="material-symbols-outlined">close</span></button>
     </div>
 
-    <p class="mb-4 text-xs text-slate-400">Leave the new password empty to keep the current password.</p>
+    <p th:if="${officerEditError}" th:text="${officerEditError}" role="alert" class="mb-4 text-sm text-red-600"></p>
+    <p class="mb-4 text-xs text-slate-600">Use a <b>@gov.lk</b> email. Leave the new password empty to keep the current password.</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label for="editOfficerEmail" class="block text-xs text-slate-400 mb-1.5">Email Address <span class="text-red-400">*</span></label>
-        <input id="editOfficerEmail" name="email" type="email" required maxlength="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
+        <label for="editOfficerEmail" class="block text-xs text-slate-700 mb-1.5">Government email <span class="text-red-600">*</span></label>
+        <input id="editOfficerEmail" th:value="${officerUpdate != null ? officerUpdate.email : ''}" name="email" type="email" required maxlength="100" pattern="[A-Za-z0-9._%+-]+@gov\.lk" title="Use an email address ending with @gov.lk" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900"/>
       </div>
       <div>
-        <label for="editOfficerPhone" class="block text-xs text-slate-400 mb-1.5">Phone Number <span class="text-red-400">*</span></label>
-        <input id="editOfficerPhone" name="phone" type="tel" required maxlength="15" pattern="\+?[0-9]{10,14}" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"/>
-      </div>
-      <div>
-        <label for="editOfficerRole" class="block text-xs text-slate-400 mb-1.5">Role <span class="text-red-400">*</span></label>
-        <select id="editOfficerRole" name="role" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white">
+        <label for="editOfficerRole" class="block text-xs text-slate-700 mb-1.5">Role <span class="text-red-600">*</span></label>
+        <select id="editOfficerRole" th:attr="data-selected=${officerUpdate != null ? officerUpdate.role : ''}" name="role" required class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900">
           <option value="director">Director</option>
           <option value="csr">Citizen Service Representative</option>
           <option value="nic-officer">NIC Application Officer</option>
@@ -496,13 +678,13 @@
         </select>
       </div>
       <div>
-        <label for="editOfficerPassword" class="block text-xs text-slate-400 mb-1.5">New Password</label>
-        <input id="editOfficerPassword" name="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Optional" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500"/>
+        <label for="editOfficerPassword" class="block text-xs text-slate-700 mb-1.5">New password</label>
+        <input id="editOfficerPassword" name="newPassword" type="password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s])\S{8,72}" title="Use 8-72 characters: uppercase, lowercase, number and symbol; no spaces" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Optional" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400"/>
       </div>
     </div>
 
     <div class="flex gap-3 mt-5">
-      <button type="button" onclick="closeEditOfficer()" class="flex-1 border border-slate-700 text-slate-400 hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+      <button type="button" onclick="closeEditOfficer()" class="flex-1 border border-slate-300 text-slate-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
       <button type="submit" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-bold transition-colors">Save Changes</button>
     </div>
   </form>
@@ -510,8 +692,8 @@
 
 <script>
 function showSection(s) {
-  const sections = ['users','roles','settings','maintenance','citizens','notifications'];
-  if (!sections.includes(s)) s = 'users';
+  const sections = ['overview','users','roles','settings','centres','maintenance','citizens','notifications'];
+  if (!sections.includes(s)) s = 'overview';
   sections.forEach(t => {
     const el = document.getElementById('section-'+t);
     const nav = document.getElementById('nav-'+t);
@@ -523,19 +705,21 @@ function showSection(s) {
   const nav = document.getElementById('nav-'+s);
   if (nav) { nav.classList.add('active'); }
   const titles = {
+    overview: ['System Overview','Current values calculated from the LankaID database'],
     users: ['Officer Credential Management','Create officer logins and manage their assigned roles'],
     roles: ['Roles & Permissions','View and configure role-based access control'],
     settings: ['System Settings','Configure processing rules, fees and notifications'],
+    centres: ['Service Centre Management','Add centres citizens can select for biometric and walk-in appointments'],
     maintenance: ['Maintenance Mode','Pause or restore all non-admin system operations'],
     citizens: ['Citizen Accounts','Review account status and citizen application counts'],
-    notifications: ['Citizen Notifications','Compose and preview announcements without leaving the dashboard']
+    notifications: ['Notifications','Send in-app announcements or official email to citizens and officers']
   };
   if (titles[s]) {
     document.getElementById('pageTitle').textContent = titles[s][0];
     document.getElementById('pageSubtitle').textContent = titles[s][1];
   }
   document.getElementById('addOfficerButton').classList.toggle('hidden', s !== 'users');
-  const nextUrl = s === 'users' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
+  const nextUrl = s === 'overview' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
   window.history.replaceState(null, '', nextUrl);
   return false;
 }
@@ -553,9 +737,10 @@ function openEditOfficer(button) {
   const form = document.getElementById('editOfficerForm');
   form.action = '/officer/admin/officers/' + button.dataset.userId + '/edit';
   document.getElementById('editOfficerEmail').value = button.dataset.email;
-  document.getElementById('editOfficerPhone').value = button.dataset.phone;
   document.getElementById('editOfficerRole').value = button.dataset.role;
   document.getElementById('editOfficerPassword').value = '';
+  form.querySelectorAll('input').forEach(input => { input.setCustomValidity(''); input.removeAttribute('aria-invalid'); });
+  form.querySelectorAll('.client-field-error').forEach(error => error.remove());
 
   const modal = document.getElementById('editOfficerModal');
   modal.classList.remove('hidden');
@@ -566,6 +751,35 @@ function closeEditOfficer() {
   const modal = document.getElementById('editOfficerModal');
   modal.classList.add('hidden');
   modal.classList.remove('flex');
+}
+
+function openEditCentre(button) {
+  document.getElementById('editCentreForm').action =
+    '/officer/admin/centres/' + button.dataset.centreId + '/edit';
+  document.getElementById('editCentreName').value = button.dataset.name;
+  document.getElementById('editCentreStreet').value = button.dataset.street || '';
+  document.getElementById('editCentreCity').value = button.dataset.city;
+  document.getElementById('editCentreDistrict').value = button.dataset.district;
+  document.getElementById('editCentreCapacity').value = button.dataset.capacity;
+  const modal = document.getElementById('editCentreModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeEditCentre() {
+  const modal = document.getElementById('editCentreModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function showCentrePanel(panelName) {
+  const showAdd = panelName === 'add';
+  document.getElementById('centreAddPanel').classList.toggle('hidden', !showAdd);
+  document.getElementById('centreListPanel').classList.toggle('hidden', showAdd);
+  document.getElementById('centreAddButton').setAttribute('aria-expanded', showAdd);
+  document.getElementById('centreListButton').setAttribute('aria-expanded', !showAdd);
+  document.getElementById('centreAddIcon').textContent = showAdd ? 'expand_less' : 'expand_more';
+  document.getElementById('centreListIcon').textContent = showAdd ? 'expand_more' : 'expand_less';
 }
 
 function filterUsers() {
@@ -583,61 +797,87 @@ function filterUsers() {
 function filterCitizens() {
   const query = document.getElementById('citizenSearch').value.toLowerCase().trim();
   const status = document.getElementById('citizenStatusFilter').value;
-  document.querySelectorAll('#citizenRows tr').forEach(row => {
+  const application = document.getElementById('citizenApplicationFilter').value;
+  const registration = document.getElementById('citizenRegistrationFilter').value;
+  const rows = document.querySelectorAll('#citizenRows tr[data-status]');
+  let visibleRows = 0;
+  rows.forEach(row => {
+    const nicCount = Number(row.dataset.nicCount || 0);
+    const passportCount = Number(row.dataset.passportCount || 0);
+    const registeredThisMonth = row.dataset.registeredThisMonth === 'true';
     const matchesQuery = row.textContent.toLowerCase().includes(query);
     const matchesStatus = !status || row.dataset.status === status;
-    row.style.display = matchesQuery && matchesStatus ? '' : 'none';
+    const matchesApplication = !application
+      || (application === 'nic' && nicCount > 0)
+      || (application === 'passport' && passportCount > 0)
+      || (application === 'both' && nicCount > 0 && passportCount > 0)
+      || (application === 'none' && nicCount === 0 && passportCount === 0);
+    const matchesRegistration = !registration
+      || (registration === 'this-month' && registeredThisMonth)
+      || (registration === 'earlier' && !registeredThisMonth);
+    const visible = matchesQuery && matchesStatus && matchesApplication && matchesRegistration;
+    row.style.display = visible ? '' : 'none';
+    if (visible) visibleRows++;
   });
+  document.getElementById('citizenNoMatches').classList.toggle('hidden', rows.length === 0 || visibleRows > 0);
 }
 
-function toggleAccount(button) {
-  const row = button.closest('tr');
-  const badge = row.querySelector('td:nth-child(6) span');
-  const reactivate = row.dataset.status === 'suspended';
-  if (!confirm((reactivate ? 'Reactivate' : 'Suspend') + ' this citizen account?')) return;
-  row.dataset.status = reactivate ? 'active' : 'suspended';
-  badge.textContent = reactivate ? 'Active' : 'Suspended';
-  badge.className = reactivate
-    ? 'bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold'
-    : 'bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold';
-  button.textContent = reactivate ? 'Suspend account' : 'Reactivate account';
-  button.className = reactivate
-    ? 'text-amber-700 text-xs font-semibold hover:underline'
-    : 'text-emerald-700 text-xs font-semibold hover:underline';
+function resetCitizenFilters() {
+  document.getElementById('citizenSearch').value = '';
+  document.getElementById('citizenStatusFilter').value = '';
+  document.getElementById('citizenApplicationFilter').value = '';
+  document.getElementById('citizenRegistrationFilter').value = '';
   filterCitizens();
 }
 
-function changeAudience() {
-  const selected = document.querySelector('[name="audience"]:checked');
-  if (!selected) return;
-  document.getElementById('groupFilters').classList.toggle('hidden', selected.value !== 'group');
-  document.getElementById('selectedCitizens').classList.toggle('hidden', selected.value !== 'selected');
-  document.querySelectorAll('.notification-recipient').forEach(card => {
-    card.className = 'notification-recipient border border-slate-200 bg-white rounded-xl p-4 cursor-pointer';
-  });
-  selected.closest('.notification-recipient').className = 'notification-recipient border border-cyan-500 bg-cyan-50 rounded-xl p-4 cursor-pointer';
+function updateNotificationAudience(form) {
+  const audience = form.querySelector('.notification-audience').value;
+  const recipientType = form.querySelector('.notification-recipient-type').value;
+  form.querySelector('.notification-filter-fields').classList.toggle('hidden', audience !== 'FILTERED');
+  form.querySelector('.notification-selected-fields').classList.toggle('hidden', audience !== 'SELECTED');
+  form.querySelector('.notification-citizen-filter').classList.toggle('hidden', recipientType !== 'CITIZEN');
+  form.querySelector('.notification-officer-filter').classList.toggle('hidden', recipientType !== 'OFFICER');
+  form.querySelector('.notification-citizen-picker').classList.toggle('hidden', recipientType !== 'CITIZEN');
+  form.querySelector('.notification-officer-picker').classList.toggle('hidden', recipientType !== 'OFFICER');
+  form.querySelector('[name="selectedRecipients"]').required = audience === 'SELECTED';
 }
 
-function previewNotification() {
-  document.getElementById('previewTitle').textContent = document.getElementById('notificationTitle').value || 'Notification title';
-  document.getElementById('previewMessage').textContent = document.getElementById('notificationMessage').value || 'Your message preview will appear here.';
+function pickSpecificRecipient(select) {
+  if (!select.value) return;
+  const field = select.form.querySelector('[name="selectedRecipients"]');
+  const current = field.value.split(/[,;\n]/).map(value => value.trim()).filter(Boolean);
+  if (!current.includes(select.value)) current.push(select.value);
+  field.value = current.join(', ');
+  select.value = '';
 }
 
-function sendNotification(event) {
-  event.preventDefault();
-  previewNotification();
-  const audience = document.querySelector('[name="audience"]:checked').value;
-  if (confirm('Send this notification to ' + (audience === 'all' ? 'all citizens' : audience + ' citizens') + '?')) {
-    alert('Notification prepared successfully. It will be delivered after the backend is connected.');
-  }
+function confirmAdminDispatch(form, channel) {
+  const audience = form.querySelector('.notification-audience').selectedOptions[0].textContent.toLowerCase();
+  const recipients = form.querySelector('.notification-recipient-type').value.toLowerCase();
+  return confirm('Send this ' + channel + ' to ' + audience + ' in ' + recipients + '?');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const requestedSection = new URLSearchParams(window.location.search).get('section');
-  if (requestedSection) showSection(requestedSection);
+  const querySection = new URLSearchParams(window.location.search).get('section');
+  const formSection = document.body.dataset.adminSection;
+  const pathSection = window.location.pathname.endsWith('/officers') ? 'users' : 'overview';
+  showSection(querySection || formSection || pathSection);
   const officerModal = document.getElementById('addUserModal');
   if (officerModal && officerModal.dataset.open === 'true') openAddUser();
+  const editModal = document.getElementById('editOfficerModal');
+  if (editModal.dataset.open === 'true') {
+    const role = document.getElementById('editOfficerRole');
+    role.value = role.dataset.selected;
+    editModal.classList.remove('hidden');
+    editModal.classList.add('flex');
+  }
+  document.querySelectorAll('.admin-notification-form').forEach(updateNotificationAudience);
 });
 </script>
+<script src="/js/portal-shell.js"></script>
+<script src="/User_Mgmt/password-rules.js"></script>
+<script src="/Admin_Mgmt/officer-form.js"></script>
+<script src="/js/form-errors.js"></script>
+<script src="/js/password-visibility.js"></script>
 </body>
 </html>

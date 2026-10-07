@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify existing identity | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${session.loggedInOfficerEmail},data-officer-rank=${session.loggedInOfficerRoleLabel},data-officer-login-time=${session.loggedInOfficerLoginTime}">
+<main class="max-w-2xl mx-auto px-4 py-8">
+  <a th:href="@{/officer/csr/support/{id}(id=${supportRequest.request.requestId})}" class="text-cyan-700 font-semibold">Back to support request</a>
+  <h1 class="text-2xl font-bold mt-5">Verify existing identity</h1>
+  <p th:if="${identityError}" th:text="${identityError}" class="mt-4 bg-red-50 border border-red-200 rounded-xl p-4" role="alert"></p>
+  <section class="mt-5 bg-white border rounded-xl p-5">
+    <h2 class="font-bold" th:text="${supportRequest.citizenName}"></h2>
+    <p class="text-sm" th:text="${supportRequest.citizenEmail}"></p>
+    <p class="mt-3 text-sm whitespace-pre-wrap" th:text="${supportRequest.request.message}"></p>
+  </section>
+  <section class="mt-5 bg-white border rounded-xl p-5">
+    <form method="get" th:action="@{/officer/csr/identity/{id}(id=${supportRequest.request.requestId})}">
+      <label class="block text-sm font-semibold">Look up government record ID
+        <input type="number" name="recordId" min="1" required class="mt-1 rounded-lg border-slate-300"/>
+      </label>
+      <button class="mt-3 rounded-lg bg-cyan-700 text-white px-4 py-2 font-semibold">View record before approval</button>
+    </form>
+    <dl th:if="${governmentRecord != null}" class="mt-4 text-sm grid grid-cols-2 gap-2">
+      <dt>Record ID</dt><dd th:text="${governmentRecord.governmentRecordId}"></dd>
+      <dt>NIC</dt><dd th:text="${governmentRecord.nicNo}"></dd>
+      <dt>Passport</dt><dd th:text="${governmentRecord.passportNo}"></dd>
+      <dt>Registered phone</dt><dd th:text="${governmentRecord.registeredPhone}"></dd>
+      <dt>Status</dt><dd th:text="${governmentRecord.identityStatus}"></dd>
+    </dl>
+  </section>
+  <form th:if="${supportRequest.request.subject == 'Existing document verification' and supportRequest.request.requestStatus != 'RESOLVED' and supportRequest.request.requestStatus != 'CLOSED'}" method="post" th:action="@{/officer/csr/identity/{id}(id=${supportRequest.request.requestId})}" class="mt-5 bg-white border rounded-xl p-5 space-y-4">
+    <input type="hidden" name="identityToken" th:value="${identityToken}"/>
+    <p class="text-sm">Check the citizen's evidence against the government registry. Arrange an in-person check through the support response if needed. Approve only after confirming the record belongs to this citizen.</p>
+    <label class="block text-sm font-semibold">Verified government record ID
+      <input type="number" min="1" name="recordId" th:value="${governmentRecord == null ? null : governmentRecord.governmentRecordId}" class="mt-1 w-full rounded-lg border-slate-300"/>
+      <span class="block text-xs font-normal mt-1">Use the government_record_id from the checked registry record. It is required for approval.</span>
+    </label>
+    <label class="block text-sm font-semibold">Evidence checked and decision notes
+      <textarea name="notes" required minlength="15" maxlength="1500" rows="4" class="mt-1 w-full rounded-lg border-slate-300" placeholder="Record what was checked and how identity was confirmed. The citizen can read these notes."></textarea>
+    </label>
+    <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="evidenceChecked" value="true" class="mt-1"/>I checked the evidence and confirmed this government record belongs to the citizen.</label>
+    <div class="flex gap-3">
+      <button name="decision" value="APPROVE" class="rounded-lg bg-emerald-700 text-white px-4 py-2 font-semibold">Approve and link</button>
+      <button name="decision" value="REJECT" class="rounded-lg border border-red-700 text-red-700 px-4 py-2 font-semibold">Do not approve</button>
+    </div>
+  </form>
+</main>
+<script src="/js/portal-shell.js"></script>
+</body>
+</html>

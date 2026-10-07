@@ -1,7 +1,9 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
+import lk.sliit.identityissuanceservice.User_Mgmt.Dto.PreparedCitizenRegistration;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
@@ -30,6 +32,8 @@ class UserAccountServiceTests {
     @Mock
     private CitizenAccountRepository citizenAccountRepository;
 
+    @Mock private CitizenApplicationService applicationService;
+
     @Test
     void registrationHashesPasswordAndCreatesCitizenAccount() {
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> {
@@ -40,10 +44,11 @@ class UserAccountServiceTests {
 
         UserAccountService service = new UserAccountService(
                 userAccountRepository,
-                citizenAccountRepository
+                citizenAccountRepository,
+                applicationService
         );
 
-        service.registerCitizen(" Citizen@Example.com ", "0771234567", "password123");
+        service.registerCitizen(" Citizen@Example.com ", "0771234567", "Password123!");
 
         ArgumentCaptor<UserAccount> userCaptor = ArgumentCaptor.forClass(UserAccount.class);
         verify(userAccountRepository).save(userCaptor.capture());
@@ -51,12 +56,15 @@ class UserAccountServiceTests {
 
         assertEquals("citizen@example.com", savedUser.getEmail());
         assertEquals("+94771234567", savedUser.getPhone());
-        assertNotEquals("password123", savedUser.getPasswordHash());
-        assertTrue(new BCryptPasswordEncoder().matches("password123", savedUser.getPasswordHash()));
+        assertEquals("Y", savedUser.getEmailVerified());
+        assertEquals("Y", savedUser.getPhoneVerified());
+        assertNotEquals("Password123!", savedUser.getPasswordHash());
+        assertTrue(new BCryptPasswordEncoder().matches("Password123!", savedUser.getPasswordHash()));
 
         ArgumentCaptor<CitizenAccount> citizenCaptor = ArgumentCaptor.forClass(CitizenAccount.class);
         verify(citizenAccountRepository).save(citizenCaptor.capture());
         assertEquals(25, citizenCaptor.getValue().getUserId());
+        verify(applicationService).getEligibility(25);
     }
 
     @Test
@@ -64,26 +72,73 @@ class UserAccountServiceTests {
         UserAccount account = new UserAccount();
         account.setUserId(25);
         account.setEmail("citizen@example.com");
-        account.setPasswordHash(new BCryptPasswordEncoder().encode("password123"));
+        account.setPasswordHash(new BCryptPasswordEncoder().encode("Password123!"));
 
-        when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatus(
+        when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatusAndEmailVerified(
                 "citizen@example.com",
-                "ACTIVE"
+                "ACTIVE",
+                "Y"
         )).thenReturn(Optional.of(account));
         when(citizenAccountRepository.existsById(25)).thenReturn(true);
 
         UserAccountService service = new UserAccountService(
                 userAccountRepository,
-                citizenAccountRepository
+                citizenAccountRepository,
+                applicationService
         );
 
         assertTrue(service.authenticateCitizen(
                 "Citizen@Example.com",
-                "password123"
+                "Password123!"
         ).isPresent());
         assertTrue(service.authenticateCitizen(
                 "citizen@example.com",
                 "wrongPassword"
         ).isEmpty());
+    }
+
+    @Test
+    void passwordResetReplacesTheStoredHashForAnActiveCitizen() {
+        UserAccount account = new UserAccount();
+        account.setUserId(25);
+        account.setEmail("citizen@example.com");
+        account.setEmailVerified("Y");
+        account.setPasswordHash(new BCryptPasswordEncoder().encode("OldPassword123!"));
+        when(userAccountRepository.findByEmailIgnoreCaseAndAccountStatus("citizen@example.com", "ACTIVE"))
+                .thenReturn(Optional.of(account));
+        when(userAccountRepository.findByEmailIgnoreCase("citizen@example.com")).thenReturn(Optional.of(account));
+        when(citizenAccountRepository.existsById(25)).thenReturn(true);
+        UserAccountService service = new UserAccountService(userAccountRepository, citizenAccountRepository, applicationService);
+
+        service.resetCitizenPassword("citizen@example.com", "NewPassword123!");
+
+        assertTrue(new BCryptPasswordEncoder().matches("NewPassword123!", account.getPasswordHash()));
+        verify(userAccountRepository).save(account);
+    }
+
+    @Test
+    void verifiedRegistrationMarksEmailAsVerified() {
+        when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> {
+            UserAccount account = invocation.getArgument(0);
+            account.setUserId(26);
+            return account;
+        });
+
+        UserAccountService service = new UserAccountService(
+                userAccountRepository,
+                citizenAccountRepository,
+                applicationService
+        );
+        PreparedCitizenRegistration prepared = service.prepareCitizenRegistration(
+                "verified@example.com",
+                "0771234568",
+                "Password123!"
+        );
+
+        service.registerVerifiedCitizen(prepared);
+
+        ArgumentCaptor<UserAccount> userCaptor = ArgumentCaptor.forClass(UserAccount.class);
+        verify(userAccountRepository).save(userCaptor.capture());
+        assertEquals("Y", userCaptor.getValue().getEmailVerified());
     }
 }

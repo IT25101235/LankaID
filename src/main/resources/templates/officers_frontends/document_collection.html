@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document Collection | LankaID CSR</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<header class="bg-slate-950 text-white border-b border-slate-800">
+  <div class="max-w-6xl mx-auto h-16 px-5 flex items-center gap-4">
+    <a th:href="@{/officer/csr}" class="text-sm text-slate-300 hover:text-white flex items-center gap-2"><span class="material-symbols-outlined text-lg">arrow_back</span>CSR dashboard</a>
+    <div class="h-6 w-px bg-slate-700"></div>
+    <div><p class="font-bold">Document Collection</p><p class="text-xs text-slate-400">Verify the collection reference before handover</p></div>
+    <div class="ml-auto text-right hidden sm:block"><p class="text-xs font-bold text-cyan-300" th:text="${loggedInOfficerEmployeeNo}">Employee</p><p class="text-xs text-slate-400" th:text="${loggedInOfficerEmail}">Email</p></div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto p-5 sm:p-6 space-y-5">
+  <div th:if="${collectionMessage}" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${collectionMessage}"></div>
+  <div th:if="${collectionError}" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${collectionError}"></div>
+
+  <section class="bg-white border rounded-2xl shadow-sm p-5">
+    <h1 class="text-xl font-extrabold">Verify collection reference</h1>
+    <p class="text-sm text-slate-500 mt-1">Ask the citizen for the delivery reference shown in their application tracker or notification.</p>
+    <form th:action="@{/officer/csr/deliveries}" method="get" class="mt-4 flex flex-col sm:flex-row gap-3">
+      <input name="reference" required th:value="${param.reference}" placeholder="Example: DEL-2026-AB12CD34" class="flex-1 rounded-xl border-slate-300 font-mono uppercase"/>
+      <button class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-3 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">search</span>Find document</button>
+    </form>
+  </section>
+
+  <section th:if="${selectedCollection}" class="bg-white border rounded-2xl shadow-sm overflow-hidden">
+    <div class="p-5 border-b flex flex-wrap items-center gap-3">
+      <div><p class="text-xs text-slate-400">Collection reference</p><p class="font-mono font-extrabold text-cyan-700 mt-1" th:text="${selectedCollection.delivery.trackingReference}">DEL-REF</p></div>
+      <span class="ml-auto rounded-full px-3 py-1 text-xs font-bold" th:classappend="${selectedCollection.delivery.deliveryStatus == 'READY_FOR_COLLECTION' ? ' bg-emerald-100 text-emerald-700' : ' bg-slate-100 text-slate-600'}" th:text="${#strings.replace(selectedCollection.delivery.deliveryStatus, '_', ' ')}">STATUS</span>
+    </div>
+    <div class="grid md:grid-cols-2 gap-5 p-5">
+      <div class="space-y-3 text-sm">
+        <div><p class="text-xs text-slate-400">Citizen</p><p class="font-bold mt-1" th:text="${selectedCollection.citizenName}">Citizen</p></div>
+        <div><p class="text-xs text-slate-400">Contact</p><p class="mt-1" th:text="${selectedCollection.citizenEmail}">Email</p><p th:text="${selectedCollection.citizenPhone}">Phone</p></div>
+        <div><p class="text-xs text-slate-400">Collection centre</p><p class="font-semibold mt-1" th:text="${selectedCollection.centreName}">Centre</p><p class="text-xs text-slate-500" th:text="${selectedCollection.centreAddress}">Address</p></div>
+      </div>
+      <div class="space-y-3 text-sm">
+        <div><p class="text-xs text-slate-400">Application</p><p class="font-mono font-bold mt-1" th:text="${selectedCollection.applicationNo}">APP</p></div>
+        <div><p class="text-xs text-slate-400">Document</p><p class="font-semibold mt-1" th:text="${selectedCollection.serviceType + ' — ' + #strings.replace(selectedCollection.applicationKind, '_', ' ')}">NIC</p></div>
+        <div><p class="text-xs text-slate-400">Government document number</p><p class="font-mono font-extrabold text-emerald-700 mt-1" th:text="${selectedCollection.documentNumber}">Number</p></div>
+      </div>
+    </div>
+    <div class="p-5 border-t bg-slate-50">
+      <form th:if="${selectedCollection.delivery.deliveryStatus == 'READY_FOR_COLLECTION'}" th:action="@{/officer/csr/deliveries/handover}" method="post" onsubmit="return confirm('Confirm that the citizen identity and document number were checked before handover?')">
+        <input type="hidden" name="reference" th:value="${selectedCollection.delivery.trackingReference}"/>
+        <label class="flex items-start gap-3 text-sm"><input id="identityChecked" required type="checkbox" class="rounded mt-1 text-emerald-600"/><span><b>Citizen identity verified</b><span class="block text-xs text-slate-500 mt-1">Confirm the citizen and document details before handing over the physical document.</span></span></label>
+        <button class="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-5 py-3 text-sm font-bold flex items-center gap-2"><span class="material-symbols-outlined">handshake</span>Confirm document handover</button>
+      </form>
+      <p th:if="${selectedCollection.delivery.deliveryStatus == 'COLLECTED'}" class="font-bold text-emerald-700 flex items-center gap-2"><span class="material-symbols-outlined">task_alt</span>This document has already been handed over.</p>
+    </div>
+  </section>
+
+  <section class="bg-white border rounded-2xl shadow-sm overflow-hidden">
+    <div class="p-5 border-b"><h2 class="font-bold">Ready for collection</h2><p class="text-xs text-slate-500 mt-1">Printed centre-pickup documents waiting for citizen handover.</p></div>
+    <div th:if="${#lists.isEmpty(readyCollections)}" class="p-8 text-center text-sm text-slate-500">No documents are waiting for collection.</div>
+    <div th:unless="${#lists.isEmpty(readyCollections)}" class="overflow-x-auto">
+      <table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Reference</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Document</th><th class="p-4 text-left">Centre</th><th class="p-4"></th></tr></thead>
+        <tbody class="divide-y"><tr th:each="item : ${readyCollections}"><td class="p-4 font-mono font-bold text-cyan-700" th:text="${item.delivery.trackingReference}">DEL</td><td class="p-4" th:text="${item.citizenName}">Citizen</td><td class="p-4"><span class="font-bold" th:text="${item.serviceType}">NIC</span><span class="block text-xs text-slate-500" th:text="${item.documentNumber}">Number</span></td><td class="p-4" th:text="${item.centreName}">Centre</td><td class="p-4 text-right"><a th:href="@{/officer/csr/deliveries(reference=${item.delivery.trackingReference})}" class="text-cyan-700 font-bold">Verify</a></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="/js/portal-shell.js"></script>
+</body>
+</html>

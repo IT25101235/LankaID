@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html class="h-full" lang="en"><head>
+<html class="h-full" lang="en" xmlns:th="http://www.thymeleaf.org"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>08. Officer Portal: NIC Verification Queue | LankaID Identity Portal</title>
@@ -100,21 +100,18 @@
             }
         }
     </script>
-<style>
-        body { font-family: 'Public Sans', sans-serif; }
-    </style>
-<link href="/css/officer-dashboard-theme.css" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="bg-background text-on-background h-full flex officer-dashboard-shell">
+<body class="portal-shell portal-officer bg-background text-on-background h-full flex officer-dashboard-shell" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <!-- Officer Navigation -->
 <aside class="w-64 min-h-screen flex flex-col fixed top-0 left-0 bottom-0 z-30 border-r officer-sidebar">
 <div class="p-5 border-b border-slate-800">
 <div class="flex items-center gap-3">
 <div class="w-9 h-9 rounded-xl flex items-center justify-center officer-brand-icon">
-<span class="material-symbols-outlined text-white text-lg">badge</span>
+<img src="/images/sri-lanka-government-emblem.png" alt="Sri Lanka Government emblem"/>
 </div>
 <div>
-<p class="font-extrabold text-white text-base leading-none">Lanka<span class="officer-accent-text">ID</span></p>
+<p class="font-extrabold text-white text-base leading-none">Lanka<span class="officer-accent-text">ID</span></p><p class="text-[10px] leading-3 text-slate-400 mt-1">ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka</p>
 <p class="text-xs text-slate-400 mt-0.5">NIC Officer Portal</p>
 </div>
 </div>
@@ -127,19 +124,19 @@ Biometric Collection
 <a class="officer-nav-link active" href="/officer/nic/applications">
 <span class="material-symbols-outlined">fact_check</span>
 Verification Queue
-<span class="ml-auto bg-cyan-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold">65</span>
+<span class="ml-auto bg-cyan-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold" th:text="${queueCount}">0</span>
 </a>
 <a class="officer-nav-link" href="/officer/nic/applications/processed">
 <span class="material-symbols-outlined">task_alt</span>
 Reviewed Applications
 </a>
+<a class="officer-nav-link" href="/officer/application-tracking">
+<span class="material-symbols-outlined">timeline</span>
+Application Tracking
+</a>
 <a class="officer-nav-link" href="/officer/nic/appointments">
 <span class="material-symbols-outlined">event_available</span>
 Appointments
-</a>
-<a class="officer-nav-link" href="/officer/nic/biometrics">
-<span class="material-symbols-outlined">fingerprint</span>
-Collection Workbench
 </a>
 </nav>
 <div class="p-4 border-t border-slate-800">
@@ -169,90 +166,60 @@ Collection Workbench
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-stack-gap gap-4 shrink-0">
 <div>
 <h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">NIC Verification Queue</h1>
-<p class="font-body-md text-body-md text-on-surface-variant">65 pending applications require attention.</p>
+<p class="font-body-md text-body-md text-on-surface-variant" th:text="${queueCount + ' submitted or ongoing applications require attention.'}">0 submitted or ongoing applications require attention.</p>
 </div>
 <div class="w-full md:w-96 relative">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-<input class="form-input w-full pl-10 pr-4 h-12 bg-surface-container-lowest border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary font-body-md text-body-md shadow-sm transition-shadow" placeholder="Search by NIC ID or Applicant Name..." type="text"/>
+<input id="queueSearch" oninput="filterQueue()" class="form-input w-full pl-10 pr-4 h-12 bg-surface-container-lowest border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary font-body-md text-body-md shadow-sm transition-shadow" placeholder="Search by application no. or applicant name..." type="text"/>
 </div>
 </div>
-<!-- Horizontal Filters -->
-<section class="officer-panel p-4 mb-stack-gap shrink-0" aria-labelledby="nic-filter-title">
-<div class="flex items-center justify-between mb-3">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-secondary">filter_alt</span>
-<h2 id="nic-filter-title" class="font-label-sm text-label-sm font-bold text-on-surface">Filter applications</h2>
+<div th:if="${verificationMessage}" class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700" th:text="${verificationMessage}"></div>
+<div th:if="${verificationError}" class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${verificationError}"></div>
+<!-- Queue Scope -->
+<section class="officer-panel p-4 mb-stack-gap shrink-0" aria-labelledby="nic-queue-scope-title">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">playlist_add_check</span>
+<div>
+<h2 id="nic-queue-scope-title" class="font-label-sm text-label-sm font-bold text-on-surface">Verification queue scope</h2>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Submitted, under review, correction required, and resubmitted NIC applications are shown here. Drafts are not shown.</p>
 </div>
-<span class="font-caption text-caption text-on-surface-variant">Showing 65 pending applications</span>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-3 items-end">
-<fieldset class="xl:col-span-4">
-<legend class="font-caption text-caption font-semibold text-on-surface-variant mb-2">Status</legend>
-<div class="flex flex-wrap gap-2">
-<label class="flex items-center gap-2 px-3 h-10 bg-surface rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
-<input checked="" class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary" type="checkbox"/>
-<span class="font-label-sm text-label-sm">Urgent</span><span class="text-xs text-red-600">12</span>
-</label>
-<label class="flex items-center gap-2 px-3 h-10 bg-surface rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
-<input checked="" class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary" type="checkbox"/>
-<span class="font-label-sm text-label-sm">Flagged</span><span class="text-xs text-amber-600">8</span>
-</label>
-<label class="flex items-center gap-2 px-3 h-10 bg-surface rounded-lg border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
-<input class="form-checkbox text-secondary rounded border-outline-variant focus:ring-secondary" type="checkbox"/>
-<span class="font-label-sm text-label-sm">Standard</span><span class="text-xs text-slate-500">45</span>
-</label>
-</div>
-</fieldset>
-<label class="xl:col-span-2 flex flex-col gap-2">
-<span class="font-caption text-caption font-semibold text-on-surface-variant">Application Type</span>
-<select class="form-select h-10 w-full bg-surface border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary text-sm"><option>All Types</option><option>New NIC</option><option>Renewal</option><option>Lost NIC</option></select>
-</label>
-<label class="xl:col-span-2 flex flex-col gap-2">
-<span class="font-caption text-caption font-semibold text-on-surface-variant">From</span>
-<input class="form-input h-10 w-full bg-surface border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary text-sm" type="date"/>
-</label>
-<label class="xl:col-span-2 flex flex-col gap-2">
-<span class="font-caption text-caption font-semibold text-on-surface-variant">To</span>
-<input class="form-input h-10 w-full bg-surface border-outline-variant text-on-surface rounded-lg focus:ring-secondary focus:border-secondary text-sm" type="date"/>
-</label>
-<button class="xl:col-span-2 h-10 border border-outline-variant bg-surface text-on-surface font-label-sm text-label-sm rounded-lg hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-secondary">
-Clear Filters
-</button>
 </div>
 </section>
 <!-- Data Table Container (Bento grid style wrap) -->
 <div class="flex-1 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.04)] border border-outline-variant overflow-hidden flex flex-col officer-panel">
 <div class="overflow-x-auto flex-1">
 <table class="w-full text-left border-collapse">
-<thead class="bg-surface-container-low sticky top-0 z-10 border-b border-outline-variant"><tr><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Applicant</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">NIC ID</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Type</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Submission Date</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Status</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold text-right">Action</th></tr></thead>
-<tbody class="divide-y divide-outline-variant/30 font-body-md text-body-md bg-surface-container-lowest">
-<tr class="hover:bg-surface-container transition-colors group" style="cursor:pointer"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-sm text-label-sm shrink-0">ER</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors">Elena Rodriguez</div><div class="font-caption text-caption text-on-surface-variant">DOB: 12/04/1985</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8891</td><td class="p-4 text-on-surface">Renewal</td><td class="p-4 text-on-surface-variant">Oct 24, 2023<br/><span class="font-caption text-caption">09:41 AM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">Urgent</span></td><td class="p-4 text-right"><button class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT">Review</button></td></tr>
-<tr class="hover:bg-surface-container transition-colors group bg-error-container/5" style="cursor:pointer"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-label-sm text-label-sm shrink-0">JC</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors">James Chen</div><div class="font-caption text-caption text-on-surface-variant">DOB: 03/15/1992</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8890</td><td class="p-4 text-on-surface">New NIC</td><td class="p-4 text-on-surface-variant">Oct 24, 2023<br/><span class="font-caption text-caption">08:15 AM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Flagged</span></td><td class="p-4 text-right"><button class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT">Review</button></td></tr>
-<tr class="hover:bg-surface-container transition-colors group" style="cursor:pointer"><td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface font-label-sm text-label-sm shrink-0">SM</div><div><div class="font-semibold text-on-surface group-hover:text-secondary transition-colors">Sarah Mitchell</div><div class="font-caption text-caption text-on-surface-variant">DOB: 07/22/1978</div></div></div></td><td class="p-4 font-mono text-on-surface-variant">NIC-2023-8889</td><td class="p-4 text-on-surface">Lost NIC</td><td class="p-4 text-on-surface-variant">Oct 23, 2023<br/><span class="font-caption text-caption">16:45 PM</span></td><td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Standard</span></td><td class="p-4 text-right"><button class="bg-transparent border border-secondary text-secondary font-label-sm text-label-sm px-4 py-2 rounded-DEFAULT">Review</button></td></tr>
+<thead class="bg-surface-container-low sticky top-0 z-10 border-b border-outline-variant"><tr><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Applicant</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Application No.</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Type</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Submission Date</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold">Status</th><th class="p-4 font-label-sm text-label-sm text-on-surface font-semibold text-right">Action</th></tr></thead>
+<tbody id="queueRows" class="divide-y divide-outline-variant/30 font-body-md text-body-md bg-surface-container-lowest">
+<tr th:if="${#lists.isEmpty(queueItems)}"><td colspan="6" class="p-10 text-center text-on-surface-variant"><span class="material-symbols-outlined text-4xl text-slate-400">inbox</span><p class="font-semibold mt-2">No NIC applications are waiting for verification.</p></td></tr>
+<tr th:each="queueItem : ${queueItems}" class="queue-row hover:bg-surface-container transition-colors group">
+<td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-sm text-label-sm shrink-0" th:text="${queueItem.applicantInitials}">AP</div><div><div class="applicant-name font-semibold text-on-surface" th:text="${queueItem.applicantName}">Applicant name</div><div class="font-caption text-caption text-on-surface-variant" th:text="${queueItem.dateOfBirth == null ? 'DOB: Not recorded' : 'DOB: ' + #temporals.format(queueItem.dateOfBirth, 'dd MMM yyyy')}">DOB: Not recorded</div></div></div></td>
+<td class="application-no p-4 font-mono text-on-surface-variant" th:text="${queueItem.applicationNo}">LK-NIC-2026-000001</td>
+<td class="p-4 text-on-surface" th:text="${queueItem.applicationKindLabel}">New NIC</td>
+<td class="p-4 text-on-surface-variant" th:text="${queueItem.submittedAt == null ? 'Not recorded' : #temporals.format(queueItem.submittedAt, 'dd MMM yyyy, hh:mm a')}">Not recorded</td>
+<td class="p-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm" th:text="${queueItem.statusLabel}">Submitted</span></td>
+<td class="p-4 text-right"><form th:action="@{/officer/nic/applications/{reference}/review(reference=${queueItem.applicationNo})}" method="post"><button type="submit" class="bg-secondary text-on-secondary font-label-sm text-label-sm px-4 py-2 rounded-lg hover:opacity-90" th:text="${queueItem.currentStatus == 'SUBMITTED' or queueItem.currentStatus == 'RESUBMITTED' ? 'Review' : 'Open'}">Review</button></form></td>
+</tr>
 </tbody>
 </table>
 </div>
 <!-- Pagination Footer -->
 <div class="p-4 border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center shrink-0">
-<span class="font-caption text-caption text-on-surface-variant">Showing 1 to 4 of 65 entries</span>
-<div class="flex gap-2">
-<button class="p-2 rounded-DEFAULT hover:bg-surface-variant text-on-surface-variant disabled:opacity-50 transition-colors" disabled="">
-<span class="material-symbols-outlined">chevron_left</span>
-</button>
-<button class="p-2 rounded-DEFAULT hover:bg-surface-variant text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined">chevron_right</span>
-</button>
-</div>
+<span class="font-caption text-caption text-on-surface-variant" th:text="${'Showing ' + queueCount + ' application(s)'}">Showing 0 application(s)</span>
 </div>
 </div>
 </div>
 </section>
 </main>
 <script>
-// Each row opens the clean Spring route using the reference shown in column two.
-document.querySelectorAll('tbody tr').forEach(row => {
-  const reference = row.querySelector('td:nth-child(2)')?.textContent.trim();
-  if (reference) row.onclick = () => window.location.href = '/officer/nic/applications/' + encodeURIComponent(reference);
-});
+function filterQueue() {
+  const searchText = document.getElementById('queueSearch').value.toLowerCase();
+  document.querySelectorAll('.queue-row').forEach(row => {
+    const applicantName = row.querySelector('.applicant-name').textContent.toLowerCase();
+    const applicationNo = row.querySelector('.application-no').textContent.toLowerCase();
+    row.style.display = applicantName.includes(searchText) || applicationNo.includes(searchText) ? '' : 'none';
+  });
+}
 </script>
+<script src="/js/portal-shell.js"></script>
 </body></html>

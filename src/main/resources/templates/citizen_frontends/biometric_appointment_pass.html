@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Pass | LankaID</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-citizen min-h-screen text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='biometrics')}"></header>
+<main class="max-w-3xl mx-auto px-4 py-7">
+  <div th:if="${appointmentMessage}" class="no-print mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${appointmentMessage}"></div>
+  <section class="pass bg-white rounded-3xl border shadow-xl overflow-hidden">
+    <div class="bg-sky-600 text-white p-6"><div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div><p class="text-sm text-sky-100 mt-3">Biometric Collection Appointment Pass</p></div>
+    <div class="p-6 sm:p-8 grid sm:grid-cols-[280px_1fr] gap-7 items-center">
+      <div class="text-center"><img th:src="@{/citizen/appointments/{reference}/qr(reference=${pass.appointment.referenceNo})}" alt="Appointment QR code" class="w-64 h-64 max-w-full mx-auto border rounded-2xl p-2"/><p class="font-mono font-extrabold text-sky-700 mt-3 break-all" th:text="${pass.appointment.referenceNo}">BIO-REFERENCE</p><p class="text-xs text-slate-400 mt-1">QR value = reference number</p></div>
+      <dl class="space-y-4 text-sm"><div><dt class="text-xs text-slate-400">Citizen</dt><dd class="font-bold mt-1" th:text="${pass.applicantName}">Citizen</dd></div><div><dt class="text-xs text-slate-400">Application</dt><dd class="font-mono font-semibold mt-1" th:text="${pass.application.applicationNo}">Application</dd></div><div><dt class="text-xs text-slate-400">Document service</dt><dd class="font-semibold mt-1" th:text="${pass.application.serviceType}">NIC</dd></div><div><dt class="text-xs text-slate-400">Centre</dt><dd class="font-semibold mt-1" th:text="${pass.centre.centreName + ', ' + pass.centre.city}">Centre</dd></div><div><dt class="text-xs text-slate-400">Date and time</dt><dd class="font-semibold mt-1" th:text="${#temporals.format(pass.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Date</dd></div><div><dt class="text-xs text-slate-400">Status</dt><dd class="inline-block mt-1 bg-emerald-50 text-emerald-700 rounded-full px-3 py-1 text-xs font-bold" th:text="${#strings.replace(pass.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</dd></div></dl>
+    </div>
+    <div class="border-t bg-slate-50 px-6 py-4 text-xs text-slate-500">Present this pass on your phone or as a printed copy. An officer can scan the QR or type the same reference manually.</div>
+  </section>
+  <div class="no-print mt-5 text-center"><a th:href="@{/citizen/appointments/{reference}/manage(reference=${pass.appointment.referenceNo})}" class="inline-block rounded-xl bg-slate-800 text-white px-5 py-3 text-sm font-bold">Cancel or reschedule booking</a><p class="text-xs text-slate-600 mt-2">Changes require at least 72 hours' notice. Your original payment is retained, so biometric rescheduling or rebooking does not require another payment.</p></div>
+  <div class="no-print mt-5 flex flex-wrap justify-center gap-3"><a th:href="@{/citizen/appointments/{reference}/pass/download(reference=${pass.appointment.referenceNo})}" class="bg-sky-600 text-white rounded-xl px-5 py-3 text-sm font-bold flex items-center gap-2"><span class="material-symbols-outlined">download</span>Download PNG pass</a><button onclick="window.print()" class="bg-white border rounded-xl px-5 py-3 text-sm font-bold flex items-center gap-2"><span class="material-symbols-outlined">print</span>Print / save PDF</button></div>
+</main>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
+</body>
+</html>

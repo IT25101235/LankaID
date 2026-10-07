@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Link existing documents | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-citizen min-h-screen bg-slate-100 text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='home')}"></header>
+<main class="max-w-2xl mx-auto px-4 py-8">
+  <a href="/citizen/dashboard" class="text-sky-700 font-semibold">Back to dashboard</a>
+  <h1 class="text-2xl font-bold mt-5">Link existing NIC or passport</h1>
+  <p class="mt-2 text-sm">Use this for documents issued before you joined LankaID. Your email is verified during registration. We will now verify your existing government record.</p>
+  <p th:if="${identityMessage}" th:text="${identityMessage}" class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4" role="status"></p>
+  <p th:if="${identityError}" th:text="${identityError}" class="mt-4 rounded-xl bg-red-50 border border-red-200 p-4" role="alert"></p>
+
+  <section th:if="${linked}" class="mt-5 bg-white border rounded-xl p-5">
+    <h2 class="font-bold">Your government record is linked</h2>
+    <p class="mt-2 text-sm">Return to your dashboard to view the available document services. If the record needs correction, contact Citizen Support.</p>
+    <a href="/citizen/support/contact-us" class="inline-block mt-3 text-sky-700 font-semibold">Contact support</a>
+  </section>
+
+  <section th:if="${!linked and maskedPhone != null}" class="mt-5 bg-white border rounded-xl p-5">
+    <h2 class="font-bold">Verify the government-registered phone</h2>
+    <p class="text-sm mt-2">Enter the six-digit code sent to <strong th:text="${maskedPhone}"></strong>.</p>
+    <form method="post" th:action="@{/citizen/identity/verify}" class="mt-4 space-y-3">
+      <input type="hidden" name="identityToken" th:value="${identityToken}"/>
+      <label class="block text-sm font-semibold" for="code">Verification code</label>
+      <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="w-full rounded-lg border-slate-300"/>
+      <button class="rounded-lg bg-sky-700 text-white px-4 py-2 font-semibold">Verify and link documents</button>
+    </form>
+    <p class="text-xs mt-3 text-slate-600">If the code expires, use Send verification code below to request another. A resend waiting period applies.</p>
+  </section>
+
+  <form th:if="${!linked}" method="post" th:action="@{/citizen/identity/request}" class="mt-5 bg-white border rounded-xl p-5 space-y-4">
+    <input type="hidden" name="identityToken" th:value="${identityToken}"/>
+    <label class="block text-sm font-semibold">Document type
+      <select name="type" class="mt-1 w-full rounded-lg border-slate-300"><option value="NIC">NIC</option><option value="PASSPORT">Passport</option></select>
+    </label>
+    <label class="block text-sm font-semibold">Existing document number
+      <input name="number" maxlength="20" pattern="[A-Za-z0-9]+" class="mt-1 w-full rounded-lg border-slate-300"/>
+      <span class="block text-xs font-normal text-slate-500 mt-1">If you do not know the number, leave it blank and request officer verification.</span>
+    </label>
+    <label class="block text-sm font-semibold">Reason for linking or help needed
+      <textarea name="explanation" required minlength="5" maxlength="1500" rows="3" class="mt-1 w-full rounded-lg border-slate-300" placeholder="I already have a passport and want to renew it."></textarea>
+    </label>
+    <p class="text-sm">The code goes to the mobile number held in the government record. If that number is outdated or unavailable, choose officer verification.</p>
+    <div class="flex flex-wrap gap-3">
+      <button name="action" value="OTP" class="rounded-lg bg-sky-700 text-white px-4 py-2 font-semibold">Send verification code</button>
+      <button name="action" value="OFFICER" class="rounded-lg border border-sky-700 text-sky-700 px-4 py-2 font-semibold">Request officer verification</button>
+    </div>
+    <p class="text-xs text-slate-600">An existing-document claim pauses new applications until ownership is checked. Do not submit this form if you have never owned either document.</p>
+  </form>
+
+  <section th:if="${identityRequest != null}" class="mt-5 bg-white border rounded-xl p-5">
+    <h2 class="font-bold">Latest verification request</h2>
+    <p class="text-sm mt-2">Status: <strong th:text="${identityRequest.requestStatus}"></strong></p>
+    <p th:if="${identityRequest.response != null}" th:text="${identityRequest.response}" class="text-sm whitespace-pre-wrap mt-3"></p>
+    <a th:href="@{/citizen/support/{id}(id=${identityRequest.requestId})}" class="inline-block mt-3 text-sky-700 font-semibold">View request and officer response</a>
+  </section>
+</main>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
+</body>
+</html>

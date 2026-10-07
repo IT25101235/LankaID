@@ -1,282 +1,97 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Application Status Tracker | LankaID Identity Portal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Public Sans','sans-serif'] } } } }</script>
-<style>body { font-family: 'Public Sans', sans-serif; background: #f1f5f9; }</style>
-<link href="/css/citizen-theme.css" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Applications | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
 </head>
-<body class="min-h-screen flex flex-col">
-
-<!-- Header -->
-<header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <a th:href="@{/citizen/dashboard}" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition-colors text-sm font-medium">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-      Dashboard
-    </a>
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
-        <span class="material-symbols-outlined text-white text-sm">verified_user</span>
-      </div>
-      <span class="font-extrabold text-slate-900 text-lg">Lanka<span class="text-sky-600">ID</span></span>
-    </div>
-    <a th:href="@{/citizen/notifications}" class="relative text-slate-500 hover:text-sky-600">
-      <span class="material-symbols-outlined text-xl">notifications</span>
-      <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">3</span>
-    </a>
-  </div>
-</header>
-
-<div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
-
-  <!-- Title -->
-  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900">My Applications</h1>
-      <p class="text-slate-500 text-sm mt-0.5">Track the status of your submitted identity document applications</p>
-    </div>
-    <div class="flex gap-2">
-      <a th:href="@{/citizen/dashboard}" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-sm">
-        <span class="material-symbols-outlined text-base">add</span>
-        New Application
-      </a>
-    </div>
+<body class="portal-shell portal-citizen min-h-screen text-slate-800">
+<header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
+<main class="max-w-5xl mx-auto px-4 py-7">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+    <div><h1 class="text-2xl font-extrabold">My Applications</h1><p class="text-sm text-slate-500 mt-1">Applications saved in your citizen account.</p></div>
+    <a th:href="@{/citizen/dashboard}" class="bg-sky-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold text-center">Start an application</a>
   </div>
 
-  <!-- Application Cards -->
-  <div class="space-y-4">
-
-    <!-- Application 1: NIC - Approved, Awaiting Biometrics -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="flex items-start justify-between p-5 border-b border-slate-100">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-sky-600 text-2xl">badge</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-bold text-slate-900">National Identity Card (NIC)</h2>
-              <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">New</span>
-            </div>
-            <p class="text-xs text-slate-500 mt-0.5">Ref: LK-NIC-2026-00183 &nbsp;·&nbsp; Submitted: Aug 10, 2026</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-semibold border border-amber-200">Biometrics Required</span>
-        </div>
-      </div>
-
-      <!-- Timeline -->
-      <div class="p-5">
-        <div class="relative">
-          <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-100" style="top: 12px; bottom: 12px;"></div>
-          <div class="space-y-5">
-            <!-- Step 1: Submitted -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 z-10 shadow-md">
-                <span class="material-symbols-outlined text-white text-sm">check</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-900">Application Submitted</p>
-                  <span class="text-xs text-slate-400">Aug 10, 2026 · 10:23 AM</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">Your application has been received and queued for officer review.</p>
-              </div>
-            </div>
-            <!-- Step 2: Verifying -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 z-10 shadow-md">
-                <span class="material-symbols-outlined text-white text-sm">check</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-900">Verification In Progress</p>
-                  <span class="text-xs text-slate-400">Aug 11, 2026 · 9:00 AM</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">Officer Nimal Jayawardena is reviewing your documents.</p>
-              </div>
-            </div>
-            <!-- Step 3: Approved -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 z-10 shadow-md">
-                <span class="material-symbols-outlined text-white text-sm">check</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-900">Application Approved</p>
-                  <span class="text-xs text-slate-400">Aug 12, 2026 · 2:15 PM</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">Your application has been approved. Please book a biometric appointment.</p>
-              </div>
-            </div>
-            <!-- Step 4: Biometrics (ACTIVE) -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 z-10 shadow-md ring-4 ring-amber-100">
-                <span class="material-symbols-outlined text-white text-sm">fingerprint</span>
-              </div>
-              <div class="flex-1 pt-0.5 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-amber-900">Biometric Appointment Required</p>
-                  <span class="text-xs text-amber-600 font-semibold animate-pulse">Action Needed</span>
-                </div>
-                <p class="text-xs text-amber-700 mt-0.5 mb-2">Visit a LankaID centre to provide your fingerprints and photo.</p>
-                <a th:href="@{/citizen/appointments/biometric}" class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                  <span class="material-symbols-outlined text-sm">calendar_month</span>
-                  Book Appointment Now
-                </a>
-              </div>
-            </div>
-            <!-- Step 5: Printing (Pending) -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">print</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <p class="text-sm font-medium text-slate-400">Sent to Printing</p>
-                <p class="text-xs text-slate-400">Pending biometric completion</p>
-              </div>
-            </div>
-            <!-- Step 6: Delivery -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">local_shipping</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <p class="text-sm font-medium text-slate-400">Dispatched for Delivery</p>
-                <p class="text-xs text-slate-400">Not started</p>
-              </div>
-            </div>
-            <!-- Step 7: Delivered -->
-            <div class="flex items-start gap-4 relative">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">task_alt</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <p class="text-sm font-medium text-slate-400">Delivered</p>
-                <p class="text-xs text-slate-400">Not started</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Application 2: Passport - Under Officer Review -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="flex items-start justify-between p-5 border-b border-slate-100">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-indigo-600 text-2xl">flight_takeoff</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-bold text-slate-900">Passport</h2>
-              <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Renewal</span>
-            </div>
-            <p class="text-xs text-slate-500 mt-0.5">Ref: LK-PASS-2026-00041 &nbsp;·&nbsp; Submitted: Aug 05, 2026</p>
-          </div>
-        </div>
-        <span class="text-xs bg-sky-100 text-sky-700 px-3 py-1 rounded-full font-semibold border border-sky-200">Under Review</span>
-      </div>
-
-      <div class="p-5">
-        <div class="relative">
-          <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-100" style="top: 12px; bottom: 12px;"></div>
-          <div class="space-y-5">
-            <div class="flex items-start gap-4">
-              <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 z-10 shadow-md">
-                <span class="material-symbols-outlined text-white text-sm">check</span>
-              </div>
-              <div class="flex-1 pt-0.5">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-slate-900">Application Submitted</p>
-                  <span class="text-xs text-slate-400">Aug 05, 2026 · 3:45 PM</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">Application received and in the processing queue.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center flex-shrink-0 z-10 shadow-md ring-4 ring-sky-100">
-                <span class="material-symbols-outlined text-white text-sm">manage_search</span>
-              </div>
-              <div class="flex-1 pt-0.5 bg-sky-50 border border-sky-200 rounded-xl p-3">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-semibold text-sky-900">Verification In Progress</p>
-                  <span class="text-xs text-sky-600 font-semibold">In Progress</span>
-                </div>
-                <p class="text-xs text-sky-700 mt-0.5">Officer Dilani Rathnayake is currently reviewing your passport documents.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">verified</span>
-              </div>
-              <div class="flex-1 pt-0.5"><p class="text-sm font-medium text-slate-400">Application Approved</p></div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">fingerprint</span>
-              </div>
-              <div class="flex-1 pt-0.5"><p class="text-sm font-medium text-slate-400">Biometric Appointment</p></div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">print</span>
-              </div>
-              <div class="flex-1 pt-0.5"><p class="text-sm font-medium text-slate-400">Sent to Printing</p></div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 z-10">
-                <span class="material-symbols-outlined text-slate-400 text-sm">local_shipping</span>
-              </div>
-              <div class="flex-1 pt-0.5"><p class="text-sm font-medium text-slate-400">Dispatched for Delivery</p></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Application 3: NIC - Info Requested by Officer -->
-    <div class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
-      <div class="flex items-start justify-between p-5 border-b border-red-100 bg-red-50">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-red-600 text-2xl">badge</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-bold text-slate-900">National Identity Card (NIC)</h2>
-              <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold">Lost / Damaged</span>
-            </div>
-            <p class="text-xs text-slate-500 mt-0.5">Ref: LK-NIC-2026-00097 &nbsp;·&nbsp; Submitted: Jul 28, 2026</p>
-          </div>
-        </div>
-        <span class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold border border-red-200">Info Requested</span>
-      </div>
-      <div class="p-5 bg-red-50 border-b border-red-100">
-        <div class="flex items-start gap-3">
-          <span class="material-symbols-outlined text-red-500 mt-0.5">warning</span>
-          <div>
-            <p class="text-sm font-semibold text-red-800">Officer has requested additional information</p>
-            <p class="text-xs text-red-600 mt-1">"Please upload a clear photo of the police report for the lost NIC and a recent utility bill as proof of address. Documents must not be older than 3 months."</p>
-            <p class="text-xs text-slate-500 mt-1">— Officer Kumara Silva, Aug 14, 2026</p>
-            <a th:href="@{/citizen/applications/nic/LK-NIC-2026-00097/correct}" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg mt-2 transition-colors">
-              <span class="material-symbols-outlined text-sm">edit_note</span>
-              Correct & Resubmit
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
+  <div th:if="${applicationMessage}" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700" th:text="${applicationMessage}"></div>
+  <div th:if="${applicationError}" class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700" th:text="${applicationError}"></div>
+  <div th:if="${#lists.isEmpty(applications)}" class="mt-6 bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+    <span class="material-symbols-outlined text-5xl text-slate-300">description</span><p class="font-bold mt-2">No applications found</p><p class="text-sm text-slate-500 mt-1">Return to the dashboard to start a NIC or passport application.</p>
   </div>
-</div>
+
+  <div th:unless="${#lists.isEmpty(applications)}" class="space-y-4 mt-6">
+    <article th:each="citizenApplication : ${applications}" th:with="deliveryInfo=${deliveryByApplicationId.get(citizenApplication.applicationId)}" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex gap-4">
+          <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
+          <div><div class="flex flex-wrap items-center gap-2"><h2 class="font-bold text-lg" th:text="${citizenApplication.serviceType == 'NIC' ? 'National Identity Card' : 'Passport'}">Document</h2><span class="text-xs rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-1 font-bold" th:text="${#strings.replace(citizenApplication.applicationKind, '_', ' ')}">NEW</span></div><p class="font-mono text-xs text-slate-500 mt-1" th:text="${citizenApplication.applicationNo}">Reference</p></div>
+        </div>
+        <span class="self-start text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1.5 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
+      </div>
+      <div th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p class="font-bold">Officer requested a correction</p>
+        <p class="mt-1"><span class="font-semibold">Items to correct:</span> <span th:text="${correctionMessages.get(citizenApplication.applicationId) != null ? correctionMessages.get(citizenApplication.applicationId) : 'Review the application form and uploaded documents.'}">Application form details</span></p>
+      </div>
+      <section class="application-journey mt-5"
+               role="progressbar" aria-label="Application progress" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1"
+               th:attr="data-status=${citizenApplication.currentStatus},data-delivery-status=${deliveryInfo == null ? '' : deliveryInfo.delivery.deliveryStatus}">
+        <div class="journey-status">
+          <span class="journey-status-icon material-symbols-outlined" aria-hidden="true">hourglass_top</span>
+          <div class="journey-status-copy">
+            <span class="journey-eyebrow">Current stage</span>
+            <strong class="journey-status-title">Checking progress</strong>
+            <p class="journey-status-message">Your latest application update will appear here.</p>
+          </div>
+          <span class="journey-step-count"><span class="journey-step-current">1</span> of 7</span>
+        </div>
+        <div class="journey-track" aria-hidden="true">
+          <div class="journey-track-rail"><span class="journey-track-fill"></span></div>
+          <ol class="journey-steps">
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">edit_document</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Application</strong><small>Details submitted</small></span></li>
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">fact_check</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Verification</strong><small>Officer review</small></span></li>
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">verified</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Approval</strong><small>Decision issued</small></span></li>
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">calendar_month</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Appointment</strong><small>Visit scheduled</small></span></li>
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">fingerprint</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Biometrics</strong><small>Identity captured</small></span></li>
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">print</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Printing</strong><small>Document produced</small></span></li>
+            <li class="journey-step"><span class="journey-marker"><span class="journey-marker-icon material-symbols-outlined">local_shipping</span><span class="journey-marker-check material-symbols-outlined">check</span></span><span class="journey-step-copy"><strong>Delivery</strong><small>Safe handover</small></span></li>
+          </ol>
+        </div>
+      </section>
+      <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="text-xs text-slate-500"><span th:text="${'Created: ' + #temporals.format(citizenApplication.createdAt, 'dd MMM yyyy, HH:mm')}">Created</span><span th:if="${citizenApplication.submittedAt != null}" th:text="${' • Submitted: ' + #temporals.format(citizenApplication.submittedAt, 'dd MMM yyyy, HH:mm')}"></span></div>
+        <div th:if="${citizenApplication.currentStatus == 'DRAFT'}" class="flex flex-wrap gap-2">
+          <a th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="bg-sky-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Continue draft</a>
+          <form th:action="@{/citizen/applications/{applicationId}/delete(applicationId=${citizenApplication.applicationId})}" method="post" onsubmit="return confirm('Delete this unsubmitted draft? This cannot be undone.')"><button type="submit" class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-100">Delete draft</button></form>
+        </div>
+        <div th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" class="flex flex-wrap gap-2"><a th:href="@{/citizen/{workflow}/{service}/correction(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="bg-amber-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Correct form</a><a th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="border border-sky-200 text-sky-700 rounded-lg px-4 py-2 text-sm font-bold text-center">Replace documents</a></div>
+        <a th:if="${citizenApplication.currentStatus == 'APPROVED'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Pay &amp; book biometrics</a>
+        <a th:if="${citizenApplication.currentStatus == 'APPOINTMENT_BOOKED'}" th:href="@{/citizen/appointments/biometric(applicationId=${citizenApplication.applicationId})}" class="bg-sky-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">View appointment pass</a>
+        <span th:if="${citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED'}" class="text-sm font-bold text-purple-700">Biometrics collected · Ready for printing</span>
+        <a th:if="${deliveryInfo == null and (citizenApplication.currentStatus == 'APPOINTMENT_BOOKED' or citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED' or citizenApplication.currentStatus == 'ISSUED')}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-orange-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Choose delivery</a>
+        <span th:if="${citizenApplication.currentStatus == 'ISSUED' and deliveryInfo == null}" class="text-sm font-bold text-emerald-700">Document printed</span>
+        <form th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' and deliveryInfo.delivery.deliveryStatus == 'DISPATCHED'}" th:action="@{/citizen/deliveries/confirm}" method="post" onsubmit="return confirm('Confirm that you have received your document?')">
+          <input type="hidden" name="applicationId" th:value="${citizenApplication.applicationId}"/>
+          <button type="submit" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold">Confirm delivery received</button>
+        </form>
+        <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'READY_FOR_COLLECTION'}" class="text-sm font-bold text-emerald-700">Ready for collection</span>
+        <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'COLLECTED'}" class="text-sm font-bold text-emerald-700">Document handed over</span>
+        <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'DELIVERED'}" class="text-sm font-bold text-emerald-700">Delivered</span>
+        <span th:if="${citizenApplication.currentStatus != 'DRAFT' and citizenApplication.currentStatus != 'CORRECTION_REQUIRED' and citizenApplication.currentStatus != 'APPROVED' and citizenApplication.currentStatus != 'APPOINTMENT_BOOKED' and citizenApplication.currentStatus != 'BIOMETRIC_COLLECTED' and citizenApplication.currentStatus != 'ISSUED'}" class="text-sm font-semibold text-slate-500">Submitted for processing</span>
+      </div>
+      <div th:if="${deliveryInfo != null}" class="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-900">
+        <div class="flex flex-wrap justify-between gap-2"><span class="font-bold" th:text="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' ? 'Home delivery' : 'Service-centre collection'}">Method</span><span class="font-mono font-bold" th:text="${deliveryInfo.delivery.trackingReference}">DEL-REF</span></div>
+        <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY'}" th:text="${deliveryInfo.delivery.deliveryAddress}">Address</p>
+        <p class="mt-2" th:if="${deliveryInfo.delivery.deliveryMethod == 'CENTRE_COLLECTION'}" th:text="${deliveryInfo.centreName + ' — ' + deliveryInfo.centreAddress}">Centre</p>
+        <p class="mt-2 font-semibold" th:text="${'Status: ' + #strings.replace(deliveryInfo.delivery.deliveryStatus, '_', ' ')}">Status</p>
+      </div>
+    </article>
+  </div>
+</main>
+<script src="/js/application-journey.js?v=20260918"></script>
+<script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

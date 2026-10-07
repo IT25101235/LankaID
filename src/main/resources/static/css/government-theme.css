@@ -1,0 +1,1770 @@
+/*
+ * LankaID centralized government visual system.
+ * Official identity references: gov.lk, presidentsoffice.gov.lk, parliament.lk, mfa.gov.lk, drp.gov.lk, immigration.gov.lk.
+ * Tailwind provides layout utilities; this file owns shared tokens, components, legacy normalization, and responsive behavior.
+ */
+
+/* Citizen application components */
+/* Shared citizen portal theme. */
+
+html,
+body {
+  font-family: "Public Sans", sans-serif !important;
+  background: var(--citizen-bg) !important;
+  color: var(--citizen-text);
+}
+
+body > header {
+  width: 100% !important;
+  max-width: none !important;
+  background: var(--citizen-surface) !important;
+  border-bottom: 1px solid var(--citizen-border) !important;
+  box-shadow: var(--citizen-shadow) !important;
+  position: sticky !important;
+  top: 0;
+  z-index: 50;
+}
+
+body > main,
+body > header > div,
+body > div.max-w-6xl {
+  width: 100%;
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Map the older Material token utilities to the reference sky/slate palette. */
+.bg-background,
+.bg-surface {
+  background-color: var(--citizen-bg) !important;
+}
+
+.bg-surface-container-lowest {
+  background-color: var(--citizen-surface) !important;
+}
+
+.bg-surface-container-low,
+.bg-surface-bright {
+  background-color: var(--citizen-surface-soft) !important;
+}
+
+.bg-surface-container,
+.bg-surface-container-high,
+.bg-surface-container-highest,
+.bg-surface-variant {
+  background-color: #e2e8f0 !important;
+}
+
+.text-on-background,
+.text-on-surface,
+.text-on-primary-fixed,
+.text-on-secondary-fixed {
+  color: var(--citizen-text) !important;
+}
+
+.text-on-surface-variant,
+.text-outline,
+.text-outline-variant,
+.text-on-primary-container,
+.text-on-tertiary-container {
+  color: var(--citizen-text-muted) !important;
+}
+
+.text-secondary,
+.text-on-secondary-container,
+.text-on-secondary-fixed-variant,
+.hover\:text-secondary:hover {
+  color: var(--citizen-primary) !important;
+}
+
+.bg-secondary,
+.bg-primary,
+.bg-primary-container {
+  background-color: var(--citizen-primary) !important;
+}
+
+.bg-secondary-container,
+.bg-secondary-fixed,
+.bg-secondary-fixed-dim,
+.bg-primary-fixed,
+.bg-primary-fixed-dim {
+  background-color: var(--citizen-primary-soft) !important;
+}
+
+.border-secondary,
+.focus\:border-secondary:focus {
+  border-color: var(--citizen-primary) !important;
+}
+
+.border-outline,
+.border-outline-variant {
+  border-color: var(--citizen-border) !important;
+}
+
+.ring-secondary,
+.focus\:ring-secondary:focus,
+.focus\:ring-2:focus {
+  --tw-ring-color: rgb(14 165 233 / 0.28) !important;
+}
+
+.hover\:bg-on-secondary-fixed-variant:hover,
+.hover\:bg-secondary\/80:hover {
+  background-color: var(--citizen-primary-hover) !important;
+}
+
+/* Give legacy panels the same card treatment as the tracker. */
+section.bg-surface-container-lowest,
+div.bg-surface-container-lowest.rounded-lg,
+div.bg-surface-container-lowest.rounded-xl,
+.ambient-shadow {
+  border: 1px solid var(--citizen-border) !important;
+  border-radius: 1rem !important;
+  box-shadow: var(--citizen-card-shadow) !important;
+}
+
+section.bg-surface-container-lowest > :first-child.bg-surface-container-low {
+  border-bottom-color: var(--citizen-border-soft) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  border-color: #cbd5e1 !important;
+  border-radius: 0.75rem !important;
+  background-color: var(--citizen-surface) !important;
+  color: var(--citizen-text) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--citizen-primary) !important;
+  box-shadow: 0 0 0 3px rgb(14 165 233 / 0.16) !important;
+}
+
+button,
+a {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: 150ms;
+}
+
+@media (max-width: 767px) {
+  body > header > div {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  body > main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  body > main.py-section-margin {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Legacy pages used desktop headline sizing and intrinsic flex widths. */
+  .text-display-lg,
+  .text-headline-lg {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  main,
+  main section,
+  main section > div,
+  main .flex-1 {
+    min-width: 0;
+  }
+
+  main h1,
+  main h2,
+  main p {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Officer dashboard components */
+
+body.officer-dashboard-shell {
+  min-height: 100vh;
+  background: var(--officer-bg) !important;
+  color: var(--officer-text);
+  font-family: "Public Sans", sans-serif;
+}
+
+.officer-sidebar {
+  background: var(--officer-sidebar) !important;
+  border-color: var(--officer-sidebar-border) !important;
+  color: #e2e8f0;
+}
+
+.officer-brand-icon {
+  background: linear-gradient(135deg, #06b6d4, #14b8a6) !important;
+  box-shadow: 0 8px 20px rgba(8, 145, 178, 0.22);
+}
+
+.officer-accent-text {
+  color: #22d3ee !important;
+}
+
+.officer-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #94a3b8 !important;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.officer-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #e2e8f0 !important;
+  transform: translateX(2px);
+}
+
+.officer-nav-link.active {
+  background: rgba(34, 211, 238, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+.officer-nav-link .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.officer-topbar {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: var(--officer-border) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.officer-panel {
+  background: var(--officer-surface) !important;
+  border: 1px solid var(--officer-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.officer-panel.interactive:hover {
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.officer-subpanel {
+  background: var(--officer-surface-muted) !important;
+  border: 1px solid var(--officer-border) !important;
+  border-radius: 12px;
+}
+
+.officer-primary-button {
+  background: var(--officer-accent) !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+  transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.officer-primary-button:hover {
+  background: var(--officer-accent-dark) !important;
+  box-shadow: 0 8px 18px rgba(8, 145, 178, 0.2);
+  transform: translateY(-1px);
+}
+
+.officer-table-row {
+  transition: background-color 150ms ease;
+}
+
+.officer-table-row:hover {
+  background: #f8fafc !important;
+}
+
+/* Normalize the semantic utility tokens used by the older generated pages. */
+.officer-dashboard-shell .bg-background { background-color: var(--officer-bg) !important; }
+.officer-dashboard-shell .bg-surface { background-color: #f8fafc !important; }
+.officer-dashboard-shell .bg-surface-container-lowest { background-color: #ffffff !important; }
+.officer-dashboard-shell .bg-surface-container-low { background-color: #f8fafc !important; }
+.officer-dashboard-shell .bg-surface-container { background-color: #f1f5f9 !important; }
+.officer-dashboard-shell .bg-surface-container-high,
+.officer-dashboard-shell .bg-surface-container-highest,
+.officer-dashboard-shell .bg-surface-variant { background-color: #e2e8f0 !important; }
+.officer-dashboard-shell .bg-secondary { background-color: var(--officer-accent) !important; }
+.officer-dashboard-shell .bg-secondary-container { background-color: var(--officer-accent-soft) !important; }
+.officer-dashboard-shell .text-on-background,
+.officer-dashboard-shell .text-on-surface { color: var(--officer-text) !important; }
+.officer-dashboard-shell .text-on-surface-variant { color: var(--officer-text-muted) !important; }
+.officer-dashboard-shell .text-secondary { color: var(--officer-accent) !important; }
+.officer-dashboard-shell .text-on-secondary-container { color: #155e75 !important; }
+.officer-dashboard-shell .border-outline-variant { border-color: var(--officer-border) !important; }
+.officer-dashboard-shell .border-secondary { border-color: var(--officer-accent) !important; }
+.officer-dashboard-shell main section.bg-surface-container-lowest {
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.officer-sidebar .text-on-surface { color: #f8fafc !important; }
+.officer-sidebar .text-on-surface-variant,
+.officer-sidebar .text-outline-variant { color: #94a3b8 !important; }
+.officer-sidebar .border-outline-variant { border-color: var(--officer-sidebar-border) !important; }
+.officer-sidebar a:hover { background: rgba(255, 255, 255, 0.08) !important; color: #e2e8f0 !important; }
+.officer-sidebar a.bg-secondary-container {
+  background: rgba(34, 211, 238, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+.metric-card {
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.metric-card:hover {
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+/* The director dashboard previously used a full dark theme. These scoped
+   mappings retain its semantic status colors while moving content to the
+   shared light officer workspace. */
+.director-main {
+  background: var(--officer-bg);
+  color: #334155;
+}
+
+.director-main .text-white { color: var(--officer-text) !important; }
+.director-main .text-slate-300 { color: #475569 !important; }
+.director-main .text-slate-400 { color: var(--officer-text-muted) !important; }
+.director-main .text-slate-500 { color: #64748b !important; }
+.director-main .border-slate-800 { border-color: var(--officer-border) !important; }
+.director-main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: var(--officer-border) !important; }
+.director-main .bg-slate-700 { background: #e2e8f0 !important; }
+.director-main .bg-slate-800\/50 { background: #f8fafc !important; border: 1px solid var(--officer-border); }
+.director-main .text-purple-400 { color: var(--officer-accent) !important; }
+.director-main .text-emerald-400 { color: #047857 !important; }
+.director-main .text-amber-400 { color: #b45309 !important; }
+.director-main .text-red-400 { color: #dc2626 !important; }
+.director-main .bg-emerald-900\/30 { background: #d1fae5 !important; }
+.director-main .bg-red-900\/30 { background: #fee2e2 !important; }
+
+/* System administration uses the same light workspace and cyan accent as the
+   Citizen Service Representative portal. The selectors below translate the
+   older dark utility classes without changing their status semantics. */
+.admin-dashboard-main {
+  background: var(--officer-bg);
+  color: #334155;
+}
+
+.admin-dashboard-main .card,
+.admin-light-page .bg-slate-900 {
+  background: var(--officer-surface) !important;
+  border-color: var(--officer-border) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.admin-dashboard-main .text-white,
+.admin-light-page .text-slate-100 { color: var(--officer-text) !important; }
+.admin-dashboard-main .text-slate-200,
+.admin-dashboard-main .text-slate-300 { color: #475569 !important; }
+.admin-dashboard-main .text-slate-400,
+.admin-light-page .text-slate-400 { color: var(--officer-text-muted) !important; }
+.admin-dashboard-main .border-slate-800,
+.admin-dashboard-main .border-slate-700,
+.admin-light-page .border-slate-800,
+.admin-light-page .border-slate-700 { border-color: var(--officer-border) !important; }
+.admin-dashboard-main .divide-slate-800 > :not([hidden]) ~ :not([hidden]),
+.admin-light-page .divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: var(--officer-border) !important; }
+.admin-dashboard-main .bg-slate-800,
+.admin-dashboard-main .bg-slate-800\/50,
+.admin-dashboard-main .bg-slate-700,
+.admin-light-page .bg-slate-950 { background: var(--officer-surface-muted) !important; }
+.admin-dashboard-main table {
+  background: #ffffff;
+  color: #334155;
+}
+.admin-dashboard-main table thead { background: #f8fafc; }
+.admin-dashboard-main table th {
+  color: #64748b !important;
+  border-color: var(--officer-border) !important;
+}
+.admin-dashboard-main table td { border-color: #f1f5f9 !important; }
+.admin-dashboard-main .hover\:bg-slate-800\/50:hover,
+.admin-dashboard-main tbody tr:hover { background: #f8fafc !important; }
+.admin-dashboard-main .hover\:bg-slate-600:hover { background: #cbd5e1 !important; }
+.admin-dashboard-main .hover\:bg-amber-900\/50:hover { background: #fef3c7 !important; }
+.admin-dashboard-main .hover\:bg-red-900\/50:hover { background: #fee2e2 !important; }
+
+/* Convert the dark status chips and avatar tiles to light semantic colors. */
+.admin-dashboard-main .bg-sky-900\/50 { background: #e0f2fe !important; }
+.admin-dashboard-main .text-sky-400 { color: #0369a1 !important; }
+.admin-dashboard-main .border-sky-800 { border-color: #bae6fd !important; }
+.admin-dashboard-main .bg-emerald-900\/50 { background: #d1fae5 !important; }
+.admin-dashboard-main .text-emerald-400 { color: #047857 !important; }
+.admin-dashboard-main .border-emerald-800 { border-color: #a7f3d0 !important; }
+.admin-dashboard-main .bg-indigo-900\/50 { background: #e0e7ff !important; }
+.admin-dashboard-main .text-indigo-400 { color: #4338ca !important; }
+.admin-dashboard-main .border-indigo-800 { border-color: #c7d2fe !important; }
+.admin-dashboard-main .bg-cyan-900\/50 { background: #cffafe !important; }
+.admin-dashboard-main .text-cyan-400 { color: #0e7490 !important; }
+.admin-dashboard-main .border-cyan-800 { border-color: #a5f3fc !important; }
+.admin-dashboard-main .bg-purple-900\/50 { background: #f3e8ff !important; }
+.admin-dashboard-main .text-purple-400 { color: #7e22ce !important; }
+.admin-dashboard-main .border-purple-800 { border-color: #e9d5ff !important; }
+.admin-dashboard-main .bg-red-900\/50 { background: #fee2e2 !important; }
+.admin-dashboard-main .text-red-400,
+.admin-dashboard-main .hover\:text-red-400:hover { color: #dc2626 !important; }
+.admin-dashboard-main .hover\:text-amber-400:hover { color: #b45309 !important; }
+
+/* White is correct on solid action colors, but ordinary white text from the
+   former dark theme is translated to slate by the rules above. */
+.admin-dashboard-main .bg-cyan-600.text-white,
+.admin-dashboard-main .bg-emerald-600.text-white,
+.admin-dashboard-main .bg-indigo-600.text-white,
+.admin-dashboard-main .bg-red-500.text-white,
+.admin-dashboard-main .bg-red-600.text-white,
+.admin-light-modal .bg-cyan-600.text-white,
+.admin-light-modal .bg-red-600.text-white { color: #ffffff !important; }
+.admin-dashboard-main input,
+.admin-dashboard-main select,
+.admin-light-page input,
+.admin-light-page select,
+.admin-light-page textarea {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: var(--officer-text) !important;
+}
+.admin-dashboard-main input::placeholder,
+.admin-light-page input::placeholder,
+.admin-light-page textarea::placeholder { color: #94a3b8 !important; }
+.admin-dashboard-main tbody tr:hover,
+.admin-light-page tbody tr:hover { background: #f8fafc !important; }
+.admin-light-page { background: var(--officer-bg) !important; color: var(--officer-text) !important; }
+.admin-light-page > header { background: rgba(255, 255, 255, 0.96) !important; border-color: var(--officer-border) !important; }
+.admin-light-page thead { background: #f8fafc !important; }
+.admin-light-page .text-emerald-400 { color: #047857 !important; }
+.admin-light-page .text-amber-400 { color: #b45309 !important; }
+.admin-light-page .bg-emerald-400\/10 { background: #d1fae5 !important; }
+.admin-light-page .bg-amber-400\/10 { background: #fef3c7 !important; }
+.admin-light-page .bg-red-600 { background: var(--officer-accent) !important; }
+.admin-light-page .hover\:bg-red-700:hover { background: var(--officer-accent-dark) !important; }
+.admin-light-page .border-red-500 { border-color: var(--officer-accent) !important; }
+.admin-light-page .text-red-500,
+.admin-light-page .text-red-300 { color: var(--officer-accent) !important; }
+.admin-light-page .bg-red-500\/10 { background: var(--officer-accent-soft) !important; }
+.admin-light-page button.bg-red-600 { color: #ffffff !important; }
+.admin-light-page table {
+  background: #ffffff;
+  color: #334155;
+}
+.admin-light-page table th { color: #64748b !important; }
+.admin-light-page table td { border-color: #f1f5f9 !important; }
+.admin-light-modal > div {
+  background: var(--officer-surface) !important;
+  border-color: var(--officer-border) !important;
+  color: var(--officer-text);
+}
+.admin-light-modal .text-white { color: var(--officer-text) !important; }
+.admin-light-modal .text-slate-400 { color: var(--officer-text-muted) !important; }
+.admin-light-modal .border-slate-700 { border-color: #cbd5e1 !important; }
+.admin-light-modal .bg-slate-800 {
+  background: #ffffff !important;
+  color: var(--officer-text) !important;
+}
+.admin-light-modal .bg-red-600 { background: var(--officer-accent) !important; }
+.admin-light-modal .hover\:bg-red-700:hover { background: var(--officer-accent-dark) !important; }
+.admin-light-modal .text-red-400 { color: var(--officer-accent) !important; }
+
+@media (max-width: 767px) {
+  .officer-panel {
+    border-radius: 12px !important;
+  }
+}
+
+/* Shared portal shell */
+
+body.portal-shell {
+  min-height: 100vh !important;
+  display: block !important;
+  background: var(--portal-primary-soft) !important;
+  color: var(--portal-text) !important;
+  font-family: "Public Sans", sans-serif !important;
+}
+
+body.portal-officer { padding-left: var(--portal-sidebar-width) !important; }
+
+body.portal-citizen {
+  padding-left: 0 !important;
+  padding-top: 0 !important;
+}
+
+body.portal-shell > header:not(.citizen-topbar) {
+  display: none !important;
+}
+
+body.portal-shell > aside:not(.portal-sidebar) {
+  display: none !important;
+}
+
+body.portal-shell > main {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  background-color: var(--portal-primary-soft) !important;
+  color: var(--portal-text) !important;
+}
+
+body.portal-shell.portal-officer > main {
+  min-height: 100vh;
+}
+
+.portal-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 100;
+  width: var(--portal-sidebar-width);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--portal-secondary);
+  color: #f8fafc;
+  border-right: 1px solid #1e3a5f;
+  box-shadow: 8px 0 24px rgb(15 39 71 / 0.08);
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 5rem;
+  padding: 1rem 1.25rem;
+  color: #ffffff;
+  text-decoration: none;
+  border-bottom: 1px solid rgb(255 255 255 / 0.09);
+}
+
+.portal-brand-mark {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background: #0e7490;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgb(8 145 178 / 0.22);
+}
+
+.portal-brand-name {
+  display: block;
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.portal-brand-name span { color: #22d3ee; }
+
+.portal-brand-subtitle {
+  display: block;
+  margin: 0.3rem 0 0;
+  color: #aabbd0;
+  font-size: 0.7rem;
+}
+
+.portal-role {
+  padding: 1.15rem 1.25rem 0.45rem;
+}
+
+.portal-role-label {
+  margin: 0;
+  color: #67e8f9;
+  font-size: 0.68rem;
+  line-height: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.portal-role-name {
+  margin: 0.2rem 0 0;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.portal-officer-email,
+.portal-login-time {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  margin: 0.5rem 0 0;
+  color: #b9c8da;
+  font-size: 0.7rem;
+  line-height: 1rem;
+}
+
+.portal-officer-email span:last-child,
+.portal-login-time span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portal-officer-email .material-symbols-outlined,
+.portal-login-time .material-symbols-outlined {
+  flex: 0 0 auto;
+  color: #67e8f9;
+  font-size: 0.9rem;
+}
+
+.portal-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+}
+
+.portal-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.65rem;
+  color: var(--portal-secondary-muted);
+  font-size: 0.86rem;
+  line-height: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.portal-nav-link:hover {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.08);
+  transform: translateX(2px);
+}
+
+.portal-nav-link.active {
+  color: #a5f3fc;
+  background: rgb(34 211 238 / 0.14);
+  box-shadow: inset 3px 0 #22d3ee;
+}
+
+.portal-nav-link .material-symbols-outlined {
+  width: 1.35rem;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.portal-sidebar-footer {
+  padding: 0.9rem 1rem 1rem;
+  border-top: 1px solid rgb(255 255 255 / 0.09);
+}
+
+.portal-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgb(255 255 255 / 0.15);
+  border-radius: 0.65rem;
+  background: rgb(255 255 255 / 0.04);
+  color: #e2e8f0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.portal-logout:hover { background: rgb(255 255 255 / 0.1); }
+
+.portal-menu-button {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 120;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.7rem;
+  background: var(--portal-secondary);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.2);
+}
+
+.portal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgb(15 23 42 / 0.55);
+}
+
+/* Citizens use a short, task-focused top navigation instead of an officer sidebar. */
+.citizen-topbar {
+  display: block !important;
+  position: sticky;
+  top: 0;
+  z-index: 110;
+  min-height: 4.5rem;
+  background: var(--portal-secondary) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #1e3a5f;
+  box-shadow: 0 8px 24px rgb(15 39 71 / 0.12);
+}
+
+.citizen-topbar-inner {
+  width: min(100%, 80rem);
+  min-height: 4.5rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  background: var(--portal-secondary) !important;
+}
+
+.citizen-brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+.citizen-brand .portal-brand-mark {
+  width: 2.45rem;
+  height: 2.45rem;
+}
+
+.citizen-brand .portal-brand-name { font-size: 1.1rem; }
+.citizen-brand .portal-brand-subtitle { font-size: 0.65rem; }
+
+.citizen-primary-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  background-color: var(--portal-secondary) !important;
+}
+
+.citizen-nav-link,
+.citizen-session-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.6rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: #dbeafe !important;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.citizen-nav-link:hover {
+  background: rgb(255 255 255 / 0.09);
+  color: #ffffff !important;
+}
+
+.citizen-nav-link.active {
+  background: rgb(34 211 238 / 0.15);
+  color: #a5f3fc !important;
+}
+
+.citizen-nav-link .material-symbols-outlined { font-size: 1.05rem; }
+
+.citizen-notification-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.portal-notification-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  margin-left: auto;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.citizen-session-link {
+  margin-left: 0.35rem;
+  padding-inline: 1rem;
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  color: #ffffff !important;
+}
+
+.citizen-session-link:hover { background: #b91c1c; border-color: #b91c1c; }
+.citizen-signout-form { margin: 0; }
+
+.citizen-menu-button {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.65rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 0.6rem;
+  background: rgb(255 255 255 / 0.07);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.citizen-menu-button .material-symbols-outlined { font-size: 1.25rem; }
+
+/* Normalize older dark officer pages into the shared white/light workspace. */
+body.portal-officer main .bg-slate-950,
+body.portal-officer main .bg-slate-900,
+body.portal-officer main .bg-slate-800\/50 {
+  background-color: #ffffff !important;
+  border-color: var(--portal-border) !important;
+}
+
+body.portal-officer main .border-slate-800,
+body.portal-officer main .border-slate-700,
+body.portal-officer main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--portal-border) !important;
+}
+
+body.portal-officer main .text-slate-100,
+body.portal-officer main .text-slate-200,
+body.portal-officer main h1.text-white,
+body.portal-officer main h2.text-white,
+body.portal-officer main h3.text-white,
+body.portal-officer main p.text-white {
+  color: var(--portal-text) !important;
+}
+
+body.portal-officer main .text-slate-300 { color: #475569 !important; }
+body.portal-officer main .text-slate-400 { color: var(--portal-muted) !important; }
+
+@media (max-width: 900px) {
+  body.portal-officer { padding-left: 0 !important; }
+
+  .portal-sidebar {
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  body.portal-menu-open .portal-sidebar { transform: translateX(0); }
+  body.portal-menu-open .portal-overlay { display: block; }
+  .portal-menu-button { display: inline-flex; }
+
+  body.portal-officer > main {
+    padding-top: 5.5rem !important;
+  }
+}
+
+@media (max-width: 1050px) {
+  .citizen-topbar-inner {
+    position: relative;
+    padding-inline: 1rem;
+  }
+
+  .citizen-menu-button { display: inline-flex; }
+
+  .citizen-primary-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0.75rem;
+    width: min(22rem, calc(100vw - 1.5rem));
+    padding: 0.75rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+    background: var(--portal-secondary);
+    border: 1px solid #294867;
+    border-radius: 0 0 0.8rem 0.8rem;
+    box-shadow: 0 18px 35px rgb(15 23 42 / 0.24);
+  }
+
+  body.citizen-menu-open .citizen-primary-nav { display: flex; }
+
+  .citizen-nav-link,
+  .citizen-session-link {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 2.9rem;
+    padding-inline: 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .citizen-session-link {
+    margin: 0.4rem 0 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 440px) {
+  .citizen-brand .portal-brand-subtitle { display: none; }
+  .citizen-menu-label { display: none; }
+}
+
+@media print {
+  body.portal-shell {
+    padding-left: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .portal-sidebar,
+  .portal-menu-button,
+  .portal-overlay,
+  .citizen-topbar { display: none !important; }
+
+  body.portal-shell > main { padding-top: 0 !important; }
+  body.portal-citizen { padding-top: 0 !important; }
+}
+
+/* Walk-in management components */
+/* Keep daily check-in compact and give the queue enough room for its actions. */
+.walkin-checkin-content {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+body.portal-officer main .walkin-camera-frame {
+  background: #0f172a !important;
+}
+
+@media (max-width: 700px) {
+  .walkin-checkin-content { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* --------------------------------------------------------------------------
+   Central Sri Lankan government design system
+   -------------------------------------------------------------------------- */
+
+:root {
+  --gov-maroon: #681042;
+  --gov-maroon-dark: #4b0b2f;
+  --gov-maroon-soft: #f8edf3;
+  --gov-navy: #17354f;
+  --gov-navy-dark: #10283d;
+  --gov-teal: #1f6e8c;
+  --gov-gold: #d4a72c;
+  --gov-gold-dark: #8a6510;
+  --gov-gold-soft: #fff7dd;
+  --gov-cream: #fbf8f1;
+  --gov-surface: #ffffff;
+  --gov-surface-muted: #f7f4ed;
+  --gov-border: #e5ded1;
+  --gov-text: #1f2937;
+  --gov-muted: #65717e;
+  --gov-success: #047857;
+  --gov-danger: #b42318;
+  --gov-shadow-sm: 0 1px 2px rgb(23 53 79 / 0.07);
+  --gov-shadow-md: 0 12px 32px rgb(23 53 79 / 0.12);
+  --gov-focus: 0 0 0 3px rgb(212 167 44 / 0.34);
+
+  /* Legacy token aliases kept for server-rendered pages. */
+  --citizen-bg: var(--gov-cream);
+  --citizen-surface: var(--gov-surface);
+  --citizen-surface-soft: var(--gov-surface-muted);
+  --citizen-border: var(--gov-border);
+  --citizen-border-soft: #f0ebe1;
+  --citizen-text: var(--gov-text);
+  --citizen-text-muted: var(--gov-muted);
+  --citizen-primary: var(--gov-maroon);
+  --citizen-primary-hover: var(--gov-maroon-dark);
+  --citizen-primary-soft: var(--gov-maroon-soft);
+  --citizen-indigo: var(--gov-navy);
+  --citizen-shadow: var(--gov-shadow-sm);
+  --citizen-card-shadow: 0 1px 3px rgb(23 53 79 / 0.09), 0 1px 2px rgb(23 53 79 / 0.05);
+  --officer-bg: var(--gov-cream);
+  --officer-surface: var(--gov-surface);
+  --officer-surface-muted: var(--gov-surface-muted);
+  --officer-border: var(--gov-border);
+  --officer-sidebar: var(--gov-navy);
+  --officer-sidebar-border: #274b68;
+  --officer-accent: var(--gov-gold);
+  --officer-accent-dark: var(--gov-gold-dark);
+  --officer-accent-soft: var(--gov-gold-soft);
+  --officer-text: var(--gov-text);
+  --officer-text-muted: var(--gov-muted);
+  --portal-primary: var(--gov-surface);
+  --portal-primary-soft: var(--gov-cream);
+  --portal-secondary: var(--gov-navy);
+  --portal-secondary-hover: #244b6b;
+  --portal-secondary-muted: #c6d4df;
+  --portal-accent: var(--gov-gold);
+  --portal-accent-soft: var(--gov-gold-soft);
+  --portal-border: var(--gov-border);
+  --portal-text: var(--gov-text);
+  --portal-muted: var(--gov-muted);
+  --portal-sidebar-width: 17rem;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--gov-cream);
+}
+
+body {
+  background: var(--gov-cream);
+  color: var(--gov-text);
+  font-family: "Public Sans", "Noto Sans Sinhala", "Noto Sans Tamil", system-ui, sans-serif !important;
+}
+
+::selection { background: #ead69c; color: var(--gov-navy-dark); }
+
+a,
+button,
+input,
+select,
+textarea { transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gov-gold) !important;
+  outline-offset: 3px;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.icon-fill,
+.filled-icon { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+
+/* Shared identity components. */
+.gov-site-header {
+  background: var(--gov-maroon) !important;
+  border-color: rgb(255 255 255 / 0.16) !important;
+  box-shadow: 0 4px 18px rgb(75 11 47 / 0.2) !important;
+}
+
+.gov-site-header > div > a:not(.gov-brand):not([class*="bg-white"]) { color: #f3d987 !important; }
+
+.gov-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.gov-emblem {
+  width: auto;
+  height: 3rem;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.2));
+}
+
+.gov-emblem-sm { height: 2.5rem; }
+.gov-emblem-lg { height: 4.5rem; }
+
+.gov-brand-title {
+  display: block;
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+
+.gov-brand-title > span { color: #f3d987; }
+
+.gov-brand-subtitle {
+  display: block;
+  margin-top: 0.25rem;
+  color: #f5e9d6;
+  font-size: 0.65rem;
+  line-height: 1rem;
+}
+
+.gov-official-strip {
+  border-top: 3px solid var(--gov-gold);
+}
+
+body.gov-landing-page > main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Landing page: authentic civic photography with a readable, restrained overlay. */
+.gov-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 34rem;
+  overflow: hidden;
+  background-image:
+    linear-gradient(90deg, rgb(16 40 61 / 0.94) 0%, rgb(23 53 79 / 0.83) 48%, rgb(75 11 47 / 0.66) 100%),
+    url("/images/presidential-secretariat-wide.jpg");
+  background-position: center 54%;
+  background-size: cover;
+  border-color: rgb(212 167 44 / 0.65) !important;
+}
+
+.gov-hero::after {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: 0.35rem;
+  content: "";
+  background: linear-gradient(90deg, var(--gov-maroon) 0 55%, var(--gov-gold) 55% 78%, var(--gov-teal) 78% 100%);
+}
+
+.gov-hero h1,
+.gov-hero > div > div > p { color: #ffffff !important; text-shadow: 0 1px 2px rgb(0 0 0 / 0.24); }
+.gov-hero > div > div > p { color: #e8eef3 !important; }
+
+.gov-hero-badge {
+  color: #fff2bd !important;
+  background: rgb(104 16 66 / 0.82) !important;
+  border-color: rgb(243 217 135 / 0.55) !important;
+  backdrop-filter: blur(8px);
+}
+
+.gov-hero .gov-hero-secondary {
+  color: #ffffff !important;
+  background: rgb(255 255 255 / 0.1) !important;
+  border-color: rgb(255 255 255 / 0.5) !important;
+  backdrop-filter: blur(8px);
+}
+
+.gov-hero .gov-hero-secondary:hover { background: rgb(255 255 255 / 0.18) !important; border-color: #ffffff !important; }
+
+.gov-hero aside {
+  background: rgb(255 255 255 / 0.96) !important;
+  border-color: rgb(255 255 255 / 0.72) !important;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.24) !important;
+  backdrop-filter: blur(10px);
+}
+
+.gov-button-primary,
+.gov-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.gov-button-primary {
+  color: #ffffff !important;
+  background: var(--gov-maroon) !important;
+  border-color: var(--gov-maroon) !important;
+  box-shadow: 0 4px 12px rgb(104 16 66 / 0.16);
+}
+
+.gov-button-primary:hover {
+  color: #ffffff !important;
+  background: var(--gov-maroon-dark) !important;
+  border-color: var(--gov-maroon-dark) !important;
+  transform: translateY(-1px);
+}
+
+.gov-button-secondary {
+  color: var(--gov-navy) !important;
+  background: #ffffff !important;
+  border-color: #b9c4cc !important;
+}
+
+.gov-button-secondary:hover {
+  color: var(--gov-maroon-dark) !important;
+  background: var(--gov-maroon-soft) !important;
+  border-color: #c98eac !important;
+}
+
+.official-government-brand-light { color: #0f2747; }
+.official-government-brand-light .gov-brand-title > span { color: #0891b2; }
+.official-government-brand-light .gov-brand-subtitle { color: #475569; }
+
+.password-field-shell {
+  position: relative;
+  width: 100%;
+}
+
+.password-field-shell > input {
+  padding-right: 4.25rem !important;
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  min-width: 2.8rem;
+  border: 0;
+  background: transparent;
+  color: #0e7490;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.password-visibility-toggle:hover,
+.password-visibility-toggle:focus-visible {
+  color: #164e63;
+  text-decoration: underline;
+}
+
+.gov-reference-text {
+  color: var(--gov-maroon) !important;
+}
+
+.service-card {
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.service-card:hover {
+  border-color: rgb(104 16 66 / 0.42) !important;
+  box-shadow: var(--gov-shadow-md);
+  transform: translateY(-2px);
+}
+
+.reveal-step { opacity: 1; transform: none; }
+.reveal-ready .reveal-step {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 520ms ease, transform 520ms ease;
+}
+.reveal-ready .reveal-step:nth-child(1) { transition-delay: 0ms; }
+.reveal-ready .reveal-step:nth-child(2) { transition-delay: 90ms; }
+.reveal-ready .reveal-step:nth-child(3) { transition-delay: 180ms; }
+.reveal-ready .reveal-step:nth-child(4) { transition-delay: 270ms; }
+.reveal-ready .reveal-step.is-visible { opacity: 1; transform: translateY(0); }
+
+/* Sign-in page visual is intentionally quiet: one authentic building image and no decorative noise. */
+.gov-auth-visual {
+  position: relative;
+  isolation: isolate;
+  background-image:
+    linear-gradient(180deg, rgb(16 40 61 / 0.9), rgb(75 11 47 / 0.9)),
+    url("/images/presidential-secretariat-wide.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.gov-auth-visual::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -1;
+  width: 0.35rem;
+  content: "";
+  background: var(--gov-gold);
+}
+
+.auth-tab { transition: color 160ms ease, border-color 160ms ease; }
+.auth-field { transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease; }
+.auth-field:hover { background-color: #ffffff; }
+
+/* Citizen application journey. Shared by the dashboard and full tracking view. */
+.application-journey {
+  --journey-accent: var(--gov-maroon);
+  --journey-accent-soft: var(--gov-maroon-soft);
+  --journey-progress: 0%;
+  overflow: hidden;
+  border: 1px solid var(--gov-border);
+  border-radius: 16px;
+  background: var(--gov-surface);
+  box-shadow: 0 8px 22px rgb(23 53 79 / 0.07);
+}
+
+.journey-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--gov-border);
+  background: linear-gradient(110deg, var(--journey-accent-soft), #ffffff 72%);
+}
+
+.journey-status-icon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #ffffff;
+  background: var(--journey-accent);
+  box-shadow: 0 6px 16px rgb(104 16 66 / 0.2);
+}
+
+.journey-status-copy { min-width: 0; }
+.journey-eyebrow {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--gov-muted);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.journey-status-title {
+  display: block;
+  color: var(--gov-text);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.journey-status-message {
+  margin: 0.16rem 0 0;
+  color: var(--gov-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+.journey-step-count {
+  min-width: 4.2rem;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid rgb(104 16 66 / 0.18);
+  border-radius: 999px;
+  color: var(--journey-accent);
+  background: #ffffff;
+  font-size: 0.73rem;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.journey-track {
+  position: relative;
+  padding: 1.35rem 0.65rem 1.2rem;
+}
+.journey-track-rail {
+  position: absolute;
+  top: 2.63rem;
+  left: calc(7.14% + 0.55rem);
+  right: calc(7.14% + 0.55rem);
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5ded1;
+}
+.journey-track-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gov-maroon), var(--gov-gold), var(--gov-success));
+  transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.application-journey.is-ready .journey-track-fill { width: var(--journey-progress); }
+
+.journey-steps {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.journey-step {
+  min-width: 0;
+  color: #788592;
+  text-align: center;
+}
+.journey-marker {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #d7d0c4;
+  border-radius: 999px;
+  color: #6b7785;
+  background: #ffffff;
+  transition: color 240ms ease, background-color 240ms ease, border-color 240ms ease, transform 240ms ease;
+}
+.journey-marker-icon { font-size: 20px; }
+.journey-marker-check { display: none; font-size: 20px; font-weight: 800; }
+.journey-step-copy { display: block; margin-top: 0.62rem; }
+.journey-step-copy strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+}
+.journey-step-copy small {
+  display: block;
+  margin-top: 0.18rem;
+  color: #8a96a2;
+  font-size: 0.61rem;
+  line-height: 1.3;
+}
+.journey-step.is-complete { color: var(--gov-success); }
+.journey-step.is-complete .journey-marker { color: #ffffff; border-color: var(--gov-success); background: var(--gov-success); }
+.journey-step.is-complete .journey-marker-icon { display: none; }
+.journey-step.is-complete .journey-marker-check { display: inline-block; }
+.journey-step.is-current { color: var(--journey-accent); }
+.journey-step.is-current .journey-marker {
+  color: #ffffff;
+  border-color: var(--journey-accent);
+  background: var(--journey-accent);
+  transform: translateY(-2px);
+}
+.journey-step.is-current .journey-marker::after {
+  position: absolute;
+  inset: -7px;
+  border: 2px solid var(--journey-accent);
+  border-radius: inherit;
+  content: "";
+  animation: journeyPulse 2s ease-out infinite;
+}
+.journey-step.is-current .journey-step-copy strong { font-weight: 800; }
+
+.application-journey.is-correction {
+  --journey-accent: #9a6700;
+  --journey-accent-soft: #fff7dd;
+}
+.application-journey.is-rejected {
+  --journey-accent: var(--gov-danger);
+  --journey-accent-soft: #fff1f0;
+}
+.application-journey.is-rejected .journey-step.is-current .journey-marker::after { animation: none; }
+.application-journey.is-complete {
+  --journey-accent: var(--gov-success);
+  --journey-accent-soft: #ecfdf5;
+}
+.application-journey.is-ready .journey-status { animation: journeyReveal 360ms ease-out both; }
+.application-journey.is-ready .journey-step { animation: journeyReveal 360ms ease-out both; }
+.application-journey.is-ready .journey-step:nth-child(2) { animation-delay: 40ms; }
+.application-journey.is-ready .journey-step:nth-child(3) { animation-delay: 80ms; }
+.application-journey.is-ready .journey-step:nth-child(4) { animation-delay: 120ms; }
+.application-journey.is-ready .journey-step:nth-child(5) { animation-delay: 160ms; }
+.application-journey.is-ready .journey-step:nth-child(6) { animation-delay: 200ms; }
+.application-journey.is-ready .journey-step:nth-child(7) { animation-delay: 240ms; }
+.application-accordion > summary::-webkit-details-marker { display: none; }
+.application-accordion > summary { list-style: none; }
+
+.appointment-day { min-height: 72px; }
+.appointment-day.selected,
+.calendar-day.selected { outline: 3px solid var(--gov-maroon); outline-offset: -3px; }
+.appointment-day:disabled { cursor: not-allowed; }
+.calendar-day { min-height: 92px; }
+.calendar-day:disabled { cursor: default; }
+.calendar-day.empty { background: var(--gov-surface-muted); }
+.scan-line { animation: scan 2s ease-in-out infinite; }
+th { white-space: nowrap; }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #c6d4df;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+.sidebar-link:hover { color: #ffffff; background: rgb(255 255 255 / 0.09); transform: translateX(2px); }
+.sidebar-link.active { color: #ffe7a0; background: rgb(212 167 44 / 0.15); box-shadow: inset 3px 0 var(--gov-gold); }
+.sidebar-link .material-symbols-outlined { font-size: 20px; }
+.card,
+.metric-card { color: var(--gov-text); background: #ffffff; border: 1px solid var(--gov-border); border-radius: 16px; }
+
+.light-admin-table { color: #334155; background: #ffffff; }
+.light-admin-table thead { background: var(--gov-surface-muted); }
+.light-admin-table thead tr,
+.light-admin-table th { color: #475569 !important; }
+.light-admin-table tbody { color: #334155 !important; }
+.light-admin-table tbody tr:hover { background: var(--gov-maroon-soft) !important; }
+.light-admin-table .text-white { color: var(--gov-text) !important; }
+.light-admin-table .text-slate-300,
+.light-admin-table .text-slate-400,
+.light-admin-table .text-slate-500 { color: #526172 !important; }
+
+/* Dynamic citizen/officer shell. */
+.portal-sidebar,
+.officer-sidebar { background: var(--gov-navy) !important; border-color: #294d69 !important; }
+.portal-brand { min-height: 5.5rem; }
+.portal-brand-mark,
+.officer-brand-icon {
+  width: 3rem;
+  height: 3.5rem;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.portal-brand-mark img,
+.officer-brand-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.24)); }
+.portal-brand-name span,
+.officer-accent-text { color: #f3d987 !important; }
+.portal-brand-subtitle { color: #d8e2e9; line-height: 0.9rem; }
+.portal-role-label { color: #f3d987; }
+.portal-officer-email .material-symbols-outlined,
+.portal-login-time .material-symbols-outlined { color: #f3d987; }
+.portal-nav-link.active {
+  color: #ffe9a7;
+  background: rgb(212 167 44 / 0.14);
+  box-shadow: inset 3px 0 var(--gov-gold);
+}
+.citizen-topbar,
+.citizen-topbar-inner,
+.citizen-primary-nav { background: var(--gov-maroon) !important; }
+.citizen-topbar { border-color: #8a315f; box-shadow: 0 8px 24px rgb(75 11 47 / 0.16); }
+.citizen-brand .portal-brand-mark { width: 2.4rem; height: 3.2rem; }
+.citizen-nav-link { color: #f7eaf1 !important; }
+.citizen-nav-link.active { color: #ffecae !important; background: rgb(212 167 44 / 0.16); }
+.citizen-session-link { background: #ffffff; border-color: #ffffff; color: var(--gov-maroon) !important; }
+.citizen-session-link:hover { background: var(--gov-gold-soft); border-color: var(--gov-gold-soft); }
+.portal-menu-button { background: var(--gov-maroon); }
+
+/* Tailwind color normalization. Layout and spacing utilities remain untouched. */
+.bg-cyan-50,
+.bg-sky-50,
+.bg-indigo-50 { background-color: var(--gov-maroon-soft) !important; }
+.bg-cyan-50\/40,
+.bg-sky-50\/40,
+.hover\:bg-cyan-50\/40:hover,
+.hover\:bg-sky-50\/40:hover { background-color: rgb(248 237 243 / 0.72) !important; }
+.bg-cyan-100,
+.bg-sky-100,
+.bg-indigo-100,
+.bg-blue-100 { background-color: #f2dce7 !important; }
+.bg-cyan-500,
+.bg-cyan-600,
+.bg-cyan-700,
+.bg-cyan-800,
+.bg-sky-500,
+.bg-sky-600,
+.bg-sky-700,
+.bg-indigo-500,
+.bg-indigo-600,
+.bg-purple-600,
+.bg-purple-700 { background-color: var(--gov-maroon) !important; }
+.hover\:bg-cyan-700:hover,
+.hover\:bg-cyan-800:hover,
+.hover\:bg-sky-700:hover,
+.hover\:bg-indigo-700:hover,
+.hover\:bg-purple-700:hover { background-color: var(--gov-maroon-dark) !important; }
+.hover\:bg-cyan-50:hover,
+.hover\:bg-sky-50:hover,
+.hover\:bg-sky-100:hover { background-color: var(--gov-gold-soft) !important; }
+.text-cyan-300,
+.text-cyan-400,
+.text-sky-300,
+.text-sky-400 { color: #e7c75f !important; }
+.text-cyan-600,
+.text-cyan-700,
+.text-cyan-800,
+.text-sky-600,
+.text-sky-700,
+.text-sky-800,
+.text-sky-900 { color: var(--gov-maroon) !important; }
+.text-indigo-500,
+.text-indigo-600,
+.text-indigo-700,
+.text-indigo-800,
+.text-blue-700 { color: var(--gov-navy) !important; }
+.text-purple-500,
+.text-purple-600,
+.text-purple-700,
+.text-purple-800 { color: var(--gov-maroon) !important; }
+.bg-purple-50,
+.bg-purple-100 { background-color: var(--gov-maroon-soft) !important; }
+.border-cyan-200,
+.border-cyan-400,
+.border-cyan-500,
+.border-cyan-600,
+.border-cyan-700,
+.border-cyan-800,
+.border-sky-100,
+.border-sky-200,
+.border-sky-500,
+.border-sky-600,
+.border-sky-700,
+.border-sky-800,
+.border-indigo-200,
+.border-indigo-800 { border-color: #d6a9c1 !important; }
+.hover\:text-cyan-700:hover,
+.hover\:text-sky-600:hover,
+.hover\:text-sky-700:hover { color: var(--gov-maroon-dark) !important; }
+.focus\:border-cyan-700:focus,
+.focus\:border-sky-700:focus { border-color: var(--gov-maroon) !important; }
+.focus\:ring-cyan-600:focus,
+.focus\:ring-cyan-700:focus,
+.focus\:ring-sky-500:focus,
+.ring-cyan-600,
+.ring-cyan-700,
+.ring-sky-500 { --tw-ring-color: rgb(212 167 44 / 0.42) !important; }
+
+/* Filled interactive controls always keep accessible foreground contrast. */
+a:is(.bg-cyan-500, .bg-cyan-600, .bg-cyan-700, .bg-sky-500, .bg-sky-600, .bg-sky-700, .bg-indigo-500, .bg-indigo-600, .bg-purple-600, .bg-purple-700),
+button:is(.bg-cyan-500, .bg-cyan-600, .bg-cyan-700, .bg-sky-500, .bg-sky-600, .bg-sky-700, .bg-indigo-500, .bg-indigo-600, .bg-purple-600, .bg-purple-700) {
+  color: #ffffff !important;
+}
+
+body.portal-officer main a:is(.bg-slate-800, .bg-slate-900),
+body.portal-officer main button:is(.bg-slate-800, .bg-slate-900) {
+  color: #ffffff !important;
+  background-color: var(--gov-navy) !important;
+}
+
+body.portal-officer main a:is(.bg-slate-800, .bg-slate-900):hover,
+body.portal-officer main button:is(.bg-slate-800, .bg-slate-900):hover {
+  background-color: var(--gov-navy-dark) !important;
+}
+
+/* Ordinary forms and surfaces use the shared warm neutral system. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  color: var(--gov-text) !important;
+  background-color: #ffffff !important;
+  border-color: #cfc7b8 !important;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--gov-maroon) !important;
+  box-shadow: var(--gov-focus) !important;
+}
+
+body > header.registration-header { background: var(--gov-maroon) !important; border-color: #8a315f !important; }
+body:not(.portal-shell) > header.bg-white { border-top: 3px solid var(--gov-gold); }
+
+@keyframes journeyPulse {
+  0% { opacity: 0.58; transform: scale(0.84); }
+  72%, 100% { opacity: 0; transform: scale(1.22); }
+}
+@keyframes journeyReveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scan { 0%, 100% { top: 15%; } 50% { top: 82%; } }
+
+@media (max-width: 900px) {
+  .gov-hero { min-height: auto; background-position: 62% center; }
+  .gov-hero > div { padding-top: 3.5rem !important; padding-bottom: 4rem !important; }
+}
+
+@media (max-width: 720px) {
+  .journey-status {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.9rem;
+  }
+  .journey-status-icon { grid-row: 1 / span 2; width: 40px; height: 40px; }
+  .journey-step-count {
+    grid-column: 2;
+    min-width: 0;
+    justify-self: start;
+    padding: 0.28rem 0.55rem;
+    font-size: 0.68rem;
+  }
+  .journey-track { padding: 0.95rem 0.9rem 0.7rem; }
+  .journey-track-rail {
+    top: 2.25rem;
+    bottom: 3.15rem;
+    left: 2.1rem;
+    right: auto;
+    width: 4px;
+    height: auto;
+  }
+  .journey-track-fill {
+    width: 100%;
+    height: 0;
+    background: linear-gradient(180deg, var(--gov-maroon), var(--gov-gold), var(--gov-success));
+    transition-property: height;
+  }
+  .application-journey.is-ready .journey-track-fill { width: 100%; height: var(--journey-progress); }
+  .journey-steps { grid-template-columns: 1fr; }
+  .journey-step {
+    min-height: 70px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+    text-align: left;
+  }
+  .journey-marker { width: 42px; height: 42px; margin: 0; }
+  .journey-step-copy { margin: 0; padding: 0.5rem 0.65rem; border-radius: 10px; }
+  .journey-step-copy strong { font-size: 0.79rem; }
+  .journey-step-copy small { font-size: 0.68rem; }
+  .journey-step.is-current .journey-step-copy { background: var(--journey-accent-soft); }
+}
+
+@media (max-width: 640px) {
+  .gov-emblem { height: 2.5rem; }
+  .gov-brand-subtitle {
+    display: block;
+    max-width: 10rem;
+    font-size: 0.55rem;
+    line-height: 0.72rem;
+    white-space: normal;
+  }
+  .gov-hero { background-position: 68% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .reveal-step { opacity: 1 !important; transform: none !important; }
+}
+
+@media print {
+  body { background: #ffffff !important; }
+  .no-print { display: none !important; }
+  .pass { border: 1px solid #cbd5e1; box-shadow: none; }
+}

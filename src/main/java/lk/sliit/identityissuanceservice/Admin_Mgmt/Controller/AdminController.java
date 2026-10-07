@@ -5,9 +5,14 @@ import jakarta.validation.Valid;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountDashboardDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.CitizenAccountDashboardService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.DirectorDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,21 +23,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class AdminController {
 
     private final OfficerAccountService officerAccountService;
+    private final ServiceCentreService serviceCentreService;
+    private final CitizenAccountDashboardService citizenAccountDashboardService;
+    private final DirectorDashboardService directorDashboardService;
     private final AdminAccountService adminAccountService;
     private final SystemMaintenanceService maintenanceService;
 
     public AdminController(
             OfficerAccountService officerAccountService,
+            ServiceCentreService serviceCentreService,
+            CitizenAccountDashboardService citizenAccountDashboardService,
+            DirectorDashboardService directorDashboardService,
             AdminAccountService adminAccountService,
             SystemMaintenanceService maintenanceService
     ) {
         this.officerAccountService = officerAccountService;
+        this.serviceCentreService = serviceCentreService;
+        this.citizenAccountDashboardService = citizenAccountDashboardService;
+        this.directorDashboardService = directorDashboardService;
         this.adminAccountService = adminAccountService;
         this.maintenanceService = maintenanceService;
     }
@@ -65,6 +81,7 @@ public class AdminController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("loggedInAdminEmail", session.getAttribute("loggedInAdminEmail"));
             model.addAttribute("openOfficerModal", true);
+            model.addAttribute("activeAdminSection", "users");
             addOfficerTableData(model);
             return "officers_frontends/admin_dashboard";
         }
@@ -80,14 +97,15 @@ public class AdminController {
         }
 
         redirectAttributes.addFlashAttribute("officerCreatedMessage", "Officer account created successfully.");
-        return "redirect:/officer/admin";
+        return "redirect:/officer/admin?section=users";
     }
 
     @PostMapping("/officer/admin/officers/{userId}/edit")
     public String updateOfficer(
             @PathVariable Integer userId,
-            @Valid @ModelAttribute OfficerUpdateDto officerUpdate,
+            @Valid @ModelAttribute("officerUpdate") OfficerUpdateDto officerUpdate,
             BindingResult bindingResult,
+            Model model,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         if (session.getAttribute("loggedInAdminId") == null) {
@@ -95,17 +113,24 @@ public class AdminController {
         }
 
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("officerActionError", firstValidationError(bindingResult));
-            return "redirect:/officer/admin";
+            return officerEditError(userId, bindingResult, session, model);
         }
 
         try {
             officerAccountService.updateOfficer(userId, officerUpdate);
             redirectAttributes.addFlashAttribute("officerActionMessage", "Officer account updated successfully.");
         } catch (IllegalArgumentException exception) {
-            redirectAttributes.addFlashAttribute("officerActionError", exception.getMessage());
+            bindingResult.reject("officer.update.failed", exception.getMessage());
+            return officerEditError(userId, bindingResult, session, model);
         }
-        return "redirect:/officer/admin";
+        return "redirect:/officer/admin?section=users";
+    }
+
+    private String officerEditError(Integer userId, BindingResult errors, HttpSession session, Model model) {
+        model.addAttribute("editOfficerId", userId);
+        model.addAttribute("officerEditError", firstValidationError(errors));
+        model.addAttribute("activeAdminSection", "users");
+        return officerManagement(session, model);
     }
 
     @PostMapping("/officer/admin/officers/{userId}/status")
@@ -126,7 +151,7 @@ public class AdminController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("officerActionError", exception.getMessage());
         }
-        return "redirect:/officer/admin";
+        return "redirect:/officer/admin?section=users";
     }
 
     @PostMapping("/officer/admin/officers/{userId}/delete")
@@ -144,7 +169,95 @@ public class AdminController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("officerActionError", exception.getMessage());
         }
-        return "redirect:/officer/admin";
+        return "redirect:/officer/admin?section=users";
+    }
+
+    @PostMapping("/officer/admin/centres")
+    public String addServiceCentre(
+            @RequestParam String centreName,
+            @RequestParam(required = false) String street,
+            @RequestParam String city,
+            @RequestParam String district,
+            @RequestParam Integer dailyCapacity,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            serviceCentreService.addCentre(centreName, street, city, district, dailyCapacity);
+            redirectAttributes.addFlashAttribute("centreMessage", "Service centre added successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("centreError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=centres";
+    }
+
+    @PostMapping("/officer/admin/centres/{centreId}/edit")
+    public String updateServiceCentre(
+            @PathVariable Integer centreId,
+            @RequestParam String centreName,
+            @RequestParam(required = false) String street,
+            @RequestParam String city,
+            @RequestParam String district,
+            @RequestParam Integer dailyCapacity,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            serviceCentreService.updateCentre(
+                    centreId, centreName, street, city, district, dailyCapacity);
+            redirectAttributes.addFlashAttribute("centreMessage", "Service centre updated successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("centreError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=centres";
+    }
+
+    @PostMapping("/officer/admin/centres/{centreId}/status")
+    public String changeServiceCentreStatus(
+            @PathVariable Integer centreId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            String status = serviceCentreService.toggleCentreStatus(centreId);
+            redirectAttributes.addFlashAttribute("centreMessage", "ACTIVE".equals(status)
+                    ? "Service centre activated successfully."
+                    : "Service centre deactivated successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("centreError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=centres";
+    }
+
+    @PostMapping("/officer/admin/centres/{centreId}/delete")
+    public String deleteServiceCentre(
+            @PathVariable Integer centreId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            serviceCentreService.removeCentre(centreId);
+            redirectAttributes.addFlashAttribute("centreMessage", "Service centre deleted successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("centreError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=centres";
     }
 
     @GetMapping("/officer/admin/citizens")
@@ -209,12 +322,70 @@ public class AdminController {
 
     private void addOfficerTableData(Model model) {
         List<OfficerDetailsDto> officers = officerAccountService.getAllOfficers();
+        List<Centre> centres = serviceCentreService.getAllCentres();
+        Map<Integer, Long> centreBookingCounts = new HashMap<>();
+        for (Centre centre : centres) {
+            centreBookingCounts.put(
+                    centre.getCentreId(),
+                    serviceCentreService.getTodayBookingCount(centre.getCentreId()));
+        }
         model.addAttribute("officers", officers);
         model.addAttribute("nicOfficerCount", countRole(officers, OfficerAccountService.NIC_OFFICER));
         model.addAttribute("passportOfficerCount", countRole(officers, OfficerAccountService.PASSPORT_OFFICER));
         model.addAttribute("csrCount", countRole(officers, OfficerAccountService.CSR));
         model.addAttribute("directorCount", countRole(officers, OfficerAccountService.DIRECTOR));
         model.addAttribute("maintenanceSettings", maintenanceService.getSettings());
+        model.addAttribute("centres", centres);
+        model.addAttribute("centreBookingCounts", centreBookingCounts);
+        model.addAttribute("activeOfficerCount", officers.stream()
+                .filter(officer -> "ACTIVE".equals(officer.getStatus()))
+                .count());
+        model.addAttribute("serviceCentreCount", centres.size());
+        model.addAttribute("adminOverview", directorDashboardService.getStats());
+        CitizenAccountDashboardDto citizenDashboard = citizenAccountDashboardService.getDashboard();
+        model.addAttribute("citizens", citizenDashboard.citizens());
+        model.addAttribute("citizenAccountCount", citizenDashboard.citizenAccountCount());
+        model.addAttribute("registeredThisMonthCount", citizenDashboard.registeredThisMonthCount());
+        model.addAttribute("suspendedCitizenCount", citizenDashboard.suspendedCitizenCount());
+    }
+
+    @PostMapping("/officer/admin/citizens/{userId}/status")
+    public String changeCitizenStatus(
+            @PathVariable Integer userId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+        try {
+            String status = citizenAccountDashboardService.toggleCitizenStatus(userId);
+            redirectAttributes.addFlashAttribute("citizenActionMessage", "ACTIVE".equals(status)
+                    ? "Citizen account reactivated successfully."
+                    : "Citizen account suspended successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("citizenActionError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=citizens";
+    }
+
+    @PostMapping("/officer/admin/citizens/{userId}/delete")
+    public String deleteCitizen(
+            @PathVariable Integer userId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+        try {
+            citizenAccountDashboardService.removeCitizenAccount(userId);
+            redirectAttributes.addFlashAttribute(
+                    "citizenActionMessage",
+                    "Citizen login deleted. Government identity records and application history were preserved."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("citizenActionError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=citizens";
     }
 
     private long countRole(List<OfficerDetailsDto> officers, String roleCode) {

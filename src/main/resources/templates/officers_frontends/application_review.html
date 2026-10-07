@@ -1,72 +1,99 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Application Review | LankaID Officer Portal</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-  <style>body{font-family:'Public Sans',sans-serif}.field-check:checked+span{color:#047857;font-weight:700}</style>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800">
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="sticky top-0 z-30 bg-slate-950 text-white border-b border-slate-800">
-  <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 flex items-center gap-4">
-    <a th:href="${queueRoute}" class="flex items-center gap-2 text-slate-300 hover:text-white text-sm">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>Back to queue
-    </a>
+  <div class="max-w-7xl mx-auto min-h-16 px-4 sm:px-6 py-3 flex items-center gap-4">
+    <a th:href="${queueRoute}" class="flex items-center gap-2 text-slate-300 hover:text-white text-sm"><span class="material-symbols-outlined text-lg">arrow_back</span>Back to queue</a>
     <div class="h-6 w-px bg-slate-700"></div>
-    <div>
-      <p class="font-bold"><span th:text="${documentType}">NIC</span> Application Review</p>
-      <p class="text-xs text-slate-400" th:text="${reference}">LK-NIC-2026-00183</p>
-    </div>
-    <span class="ml-auto rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 px-3 py-1 text-xs font-semibold">UI prototype · no DB</span>
+    <div><p class="font-bold"><span th:text="${documentType}">NIC</span> Application Review</p><p class="text-xs text-slate-400 font-mono" th:text="${reviewApplication.applicationNo}">Reference</p></div>
+    <span class="ml-auto rounded-full border px-3 py-1 text-xs font-semibold" th:classappend="${reviewApplication.currentStatus == 'UNDER_REVIEW' ? ' bg-sky-400/15 text-sky-300 border-sky-400/30' : ' bg-amber-400/15 text-amber-300 border-amber-400/30'}" th:text="${#strings.replace(reviewApplication.currentStatus, '_', ' ')}">UNDER REVIEW</span>
   </div>
 </header>
 
 <main class="max-w-7xl mx-auto p-4 sm:p-6">
-  <div id="statusBanner" class="mb-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 flex items-center gap-3">
-    <span class="material-symbols-outlined text-sky-600">rate_review</span>
-    <div><p class="text-sm font-bold text-sky-900">Under officer review</p><p class="text-xs text-sky-700">Review the form and documents before choosing a decision.</p></div>
+  <div th:if="${decisionError}" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" th:text="${decisionError}"></div>
+  <div class="mb-5 rounded-xl border px-4 py-3 flex items-center gap-3" th:classappend="${decisionAllowed ? ' border-sky-200 bg-sky-50' : ' border-amber-200 bg-amber-50'}">
+    <span class="material-symbols-outlined" th:classappend="${decisionAllowed ? ' text-sky-600' : ' text-amber-600'}" th:text="${decisionAllowed ? 'rate_review' : 'hourglass_top'}">rate_review</span>
+    <div><p class="text-sm font-bold" th:text="${decisionAllowed ? 'Under officer review' : 'Waiting for citizen corrections'}">Under officer review</p><p class="text-xs mt-0.5" th:text="${decisionAllowed ? 'Review the submitted form and documents before choosing a decision.' : 'Decision buttons will become available after the citizen edits and resubmits the application.'}">Review details.</p></div>
   </div>
 
-  <div class="grid xl:grid-cols-[1fr_340px] gap-6">
+  <div class="grid xl:grid-cols-[1fr_350px] gap-6">
     <div class="space-y-5">
       <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-sky-700">Applicant</p>
-            <h1 class="text-xl font-bold mt-1">Kamal Sandesh Perera</h1>
-            <p class="text-sm text-slate-500 mt-1">Submitted 15 Aug 2026 · Colombo Centre</p>
-          </div>
-          <div class="flex gap-2"><span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">Renewal</span><span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold">Normal priority</span></div>
+          <div><p class="text-xs font-semibold uppercase tracking-wide text-sky-700">Applicant</p><h1 class="text-xl font-bold mt-1" th:text="${applicantName}">Applicant name</h1><p class="text-sm text-slate-500 mt-1" th:text="${reviewApplication.submittedAt == null ? 'Submission date not recorded' : 'Submitted ' + #temporals.format(reviewApplication.submittedAt, 'dd MMM yyyy, hh:mm a')}">Submitted date</p></div>
+          <span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold" th:text="${#strings.replace(reviewApplication.applicationKind, '_', ' ')}">NEW</span>
         </div>
         <div class="p-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
-          <div><p class="text-xs text-slate-400">Full name</p><p class="font-semibold mt-1">Kamal Sandesh Perera</p></div>
-          <div><p class="text-xs text-slate-400">Date of birth</p><p class="font-semibold mt-1">12 March 2000</p></div>
-          <div><p class="text-xs text-slate-400">Current NIC</p><p class="font-semibold mt-1">200012349876</p></div>
-          <div><p class="text-xs text-slate-400">Mobile</p><p class="font-semibold mt-1">+94 77 234 5678</p></div>
-          <div><p class="text-xs text-slate-400">Email</p><p class="font-semibold mt-1">kamal.p@gmail.com</p></div>
-          <div><p class="text-xs text-slate-400">District</p><p class="font-semibold mt-1">Colombo</p></div>
-          <div class="sm:col-span-2 lg:col-span-3"><p class="text-xs text-slate-400">Permanent address</p><p class="font-semibold mt-1">42, Temple Road, Nugegoda, Sri Lanka</p></div>
-        </div>
-      </section>
-
-      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between"><div><h2 class="font-bold">Submitted documents</h2><p class="text-xs text-slate-500 mt-1">Open each item and mark whether it is acceptable.</p></div><span class="text-xs text-slate-500">3 files</span></div>
-        <div class="divide-y divide-slate-100">
-          <div class="p-4 flex items-center gap-3"><span class="material-symbols-outlined text-red-500">picture_as_pdf</span><div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">Current_NIC_Copy.pdf</p><p class="text-xs text-slate-400">1.8 MB</p></div><button onclick="previewDocument('Current NIC copy')" class="text-xs font-semibold text-sky-700 hover:underline">Preview</button><label class="flex items-center gap-2 text-xs"><input class="field-check rounded text-emerald-600" type="checkbox" checked/><span>Verified</span></label></div>
-          <div class="p-4 flex items-center gap-3"><span class="material-symbols-outlined text-indigo-500">image</span><div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">Birth_Certificate.jpg</p><p class="text-xs text-slate-400">2.1 MB</p></div><button onclick="previewDocument('Birth certificate')" class="text-xs font-semibold text-sky-700 hover:underline">Preview</button><label class="flex items-center gap-2 text-xs"><input class="field-check rounded text-emerald-600" type="checkbox" checked/><span>Verified</span></label></div>
-          <div class="p-4 flex items-center gap-3"><span class="material-symbols-outlined text-indigo-500">image</span><div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">Proof_of_Address.jpg</p><p class="text-xs text-slate-400">1.2 MB</p></div><button onclick="previewDocument('Proof of address')" class="text-xs font-semibold text-sky-700 hover:underline">Preview</button><label class="flex items-center gap-2 text-xs"><input class="field-check rounded text-emerald-600" type="checkbox"/><span>Verified</span></label></div>
+          <div><p class="text-xs text-slate-400">Family name</p><p class="font-semibold mt-1" th:text="${citizen.familyName ?: 'Not recorded'}">Name</p></div>
+          <div><p class="text-xs text-slate-400">Given name</p><p class="font-semibold mt-1" th:text="${citizen.givenName ?: 'Not recorded'}">Name</p></div>
+          <div><p class="text-xs text-slate-400">Surname</p><p class="font-semibold mt-1" th:text="${citizen.surname ?: 'Not recorded'}">Surname</p></div>
+          <div><p class="text-xs text-slate-400">Date of birth</p><p class="font-semibold mt-1" th:text="${citizen.dateOfBirth == null ? 'Not recorded' : #temporals.format(citizen.dateOfBirth, 'dd MMM yyyy')}">DOB</p></div>
+          <div><p class="text-xs text-slate-400">Gender</p><p class="font-semibold mt-1" th:text="${citizen.gender ?: 'Not recorded'}">Gender</p></div>
+          <div><p class="text-xs text-slate-400">Civil status</p><p class="font-semibold mt-1" th:text="${citizen.civilStatus ?: 'Not recorded'}">Status</p></div>
+          <div><p class="text-xs text-slate-400">Occupation</p><p class="font-semibold mt-1" th:text="${citizen.occupation ?: 'Not recorded'}">Occupation</p></div>
+          <div><p class="text-xs text-slate-400">Email</p><p class="font-semibold mt-1 break-all" th:text="${userAccount.email}">Email</p></div>
+          <div><p class="text-xs text-slate-400">Phone</p><p class="font-semibold mt-1" th:text="${userAccount.phone}">Phone</p></div>
         </div>
       </section>
 
       <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <h2 class="font-bold">Application history</h2>
-        <div class="mt-4 space-y-4 text-sm border-l-2 border-slate-200 ml-2 pl-5">
-          <div><p class="font-semibold">Assigned to current officer</p><p class="text-xs text-slate-500">15 Aug 2026, 10:10 AM</p></div>
-          <div><p class="font-semibold">Payment confirmed</p><p class="text-xs text-slate-500">15 Aug 2026, 9:48 AM</p></div>
-          <div><p class="font-semibold">Application submitted</p><p class="text-xs text-slate-500">15 Aug 2026, 9:45 AM</p></div>
+        <h2 class="font-bold">Birth and citizenship details</h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 text-sm mt-4">
+          <div><p class="text-xs text-slate-400">Birth certificate number</p><p class="font-semibold mt-1" th:text="${citizen.birthCertificateNo ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Birth place</p><p class="font-semibold mt-1" th:text="${citizen.birthPlace ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Birth division</p><p class="font-semibold mt-1" th:text="${citizen.birthDivision ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Birth district</p><p class="font-semibold mt-1" th:text="${citizen.birthDistrict ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Country of birth</p><p class="font-semibold mt-1" th:text="${citizen.countryOfBirth ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Birth city</p><p class="font-semibold mt-1" th:text="${citizen.birthCity ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Dual citizen</p><p class="font-semibold mt-1" th:text="${citizen.dualCitizen == 'Y' ? 'Yes' : 'No'}"></p></div>
+          <div th:if="${citizen.dualCitizen == 'Y'}"><p class="text-xs text-slate-400">Citizenship certificate</p><p class="font-semibold mt-1" th:text="${citizen.citizenshipCertificateNo ?: 'Not recorded'}"></p></div>
+          <div th:if="${citizen.dualCitizen == 'Y'}"><p class="text-xs text-slate-400">Certificate issued</p><p class="font-semibold mt-1" th:text="${citizen.citizenshipIssuedDate == null ? 'Not recorded' : #temporals.format(citizen.citizenshipIssuedDate, 'dd MMM yyyy')}"></p></div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 class="font-bold">Address details</h2>
+        <div class="grid sm:grid-cols-2 gap-5 text-sm mt-4">
+          <div><p class="text-xs text-slate-400">Permanent address</p><p class="font-semibold mt-1" th:text="${#strings.isEmpty(permanentAddress) ? 'Not recorded' : permanentAddress}"></p></div>
+          <div><p class="text-xs text-slate-400">Postal address</p><p class="font-semibold mt-1" th:text="${(citizen.postalHouseNo ?: '') + ', ' + (citizen.postalStreet ?: '') + ', ' + (citizen.postalCity ?: '') + ', ' + (citizen.postalPostalCode ?: '')}"></p></div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 class="font-bold"><span th:text="${documentType}">NIC</span> application details</h2>
+        <div th:if="${nicApplication != null}" class="grid sm:grid-cols-2 gap-5 text-sm mt-4">
+          <div><p class="text-xs text-slate-400">Previous NIC number</p><p class="font-semibold mt-1" th:text="${nicApplication.lastNicNo ?: 'Not applicable'}"></p></div>
+          <div><p class="text-xs text-slate-400">Previous issue date</p><p class="font-semibold mt-1" th:text="${nicApplication.lastIssuedDate == null ? 'Not applicable' : #temporals.format(nicApplication.lastIssuedDate, 'dd MMM yyyy')}"></p></div>
+          <div><p class="text-xs text-slate-400">Police station</p><p class="font-semibold mt-1" th:text="${nicApplication.policeStation ?: 'Not applicable'}"></p></div>
+          <div><p class="text-xs text-slate-400">Police report date</p><p class="font-semibold mt-1" th:text="${nicApplication.policeReportDate == null ? 'Not applicable' : #temporals.format(nicApplication.policeReportDate, 'dd MMM yyyy')}"></p></div>
+        </div>
+        <div th:if="${passportApplication != null}" class="grid sm:grid-cols-2 gap-5 text-sm mt-4">
+          <div><p class="text-xs text-slate-400">Service level</p><p class="font-semibold mt-1" th:text="${passportApplication.serviceLevel ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">Travel document type</p><p class="font-semibold mt-1" th:text="${passportApplication.travelDocumentType ?: 'Not recorded'}"></p></div>
+          <div><p class="text-xs text-slate-400">NIC proof number</p><p class="font-semibold mt-1" th:text="${passportApplication.nicProofNo ?: 'Not provided'}"></p></div>
+          <div><p class="text-xs text-slate-400">Parent NIC number</p><p class="font-semibold mt-1" th:text="${passportApplication.parentNicNo ?: 'Not provided'}"></p></div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between"><div><h2 class="font-bold">Submitted documents</h2><p class="text-xs text-slate-500 mt-1">Preview opens inside this page. No download is required.</p></div><span class="text-xs text-slate-500" th:text="${documents.size() + ' file(s)'}">0 files</span></div>
+        <div th:if="${#lists.isEmpty(documents)}" class="p-8 text-center text-sm text-slate-500">No documents were uploaded.</div>
+        <div class="divide-y divide-slate-100">
+          <div th:each="document : ${documents}" class="p-4 flex flex-wrap items-center gap-3">
+            <span class="material-symbols-outlined text-indigo-500">description</span>
+            <div class="flex-1 min-w-0"><p class="text-sm font-semibold" th:text="${#strings.replace(document.documentType, '_', ' ')}">Document</p><p class="text-xs text-slate-400" th:text="${document.uploadedAt == null ? 'Upload date not recorded' : 'Uploaded ' + #temporals.format(document.uploadedAt, 'dd MMM yyyy, hh:mm a')}"></p></div>
+            <span class="text-xs rounded-full px-2.5 py-1 font-semibold bg-slate-100 text-slate-600" th:text="${#strings.replace(document.verificationStatus, '_', ' ')}">PENDING</span>
+            <button type="button" class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100" th:attr="data-url=@{/officer/verification/documents/{id}/view(id=${document.documentId})},data-title=${#strings.replace(document.documentType, '_', ' ')}" onclick="openDocument(this.dataset.url, this.dataset.title)">Open on screen</button>
+          </div>
         </div>
       </section>
     </div>
@@ -74,43 +101,34 @@
     <aside class="space-y-5">
       <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 xl:sticky xl:top-20">
         <h2 class="font-bold">Officer decision</h2>
-        <label class="block text-xs font-semibold text-slate-600 mt-4 mb-1.5">Internal note</label>
-        <textarea id="internalNote" rows="4" class="w-full rounded-xl border-slate-300 text-sm" placeholder="Visible only to officers"></textarea>
-        <div class="mt-4 space-y-2">
-          <button onclick="approveApplication()" class="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-sm font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined text-lg">check_circle</span>Approve application</button>
-          <button onclick="openDecision('correction')" class="w-full rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 py-3 text-sm font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined text-lg">edit_note</span>Request correction</button>
-          <button onclick="openDecision('reject')" class="w-full rounded-xl border border-red-200 hover:bg-red-50 text-red-700 py-3 text-sm font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined text-lg">cancel</span>Reject application</button>
+        <div th:if="${decisionAllowed}">
+          <form th:action="@{/officer/{service}/applications/{reference}/approve(service=${#strings.toLowerCase(reviewApplication.serviceType)},reference=${reviewApplication.applicationNo})}" method="post" class="mt-4" onsubmit="return confirm('Approve this application?');"><button type="submit" class="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-sm font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined text-lg">check_circle</span>Approve application</button></form>
+          <form th:action="@{/officer/{service}/applications/{reference}/correction(service=${#strings.toLowerCase(reviewApplication.serviceType)},reference=${reviewApplication.applicationNo})}" method="post" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4" onsubmit="return confirmCorrection(this);">
+            <p class="text-sm font-bold text-amber-900">Request correction</p><p class="text-xs text-amber-700 mt-1">Select what the citizen must update.</p>
+            <label class="mt-3 flex items-center gap-2 text-xs font-semibold"><input type="checkbox" name="correctForm" value="true" class="rounded text-amber-600"/>Application form details</label>
+            <label th:each="document : ${documents}" class="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" name="documentIds" th:value="${document.documentId}" class="rounded text-amber-600"/><span th:text="${#strings.replace(document.documentType, '_', ' ')}">Document</span></label>
+            <button type="submit" class="w-full mt-4 rounded-xl border border-amber-300 bg-white hover:bg-amber-100 text-amber-800 py-2.5 text-sm font-bold">Request selected corrections</button>
+          </form>
+          <form th:action="@{/officer/{service}/applications/{reference}/reject(service=${#strings.toLowerCase(reviewApplication.serviceType)},reference=${reviewApplication.applicationNo})}" method="post" class="mt-3" onsubmit="return confirm('Reject this application?');"><button type="submit" class="w-full rounded-xl border border-red-200 hover:bg-red-50 text-red-700 py-3 text-sm font-bold flex justify-center items-center gap-2"><span class="material-symbols-outlined text-lg">cancel</span>Reject application</button></form>
         </div>
-        <p class="text-xs text-slate-400 mt-4 leading-relaxed">Approving unlocks biometric appointment booking for the citizen. This prototype changes only the visible page state.</p>
+        <div th:unless="${decisionAllowed}" class="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">The citizen must correct and resubmit this application before another decision can be made.</div>
+        <p class="text-xs text-slate-400 mt-4 leading-relaxed">Approval changes the application to APPROVED. Rejection removes it from the active verification queue.</p>
       </section>
     </aside>
   </div>
 </main>
 
-<div id="decisionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-    <div class="flex justify-between gap-3"><div><h2 id="decisionTitle" class="text-lg font-bold">Request correction</h2><p id="decisionHelp" class="text-xs text-slate-500 mt-1"></p></div><button onclick="closeDecision()"><span class="material-symbols-outlined">close</span></button></div>
-    <div id="correctionFields" class="mt-4 grid grid-cols-2 gap-2 text-xs">
-      <label class="rounded-lg border p-3 flex gap-2"><input type="checkbox" class="rounded"/>Personal details</label>
-      <label class="rounded-lg border p-3 flex gap-2"><input type="checkbox" class="rounded"/>Address</label>
-      <label class="rounded-lg border p-3 flex gap-2"><input type="checkbox" class="rounded"/>Photograph</label>
-      <label class="rounded-lg border p-3 flex gap-2"><input type="checkbox" class="rounded" checked/>Supporting document</label>
-    </div>
-    <label class="block text-xs font-semibold text-slate-600 mt-4 mb-1.5">Reason sent to citizen</label>
-    <textarea id="decisionReason" rows="4" class="w-full rounded-xl border-slate-300 text-sm" placeholder="Explain exactly what the citizen must correct"></textarea>
-    <div class="flex gap-3 mt-5"><button onclick="closeDecision()" class="flex-1 rounded-xl border border-slate-300 py-2.5 text-sm font-semibold">Cancel</button><button onclick="submitDecision()" class="flex-1 rounded-xl bg-slate-900 text-white py-2.5 text-sm font-bold">Confirm</button></div>
+<div id="documentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
+    <div class="p-4 border-b flex items-center justify-between gap-4"><div><p class="text-xs text-slate-500">Document preview</p><h2 id="documentTitle" class="font-bold">Document</h2></div><button type="button" onclick="closeDocument()" class="rounded-lg p-2 hover:bg-slate-100"><span class="material-symbols-outlined">close</span></button></div>
+    <iframe id="documentFrame" title="Uploaded document preview" class="w-full flex-1 bg-slate-200"></iframe>
   </div>
 </div>
-
-<script th:inline="javascript">
-let decisionType = 'correction';
-const biometricRoute = /*[[${biometricRoute}]]*/ '/officer/nic/biometrics';
-function previewDocument(name){ alert(name + ' preview will open here when file storage is connected.'); }
-function setBanner(title, detail, color){ document.getElementById('statusBanner').className=`mb-5 rounded-xl border px-4 py-3 flex items-center gap-3 ${color}`; document.getElementById('statusBanner').innerHTML=`<span class="material-symbols-outlined">task_alt</span><div><p class="text-sm font-bold">${title}</p><p class="text-xs mt-0.5">${detail}</p></div>`; window.scrollTo({top:0,behavior:'smooth'}); }
-function approveApplication(){ if(!confirm('Approve this application and allow biometric appointment booking?')) return; setBanner('Application approved','Citizen notification created. The next step is biometric appointment booking.','border-emerald-200 bg-emerald-50 text-emerald-800'); }
-function openDecision(type){ decisionType=type; const correction=type==='correction'; document.getElementById('decisionTitle').textContent=correction?'Request correction':'Reject application'; document.getElementById('decisionHelp').textContent=correction?'Choose the fields to unlock for the citizen.':'A clear rejection reason is required.'; document.getElementById('correctionFields').classList.toggle('hidden',!correction); document.getElementById('decisionModal').classList.remove('hidden'); document.getElementById('decisionModal').classList.add('flex'); }
-function closeDecision(){ document.getElementById('decisionModal').classList.add('hidden'); document.getElementById('decisionModal').classList.remove('flex'); }
-function submitDecision(){ const reason=document.getElementById('decisionReason').value.trim(); if(!reason){alert('Please enter a reason for the citizen.');return;} closeDecision(); setBanner(decisionType==='correction'?'Correction requested':'Application rejected',decisionType==='correction'?'The citizen can now edit only the requested information.':'The citizen has been notified with the rejection reason.',decisionType==='correction'?'border-amber-200 bg-amber-50 text-amber-800':'border-red-200 bg-red-50 text-red-800'); }
+<script>
+function openDocument(url,title){document.getElementById('documentTitle').textContent=title;document.getElementById('documentFrame').src=url;const modal=document.getElementById('documentModal');modal.classList.remove('hidden');modal.classList.add('flex')}
+function closeDocument(){const modal=document.getElementById('documentModal');modal.classList.add('hidden');modal.classList.remove('flex');document.getElementById('documentFrame').src=''}
+function confirmCorrection(form){if(!form.querySelector('input[type=checkbox]:checked')){alert('Select the form or at least one document.');return false}return confirm('Send this correction request to the citizen?')}
 </script>
+<script src="/js/portal-shell.js"></script>
 </body>
 </html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recover Walk-in Booking | LankaID</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+<header class="bg-white border-b">
+  <div class="max-w-4xl mx-auto h-16 px-4 flex items-center">
+    <div th:replace="~{fragments/government_brand :: brand(@{/}, 'light')}"></div>
+    <a th:href="@{/walk-in}" class="ml-auto text-sm font-bold text-cyan-700">Book appointment</a>
+  </div>
+</header>
+<main class="max-w-4xl mx-auto p-4 sm:p-8">
+  <h1 class="text-3xl font-extrabold">Manage walk-in bookings</h1>
+  <p class="text-sm text-slate-500 mt-2">Verify the mobile number used during booking to view, cancel or reschedule your bookings. Rescheduling costs LKR 300.</p>
+  <div th:if="${walkInMessage}" class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700" th:text="${walkInMessage}"></div>
+  <div id="otp-feedback" th:if="${walkInError}" class="mt-4 rounded-xl bg-red-50 border border-red-200 p-4 text-sm font-bold text-red-700" th:text="${walkInError}"></div>
+  <form th:if="${step == 'PHONE'}" th:action="@{/walk-in/recover/otp/send}" method="post" class="mt-5 bg-white border rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
+    <div class="min-w-0 flex-1">
+      <label for="visitorPhone" class="block text-sm font-bold">Mobile number</label>
+      <div class="mt-2 flex">
+        <span class="inline-flex items-center rounded-l-xl border border-r-0 border-slate-300 bg-slate-100 px-4 font-bold">+94</span>
+        <input id="visitorPhone" name="phone" th:value="${phone}" required pattern="7[0-9]{8}" minlength="9" maxlength="9" inputmode="numeric" autocomplete="tel-national" aria-describedby="phoneHelp" title="Enter nine digits starting with 7, without the leading zero." class="w-full min-w-0 rounded-r-xl border-slate-300" placeholder="771234567"/>
+      </div>
+      <p id="phoneHelp" class="mt-2 text-xs text-slate-500">Enter the remaining 9 digits, starting with 7. Leave out the first 0: 0771234567 becomes +94 771234567.</p>
+    </div>
+    <button data-otp-retry data-ready-label="Send OTP" th:attr="data-retry-seconds=${retryAfterSeconds ?: 0}" class="self-start sm:self-center rounded-xl bg-cyan-600 text-white px-5 py-3 font-bold disabled:opacity-50 disabled:cursor-not-allowed">Send OTP</button>
+  </form>
+  <section th:if="${step == 'OTP'}" class="mt-5 bg-white border rounded-2xl p-5 sm:p-7">
+    <h2 class="text-lg font-bold">Verify your mobile number</h2>
+    <p class="text-sm text-slate-500 mt-2">Enter the six-digit code sent to <b th:text="${phone}">your phone</b>.</p>
+    <form th:action="@{/walk-in/recover/otp/verify}" method="post" class="mt-5">
+      <label for="recoveryOtp" class="block text-sm font-bold">Six-digit OTP</label>
+      <input id="recoveryOtp" name="otp" required inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" class="w-full mt-2 rounded-xl border-slate-300 text-center font-mono text-xl tracking-[0.4em]" placeholder="6-digit code"/>
+      <button class="w-full mt-5 rounded-xl bg-cyan-600 text-white py-3 font-bold">Verify and find bookings</button>
+    </form>
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <form th:action="@{/walk-in/recover/otp/resend}" method="post"><button data-otp-retry data-ready-label="Resend code" th:attr="data-retry-seconds=${retryAfterSeconds ?: 0}" class="font-bold text-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed">Resend code</button></form>
+      <form th:action="@{/walk-in/recover/reset}" method="post"><button class="font-bold text-slate-600">Change phone number</button></form>
+    </div>
+    <p class="mt-3 text-xs text-slate-500">Use the latest code. If it expires, request another when the countdown ends.</p>
+  </section>
+  <div th:if="${step == 'RESULTS'}" class="mt-5 flex flex-wrap items-center justify-between gap-3">
+    <p class="text-sm font-bold text-emerald-700">Verified: <span th:text="${phone}">phone</span></p>
+    <form th:action="@{/walk-in/recover/reset}" method="post"><button class="text-sm font-bold text-cyan-700">Use another number</button></form>
+  </div>
+  <div th:if="${walkIns != null and #lists.isEmpty(walkIns)}" class="mt-4 bg-white border border-dashed rounded-2xl p-8 text-center">No walk-in bookings were found for that phone number.</div>
+  <div th:if="${walkIns != null and !#lists.isEmpty(walkIns)}" class="mt-4 space-y-3">
+    <article th:each="item : ${walkIns}" class="bg-white border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex-1">
+        <p class="font-bold" th:text="${item.appointment.visitorName}">Visitor</p>
+        <p class="font-mono text-xs text-cyan-700 mt-1" th:text="${item.appointment.referenceNo}">Reference</p>
+        <p class="text-sm text-slate-500 mt-2" th:text="${item.centreName + ' · ' + #temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Appointment</p>
+      </div>
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold" th:text="${item.appointment.appointmentStatus}">Status</span>
+      <a th:if="${item.appointment.appointmentStatus != 'CANCELLED'}" th:href="@{/walk-in/pass/{reference}(reference=${item.appointment.referenceNo})}" class="rounded-xl bg-cyan-600 text-white px-4 py-2.5 text-sm text-center font-bold">Open QR pass</a>
+      <a th:href="@{/walk-in/bookings/{reference}/manage(reference=${item.appointment.referenceNo})}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-center font-bold">Manage booking</a>
+    </article>
+  </div>
+</main>
+<script src="/js/walkin-phone.js"></script>
+<script src="/js/walkin-otp.js"></script>
+<script src="/js/portal-shell.js?v=20260915-signout"></script>
+</body>
+</html>

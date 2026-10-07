@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Officer Notifications | LankaID</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
+</head>
+<body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800"
+      th:attr="data-officer-role=${loggedInOfficerRole},data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
+<main class="max-w-4xl mx-auto px-5 py-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wider text-cyan-700">Officer communications</p>
+      <h1 class="text-2xl font-extrabold mt-1">Notifications</h1>
+      <p class="text-sm text-slate-500 mt-1"><span th:text="${unreadCount}">0</span> unread official message(s)</p>
+    </div>
+    <form th:if="${unreadCount > 0}" th:action="@{/officer/notifications/read-all}" method="post">
+      <button class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2.5 text-xs font-bold text-cyan-800 hover:bg-cyan-100">Mark all as read</button>
+    </form>
+  </div>
+
+  <div th:if="${#lists.isEmpty(notifications)}" class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+    <span class="material-symbols-outlined text-5xl text-slate-300">notifications_none</span>
+    <p class="font-bold mt-2">No officer notifications yet</p>
+    <p class="text-sm text-slate-500 mt-1">Official announcements from the system administrator will appear here.</p>
+  </div>
+
+  <div th:unless="${#lists.isEmpty(notifications)}" class="mt-6 space-y-3">
+    <article th:each="notification : ${notifications}" class="rounded-2xl border p-5 flex gap-4"
+             th:classappend="${notification.read ? ' bg-white border-slate-200' : ' bg-cyan-50 border-cyan-200'}">
+      <span class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center material-symbols-outlined"
+            th:classappend="${notification.read ? ' bg-slate-100 text-slate-500' : ' bg-cyan-100 text-cyan-700'}">campaign</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap justify-between gap-2">
+          <p class="font-bold text-sm" th:text="${#strings.replace(#strings.replace(notification.notificationType, 'ADMIN_', ''), '_', ' ')}">General</p>
+          <time class="text-xs text-slate-400" th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy, HH:mm')}">Time</time>
+        </div>
+        <p class="text-sm text-slate-700 mt-2 leading-6 whitespace-pre-line" th:text="${notification.message}">Message</p>
+        <form th:unless="${notification.read}" th:action="@{/officer/notifications/{id}/read(id=${notification.notificationId})}" method="post">
+          <button class="text-xs text-cyan-700 font-bold mt-3">Mark as read</button>
+        </form>
+      </div>
+    </article>
+  </div>
+</main>
+<script src="/js/portal-shell.js?v=20260919-notifications"></script>
+</body>
+</html>
