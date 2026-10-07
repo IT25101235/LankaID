@@ -1215,5 +1215,23 @@ GO
 ALTER TABLE [dbo].[Notification] CHECK CONSTRAINT [chk_notification_broadcast]
 GO
 
+CREATE TABLE [dbo].[ApplicationFeeSettings](
+	[settings_id] [int] NOT NULL,
+	[nic_fee] [decimal](12, 2) NOT NULL,
+	[passport_fee] [decimal](12, 2) NOT NULL,
+	[updated_at] [datetime2](7) NULL,
+ CONSTRAINT [pk_application_fee_settings] PRIMARY KEY CLUSTERED
+(
+	[settings_id] ASC
+),
+ CONSTRAINT [chk_application_fee_settings_nic] CHECK ([nic_fee] > (0)),
+ CONSTRAINT [chk_application_fee_settings_passport] CHECK ([passport_fee] > (0))
+)
+GO
+
+INSERT INTO [dbo].[ApplicationFeeSettings] ([settings_id], [nic_fee], [passport_fee])
+VALUES (1, 2000.00, 10000.00)
+GO
+
 PRINT 'LankaID database schema created successfully.';
 GO
