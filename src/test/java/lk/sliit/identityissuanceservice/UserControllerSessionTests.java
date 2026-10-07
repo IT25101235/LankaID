@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.SystemMaintenance;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.UserController;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.OfficerSessionIdentityAdvice;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,14 +46,23 @@ class UserControllerSessionTests {
     @Mock
     private OfficerAccountService officerAccountService;
 
+    @Mock
+    private SystemMaintenanceService maintenanceService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
+        SystemMaintenance settings = new SystemMaintenance();
+        settings.setMaintenanceActive(false);
+        settings.setMaintenanceMessage(SystemMaintenanceService.DEFAULT_MESSAGE);
+        lenient().when(maintenanceService.getSettings()).thenReturn(settings);
+
         mockMvc = standaloneSetup(new UserController(
                 userAccountService,
                 adminAccountService,
-                officerAccountService
+                officerAccountService,
+                maintenanceService
         )).build();
     }
 
@@ -80,6 +92,23 @@ class UserControllerSessionTests {
         assertEquals("CITIZEN", session.getAttribute("loggedInUserRole"));
         assertEquals("/citizen/dashboard", session.getAttribute("loggedInDashboardPath"));
         assertEquals(1800, session.getMaxInactiveInterval());
+    }
+
+    @Test
+    void maintenanceModeBlocksCitizenLogin() throws Exception {
+        when(maintenanceService.isMaintenanceActive()).thenReturn(true);
+        SystemMaintenance settings = new SystemMaintenance();
+        settings.setMaintenanceActive(true);
+        settings.setMaintenanceMessage("Scheduled maintenance");
+        when(maintenanceService.getSettings()).thenReturn(settings);
+
+        mockMvc.perform(post("/login")
+                        .param("email", "citizen@example.com")
+                        .param("password", "password123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("login_portal"))
+                .andExpect(model().attributeHasErrors("loginRequest"))
+                .andExpect(model().attribute("maintenanceActive", true));
     }
 
     @Test

@@ -45,4 +45,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
             LocalDateTime end,
             Collection<String> statuses
     );
+
+    boolean existsByCentreIdAndScheduledAtAfterAndAppointmentStatusIn(
+            Integer centreId,
+            LocalDateTime scheduledAt,
+            Collection<String> statuses
+    );
 }

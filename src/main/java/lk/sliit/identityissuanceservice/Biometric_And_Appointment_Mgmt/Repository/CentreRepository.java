@@ -13,5 +13,10 @@ public interface CentreRepository extends JpaRepository<Centre, Integer> {
     java.util.Optional<Centre> findByIdForBooking(@org.springframework.data.repository.query.Param("id") Integer id);
     List<Centre> findAllByOrderByCentreNameAsc();
 
+    List<Centre> findAllByCentreStatusOrderByCentreNameAsc(String centreStatus);
+
     boolean existsByCentreNameIgnoreCaseAndCityIgnoreCase(String centreName, String city);
+
+    boolean existsByCentreNameIgnoreCaseAndCityIgnoreCaseAndCentreIdNot(
+            String centreName, String city, Integer centreId);
 }

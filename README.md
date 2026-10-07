@@ -304,7 +304,7 @@ LankaID Identity Issuing Web Service Application
 | **Citizen Registration & Auth** | Citizen | ✅ | ✅ | ❌ | ❌ | ✅ | `UserAccount`, `CitizenAccount` | ✅ Implemented |
 | **Officer Authentication** | Staff / Admin | ❌ | ✅ | ❌ | ❌ | ✅ | `UserAccount`, `StaffAccount` | ✅ Implemented |
 | **Admin Officer Management** | System Admin | ✅ | ✅ | ✅ | ✅ | ✅ | `UserAccount`, `StaffAccount` | ✅ Implemented |
-| **Service Centre Management** | System Admin | ✅ | ✅ | ❌ | ❌ | ✅ | `Centre` | ✅ Implemented |
+| **Service Centre Management** | System Admin | ✅ | ✅ | ✅ | ✅ | ✅ | `Centre` | ✅ Implemented |
 | **New NIC Application** | Citizen | ✅ | ✅ | ✅ | ✅ | ✅ | `Application`, `NICApplication` | ✅ Implemented |
 | **New Passport Application** | Citizen | ✅ | ✅ | ✅ | ✅ | ✅ | `Application`, `PassportApplication` | ✅ Implemented |
 | **NIC/Passport Renewals** | Citizen | ✅ | ✅ | ✅ | ❌ | ✅ | `Application`, `NIC/Passport` | ✅ Implemented |
@@ -975,7 +975,7 @@ erDiagram
 | `CitizenAccount` | `user_id` (PK) | `user_id` -> `UserAccount`, `government_record_id` -> `GovernmentIdentityRecord` | `family_name`, `given_name`, `date_of_birth`, `gender`, `permanent_*`, `postal_*`, `dual_citizen` | Citizen demographic & residential details |
 | `StaffAccount` | `user_id` (PK) | `user_id` -> `UserAccount` | `employee_no` (UQ), `staff_role` (CK: NIC_OFFICER, PASSPORT_OFFICER, CSR, DIRECTOR, SYSTEM_ADMIN), `staff_status` | Staff identity, operational roles & permissions |
 | `GovernmentIdentityRecord` | `government_record_id` (PK) | None | `nic_no` (UQ), `passport_no` (UQ), `registered_email`, `registered_phone`, `identity_status` | Legacy national registry for pre-validation |
-| `Centre` | `centre_id` (PK) | None | `centre_name`, `city`, `district`, `daily_capacity` (1-2000), UQ(`centre_name`, `city`) | Physical government service branches |
+| `Centre` | `centre_id` (PK) | None | `centre_name`, `city`, `district`, `daily_capacity` (1-2000), `centre_status` (ACTIVE/INACTIVE), UQ(`centre_name`, `city`) | Physical government service branches |
 | `Application` | `application_id` (PK) | `citizen_id` -> `CitizenAccount` | `application_no` (UQ), `service_type` (NIC/PASSPORT), `application_kind` (NEW/RENEWAL/LOST), `current_status` | Base identity document application record |
 | `NICApplication` | `application_id` (PK) | `application_id` -> `Application` | `last_nic_no`, `last_issued_date`, `police_station`, `police_report_date` | Subclass table for NIC-specific details |
 | `PassportApplication`| `application_id` (PK) | `application_id` -> `Application` | `service_level`, `travel_document_type`, `nic_proof_no`, `parent_nic_no` | Subclass table for Passport travel specifics |
@@ -1150,7 +1150,7 @@ flowchart LR
 | Module | Create | Read | Update | Delete | Implemented Entities |
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **User & Staff Accounts** | ✅ | ✅ | ✅ | ✅ | `UserAccount`, `CitizenAccount`, `StaffAccount` |
-| **Regional Centres** | ✅ | ✅ | ❌ | ❌ | `Centre` |
+| **Regional Centres** | ✅ | ✅ | ✅ | ✅ | `Centre` |
 | **Applications (NIC/Passport)**| ✅ | ✅ | ✅ | ✅ | `Application`, `NICApplication`, `PassportApplication` |
 | **Supporting Documents** | ✅ | ✅ | ❌ | ❌ | `ApplicationDocument` |
 | **Application Reviews** | ✅ | ✅ | ❌ | ❌ | `ApplicationReview` |

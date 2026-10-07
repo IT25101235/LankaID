@@ -70,7 +70,7 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository
                 .findByApplicationIdAndAppointmentType(applicationId, "BIOMETRIC")
                 .orElseThrow(() -> new IllegalArgumentException("Payment appointment record was not found."));
-        List<Centre> centres = centreRepository.findAllByOrderByCentreNameAsc();
+        List<Centre> centres = centreRepository.findAllByCentreStatusOrderByCentreNameAsc("ACTIVE");
         if (centres.isEmpty()) {
             throw new IllegalArgumentException("No service centres are available. Please contact the system administrator.");
         }

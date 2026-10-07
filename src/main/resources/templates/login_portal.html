@@ -103,6 +103,11 @@
 <link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="m-0 min-h-screen bg-white font-sans text-slate-900 antialiased">
+<div th:if="${maintenanceActive}" class="border-b border-amber-300 bg-amber-50 px-4 py-3 text-center" role="alert">
+  <p class="font-bold text-amber-900">System maintenance is active</p>
+  <p class="text-sm text-amber-800" th:text="${maintenanceWarning}">Identity services are temporarily unavailable.</p>
+  <p class="text-xs text-amber-700 mt-1">Only the System Administrator can sign in.</p>
+</div>
 <!-- Full-page authentication workspace -->
 <main class="min-h-screen grid lg:grid-cols-[0.72fr_1.28fr]">
   <aside class="gov-auth-visual hidden lg:flex bg-slate-900 text-white px-12 xl:px-16 py-12 flex-col">
