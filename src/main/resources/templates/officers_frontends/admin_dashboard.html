@@ -33,10 +33,6 @@
       <span class="material-symbols-outlined">group</span>
       Officer Credentials
     </a>
-    <a href="#" onclick="showSection('roles')" class="sidebar-link" id="nav-roles">
-      <span class="material-symbols-outlined">manage_accounts</span>
-      Roles & Permissions
-    </a>
     <a href="#" onclick="showSection('settings')" class="sidebar-link" id="nav-settings">
       <span class="material-symbols-outlined">settings</span>
       System Settings
@@ -585,21 +581,6 @@
     </div>
   </div>
 
-  <!-- ===== ROLES ===== -->
-  <div id="section-roles" class="p-6 hidden">
-    <div class="card p-6">
-      <h2 class="font-bold text-slate-900 text-base mb-4">Roles & Permissions</h2>
-      <div class="space-y-3">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen</span></div><span class="text-xs font-medium text-slate-600">1,247 users</span></div><p class="text-xs leading-5 text-slate-600">Can apply for NIC/Passport, track applications, book appointments, file complaints, receive notifications.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-slate-900 text-sm">NIC Application Officer</span></div><span class="text-xs font-medium text-slate-600" th:text="|${nicOfficerCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can review NIC applications, approve/reject/request-info, collect biometric data, view NIC queue.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-slate-900 text-sm">Passport Application Officer</span></div><span class="text-xs font-medium text-slate-600" th:text="|${passportOfficerCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can review Passport applications, approve/reject/request-info, collect biometric data, view Passport queue.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span><span class="font-semibold text-slate-900 text-sm">Citizen Service Representative</span></div><span class="text-xs font-medium text-slate-600" th:text="|${csrCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can manage complaints, respond to citizens, manage walk-in bookings, view appointment schedules.</p></div>
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span class="font-semibold text-slate-900 text-sm">Identity Service Director</span></div><span class="text-xs font-medium text-slate-600" th:text="|${directorCount} users|">0 users</span></div><p class="text-xs leading-5 text-slate-600">Can access the Director, NIC, Passport and CSR dashboards.</p></div>
-        <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-4"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-600"></span><span class="font-semibold text-slate-900 text-sm">System Administrator</span></div><span class="text-xs font-medium text-slate-600">1 fixed account</span></div><p class="text-xs leading-5 text-slate-600">Manages accounts and system settings through the Admin Portal. This account cannot open operational officer dashboards or be created through the form.</p></div>
-      </div>
-    </div>
-  </div>
-
 </main>
 
 <!-- Add User Modal -->
@@ -692,7 +673,7 @@
 
 <script>
 function showSection(s) {
-  const sections = ['overview','users','roles','settings','centres','maintenance','citizens','notifications'];
+  const sections = ['overview','users','settings','centres','maintenance','citizens','notifications'];
   if (!sections.includes(s)) s = 'overview';
   sections.forEach(t => {
     const el = document.getElementById('section-'+t);
@@ -707,7 +688,6 @@ function showSection(s) {
   const titles = {
     overview: ['System Overview','Current values calculated from the LankaID database'],
     users: ['Officer Credential Management','Create officer logins and manage their assigned roles'],
-    roles: ['Roles & Permissions','View and configure role-based access control'],
     settings: ['System Settings','Configure processing rules, fees and notifications'],
     centres: ['Service Centre Management','Add centres citizens can select for biometric and walk-in appointments'],
     maintenance: ['Maintenance Mode','Pause or restore all non-admin system operations'],

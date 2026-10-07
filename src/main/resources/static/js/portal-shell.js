@@ -229,7 +229,6 @@
         items: [
           item('/officer/admin', 'dashboard', 'Overview', ['/officer/admin']),
           item('/officer/admin?section=users', 'manage_accounts', 'Officer accounts', ['/officer/admin?section=users']),
-          item('/officer/admin?section=roles', 'admin_panel_settings', 'Roles and permissions', ['/officer/admin?section=roles']),
           item('/officer/admin?section=settings', 'settings', 'System settings', ['/officer/admin?section=settings']),
           item('/officer/admin?section=centres', 'apartment', 'Service centres', ['/officer/admin?section=centres']),
           item('/officer/admin?section=maintenance', 'engineering', 'Maintenance mode', ['/officer/admin?section=maintenance']),
