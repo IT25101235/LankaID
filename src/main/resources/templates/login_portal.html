@@ -175,7 +175,7 @@
                placeholder="••••••••"
                type="password"
                required />
-        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-700 transition-colors" type="button" onclick="togglePassword('password', this)" aria-label="Show password"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-700 transition-colors" type="button" onclick="togglePassword('password', this)" aria-label="Show password"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
       </div>
       <p id="passwordError" class="text-red-600 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
     </div>
@@ -233,7 +233,7 @@
       <label class="font-label-sm text-label-sm text-on-surface" for="officerPassword">Password</label>
       <div class="relative">
         <input id="officerPassword" th:field="*{password}" th:errorclass="border-red-500" class="auth-field w-full h-12 pl-3 pr-10 rounded-md bg-white border border-slate-300 text-slate-900 focus:border-cyan-700 focus:ring-2 focus:ring-cyan-700/15 outline-none text-sm placeholder:text-slate-400" placeholder="••••••••" type="password" required />
-        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-700 transition-colors" type="button" onclick="togglePassword('officerPassword', this)" aria-label="Show password"><span class="material-symbols-outlined text-[20px]">visibility_off</span></button>
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-700 transition-colors" type="button" onclick="togglePassword('officerPassword', this)" aria-label="Show password"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
       </div>
       <p id="officerPasswordError" class="text-red-600 text-xs mt-1" th:text="${#fields.hasErrors('password') ? #fields.errors('password')[0] : ''}"></p>
     </div>
@@ -296,7 +296,7 @@ function togglePassword(inputId, button) {
   const reveal = input.type === 'password';
   input.type = reveal ? 'text' : 'password';
   const icon = button.querySelector('.material-symbols-outlined');
-  if (icon) icon.textContent = reveal ? 'visibility' : 'visibility_off';
+  if (icon) icon.textContent = reveal ? 'visibility_off' : 'visibility';
   button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
 }
 

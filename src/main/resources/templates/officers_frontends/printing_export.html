@@ -28,8 +28,8 @@
 </header>
 
 <main class="max-w-7xl mx-auto p-5 sm:p-6 space-y-5">
-  <div th:if="${printingMessage}" class="rounded-xl border border-emerald-700 bg-emerald-950/60 p-4 text-sm font-semibold text-emerald-300" th:text="${printingMessage}"></div>
-  <div th:if="${printingError}" class="rounded-xl border border-red-700 bg-red-950/60 p-4 text-sm font-semibold text-red-300" th:text="${printingError}"></div>
+  <div th:if="${printingMessage}" class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800 flex items-center gap-3" role="status"><span class="material-symbols-outlined">check_circle</span><span th:text="${printingMessage}"></span></div>
+  <div th:if="${printingError}" class="rounded-xl border border-red-300 bg-red-50 p-4 text-sm font-semibold text-red-800 flex items-center gap-3" role="alert"><span class="material-symbols-outlined">warning</span><span th:text="${printingError}"></span></div>
 
   <section class="grid sm:grid-cols-3 gap-4">
     <article class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
