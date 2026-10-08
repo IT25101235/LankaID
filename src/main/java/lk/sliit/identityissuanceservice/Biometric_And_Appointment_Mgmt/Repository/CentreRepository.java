@@ -10,6 +10,8 @@ import java.util.List;
  * Repository pattern: CRUD for centres. Method names like findAllByCentreStatus... become SQL
  * automatically.
  */
+// OOP - Inheritance, Abstraction and Polymorphism: this interface extends JpaRepository, so it inherits
+// save, find and delete. We only declare it; Spring supplies the real implementation at runtime.
 @Repository
 public interface CentreRepository extends JpaRepository<Centre, Integer> {
     /** Locks the centre row while it is being used for a booking. */

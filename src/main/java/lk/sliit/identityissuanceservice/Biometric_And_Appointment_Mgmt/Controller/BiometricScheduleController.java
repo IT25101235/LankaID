@@ -22,6 +22,9 @@ import java.time.YearMonth;
 @Controller
 public class BiometricScheduleController {
 
+    // OOP - Composition and Encapsulation: the service is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final BiometricScheduleService schedules;
 
     public BiometricScheduleController(BiometricScheduleService schedules) {

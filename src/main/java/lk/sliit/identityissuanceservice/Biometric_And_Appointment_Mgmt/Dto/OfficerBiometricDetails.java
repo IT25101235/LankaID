@@ -6,6 +6,8 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 
 /** DTO: everything the officer screens and the pass need about one appointment. */
+// OOP - Composition: built from several objects (appointment, application, citizen, centre) instead of
+// repeating their fields.
 public record OfficerBiometricDetails(
         Appointment appointment,
         CitizenApplication application,

@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 @Table(name = "AppointmentCheckIn", schema = "dbo")
 public class AppointmentCheckIn {
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @Column(name = "appointment_id")
     private Integer appointmentId;
@@ -35,6 +37,7 @@ public class AppointmentCheckIn {
         if (checkedInAt == null) checkedInAt = LocalDateTime.now();
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
     public Integer getStaffId() { return staffId; }

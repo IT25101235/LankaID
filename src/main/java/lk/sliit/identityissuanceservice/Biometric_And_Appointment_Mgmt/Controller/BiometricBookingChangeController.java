@@ -16,6 +16,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  */
 @Controller
 public class BiometricBookingChangeController {
+    // OOP - Composition and Encapsulation: the services is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final AppointmentService bookings;
     private final BiometricBookingChangeService changes;
 

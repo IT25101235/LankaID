@@ -21,6 +21,8 @@ public class BiometricFormToken {
     }
 
     /** Rejects the request if the token is missing or different (blocks forged cross-site form posts). */
+    // OOP - Abstraction: callers use BiometricFormToken.check() without knowing how the token is stored or
+    // compared.
     public static void check(String token, HttpSession session) {
         Object expected = session.getAttribute(KEY);
         if (token == null || !(expected instanceof String value)

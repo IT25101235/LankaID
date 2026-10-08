@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 @Table(name = "Centre", schema = "dbo")
 public class Centre {
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "centre_id")
@@ -42,6 +44,7 @@ public class Centre {
         if (centreStatus == null) centreStatus = "ACTIVE";
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getCentreId() { return centreId; }
     public void setCentreId(Integer centreId) { this.centreId = centreId; }
     public String getCentreName() { return centreName; }
