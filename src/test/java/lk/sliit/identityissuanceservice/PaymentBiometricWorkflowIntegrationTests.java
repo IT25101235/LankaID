@@ -367,6 +367,12 @@ class PaymentBiometricWorkflowIntegrationTests {
                 "COMPLETED",
                 appointmentRepository.findById(appointment.getAppointmentId()).orElseThrow().getAppointmentStatus()
         );
+        mockMvc.perform(get("/officer/{service}/biometrics", servicePath).session(officerSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString(appointment.getReferenceNo()))));
+        mockMvc.perform(get("/officer/{service}/appointments", servicePath).session(officerSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(appointment.getReferenceNo())));
         assertTrue(userNotificationRepository
                 .findAllById_UserIdOrderByDeliveredAtDesc(citizenUser.getUserId()).size() >= 4);
 

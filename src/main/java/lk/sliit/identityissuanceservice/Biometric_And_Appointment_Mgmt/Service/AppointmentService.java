@@ -26,7 +26,9 @@ import java.util.List;
 @Service
 public class AppointmentService {
 
-    private static final List<String> OFFICER_QUEUE_STATUSES =
+    private static final List<String> OFFICER_ACTIVE_QUEUE_STATUSES =
+            List.of("CONFIRMED", "CHECKED_IN");
+    private static final List<String> OFFICER_HISTORY_STATUSES =
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
 
     private final AppointmentRepository appointmentRepository;
@@ -143,7 +145,7 @@ public class AppointmentService {
         Appointment appointment = getCitizenAppointment(citizenId, reference);
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
-        if (!OFFICER_QUEUE_STATUSES.contains(appointment.getAppointmentStatus())) {
+        if (!OFFICER_HISTORY_STATUSES.contains(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Confirm an appointment before opening its pass.");
         }
         return buildOfficerDetails(appointment, application.getServiceType(), true);
@@ -153,7 +155,7 @@ public class AppointmentService {
     public List<OfficerBiometricDetails> getOfficerQueue(String serviceType) {
         return appointmentRepository
                 .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-                        "BIOMETRIC", OFFICER_QUEUE_STATUSES)
+                        "BIOMETRIC", OFFICER_ACTIVE_QUEUE_STATUSES)
                 .stream()
                 .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
                 .filter(java.util.Objects::nonNull)
@@ -164,7 +166,7 @@ public class AppointmentService {
     public List<OfficerBiometricDetails> getOfficerHistory(String serviceType) {
         return appointmentRepository
                 .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-                        "BIOMETRIC", OFFICER_QUEUE_STATUSES)
+                        "BIOMETRIC", OFFICER_HISTORY_STATUSES)
                 .stream()
                 .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
                 .filter(java.util.Objects::nonNull)
@@ -244,7 +246,7 @@ public class AppointmentService {
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElse(null);
         if (application == null || !serviceType.equals(application.getServiceType())) return null;
-        if (rejectPendingPayment && !OFFICER_QUEUE_STATUSES.contains(appointment.getAppointmentStatus())) {
+        if (rejectPendingPayment && !OFFICER_HISTORY_STATUSES.contains(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("This appointment has not been paid and confirmed.");
         }
         CitizenAccount citizen = citizenRepository.findById(application.getCitizenId())
