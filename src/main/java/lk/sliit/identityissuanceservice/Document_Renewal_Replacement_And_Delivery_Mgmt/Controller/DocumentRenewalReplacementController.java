@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+// Handles citizen pages for renewing a document or replacing a lost one.
 @Controller
 public class DocumentRenewalReplacementController {
 
@@ -33,6 +34,7 @@ public class DocumentRenewalReplacementController {
         this.correctionRequestService = correctionRequestService;
     }
 
+    // Show a prefilled NIC form only when an existing verified NIC is linked.
     @GetMapping("/citizen/applications/nic/{formKind:renewal|replacement}")
     public String nicForm(
             @PathVariable String formKind,
@@ -52,6 +54,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Validate the form, save a draft or edit the same request, then open uploads.
     @PostMapping("/citizen/applications/nic/{formKind:renewal|replacement}")
     public String saveNicRequest(
             @PathVariable String formKind,
@@ -81,6 +84,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Load the passport form with the citizen profile and linked document details.
     @GetMapping("/citizen/applications/passport/{formKind:renewal|replacement}")
     public String passportForm(
             @PathVariable String formKind,
@@ -100,6 +104,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Keep validation errors on this page; a saved request continues to uploads.
     @PostMapping("/citizen/applications/passport/{formKind:renewal|replacement}")
     public String savePassportRequest(
             @PathVariable String formKind,
@@ -129,6 +134,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Reopen an owned, unsubmitted draft without creating another application.
     @GetMapping("/citizen/renewals/{service:nic|passport}/edit")
     public String editDraft(
             @PathVariable String service,
@@ -160,6 +166,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // An officer must request a correction before a submitted form can be edited.
     @GetMapping("/citizen/renewals/{service:nic|passport}/correction")
     public String correctionForm(
             @PathVariable String service,
@@ -191,6 +198,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Reuse the shared upload page with renewal routes and required document types.
     @GetMapping("/citizen/renewals/{service:nic|passport}/documents")
     public String documentPage(
             @PathVariable String service,
@@ -210,6 +218,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Check the owner and service before handing the uploaded file to the service.
     @PostMapping("/citizen/renewals/{service:nic|passport}/documents")
     public String uploadDocument(
             @PathVariable String service,
@@ -231,6 +240,7 @@ public class DocumentRenewalReplacementController {
         return renewalDocumentRedirect(service, applicationId);
     }
 
+    // Show saved details and documents so the citizen can review before submission.
     @GetMapping("/citizen/renewals/{service:nic|passport}/review")
     public String reviewRequest(
             @PathVariable String service,
@@ -262,6 +272,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // Submit the existing draft or correction request; saving a form alone does not submit it.
     @PostMapping("/citizen/renewals/{service:nic|passport}/submit")
     public String submitRequest(
             @PathVariable String service,
@@ -361,6 +372,7 @@ public class DocumentRenewalReplacementController {
         }
     }
 
+    // The replacement page represents a lost document and uses the database value LOST.
     private String applicationKind(String formKind) {
         return "renewal".equals(formKind) ? "RENEWAL" : "LOST";
     }
@@ -371,6 +383,7 @@ public class DocumentRenewalReplacementController {
                 : "Lost " + service + " Replacement";
     }
 
+    // Prevent a NIC request from being opened through a passport route, or the reverse.
     private void checkService(CitizenApplication application, String servicePath) {
         if (!application.getServiceType().equalsIgnoreCase(servicePath)) {
             throw new IllegalArgumentException("Application service type does not match the requested page.");
@@ -382,6 +395,7 @@ public class DocumentRenewalReplacementController {
                 + "/documents?applicationId=" + applicationId;
     }
 
+    // Use the signed-in citizen ID from the session rather than a submitted user ID.
     private Integer loggedInCitizenId(HttpSession session) {
         Object citizenId = session.getAttribute("loggedInUserId");
         Object role = session.getAttribute("loggedInUserRole");
