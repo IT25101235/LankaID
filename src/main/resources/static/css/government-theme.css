@@ -2208,3 +2208,128 @@ body:not(.portal-shell) > header.bg-white { border-top: 3px solid var(--gov-gold
 @media print {
   .lankaid-chatbot, .lankaid-chatbot-support-link { display: none !important; }
 }
+
+
+/* --------------------------------------------------------------------------
+   Sign-in page: "Silk Waves" side margins, flowing silk thread, smooth field focus
+   Every rule is scoped with :has(.gov-auth-visual), so only the sign-in page is
+   affected. Animations use only background-position and box-shadow (no JavaScript).
+   -------------------------------------------------------------------------- */
+
+/* Side margins: dark maroon silk behind the centred 72rem layout. */
+html:has(.gov-auth-visual) {
+  background: #12030b !important;
+}
+
+body:has(.gov-auth-visual) {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(60% 50% at 8% 0%, rgb(212 167 44 / 0.22), transparent 70%),
+    linear-gradient(180deg, #1b0612 0%, #3b0a24 55%, #681042 100%) !important;
+}
+
+/* Back layer: four filled waves moving at different speeds. */
+body:has(.gov-auth-visual)::before {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  content: "";
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150%20L1600%20300%20L0%20300%20Z'%20fill='%234b0b2f'%20fill-opacity='.65'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150%20L1600%20300%20L0%20300%20Z'%20fill='%238f1d45'%20fill-opacity='.4'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150%20L1600%20300%20L0%20300%20Z'%20fill='%23e11d48'%20fill-opacity='.22'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150%20L1600%20300%20L0%20300%20Z'%20fill='%23ff7a9a'%20fill-opacity='.12'/%3E%3C/svg%3E");
+  background-size: 1600px 300px, 2000px 340px, 1400px 280px, 1800px 320px;
+  background-position: 0 100%, 0 78%, 0 56%, 0 34%;
+  background-repeat: repeat-x;
+  animation: authSilkFlow 46s linear infinite;
+}
+
+/* Front layer: three thin gold lines that follow the waves. */
+body:has(.gov-auth-visual)::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150'%20fill='none'%20stroke='%23f3d987'%20stroke-opacity='.55'%20stroke-width='2'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150'%20fill='none'%20stroke='%23ffc88c'%20stroke-opacity='.4'%20stroke-width='2'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='300'%20viewBox='0%200%201600%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0%20150%20C%20267%2040%20533%20260%20800%20150%20C%201067%2040%201333%20260%201600%20150'%20fill='none'%20stroke='%23ff96aa'%20stroke-opacity='.35'%20stroke-width='2'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  background-size: 1600px 300px, 2000px 340px, 1400px 280px;
+  background-position: 0 100%, 0 78%, 0 56%;
+  background-repeat: repeat-x;
+  animation: authSilkFlowLines 46s linear infinite;
+}
+
+/* Each offset is a whole multiple of its tile width, so the loop is seamless. */
+@keyframes authSilkFlow {
+  from { background-position: 0 100%, 0 78%, 0 56%, 0 34%; }
+  to { background-position: -1600px 100%, 2000px 78%, -1400px 56%, 1800px 34%; }
+}
+
+@keyframes authSilkFlowLines {
+  from { background-position: 0 100%, 0 78%, 0 56%; }
+  to { background-position: -1600px 100%, 2000px 78%, -1400px 56%; }
+}
+
+/* Glass rim and soft rose halo around the centred layout. */
+body:has(.gov-auth-visual) > main {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / .28),
+    0 0 0 7px rgb(255 255 255 / .06),
+    0 0 80px 6px rgb(225 29 72 / .42),
+    0 30px 80px rgb(18 3 11 / .55);
+}
+
+/* Photo panel: keep the white text readable on the bright building photo. */
+.gov-auth-visual h1,
+.gov-auth-visual h1 + p {
+  text-shadow: 0 2px 18px rgb(18 3 11 / .55);
+}
+
+/* Replace the static gold bar with a flowing silk thread. */
+.gov-auth-visual::after {
+  background: linear-gradient(0deg, #d4a72c, #fff2bd, #d4a72c, #e11d48, #d4a72c) 0 0 / 100% 240px repeat-y;
+  animation: authEdgeFlowUp 2.8s linear infinite, authEdgeSilk 4s ease-in-out infinite;
+}
+
+@keyframes authEdgeFlowUp {
+  from { background-position: 0 0; }
+  to { background-position: 0 -240px; }
+}
+
+@keyframes authEdgeSilk {
+  0%, 100% { box-shadow: 6px 0 22px 2px rgb(212 167 44 / .5); }
+  50% { box-shadow: 10px 0 42px 8px rgb(225 29 72 / .42); }
+}
+
+/* Smooth field focus: no double gold ring, a soft glow that eases in and out. */
+body:has(.gov-auth-visual) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+body:has(.gov-auth-visual) select:focus-visible,
+body:has(.gov-auth-visual) textarea:focus-visible {
+  outline: none !important;
+}
+
+body:has(.gov-auth-visual) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+body:has(.gov-auth-visual) select:focus,
+body:has(.gov-auth-visual) textarea:focus {
+  border-color: var(--gov-maroon) !important;
+  box-shadow: 0 0 0 4px rgb(212 167 44 / .2), 0 8px 22px rgb(104 16 66 / .14) !important;
+}
+
+body:has(.gov-auth-visual) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body:has(.gov-auth-visual) select,
+body:has(.gov-auth-visual) textarea {
+  transition: border-color 280ms ease, background-color 280ms ease, box-shadow 380ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(.gov-auth-visual)::before,
+  body:has(.gov-auth-visual)::after,
+  .gov-auth-visual::after {
+    animation: none !important;
+  }
+}
