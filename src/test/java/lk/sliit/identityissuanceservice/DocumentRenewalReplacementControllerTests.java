@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenCorrectionRequestService;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Controller.DocumentRenewalReplacementController;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
@@ -66,6 +67,28 @@ class DocumentRenewalReplacementControllerTests {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/citizen/dashboard"))
                 .andExpect(flash().attribute("applicationError", "No existing identity document was found."));
+    }
+
+    @Test
+    void nicRenewalDraftCanBeReopenedFromDocumentStep() throws Exception {
+        CitizenApplication draft = new CitizenApplication();
+        draft.setApplicationId(91);
+        draft.setCitizenId(25);
+        draft.setServiceType("NIC");
+        draft.setApplicationKind("RENEWAL");
+        draft.setCurrentStatus("DRAFT");
+        when(renewalService.getRequest(25, 91)).thenReturn(draft);
+        when(renewalService.prepareNicDraftEdit(25, 91)).thenReturn(new NicRenewalReplacementForm());
+        when(renewalService.getEligibility(25))
+                .thenReturn(new CitizenEligibilityDto(true, false, false, "200012345678", null));
+
+        mockMvc.perform(get("/citizen/renewals/nic/edit")
+                        .param("applicationId", "91")
+                        .session(citizenSession()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("citizen_frontends/nic_application_form"))
+                .andExpect(model().attribute("draftEditApplicationId", 91))
+                .andExpect(model().attribute("workflowPath", "renewals"));
     }
 
     private MockHttpSession citizenSession() {
