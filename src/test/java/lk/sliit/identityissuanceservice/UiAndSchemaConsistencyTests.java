@@ -154,6 +154,17 @@ class UiAndSchemaConsistencyTests {
     }
 
     @Test
+    void landingPageIncludesPublicChatbot() throws IOException {
+        String landingPage = Files.readString(TEMPLATE_ROOT.resolve("index.html"));
+
+        assertTrue(landingPage.contains("/Chatbot/chatbot.css"));
+        assertTrue(landingPage.contains("data-chatbot-launcher"));
+        assertTrue(landingPage.contains("data-chatbot-open"));
+        assertTrue(landingPage.contains("/Chatbot/chatbot-guide.js"));
+        assertTrue(landingPage.contains("/Chatbot/chatbot.js"));
+    }
+
+    @Test
     void registrationPasswordResetAndWalkInUseTheNewGuidedFlows() throws IOException {
         String registration = Files.readString(TEMPLATE_ROOT.resolve("citizen_frontends/citizen_register.html"));
         String login = Files.readString(TEMPLATE_ROOT.resolve("login_portal.html"));
