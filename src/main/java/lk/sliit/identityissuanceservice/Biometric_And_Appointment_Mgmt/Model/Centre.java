@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+/** Entity: a service centre where citizens give their biometrics. */
 @Entity
 @Table(name = "Centre", schema = "dbo")
 public class Centre {
@@ -35,6 +36,7 @@ public class Centre {
     @Column(name = "centre_status", nullable = false, length = 20)
     private String centreStatus;
 
+    /** New centres start as ACTIVE. */
     @PrePersist
     private void applyDefaults() {
         if (centreStatus == null) centreStatus = "ACTIVE";

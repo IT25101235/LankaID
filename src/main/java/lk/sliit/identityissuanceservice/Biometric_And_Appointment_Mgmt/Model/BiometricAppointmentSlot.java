@@ -13,6 +13,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * Entity: one half-hour slot an officer publishes for a centre and service (NIC or PASSPORT), with a
+ * capacity.
+ */
 @Entity
 @Table(name = "BiometricAppointmentSlot", schema = "dbo")
 public class BiometricAppointmentSlot {
@@ -49,6 +53,7 @@ public class BiometricAppointmentSlot {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /** Sets created and updated times when the slot is first saved. */
     @PrePersist
     private void createTimestamps() {
         LocalDateTime now = LocalDateTime.now();
@@ -56,6 +61,7 @@ public class BiometricAppointmentSlot {
         updatedAt = now;
     }
 
+    /** Refreshes the updated time on every change. */
     @PreUpdate
     private void updateTimestamp() {
         updatedAt = LocalDateTime.now();

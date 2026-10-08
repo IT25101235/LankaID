@@ -5,6 +5,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Cen
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 
+/** DTO: everything the officer screens and the pass need about one appointment. */
 public record OfficerBiometricDetails(
         Appointment appointment,
         CitizenApplication application,

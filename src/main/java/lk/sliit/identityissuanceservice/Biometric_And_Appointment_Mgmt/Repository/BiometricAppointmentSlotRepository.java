@@ -12,8 +12,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+/** Repository pattern: CRUD and calendar queries for slots. */
 public interface BiometricAppointmentSlotRepository extends JpaRepository<BiometricAppointmentSlot, Integer> {
 
+    /** Locks the slot row so two citizens cannot take the last place at the same time. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select slot from BiometricAppointmentSlot slot where slot.slotId = :slotId")
     Optional<BiometricAppointmentSlot> findByIdForBooking(@Param("slotId") Integer slotId);

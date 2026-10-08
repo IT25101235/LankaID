@@ -9,13 +9,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository pattern: CRUD for appointments. Method names become SQL automatically; the @Query ones
+ * are written by hand.
+ */
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
 
+    /** Locks the booking row so two requests cannot change it at once. */
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select a from Appointment a where a.appointmentId = :id")
     Optional<Appointment> findByIdForChange(@org.springframework.data.repository.query.Param("id") Integer id);
 
+    /**
+     * Counts bookings that use up a slot place. Cancelled bookings are not counted, so their place is
+     * freed.
+     */
     @org.springframework.data.jpa.repository.Query("""
             select count(a) from Appointment a where a.biometricSlotId = :slotId
             and a.appointmentStatus in ('CONFIRMED', 'CHECKED_IN', 'COMPLETED')
@@ -28,12 +37,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     boolean existsByBiometricSlotId(Integer biometricSlotId);
 
+    /** Each application has one biometric appointment. */
     Optional<Appointment> findByApplicationIdAndAppointmentType(Integer applicationId, String appointmentType);
 
     Optional<Appointment> findByReferenceNoIgnoreCase(String referenceNo);
 
     boolean existsByReferenceNo(String referenceNo);
 
+    /** Officer queue and history lists. */
     List<Appointment> findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
             String appointmentType,
             Collection<String> statuses

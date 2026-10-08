@@ -20,6 +20,7 @@ public class BiometricFormToken {
         return (String) session.getAttribute(KEY);
     }
 
+    /** Rejects the request if the token is missing or different (blocks forged cross-site form posts). */
     public static void check(String token, HttpSession session) {
         Object expected = session.getAttribute(KEY);
         if (token == null || !(expected instanceof String value)

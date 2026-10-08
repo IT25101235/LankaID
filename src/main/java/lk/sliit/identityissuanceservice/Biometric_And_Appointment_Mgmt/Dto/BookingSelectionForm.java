@@ -19,6 +19,10 @@ public class BookingSelectionForm {
     public String getSlotId() { return slotId; }
     public void setSlotId(String value) { slotId = value; }
 
+    /**
+     * Input validation: these methods turn form text into numbers, dates and times, or give a friendly
+     * error.
+     */
     public Integer readCentre() { return readId(centreId, "Select a valid service centre."); }
     public Integer readSlot() { return readId(slotId, "Select an available appointment slot."); }
     public LocalDate readDate() {

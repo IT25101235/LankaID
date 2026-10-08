@@ -4,6 +4,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.App
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+/** Repository pattern: Spring Data JPA gives ready-made save, find and delete for check-ins. */
 @Repository
 public interface AppointmentCheckInRepository extends JpaRepository<AppointmentCheckIn, Integer> {
 }

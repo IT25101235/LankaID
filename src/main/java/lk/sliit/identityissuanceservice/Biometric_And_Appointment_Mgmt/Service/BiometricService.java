@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/** Service: finishes the biometric step for an application. */
 @Service
 public class BiometricService {
 
@@ -34,6 +35,10 @@ public class BiometricService {
         this.notificationPublisher = notificationPublisher;
     }
 
+    /**
+     * CREATE: save the collection, mark the appointment COMPLETED and the application ready for
+     * printing. Needs a prior check-in.
+     */
     @Transactional
     public void completeCollection(String reference, String serviceType, Integer staffId) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");

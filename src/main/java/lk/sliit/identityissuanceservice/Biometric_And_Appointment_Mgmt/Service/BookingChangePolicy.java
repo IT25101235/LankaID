@@ -16,6 +16,7 @@ public final class BookingChangePolicy {
         return canCancel(appointment, now);
     }
 
+    /** Policy rules: a biometric booking can be cancelled up to 72 hours before it. */
     public static boolean canCancel(Appointment appointment) {
         return canCancel(appointment, LocalDateTime.now());
     }
@@ -29,6 +30,7 @@ public final class BookingChangePolicy {
                 && appointment.getScheduledAt().isAfter(now);
     }
 
+    /** Can be rescheduled if cancellable, or if the booked date has already passed (missed). */
     public static boolean canReschedule(Appointment appointment) {
         return canReschedule(appointment, LocalDateTime.now());
     }
@@ -55,6 +57,7 @@ public final class BookingChangePolicy {
                 && appointment.getScheduledAt().toLocalDate().isBefore(today);
     }
 
+    /** Check-in is only allowed on the booked date. */
     public static void requireCheckInToday(Appointment appointment) {
         LocalDate bookedDate = appointment.getScheduledAt().toLocalDate();
         LocalDate today = LocalDate.now();
@@ -88,6 +91,7 @@ public final class BookingChangePolicy {
         }
     }
 
+    /** Rejects a stale form: the booking changed after the page was opened. */
     public static void requireUnchanged(Appointment appointment,
             lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BookingChangeRequest request) {
         if (!appointment.getAppointmentStatus().equals(request.status())

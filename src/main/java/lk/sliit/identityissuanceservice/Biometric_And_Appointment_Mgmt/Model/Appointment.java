@@ -10,6 +10,10 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity for the Appointment table: one booking. Status flow: PENDING_PAYMENT -> CONFIRMED ->
+ * CHECKED_IN -> COMPLETED (or CANCELLED).
+ */
 @Entity
 @Table(name = "Appointment", schema = "dbo")
 public class Appointment {
@@ -65,6 +69,7 @@ public class Appointment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /** Fills in the default status and created time the first time the row is saved. */
     @PrePersist
     private void applyDefaults() {
         if (appointmentStatus == null) appointmentStatus = "PENDING_PAYMENT";
