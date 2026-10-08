@@ -155,8 +155,13 @@ public class CitizenSupportController {
         model.addAttribute("resolvedSupportCount", supportService.getResolvedCount());
         model.addAttribute("averageResponseTime", supportService.getAverageResponseTimeLabel());
         model.addAttribute("recentSupportRequests", supportService.getRecentRequests());
+        model.addAttribute(
+                "complaints",
+                supportService.getCsrRequests(CitizenSupportService.COMPLAINT, null, 0).getContent()
+        );
 
         LocalDate today = LocalDate.now();
+        model.addAttribute("today", today);
         List<WalkInAppointmentView> todayWalkIns = walkInService.getAppointmentsForDate(today);
         model.addAttribute("todayWalkInCount", todayWalkIns.size());
         model.addAttribute(

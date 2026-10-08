@@ -244,55 +244,22 @@
           <tr>
             <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Reference</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Citizen</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Type</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Subject</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Priority</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Status</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Received</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr class="hover:bg-red-50 transition-colors cursor-pointer" onclick="openComplaint('CMP-2026-0102')">
-            <td class="px-4 py-3 font-mono text-xs text-sky-700 font-semibold">CMP-2026-0102</td>
-            <td class="px-4 py-3"><p class="font-semibold text-slate-800">Kamal Perera</p><p class="text-xs text-slate-400">kamall.p@gmail.com</p></td>
-            <td class="px-4 py-3 text-xs text-slate-600">Processing Delay</td>
-            <td class="px-4 py-3 text-xs text-slate-700 max-w-xs truncate">NIC application under review for 3 weeks</td>
-            <td class="px-4 py-3"><span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">High</span></td>
-            <td class="px-4 py-3"><span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Open</span></td>
-            <td class="px-4 py-3 text-xs text-slate-500">2 hrs ago</td>
-            <td class="px-4 py-3"><a href="/officer/csr/complaints/CMP-2026-0102" class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors font-semibold">Respond</a></td>
+          <tr th:each="item : ${complaints}" class="hover:bg-slate-50 transition-colors">
+            <td class="px-4 py-3 font-mono text-xs text-sky-700 font-semibold" th:text="${item.reference}">Reference</td>
+            <td class="px-4 py-3"><p class="font-semibold text-slate-800" th:text="${item.citizenName}">Citizen</p><p class="text-xs text-slate-400" th:text="${item.citizenEmail}">Email</p></td>
+            <td class="px-4 py-3 text-xs text-slate-700 max-w-xs truncate" th:text="${item.request.subject}">Subject</td>
+            <td class="px-4 py-3"><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-semibold" th:text="${#strings.replace(item.request.requestStatus, '_', ' ')}">Status</span></td>
+            <td class="px-4 py-3 text-xs text-slate-500" th:text="${#temporals.format(item.request.createdAt, 'dd MMM yyyy, hh:mm a')}">Received</td>
+            <td class="px-4 py-3"><a th:href="@{/officer/csr/complaints/{reference}(reference=${item.reference})}" class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors font-semibold" th:text="${item.request.requestStatus == 'OPEN' ? 'Respond' : 'View'}">View</a></td>
           </tr>
-          <tr class="hover:bg-orange-50 transition-colors cursor-pointer" onclick="openComplaint('CMP-2026-0101')">
-            <td class="px-4 py-3 font-mono text-xs text-sky-700 font-semibold">CMP-2026-0101</td>
-            <td class="px-4 py-3"><p class="font-semibold text-slate-800">Dilani Silva</p><p class="text-xs text-slate-400">dilani.s@yahoo.com</p></td>
-            <td class="px-4 py-3 text-xs text-slate-600">Technical Issue</td>
-            <td class="px-4 py-3 text-xs text-slate-700 max-w-xs truncate">Cannot upload documents — error on portal</td>
-            <td class="px-4 py-3"><span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Medium</span></td>
-            <td class="px-4 py-3"><span class="text-xs bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-semibold">In Progress</span></td>
-            <td class="px-4 py-3 text-xs text-slate-500">5 hrs ago</td>
-            <td class="px-4 py-3"><a href="/officer/csr/complaints/CMP-2026-0101" class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors font-semibold">View</a></td>
-          </tr>
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-4 py-3 font-mono text-xs text-sky-700 font-semibold">CMP-2026-0099</td>
-            <td class="px-4 py-3"><p class="font-semibold text-slate-800">Nuwan Fernando</p><p class="text-xs text-slate-400">nuwan.f@gmail.com</p></td>
-            <td class="px-4 py-3 text-xs text-slate-600">Delivery Issue</td>
-            <td class="px-4 py-3 text-xs text-slate-700 max-w-xs truncate">Passport marked delivered but not received</td>
-            <td class="px-4 py-3"><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">Low</span></td>
-            <td class="px-4 py-3"><span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Open</span></td>
-            <td class="px-4 py-3 text-xs text-slate-500">Yesterday</td>
-            <td class="px-4 py-3"><a href="/officer/csr/complaints/CMP-2026-0099" class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors font-semibold">Respond</a></td>
-          </tr>
-          <tr class="hover:bg-slate-50 transition-colors opacity-60">
-            <td class="px-4 py-3 font-mono text-xs text-slate-500 font-semibold">CMP-2026-0034</td>
-            <td class="px-4 py-3"><p class="font-semibold text-slate-700">Amali Mendis</p><p class="text-xs text-slate-400">amali.m@gmail.com</p></td>
-            <td class="px-4 py-3 text-xs text-slate-500">Processing Delay</td>
-            <td class="px-4 py-3 text-xs text-slate-600 max-w-xs truncate">NIC renewal taking too long</td>
-            <td class="px-4 py-3"><span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-semibold">Low</span></td>
-            <td class="px-4 py-3"><span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Resolved</span></td>
-            <td class="px-4 py-3 text-xs text-slate-400">Jul 10, 2026</td>
-            <td class="px-4 py-3"><button class="text-xs text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">View</button></td>
-          </tr>
+          <tr th:if="${#lists.isEmpty(complaints)}"><td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">No complaints have been submitted.</td></tr>
         </tbody>
       </table>
     </div>
@@ -309,7 +276,7 @@
     </div>
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex gap-3 items-center">
-        <input type="date" value="2026-08-15" class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white"/>
+        <input type="date" th:value="${today}" class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white"/>
         <select class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
           <option>All Services</option>
           <option>NIC Biometrics</option>
@@ -337,11 +304,16 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-mono text-xs font-bold text-slate-600">A-01</td><td class="px-4 py-3 font-semibold text-sm text-slate-800">Sanath Bandara</td><td class="px-4 py-3 text-xs text-slate-600">NIC Biometrics</td><td class="px-4 py-3 font-mono text-xs text-sky-700">LK-NIC-2026-00180</td><td class="px-4 py-3 text-xs text-slate-600">8:30 AM</td><td class="px-4 py-3"><span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Done</span></td><td class="px-4 py-3"><button class="text-xs text-slate-500 hover:text-slate-800">Details</button></td></tr>
-          <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-mono text-xs font-bold text-slate-600">A-02</td><td class="px-4 py-3 font-semibold text-sm text-slate-800">Priya Gunasekara</td><td class="px-4 py-3 text-xs text-slate-600">Passport Biometrics</td><td class="px-4 py-3 font-mono text-xs text-sky-700">LK-PASS-2026-00038</td><td class="px-4 py-3 text-xs text-slate-600">9:00 AM</td><td class="px-4 py-3"><span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Done</span></td><td class="px-4 py-3"><button class="text-xs text-slate-500 hover:text-slate-800">Details</button></td></tr>
-          <tr class="bg-cyan-50 border-l-4 border-cyan-500"><td class="px-4 py-3 font-mono text-xs font-bold text-cyan-700">B-247</td><td class="px-4 py-3 font-bold text-sm text-slate-900">Kamal Perera</td><td class="px-4 py-3 text-xs text-slate-700 font-medium">NIC Biometrics</td><td class="px-4 py-3 font-mono text-xs text-sky-700">LK-NIC-2026-00183</td><td class="px-4 py-3 text-xs font-bold text-cyan-700">10:30 AM (Now)</td><td class="px-4 py-3"><span class="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full font-semibold">In Progress</span></td><td class="px-4 py-3"><button class="text-xs bg-cyan-600 text-white px-3 py-1.5 rounded-lg hover:bg-cyan-700 font-semibold">Complete</button></td></tr>
-          <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-mono text-xs font-bold text-slate-600">A-04</td><td class="px-4 py-3 font-semibold text-sm text-slate-800">Dilani Rathnayake</td><td class="px-4 py-3 text-xs text-slate-600">NIC Biometrics</td><td class="px-4 py-3 font-mono text-xs text-sky-700">LK-NIC-2026-00097</td><td class="px-4 py-3 text-xs text-slate-600">11:00 AM</td><td class="px-4 py-3"><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">Upcoming</span></td><td class="px-4 py-3"><button class="text-xs bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-300 font-semibold">Check In</button></td></tr>
-          <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-mono text-xs font-bold text-slate-600">A-05</td><td class="px-4 py-3 font-semibold text-sm text-slate-800">Roshan Fernando</td><td class="px-4 py-3 text-xs text-slate-600">Passport Biometrics</td><td class="px-4 py-3 font-mono text-xs text-sky-700">LK-PASS-2026-00039</td><td class="px-4 py-3 text-xs text-slate-600">11:30 AM</td><td class="px-4 py-3"><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">Upcoming</span></td><td class="px-4 py-3"><button class="text-xs bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-300 font-semibold">Check In</button></td></tr>
+          <tr th:each="item, row : ${todayWalkIns}" class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-mono text-xs font-bold text-slate-600" th:text="${'A-' + #numbers.formatInteger(row.count, 2)}">Token</td>
+            <td class="px-4 py-3 font-semibold text-sm text-slate-800" th:text="${item.appointment.visitorName}">Citizen</td>
+            <td class="px-4 py-3 text-xs text-slate-600" th:text="${item.appointment.visitorService == 'NIC_APPLICATION_HELP' ? 'NIC Application Help' : 'Passport Application Help'}">Service</td>
+            <td class="px-4 py-3 font-mono text-xs text-sky-700" th:text="${item.appointment.referenceNo}">Reference</td>
+            <td class="px-4 py-3 text-xs text-slate-600" th:text="${#temporals.format(item.appointment.scheduledAt, 'hh:mm a')}">Time</td>
+            <td class="px-4 py-3"><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-semibold" th:text="${#strings.replace(item.appointment.appointmentStatus, '_', ' ')}">Status</span></td>
+            <td class="px-4 py-3"><a th:href="@{/officer/csr/walk-ins(reference=${item.appointment.referenceNo})}" class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 font-semibold">Details</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(todayWalkIns)}"><td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">No walk-in appointments are booked for today.</td></tr>
         </tbody>
       </table>
     </div>
