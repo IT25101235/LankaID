@@ -35,6 +35,9 @@ public class AppointmentService {
     private static final List<String> OFFICER_HISTORY_STATUSES =
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
 
+    // OOP - Composition and Encapsulation: the repositories and other services is a private final field
+    // handed in through the constructor (dependency injection), so this class is loosely coupled and the
+    // object is never created here.
     private final AppointmentRepository appointmentRepository;
     private final AppointmentCheckInRepository checkInRepository;
     private final BiometricCollectionRepository biometricRepository;
@@ -94,6 +97,8 @@ public class AppointmentService {
      * CREATE: confirm a slot for a paid application. Appointment and slot are locked so the last place
      * cannot be double booked.
      */
+    // OOP - Abstraction: controllers just call this method; locking, payment check and notification stay
+    // hidden inside.
     @Transactional
     public Appointment bookAppointment(
             Integer citizenId,

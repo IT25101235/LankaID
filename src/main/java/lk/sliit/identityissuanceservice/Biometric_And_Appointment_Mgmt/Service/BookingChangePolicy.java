@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /** The same rules are used for showing actions and accepting submitted changes. */
+// OOP - Encapsulation: a final class with a private constructor cannot be extended or instantiated. It
+// only offers static rule methods.
 public final class BookingChangePolicy {
     private BookingChangePolicy() { }
 
@@ -17,6 +19,8 @@ public final class BookingChangePolicy {
     }
 
     /** Policy rules: a biometric booking can be cancelled up to 72 hours before it. */
+    // OOP - Polymorphism (method overloading): canCancel(a) uses the current time, canCancel(a, now) takes
+    // a given time.
     public static boolean canCancel(Appointment appointment) {
         return canCancel(appointment, LocalDateTime.now());
     }

@@ -13,6 +13,8 @@ import java.util.Optional;
  * Repository pattern: CRUD for appointments. Method names become SQL automatically; the @Query ones
  * are written by hand.
  */
+// OOP - Inheritance, Abstraction and Polymorphism: this interface extends JpaRepository, so it inherits
+// save, find and delete. We only declare it; Spring supplies the real implementation at runtime.
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
 

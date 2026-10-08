@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 @Service
 public class BiometricService {
 
+    // OOP - Composition and Encapsulation: the services and repositories is a private final field handed
+    // in through the constructor (dependency injection), so this class is loosely coupled and the object
+    // is never created here.
     private final AppointmentService appointmentService;
     private final AppointmentRepository appointmentRepository;
     private final BiometricCollectionRepository biometricRepository;

@@ -25,6 +25,8 @@ public class Appointment {
 
     public Long getBookingVersion() { return bookingVersion; }
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")
@@ -76,6 +78,7 @@ public class Appointment {
         if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
     public Integer getCitizenId() { return citizenId; }

@@ -25,6 +25,9 @@ public class BiometricScheduleService {
     private static final List<String> OCCUPYING_STATUSES = List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
     private static final List<String> CANCELLABLE_STATUSES = List.of("CONFIRMED");
 
+    // OOP - Composition and Encapsulation: the repositories is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final BiometricAppointmentSlotRepository slots;
     private final AppointmentRepository appointments;
     private final CentreRepository centres;
@@ -259,6 +262,8 @@ public class BiometricScheduleService {
     }
 
     /** Converts a slot entity into the DTO shown on screen. */
+    // OOP - Polymorphism (method overloading): two toView methods share a name but take different
+    // parameters.
     private BiometricSlotView toView(BiometricAppointmentSlot slot, Centre centre) {
         return toView(slot, centre, null);
     }

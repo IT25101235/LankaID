@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class BiometricBookingChangeService {
+    // OOP - Composition and Encapsulation: the repositories and services is a private final field handed
+    // in through the constructor (dependency injection), so this class is loosely coupled and the object
+    // is never created here.
     private final AppointmentRepository appointments;
     private final AppointmentCheckInRepository checkIns;
     private final CitizenApplicationRepository applications;

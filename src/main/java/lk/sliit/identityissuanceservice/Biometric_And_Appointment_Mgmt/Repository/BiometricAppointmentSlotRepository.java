@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 /** Repository pattern: CRUD and calendar queries for slots. */
+// OOP - Inheritance, Abstraction and Polymorphism: this interface extends JpaRepository, so it inherits
+// save, find and delete. We only declare it; Spring supplies the real implementation at runtime.
 public interface BiometricAppointmentSlotRepository extends JpaRepository<BiometricAppointmentSlot, Integer> {
 
     /** Locks the slot row so two citizens cannot take the last place at the same time. */

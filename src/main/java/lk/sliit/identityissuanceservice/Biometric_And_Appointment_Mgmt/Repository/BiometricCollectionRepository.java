@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /** Repository pattern: ready-made CRUD for biometric collection records. */
+// OOP - Inheritance, Abstraction and Polymorphism: this interface extends JpaRepository, so it inherits
+// save, find and delete. We only declare it; Spring supplies the real implementation at runtime.
 @Repository
 public interface BiometricCollectionRepository extends JpaRepository<BiometricCollection, Integer> {
 }

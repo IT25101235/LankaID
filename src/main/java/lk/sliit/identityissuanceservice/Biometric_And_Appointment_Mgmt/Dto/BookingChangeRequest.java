@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.UUID;
 
 /** Session-bound confirmation protects against stale forms and repeated payments. */
+// OOP - Immutability and Interface: an unchangeable record that implements Serializable so it can be
+// stored in the session.
 public record BookingChangeRequest(Integer appointmentId, String status, LocalDateTime scheduledAt, Long version,
                                    String token) implements Serializable {
     private static final String KEY = "bookingChangeRequests";

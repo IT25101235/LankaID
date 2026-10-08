@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Table(name = "BiometricCollection", schema = "dbo")
 public class BiometricCollection {
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @Column(name = "application_id")
     private Integer applicationId;
@@ -33,6 +35,7 @@ public class BiometricCollection {
         if (collectionStatus == null) collectionStatus = "COLLECTED";
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getApplicationId() { return applicationId; }
     public void setApplicationId(Integer applicationId) { this.applicationId = applicationId; }
     public Integer getStaffId() { return staffId; }
