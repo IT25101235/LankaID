@@ -198,7 +198,14 @@ public class BiometricScheduleService {
         if (!requireServiceType(serviceType).equals(slot.getServiceType())) {
             throw new IllegalArgumentException("That slot belongs to a different document service.");
         }
-        BiometricSlotView view = toView(slot, findCentre(slot.getCentreId()), excludedAppointmentId);
+        Centre centre = findCentre(slot.getCentreId());
+        LocalDate today = LocalDate.now();
+        if (!"ACTIVE".equals(centre.getCentreStatus())
+                || slot.getSlotDate().isBefore(today.plusDays(1))
+                || slot.getSlotDate().isAfter(today.plusDays(90))) {
+            throw new IllegalArgumentException("That appointment slot is no longer available. Choose another slot.");
+        }
+        BiometricSlotView view = toView(slot, centre, excludedAppointmentId);
         if (!view.available()
                 || view.remainingPlaces() < 1
                 || !slot.getSlotDate().atTime(slot.getSlotTime()).isAfter(LocalDateTime.now())) {

@@ -27,7 +27,7 @@
       <a th:href="@{/citizen/appointments/{reference}/manage(reference=${appointment.referenceNo})}" class="inline-block rounded-xl bg-slate-800 text-white px-5 py-3 text-sm font-bold">Manage booking / rebook</a>
     </section>
 
-    <form th:if="${appointment.appointmentStatus == 'PENDING_PAYMENT'}" th:action="@{/citizen/appointments/biometric}" method="post" class="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
+    <form th:if="${appointment.appointmentStatus == 'PENDING_PAYMENT'}" th:action="@{/citizen/appointments/biometric}" method="post" class="grid lg:grid-cols-[1fr_320px] gap-5 items-start"><input type="hidden" name="formToken" th:value="${formToken}"/>
       <input type="hidden" name="applicationId" th:value="${citizenApplication.applicationId}"/>
       <section class="bg-white border rounded-2xl shadow-sm p-5 sm:p-6">
         <div class="rounded-xl bg-sky-50 border border-sky-200 p-4"><p class="font-bold text-sky-900" th:text="|${citizenApplication.serviceType} application ${citizenApplication.applicationNo}|">Application</p><p class="text-xs text-sky-700 mt-1">Payment confirmed. The reference and QR pass are issued when this appointment is confirmed.</p></div>

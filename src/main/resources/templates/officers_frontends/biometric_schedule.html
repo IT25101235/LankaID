@@ -21,7 +21,7 @@
   </nav>
 
   <section class="grid xl:grid-cols-2 gap-5">
-    <form th:action="@{/officer/{service}/appointments/schedule/publish(service=${servicePath})}" method="post" class="rounded-2xl border bg-white p-5 shadow-sm">
+    <form th:action="@{/officer/{service}/appointments/schedule/publish(service=${servicePath})}" method="post" class="rounded-2xl border bg-white p-5 shadow-sm"><input type="hidden" name="formToken" th:value="${formToken}"/>
       <h1 class="font-extrabold text-lg">Publish appointment dates</h1>
       <p class="mt-1 text-xs text-slate-500" th:text="|These slots are only for ${serviceType} applications.|">Service-specific schedule</p>
       <div class="mt-4 grid sm:grid-cols-2 gap-3">
@@ -35,7 +35,7 @@
       <button class="mt-4 rounded-xl bg-cyan-600 px-5 py-3 text-sm font-bold text-white">Publish half-hour slots</button>
     </form>
 
-    <form th:action="@{/officer/{service}/appointments/schedule/close(service=${servicePath})}" method="post" class="rounded-2xl border border-red-200 bg-white p-5 shadow-sm" onsubmit="return confirm('Close this date range? Confirmed appointments in it will be cancelled and citizens will be notified.')">
+    <form th:action="@{/officer/{service}/appointments/schedule/close(service=${servicePath})}" method="post" class="rounded-2xl border border-red-200 bg-white p-5 shadow-sm" onsubmit="return confirm('Close this date range? Confirmed appointments in it will be cancelled and citizens will be notified.')"><input type="hidden" name="formToken" th:value="${formToken}"/>
       <h2 class="font-extrabold text-lg text-red-700">Close appointment dates</h2>
       <p class="mt-1 text-xs text-slate-500">Closing keeps the history, releases bookings, and allows affected citizens to rebook free.</p>
       <div class="mt-4 grid sm:grid-cols-2 gap-3">
@@ -70,7 +70,7 @@
         <div class="mt-4 space-y-3">
           <article th:each="slot : ${schedule}" class="slot-card hidden rounded-xl border p-4" th:attr="data-date=${slot.slotDate}">
             <div class="flex items-start justify-between gap-3"><div><p class="font-extrabold" th:text="${#temporals.format(slot.slotTime, 'hh:mm a')}">09:00 AM</p><p class="mt-1 text-xs text-slate-500" th:text="|${slot.bookedCount} booked · ${slot.remainingPlaces} remaining|">Capacity</p></div><span class="rounded-full px-2.5 py-1 text-[11px] font-bold" th:classappend="${slot.available ? ' bg-emerald-100 text-emerald-700' : ' bg-red-100 text-red-700'}" th:text="${slot.available ? 'OPEN' : 'CLOSED'}">OPEN</span></div>
-            <form th:action="@{/officer/{service}/appointments/schedule/slot(service=${servicePath})}" method="post" class="mt-3 flex flex-wrap items-end gap-2">
+            <form th:action="@{/officer/{service}/appointments/schedule/slot(service=${servicePath})}" method="post" class="mt-3 flex flex-wrap items-end gap-2"><input type="hidden" name="formToken" th:value="${formToken}"/>
               <input type="hidden" name="slotId" th:value="${slot.slotId}"/><input type="hidden" name="centreId" th:value="${selectedCentreId}"/><input type="hidden" name="month" th:value="${selectedMonth}"/>
               <label class="text-xs font-bold">Capacity<input type="number" name="capacity" min="1" max="100" th:value="${slot.capacity}" class="mt-1 block w-24 rounded-lg border-slate-300 text-sm"/></label>
               <label class="mb-2 flex items-center gap-2 text-xs font-bold"><input type="checkbox" name="available" value="true" th:checked="${slot.available}" class="rounded"/>Open</label>

@@ -44,6 +44,12 @@ public class BiometricService {
         if (details.biometricCollected()) {
             throw new IllegalArgumentException("Biometrics have already been collected.");
         }
+        var lockedAppointment = appointmentRepository.findByIdForChange(details.appointment().getAppointmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Appointment was not found."));
+        if (!"CHECKED_IN".equals(lockedAppointment.getAppointmentStatus())
+                || biometricRepository.existsById(details.application().getApplicationId())) {
+            throw new IllegalArgumentException("Check in the citizen before collecting biometrics.");
+        }
 
         BiometricCollection collection = new BiometricCollection();
         collection.setApplicationId(details.application().getApplicationId());
