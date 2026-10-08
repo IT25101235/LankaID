@@ -519,9 +519,15 @@ public class DocumentRenewalReplacementService {
             NicRenewalReplacementForm form
     ) {
         if (eligibility.getNicIssuedDate() != null) {
+            if (form.getLastIssuedDate() != null
+                    && !eligibility.getNicIssuedDate().equals(form.getLastIssuedDate())) {
+                throw new IllegalArgumentException(
+                        "The previous NIC issue date does not match the verified government record."
+                );
+            }
             form.setLastIssuedDate(eligibility.getNicIssuedDate());
         } else if (LOST.equals(applicationKind)) {
-            // A lost-card applicant must not guess security data that should come from the official record.
+            // Missing lost-card dates are left for the NIC application officer to verify.
             form.setLastIssuedDate(null);
         }
     }
