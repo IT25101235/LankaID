@@ -210,11 +210,18 @@ public class AppointmentService {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
         Appointment appointment = appointmentRepository.findByIdForChange(details.appointment().getAppointmentId()).orElseThrow();
-        if (!List.of("CONFIRMED", "CHECKED_IN").contains(appointment.getAppointmentStatus())) {
-            throw new IllegalArgumentException("Only a confirmed appointment can be checked in.");
-        }
         if ("COMPLETED".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Biometrics have already been completed.");
+        }
+        if ("CHECKED_IN".equals(appointment.getAppointmentStatus())) {
+            throw new IllegalArgumentException("This citizen has already been checked in.");
+        }
+        if (!"CONFIRMED".equals(appointment.getAppointmentStatus())) {
+            throw new IllegalArgumentException("Only a confirmed appointment can be checked in.");
+        }
+        if (!appointment.getScheduledAt().toLocalDate().equals(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in is only available on the appointment date ("
+                    + appointment.getScheduledAt().toLocalDate() + ").");
         }
 
         AppointmentCheckIn checkIn = checkInRepository.findById(appointment.getAppointmentId())
