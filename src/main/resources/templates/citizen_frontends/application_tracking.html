@@ -28,7 +28,7 @@
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div class="flex gap-4">
           <span class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
-          <div><div class="flex flex-wrap items-center gap-2"><h2 class="font-bold text-lg" th:text="${citizenApplication.serviceType == 'NIC' ? 'National Identity Card' : 'Passport'}">Document</h2><span class="text-xs rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-1 font-bold" th:text="${#strings.replace(citizenApplication.applicationKind, '_', ' ')}">NEW</span></div><p class="font-mono text-xs text-slate-500 mt-1" th:text="${citizenApplication.applicationNo}">Reference</p></div>
+          <div><div class="flex flex-wrap items-center gap-2"><h2 class="font-bold text-lg" th:text="${citizenApplication.serviceType == 'NIC' ? 'National Identity Card' : 'Passport'}">Document</h2><span class="text-xs rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-1 font-bold" th:text="${citizenApplication.applicationKind == 'LOST' ? 'LOST REPLACEMENT' : #strings.replace(citizenApplication.applicationKind, '_', ' ')}">NEW</span></div><p class="font-mono text-xs text-slate-500 mt-1" th:text="${citizenApplication.applicationNo}">Reference</p></div>
         </div>
         <span class="self-start text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1.5 font-bold" th:text="${#strings.replace(citizenApplication.currentStatus, '_', ' ')}">DRAFT</span>
       </div>
@@ -69,8 +69,10 @@
         </div>
         <div th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" class="flex flex-wrap gap-2"><a th:href="@{/citizen/{workflow}/{service}/correction(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="bg-amber-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Correct form</a><a th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="border border-sky-200 text-sky-700 rounded-lg px-4 py-2 text-sm font-bold text-center">Replace documents</a></div>
         <a th:if="${citizenApplication.currentStatus == 'APPROVED'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Pay &amp; book biometrics</a>
+        <a th:if="${citizenApplication.currentStatus == 'PAYMENT_PENDING'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Complete payment &amp; book biometrics</a>
         <a th:if="${citizenApplication.currentStatus == 'APPOINTMENT_BOOKED'}" th:href="@{/citizen/appointments/biometric(applicationId=${citizenApplication.applicationId})}" class="bg-sky-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">View appointment pass</a>
         <span th:if="${citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED'}" class="text-sm font-bold text-purple-700">Biometrics collected · Ready for printing</span>
+        <span th:if="${citizenApplication.currentStatus == 'PROCESSING'}" class="text-sm font-bold text-purple-700">Document is being printed</span>
         <a th:if="${deliveryInfo == null and (citizenApplication.currentStatus == 'APPOINTMENT_BOOKED' or citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED' or citizenApplication.currentStatus == 'ISSUED')}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="bg-orange-600 text-white rounded-lg px-4 py-2 text-sm font-bold text-center">Choose delivery</a>
         <span th:if="${citizenApplication.currentStatus == 'ISSUED' and deliveryInfo == null}" class="text-sm font-bold text-emerald-700">Document printed</span>
         <form th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' and deliveryInfo.delivery.deliveryStatus == 'DISPATCHED'}" th:action="@{/citizen/deliveries/confirm}" method="post" onsubmit="return confirm('Confirm that you have received your document?')">
@@ -80,7 +82,9 @@
         <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'READY_FOR_COLLECTION'}" class="text-sm font-bold text-emerald-700">Ready for collection</span>
         <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'COLLECTED'}" class="text-sm font-bold text-emerald-700">Document handed over</span>
         <span th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryStatus == 'DELIVERED'}" class="text-sm font-bold text-emerald-700">Delivered</span>
-        <span th:if="${citizenApplication.currentStatus != 'DRAFT' and citizenApplication.currentStatus != 'CORRECTION_REQUIRED' and citizenApplication.currentStatus != 'APPROVED' and citizenApplication.currentStatus != 'APPOINTMENT_BOOKED' and citizenApplication.currentStatus != 'BIOMETRIC_COLLECTED' and citizenApplication.currentStatus != 'ISSUED'}" class="text-sm font-semibold text-slate-500">Submitted for processing</span>
+        <span th:if="${citizenApplication.currentStatus == 'SUBMITTED' or citizenApplication.currentStatus == 'RESUBMITTED' or citizenApplication.currentStatus == 'UNDER_REVIEW'}" class="text-sm font-semibold text-slate-500">Officer review in progress</span>
+        <span th:if="${citizenApplication.currentStatus == 'REJECTED'}" class="text-sm font-bold text-red-700">Application was not approved</span>
+        <span th:if="${citizenApplication.currentStatus == 'CANCELLED'}" class="text-sm font-bold text-slate-600">Application cancelled</span>
       </div>
       <div th:if="${deliveryInfo != null}" class="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-900">
         <div class="flex flex-wrap justify-between gap-2"><span class="font-bold" th:text="${deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' ? 'Home delivery' : 'Service-centre collection'}">Method</span><span class="font-mono font-bold" th:text="${deliveryInfo.delivery.trackingReference}">DEL-REF</span></div>
@@ -91,7 +95,7 @@
     </article>
   </div>
 </main>
-<script src="/js/application-journey.js?v=20261007"></script>
+<script src="/js/application-journey.js?v=20261008-2"></script>
 <script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

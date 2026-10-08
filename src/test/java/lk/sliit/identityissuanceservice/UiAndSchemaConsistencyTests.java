@@ -298,6 +298,13 @@ class UiAndSchemaConsistencyTests {
             assertFalse(template.contains("application-progress"));
         }
         assertTrue(journeyScript.contains("PAYMENT_PENDING"));
+        assertTrue(journeyScript.contains("APPROVED: { step: 3"));
+        assertTrue(journeyScript.contains("PAYMENT_PENDING: { step: 3"));
+        assertTrue(journeyScript.contains("APPOINTMENT_BOOKED: { step: 4"));
+        assertTrue(journeyScript.contains("BIOMETRIC_COLLECTED: { step: 5"));
+        assertTrue(journeyScript.contains("PROCESSING: { step: 5"));
+        assertTrue(journeyScript.contains("ISSUED: { step: 6"));
+        assertTrue(journeyScript.contains("CANCELLED"));
         assertTrue(journeyScript.contains("READY_FOR_COLLECTION"));
         assertFalse(journeyScript.contains("PREPARING: { step: 5"));
         assertTrue(journeyScript.contains("requestAnimationFrame"));

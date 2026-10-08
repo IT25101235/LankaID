@@ -212,7 +212,8 @@ public class PaymentService {
                 .findByApplicationIdAndCitizenId(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
         List<String> allowedStatuses = List.of(
-                "APPROVED", "APPOINTMENT_BOOKED", "BIOMETRIC_COLLECTED", "PROCESSING", "ISSUED"
+                "APPROVED", "PAYMENT_PENDING", "APPOINTMENT_BOOKED",
+                "BIOMETRIC_COLLECTED", "PROCESSING", "ISSUED"
         );
         if (!allowedStatuses.contains(application.getCurrentStatus())) {
             throw new IllegalArgumentException("Payment is available only after officer approval.");
