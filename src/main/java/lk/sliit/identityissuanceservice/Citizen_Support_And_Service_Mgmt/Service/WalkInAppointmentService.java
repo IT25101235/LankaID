@@ -8,6 +8,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.App
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentCheckInRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BookingChangePolicy;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInSlotView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInPaymentDetails;
@@ -516,6 +517,7 @@ public class WalkInAppointmentService {
                 && !"CHECKED_IN".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("This walk-in appointment cannot be checked in.");
         }
+        BookingChangePolicy.requireCheckInToday(appointment);
         AppointmentCheckIn checkIn = checkInRepository.findById(appointment.getAppointmentId())
                 .orElseGet(AppointmentCheckIn::new);
         checkIn.setAppointmentId(appointment.getAppointmentId());
@@ -524,6 +526,32 @@ public class WalkInAppointmentService {
         checkIn.setCheckInMethod("QR".equals(method) ? "QR" : "REFERENCE_NUMBER");
         checkInRepository.save(checkIn);
         appointment.setAppointmentStatus("CHECKED_IN");
+        appointmentRepository.save(appointment);
+        return buildAppointmentView(appointment);
+    }
+
+    /** Moves a missed visit to the first available future slot at the same centre. */
+    @Transactional
+    public WalkInAppointmentView rescheduleMissed(String reference, Integer staffId) {
+        if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
+        Appointment appointment = appointmentRepository.findForChange(clean(reference))
+                .orElseThrow(() -> new IllegalArgumentException("Walk-in appointment was not found."));
+        BookingChangePolicy.requireMissedAppointment(appointment);
+        if (checkInRepository.existsById(appointment.getAppointmentId())) {
+            throw new IllegalArgumentException("A checked-in appointment cannot be rescheduled.");
+        }
+
+        WalkInSlotView nextSlot = getBookableSlots().stream()
+                .filter(slot -> slot.centreId().equals(appointment.getCentreId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No future slots are available at this centre. The citizen can choose another centre from Manage booking."));
+        WalkInSlot slot = slotRepository.findByIdForBooking(nextSlot.slotId())
+                .orElseThrow(() -> new IllegalArgumentException("The selected slot is no longer available."));
+        requireAvailableSlot(slot);
+        appointment.setScheduledAt(slot.getSlotDate().atTime(slot.getSlotTime()));
+        appointment.setAppointmentStatus("CONFIRMED");
+        appointment.setQrCode(appointment.getReferenceNo());
         appointmentRepository.save(appointment);
         return buildAppointmentView(appointment);
     }

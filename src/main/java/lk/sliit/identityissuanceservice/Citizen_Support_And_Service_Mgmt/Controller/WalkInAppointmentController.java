@@ -5,6 +5,7 @@ import lk.sliit.identityissuanceservice.User_Mgmt.Controller.DeletionFormToken;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletResponse;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BookingChangePolicy;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
@@ -368,7 +369,10 @@ public class WalkInAppointmentController {
         model.addAttribute("scheduleMonth", selectedMonth.toString());
         if (reference != null && !reference.isBlank()) {
             try {
-                model.addAttribute("selectedWalkIn", walkInService.findByReference(reference));
+                var selected = walkInService.findByReference(reference);
+                model.addAttribute("selectedWalkIn", selected);
+                model.addAttribute("selectedWalkInToday", BookingChangePolicy.isToday(selected.appointment()));
+                model.addAttribute("selectedWalkInMissed", BookingChangePolicy.isMissed(selected.appointment()));
             } catch (IllegalArgumentException exception) {
                 model.addAttribute("walkInError", exception.getMessage());
             }
@@ -503,6 +507,27 @@ public class WalkInAppointmentController {
         try {
             walkInService.checkIn(reference, officerId(session), method);
             redirectAttributes.addFlashAttribute("walkInMessage", "Visitor checked in successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+        }
+        return "redirect:/officer/csr/walk-ins?reference=" + reference.trim();
+    }
+
+    @PostMapping("/officer/csr/walk-ins/reschedule-missed")
+    public String rescheduleMissed(
+            @RequestParam String reference,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        String accessRedirect = csrAccessRedirect(session);
+        if (accessRedirect != null) return accessRedirect;
+        try {
+            var updated = walkInService.rescheduleMissed(reference, officerId(session));
+            redirectAttributes.addFlashAttribute(
+                    "walkInMessage",
+                    "Missed appointment moved to " + updated.appointment().getScheduledAt()
+                            + ". The same QR pass remains valid."
+            );
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
         }
