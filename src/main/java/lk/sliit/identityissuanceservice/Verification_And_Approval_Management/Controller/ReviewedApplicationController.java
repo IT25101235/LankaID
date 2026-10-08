@@ -10,6 +10,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.Locale;
 
+/**
+ * Displays the paginated audit history of completed verification decisions.
+ * Normal officers are restricted to their service, while directors can inspect both queues.
+ */
 @Controller
 public class ReviewedApplicationController {
     private final ReviewedApplicationService reviews;
@@ -19,6 +23,7 @@ public class ReviewedApplicationController {
     public String reviewed(@PathVariable String service, @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "") String decision, @RequestParam(defaultValue = "") String date,
             @RequestParam(defaultValue = "0") int page, HttpSession session, Model model) {
+        // Enforce the service boundary before executing the history query.
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         String serviceType = service.toUpperCase(Locale.ROOT);
         Object role = session.getAttribute("loggedInOfficerRole");
@@ -34,6 +39,7 @@ public class ReviewedApplicationController {
             model.addAttribute(key, session.getAttribute(key));
         }
         try {
+            // Invalid filters are reported on the page instead of producing an application error.
             model.addAttribute("reviews", reviews.find(serviceType, search, decision, date, page));
         } catch (IllegalArgumentException exception) {
             model.addAttribute("filterError", exception.getMessage());

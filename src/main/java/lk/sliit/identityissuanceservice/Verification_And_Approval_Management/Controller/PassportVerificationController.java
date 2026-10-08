@@ -16,6 +16,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * MVC controller for the passport verification workflow.
+ *
+ * <p>It handles routing, officer-session authorization and view-model preparation. Approval,
+ * rejection and correction rules are delegated to {@link VerificationReviewService}, keeping
+ * presentation logic separate from transactional business logic.</p>
+ *
+ * <p>OOP concepts: constructor injection demonstrates composition and loose coupling; the
+ * service hides persistence details behind a small set of business operations.</p>
+ */
 @Controller
 public class PassportVerificationController {
 
@@ -51,6 +61,7 @@ public class PassportVerificationController {
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
+        // Keep all three decision routes consistent by sharing access checks and redirects.
         String accessResult = checkAccess(session);
         if (accessResult != null) {
             return accessResult;
@@ -126,6 +137,7 @@ public class PassportVerificationController {
 
         try {
             Integer staffId = session.getAttribute("loggedInOfficerId") instanceof Integer id ? id : null;
+            // The service performs the atomic database update and citizen notification.
             if ("approve".equals(decision)) {
                 verificationReviewService.approve(reference, "PASSPORT", staffId);
                 redirectAttributes.addFlashAttribute("verificationMessage", "Application approved successfully.");
@@ -156,11 +168,13 @@ public class PassportVerificationController {
     }
 
     private String checkAccess(HttpSession session) {
+        // Administrators and unrelated officer roles must not enter this operational queue.
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
         }
 
         Object role = session.getAttribute("loggedInOfficerRole");
+        // Directors can supervise either service; passport officers remain service-scoped.
         boolean allowed = OfficerAccountService.PASSPORT_OFFICER.equals(role)
                 || OfficerAccountService.DIRECTOR.equals(role);
         return allowed ? null : "redirect:/login";

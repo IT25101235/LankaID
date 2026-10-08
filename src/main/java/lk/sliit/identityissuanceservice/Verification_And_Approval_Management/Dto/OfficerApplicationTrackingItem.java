@@ -7,6 +7,11 @@ import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Deliver
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Model.ApplicationReview;
 
+/**
+ * Immutable cross-module snapshot of one application's progress.
+ * Composition is visible here because the DTO contains related verification, payment,
+ * appointment, biometric and delivery objects rather than duplicating their fields.
+ */
 public record OfficerApplicationTrackingItem(
         CitizenApplication application,
         String citizenName,

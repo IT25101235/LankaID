@@ -4,6 +4,10 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Model.ApplicationReview;
 
+/**
+ * Immutable projection for one row in the processed-application history.
+ * Helper methods encapsulate UI label formatting so templates remain simple.
+ */
 public record ReviewedApplicationRow(ApplicationReview review, CitizenApplication application, CitizenAccount citizen) {
     public String citizenName() {
         if (citizen == null) return "Citizen #" + application.getCitizenId();

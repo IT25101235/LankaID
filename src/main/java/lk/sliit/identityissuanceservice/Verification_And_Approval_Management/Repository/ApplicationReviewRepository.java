@@ -13,9 +13,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository abstraction for verification audit records.
+ * Spring Data provides the concrete implementation, while this interface declares the
+ * module-specific history and latest-review queries.
+ */
 @Repository
 public interface ApplicationReviewRepository extends JpaRepository<ApplicationReview, Integer> {
 
+    // Join audit, application and citizen data once and project it directly into a display DTO.
     @Query("""
             select new lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Dto.ReviewedApplicationRow(r, a, c)
             from ApplicationReview r join CitizenApplication a on a.applicationId = r.applicationId
@@ -33,6 +39,7 @@ public interface ApplicationReviewRepository extends JpaRepository<ApplicationRe
             String serviceType, String decision, String search, LocalDateTime start,
             LocalDateTime end, Pageable pageable);
 
+    // The latest sequence is used both for display and when allocating the next audit number.
     Optional<ApplicationReview> findTopByApplicationIdOrderByReviewSequenceDesc(Integer applicationId);
 
     List<ApplicationReview> findAllByOrderByReviewedAtDesc();

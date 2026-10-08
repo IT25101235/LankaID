@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Builds the officer's pending-work queue for either NIC or passport applications.
+ * It keeps queue selection and display formatting out of the controllers.
+ */
 @Service
 public class VerificationQueueService {
 
@@ -45,6 +49,7 @@ public class VerificationQueueService {
     }
 
     private List<VerificationQueueItem> getQueue(String serviceType) {
+        // FIFO ordering gives older submitted applications priority in the officer queue.
         List<CitizenApplication> applications = applicationRepository
                 .findByServiceTypeAndCurrentStatusInOrderBySubmittedAtAscApplicationIdAsc(
                         serviceType,
@@ -60,6 +65,7 @@ public class VerificationQueueService {
                 .stream()
                 .collect(Collectors.toMap(CitizenAccount::getUserId, Function.identity()));
 
+        // Batch-loading citizens avoids one citizen query for every queue row.
         return applications.stream()
                 .map(application -> toQueueItem(application, citizens.get(application.getCitizenId()), serviceType))
                 .toList();

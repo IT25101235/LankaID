@@ -29,6 +29,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Core business service for verification and approval decisions.
+ *
+ * <p>This class acts as the workflow coordinator: it validates the application's current state,
+ * updates document and application records, writes an immutable audit entry, and publishes the
+ * corresponding citizen notification. Transaction boundaries keep those related changes atomic.</p>
+ *
+ * <p>OOP concepts: repository and notification collaborators are composed through constructor
+ * injection; callers use high-level operations such as {@code approve} without knowing the
+ * persistence steps, demonstrating abstraction and encapsulation.</p>
+ */
 @Service
 public class VerificationReviewService {
 
@@ -72,6 +83,7 @@ public class VerificationReviewService {
 
     @Transactional
     public CitizenApplication startReview(String reference, String serviceType) {
+        // Only a submitted or resubmitted application may enter the officer-review state.
         CitizenApplication application = findApplication(reference, serviceType);
         String status = application.getCurrentStatus();
 
@@ -95,6 +107,7 @@ public class VerificationReviewService {
 
     @Transactional(readOnly = true)
     public VerificationReviewDetails getReviewDetails(String reference, String serviceType) {
+        // Compose one view object from the common application, citizen, service detail and documents.
         CitizenApplication application = findApplication(reference, serviceType);
         CitizenAccount citizen = citizenRepository.findById(application.getCitizenId())
                 .orElseThrow(() -> new IllegalArgumentException("Citizen details were not found."));
@@ -115,11 +128,13 @@ public class VerificationReviewService {
 
     @Transactional
     public void approve(String reference, String serviceType, Integer staffId) {
+        // A final decision is legal only while an officer has the application under review.
         CitizenApplication application = findApplicationUnderReview(reference, serviceType);
         LocalDateTime now = LocalDateTime.now();
 
         List<ApplicationDocument> documents = documentRepository
                 .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId());
+        // Approval verifies every supporting document and records who performed the verification.
         for (ApplicationDocument document : documents) {
             document.setVerificationStatus("VERIFIED");
             document.setVerifiedByStaffId(staffId);
@@ -129,6 +144,7 @@ public class VerificationReviewService {
 
         application.setCurrentStatus("APPROVED");
         applicationRepository.save(application);
+        // The audit record preserves the decision independently of the application's latest status.
         saveReview(application, staffId, "APPROVED", null);
         String fee = String.format(Locale.US, "%,.2f",
                 feeSettingsService.getFee(application.getServiceType()));
@@ -143,6 +159,7 @@ public class VerificationReviewService {
 
     @Transactional
     public void reject(String reference, String serviceType, Integer staffId) {
+        // Rejection updates both the parent application and all documents in one transaction.
         CitizenApplication application = findApplicationUnderReview(reference, serviceType);
         LocalDateTime now = LocalDateTime.now();
 
@@ -174,6 +191,7 @@ public class VerificationReviewService {
             List<Integer> documentIds,
             Integer staffId
     ) {
+        // Correction is a reversible decision: the citizen edits and resubmits the same application.
         CitizenApplication application = findApplicationUnderReview(reference, serviceType);
         List<Integer> selectedDocumentIds = documentIds == null ? List.of() : documentIds;
 
@@ -186,6 +204,7 @@ public class VerificationReviewService {
         List<ApplicationDocument> selectedDocuments = documents.stream()
                 .filter(document -> selectedDocumentIds.contains(document.getDocumentId()))
                 .toList();
+        // Filtering against saved documents prevents IDs from another application being modified.
         if (!correctForm && selectedDocuments.isEmpty()) {
             throw new IllegalArgumentException("Select the application form or at least one document.");
         }
@@ -198,6 +217,7 @@ public class VerificationReviewService {
         String correctionMessage = String.join(", ", requestedItems);
 
         for (ApplicationDocument document : selectedDocuments) {
+            // Selected files must be replaced, so their earlier verification metadata is cleared.
             document.setVerificationStatus("REJECTED");
             document.setVerifiedByStaffId(null);
             document.setVerifiedAt(null);
@@ -222,6 +242,7 @@ public class VerificationReviewService {
             String decision,
             String correctionMessage
     ) {
+        // Sequence numbers retain the complete order when an application is corrected and reviewed again.
         ApplicationReview review = new ApplicationReview();
         review.setApplicationId(application.getApplicationId());
         review.setStaffId(staffId);
@@ -236,6 +257,7 @@ public class VerificationReviewService {
 
     @Transactional(readOnly = true)
     public VerificationDocumentFile getDocumentForOfficer(Integer documentId, String officerRole) {
+        // Authorization depends on the owning application's service type, not on a browser parameter.
         ApplicationDocument document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new IllegalArgumentException("Document was not found."));
         CitizenApplication application = applicationRepository.findById(document.getApplicationId())
@@ -244,6 +266,7 @@ public class VerificationReviewService {
         checkOfficerRole(officerRole, application.getServiceType());
 
         Path file = uploadRoot.resolve(document.getFilePath()).normalize();
+        // Normalization plus startsWith blocks path traversal outside the configured upload directory.
         if (!file.startsWith(uploadRoot) || !Files.isRegularFile(file)) {
             throw new IllegalArgumentException("The uploaded file is not available.");
         }
@@ -267,6 +290,7 @@ public class VerificationReviewService {
     }
 
     private CitizenApplication findApplication(String reference, String serviceType) {
+        // Checking the service prevents a NIC reference from being opened through passport routes.
         CitizenApplication application = applicationRepository.findByApplicationNoIgnoreCase(reference)
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
         if (!serviceType.equals(application.getServiceType())) {
@@ -276,6 +300,7 @@ public class VerificationReviewService {
     }
 
     private CitizenApplication findApplicationUnderReview(String reference, String serviceType) {
+        // This state guard prevents duplicate or out-of-order approval decisions.
         CitizenApplication application = findApplication(reference, serviceType);
         if (!"UNDER_REVIEW".equals(application.getCurrentStatus())) {
             throw new IllegalArgumentException("Open the submitted application for review before making a decision.");
@@ -284,6 +309,7 @@ public class VerificationReviewService {
     }
 
     private void checkOfficerRole(String officerRole, String serviceType) {
+        // Polymorphic role behaviour: directors handle both services; officers handle one service.
         boolean director = OfficerAccountService.DIRECTOR.equals(officerRole);
         boolean serviceOfficer = NIC.equals(serviceType)
                 ? OfficerAccountService.NIC_OFFICER.equals(officerRole)

@@ -10,6 +10,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Presents a read-only, end-to-end application progress screen for authorized officers.
+ * Directors see both services, while NIC and passport officers see only their own service.
+ * The controller supplies paging and navigation data; aggregation is handled by the service.
+ */
 @Controller
 public class OfficerApplicationTrackingController {
 
@@ -26,6 +31,7 @@ public class OfficerApplicationTrackingController {
             HttpSession session,
             Model model
     ) {
+        // Redirect each account type to its own permitted workspace before loading tracking data.
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         String role = session.getAttribute("loggedInOfficerRole") instanceof String value ? value : null;
         if (OfficerAccountService.CSR.equals(role)) return "redirect:/officer/csr";
@@ -34,6 +40,7 @@ public class OfficerApplicationTrackingController {
         Page<OfficerApplicationTrackingItem> trackingPage =
                 trackingService.getTrackingPage(role, search, page);
 
+        // Expose page metadata separately so the template does not need repository knowledge.
         model.addAttribute("trackingItems", trackingPage.getContent());
         model.addAttribute("currentPage", trackingPage.getNumber());
         model.addAttribute("totalPages", trackingPage.getTotalPages());
