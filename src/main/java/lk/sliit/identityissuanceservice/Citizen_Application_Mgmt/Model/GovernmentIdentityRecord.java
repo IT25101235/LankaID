@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "GovernmentIdentityRecord", schema = "dbo")
 public class GovernmentIdentityRecord {
@@ -18,6 +20,9 @@ public class GovernmentIdentityRecord {
 
     @Column(name = "nic_no", length = 12)
     private String nicNo;
+
+    @Column(name = "nic_issued_date")
+    private LocalDate nicIssuedDate;
 
     @Column(name = "passport_no", length = 20)
     private String passportNo;
@@ -35,6 +40,8 @@ public class GovernmentIdentityRecord {
     public void setGovernmentRecordId(Integer governmentRecordId) { this.governmentRecordId = governmentRecordId; }
     public String getNicNo() { return nicNo; }
     public void setNicNo(String nicNo) { this.nicNo = nicNo; }
+    public LocalDate getNicIssuedDate() { return nicIssuedDate; }
+    public void setNicIssuedDate(LocalDate nicIssuedDate) { this.nicIssuedDate = nicIssuedDate; }
     public String getPassportNo() { return passportNo; }
     public void setPassportNo(String passportNo) { this.passportNo = passportNo; }
     public String getRegisteredEmail() { return registeredEmail; }
