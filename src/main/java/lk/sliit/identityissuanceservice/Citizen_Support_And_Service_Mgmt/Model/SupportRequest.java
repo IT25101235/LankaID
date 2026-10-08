@@ -55,9 +55,10 @@ public class SupportRequest {
     }
 
     public Integer getRequestId() { return requestId; }
-    public boolean isDeletableContact() {
-        // Complaints, answered requests and verification records must remain for follow-up and audit.
-        return "CONTACT".equals(requestType) && "OPEN".equals(requestStatus)
+    public boolean isDeletableByCitizen() {
+        // Once an officer starts handling a request, it stays available for follow-up and audit.
+        return ("CONTACT".equals(requestType) || "COMPLAINT".equals(requestType))
+                && "OPEN".equals(requestStatus)
                 && handledByStaffId == null && respondedAt == null
                 && (response == null || response.isBlank())
                 && !"Existing document verification".equals(subject);
