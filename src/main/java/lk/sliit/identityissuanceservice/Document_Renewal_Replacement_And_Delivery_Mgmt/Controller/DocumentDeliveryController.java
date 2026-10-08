@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+// Handles officer collection pages and citizen receipt confirmation.
 @Controller
 public class DocumentDeliveryController {
 
@@ -20,6 +21,7 @@ public class DocumentDeliveryController {
         this.deliveryService = deliveryService;
     }
 
+    // Shows the ready queue and optionally finds a document by its collection reference.
     @GetMapping("/officer/csr/deliveries")
     public String collectionWorkbench(
             @RequestParam(required = false) String reference,
@@ -40,6 +42,7 @@ public class DocumentDeliveryController {
         return "officers_frontends/document_collection";
     }
 
+    // Check that the document is ready before recording centre handover.
     @PostMapping("/officer/csr/deliveries/handover")
     public String handOverDocument(
             @RequestParam String reference,
@@ -62,6 +65,7 @@ public class DocumentDeliveryController {
         return "redirect:/officer/csr/deliveries?reference=" + reference.trim();
     }
 
+    // Use the citizen identity from the session; the service also checks application ownership.
     @PostMapping("/citizen/deliveries/confirm")
     public String confirmHomeDelivery(
             @RequestParam Integer applicationId,
@@ -82,6 +86,7 @@ public class DocumentDeliveryController {
         return "redirect:/citizen/applications";
     }
 
+    // Centre handover is available to CSR or director roles; administrator sessions are excluded.
     private boolean canAccess(HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) return false;
         Object role = session.getAttribute("loggedInOfficerRole");

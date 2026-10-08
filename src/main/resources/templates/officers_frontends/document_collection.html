@@ -26,12 +26,14 @@
   <section class="bg-white border rounded-2xl shadow-sm p-5">
     <h1 class="text-xl font-extrabold">Verify collection reference</h1>
     <p class="text-sm text-slate-500 mt-1">Ask the citizen for the delivery reference shown in their application tracker or notification.</p>
+    <!-- Search for a centre-collection document using its internal reference. -->
     <form th:action="@{/officer/csr/deliveries}" method="get" class="mt-4 flex flex-col sm:flex-row gap-3">
       <input name="reference" required th:value="${param.reference}" placeholder="Example: DEL-2026-AB12CD34" class="flex-1 rounded-xl border-slate-300 font-mono uppercase"/>
       <button class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-5 py-3 text-sm font-bold flex items-center justify-center gap-2"><span class="material-symbols-outlined text-lg">search</span>Find document</button>
     </form>
   </section>
 
+  <!-- The controller supplies combined citizen, document and centre details. -->
   <section th:if="${selectedCollection}" class="bg-white border rounded-2xl shadow-sm overflow-hidden">
     <div class="p-5 border-b flex flex-wrap items-center gap-3">
       <div><p class="text-xs text-slate-400">Collection reference</p><p class="font-mono font-extrabold text-cyan-700 mt-1" th:text="${selectedCollection.delivery.trackingReference}">DEL-REF</p></div>
@@ -50,6 +52,7 @@
       </div>
     </div>
     <div class="p-5 border-t bg-slate-50">
+      <!-- Ready documents can be handed over by posting their collection reference. -->
       <form th:if="${selectedCollection.delivery.deliveryStatus == 'READY_FOR_COLLECTION'}" th:action="@{/officer/csr/deliveries/handover}" method="post" onsubmit="return confirm('Confirm that the citizen identity and document number were checked before handover?')">
         <input type="hidden" name="reference" th:value="${selectedCollection.delivery.trackingReference}"/>
         <label class="flex items-start gap-3 text-sm"><input id="identityChecked" required type="checkbox" class="rounded mt-1 text-emerald-600"/><span><b>Citizen identity verified</b><span class="block text-xs text-slate-500 mt-1">Confirm the citizen and document details before handing over the physical document.</span></span></label>
@@ -59,6 +62,7 @@
     </div>
   </section>
 
+  <!-- List printed centre documents still waiting for handover. -->
   <section class="bg-white border rounded-2xl shadow-sm overflow-hidden">
     <div class="p-5 border-b"><h2 class="font-bold">Ready for collection</h2><p class="text-xs text-slate-500 mt-1">Printed centre-pickup documents waiting for citizen handover.</p></div>
     <div th:if="${#lists.isEmpty(readyCollections)}" class="p-8 text-center text-sm text-slate-500">No documents are waiting for collection.</div>

@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+// Applies renewal and lost replacement rules while reusing the shared application tables.
 @Service
 public class DocumentRenewalReplacementService {
 
@@ -83,11 +84,13 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
+    // Reuse the common government identity check used by new application workflows.
     public CitizenEligibilityDto getEligibility(Integer citizenId) {
         return eligibilityService.getEligibility(citizenId);
     }
 
     @Transactional
+    // Require a linked NIC, block another active NIC request, and prefill the form.
     public NicRenewalReplacementForm prepareNicForm(Integer citizenId, String formKind) {
         String applicationKind = applicationKind(formKind);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
@@ -102,6 +105,7 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
+    // Require an existing passport and use the linked NIC as proof when available.
     public PassportRenewalReplacementForm preparePassportForm(Integer citizenId, String formKind) {
         applicationKind(formKind);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
@@ -180,6 +184,7 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
+    // Save the profile, common draft, and NIC details together in one database transaction.
     public CitizenApplication createNicRequest(
             Integer citizenId,
             String formKind,
@@ -187,6 +192,7 @@ public class DocumentRenewalReplacementService {
         String applicationKind = applicationKind(formKind);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
         checkExistingDocument(eligibility, NIC);
+        // Use the verified NIC number instead of trusting the number posted by the browser.
         form.setLastNicNo(eligibility.getNicNumber());
         applyTrustedNicIssueDate(applicationKind, eligibility, form);
         CitizenProfileMapper.validateConditionalFields(form);
@@ -207,6 +213,7 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
+    // Create a passport draft with its own detail row and the same application ID.
     public CitizenApplication createPassportRequest(
             Integer citizenId,
             String formKind,
@@ -286,6 +293,7 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional(readOnly = true)
+    // Look up the request by both application ID and owner, then require RENEWAL or LOST.
     public CitizenApplication getRequest(Integer citizenId, Integer applicationId) {
         CitizenApplication application = applicationRepository
                 .findByApplicationIdAndCitizenId(applicationId, citizenId)
@@ -308,6 +316,7 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional(readOnly = true)
+    // Submitted requests stay locked unless an officer has requested corrections.
     public List<ApplicationDocument> getDocuments(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getRequest(citizenId, applicationId);
         if (!"DRAFT".equals(application.getCurrentStatus())
@@ -320,6 +329,7 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
+    // Uploads belong to editable requests; duplicate types are replaceable only during corrections.
     public void uploadDocument(
             Integer citizenId,
             Integer applicationId,
@@ -338,6 +348,7 @@ public class DocumentRenewalReplacementService {
             throw new IllegalArgumentException("That document type has already been uploaded.");
         }
 
+        // Give the file a random name and keep its destination inside the upload directory.
         String storedName = UUID.randomUUID() + "." + fileExtension(file.getOriginalFilename());
         Path applicationFolder = uploadRoot.resolve("application-documents")
                 .resolve(application.getApplicationNo()).normalize();
@@ -356,6 +367,7 @@ public class DocumentRenewalReplacementService {
         ApplicationDocument document = existingDocument.orElseGet(ApplicationDocument::new);
         document.setApplicationId(applicationId);
         document.setDocumentType(type);
+        // Store a relative path in the database; the file content stays on disk.
         document.setFilePath(uploadRoot.relativize(destination).toString().replace('\\', '/'));
         document.setUploadedAt(LocalDateTime.now());
         document.setVerificationStatus("PENDING");
@@ -366,6 +378,7 @@ public class DocumentRenewalReplacementService {
 
     @Transactional
     public CitizenApplication submitRequest(Integer citizenId, Integer applicationId) {
+        // Lock this owned draft or correction row so two submissions cannot proceed together.
         applicationRepository.findEditableForUpdate(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Only drafts or corrected requests can be submitted."));
         CitizenApplication application = getRequest(citizenId, applicationId);
@@ -374,6 +387,7 @@ public class DocumentRenewalReplacementService {
             throw new IllegalArgumentException("Only drafts or corrected requests can be submitted.");
         }
 
+        // Check the actual saved documents, not only what the upload page displays.
         Set<String> uploadedTypes = documentRepository
                 .findAllByApplicationIdOrderByUploadedAtAsc(applicationId)
                 .stream()
@@ -388,6 +402,7 @@ public class DocumentRenewalReplacementService {
             );
         }
 
+        // Corrected requests return all documents to PENDING for officer verification.
         if (resubmission) {
             List<ApplicationDocument> documents = documentRepository
                     .findAllByApplicationIdOrderByUploadedAtAsc(applicationId);
@@ -399,6 +414,7 @@ public class DocumentRenewalReplacementService {
             documentRepository.saveAll(documents);
         }
 
+        // Keep the same application number and move it into the officer review queue.
         application.setCurrentStatus(resubmission ? "RESUBMITTED" : "SUBMITTED");
         application.setSubmittedAt(LocalDateTime.now());
         application.setDeclarationAccepted("Y");
@@ -446,6 +462,7 @@ public class DocumentRenewalReplacementService {
         return application;
     }
 
+    // Form updates must belong to this citizen and match the service and editable status.
     private CitizenApplication getEditableRequest(
             Integer citizenId,
             Integer applicationId,
@@ -464,6 +481,7 @@ public class DocumentRenewalReplacementService {
         return application;
     }
 
+    // Lost replacements add a police report; passport requests also need NIC proof.
     public List<String> requiredDocumentTypes(CitizenApplication application) {
         if (NIC.equals(application.getServiceType())) {
             return LOST.equals(application.getApplicationKind())
@@ -475,6 +493,7 @@ public class DocumentRenewalReplacementService {
                 : List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF");
     }
 
+    // Renewal or replacement requires a verified existing document with no identity conflict.
     private void checkExistingDocument(CitizenEligibilityDto eligibility, String serviceType) {
         if (eligibility.isIdentityConflict()) {
             throw new IllegalArgumentException(
@@ -489,6 +508,7 @@ public class DocumentRenewalReplacementService {
         }
     }
 
+    // Convert page names into the application kinds stored by the database.
     private String applicationKind(String formKind) {
         return switch (formKind == null ? "" : formKind.toLowerCase(Locale.ROOT)) {
             case "renewal" -> RENEWAL;
@@ -497,6 +517,7 @@ public class DocumentRenewalReplacementService {
         };
     }
 
+    // Lost NICs need police details; NIC renewals need the previous issue date.
     private void validateNicDetails(String applicationKind, NicRenewalReplacementForm form) {
         if (CitizenProfileMapper.blankToNull(form.getLastNicNo()) == null) {
             throw new IllegalArgumentException("Existing NIC number is required.");
@@ -513,6 +534,7 @@ public class DocumentRenewalReplacementService {
         }
     }
 
+    // Prefer the government issue date and reject changes; a lost NIC may have no known date.
     private void applyTrustedNicIssueDate(
             String applicationKind,
             CitizenEligibilityDto eligibility,
@@ -532,6 +554,7 @@ public class DocumentRenewalReplacementService {
         }
     }
 
+    // A passport request needs the citizen NIC or a parent NIC as proof.
     private void validatePassportProof(String nicProofNo, String parentNicNo) {
         if (CitizenProfileMapper.blankToNull(nicProofNo) == null
                 && CitizenProfileMapper.blankToNull(parentNicNo) == null) {
@@ -539,6 +562,7 @@ public class DocumentRenewalReplacementService {
         }
     }
 
+    // Block another unfinished request for the same citizen and document service.
     private void checkForActiveApplication(Integer citizenId, String serviceType) {
         if (applicationRepository.existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
                 citizenId,
@@ -550,12 +574,14 @@ public class DocumentRenewalReplacementService {
         }
     }
 
+    // Save shared personal and address fields back to the citizen profile.
     private void saveCitizenProfile(Integer citizenId, CitizenProfileForm form) {
         CitizenAccount citizen = findCitizen(citizenId);
         CitizenProfileMapper.updateCitizen(citizen, form);
         citizenRepository.save(citizen);
     }
 
+    // Saving the first form creates a DRAFT; document checks and submission happen later.
     private CitizenApplication createBaseApplication(
             Integer citizenId,
             String serviceType,
@@ -570,6 +596,7 @@ public class DocumentRenewalReplacementService {
         return applicationRepository.save(application);
     }
 
+    // Allow known document types and PDF or image extensions, with a maximum size of 5 MiB.
     private void validateDocument(String type, MultipartFile file) {
         if (!ALLOWED_DOCUMENT_TYPES.contains(type)) {
             throw new IllegalArgumentException("Select a valid document type.");
@@ -585,6 +612,7 @@ public class DocumentRenewalReplacementService {
         }
     }
 
+    // Build a service and year reference, retrying when the generated number already exists.
     private String generateApplicationNo(String serviceType) {
         String applicationNo;
         do {
