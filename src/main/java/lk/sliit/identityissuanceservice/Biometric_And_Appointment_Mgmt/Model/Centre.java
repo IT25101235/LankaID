@@ -8,10 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+/** Entity: a service centre where citizens give their biometrics. */
 @Entity
 @Table(name = "Centre", schema = "dbo")
 public class Centre {
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "centre_id")
@@ -35,11 +38,13 @@ public class Centre {
     @Column(name = "centre_status", nullable = false, length = 20)
     private String centreStatus;
 
+    /** New centres start as ACTIVE. */
     @PrePersist
     private void applyDefaults() {
         if (centreStatus == null) centreStatus = "ACTIVE";
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getCentreId() { return centreId; }
     public void setCentreId(Integer centreId) { this.centreId = centreId; }
     public String getCentreName() { return centreName; }

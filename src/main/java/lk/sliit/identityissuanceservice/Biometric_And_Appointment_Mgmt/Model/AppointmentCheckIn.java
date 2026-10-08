@@ -8,10 +8,16 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity: records that an officer checked a citizen in. One row per appointment (same id as the
+ * appointment).
+ */
 @Entity
 @Table(name = "AppointmentCheckIn", schema = "dbo")
 public class AppointmentCheckIn {
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @Column(name = "appointment_id")
     private Integer appointmentId;
@@ -25,11 +31,13 @@ public class AppointmentCheckIn {
     @Column(name = "check_in_method", nullable = false, length = 25)
     private String checkInMethod;
 
+    /** Sets the check-in time automatically on first save. */
     @PrePersist
     private void applyDefaults() {
         if (checkedInAt == null) checkedInAt = LocalDateTime.now();
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
     public Integer getStaffId() { return staffId; }

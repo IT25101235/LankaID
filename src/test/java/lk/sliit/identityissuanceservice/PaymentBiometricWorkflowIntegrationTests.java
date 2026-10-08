@@ -41,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -297,9 +298,11 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
                         biometricCentre.getCentreId(), serviceType, appointmentDate, java.time.LocalTime.of(10, 0))
                 .orElseThrow();
+        citizenSession.setAttribute("biometricFormToken", "test-form-token");
         mockMvc.perform(post("/citizen/appointments/biometric")
                         .param("applicationId", application.getApplicationId().toString())
                         .param("slotId", selectedSlot.getSlotId().toString())
+                        .param("formToken", "test-form-token")
                         .session(citizenSession))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(
@@ -348,9 +351,30 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(content().string(containsString("Biometric Collection")))
                 .andExpect(content().string(not(containsString("Collection Workbench"))));
 
+        officerSession.setAttribute("biometricFormToken", "test-form-token");
+        // Check-in is only open on the appointment date, so a future booking is rejected first.
         mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
                                 servicePath, appointment.getReferenceNo())
                         .param("checkInMethod", "QR")
+                        .param("formToken", "test-form-token")
+                        .session(officerSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("biometricError", containsString("only available on the appointment date")));
+        assertTrue(!checkInRepository.existsById(appointment.getAppointmentId()));
+        // A request without the form token is rejected.
+        mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
+                                servicePath, appointment.getReferenceNo())
+                        .param("checkInMethod", "QR")
+                        .session(officerSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("biometricError", containsString("Reload the page")));
+
+        appointment.setScheduledAt(java.time.LocalDateTime.now());
+        appointmentRepository.saveAndFlush(appointment);
+        mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
+                                servicePath, appointment.getReferenceNo())
+                        .param("checkInMethod", "QR")
+                        .param("formToken", "test-form-token")
                         .session(officerSession))
                 .andExpect(status().is3xxRedirection());
         assertFalse(checkInRepository.existsById(appointment.getAppointmentId()));
@@ -366,6 +390,7 @@ class PaymentBiometricWorkflowIntegrationTests {
 
         mockMvc.perform(post("/officer/{service}/biometrics/{reference}/complete",
                                 servicePath, appointment.getReferenceNo())
+                        .param("formToken", "test-form-token")
                         .session(officerSession))
                 .andExpect(status().is3xxRedirection());
 

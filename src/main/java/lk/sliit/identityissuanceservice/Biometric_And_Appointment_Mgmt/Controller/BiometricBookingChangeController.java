@@ -10,8 +10,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller: the citizen "Manage booking" page, where a confirmed biometric booking is cancelled or
+ * moved.
+ */
 @Controller
 public class BiometricBookingChangeController {
+    // OOP - Composition and Encapsulation: the services is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final AppointmentService bookings;
     private final BiometricBookingChangeService changes;
 
@@ -20,11 +27,13 @@ public class BiometricBookingChangeController {
         this.changes = changes;
     }
 
+    /** Stops the browser caching this page. */
     @ModelAttribute public void noCache(jakarta.servlet.http.HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-store");
     }
     @ModelAttribute("selection") public BookingSelectionForm selection() { return new BookingSelectionForm(); }
 
+    /** READ: show the booking and issue a one-time change token. */
     @GetMapping("/citizen/appointments/{reference}/manage")
     public String manage(@PathVariable String reference, HttpSession session, Model model, RedirectAttributes redirect) {
         if (citizenId(session) == null) return "redirect:/login";
@@ -51,6 +60,7 @@ public class BiometricBookingChangeController {
         }
     }
 
+    /** UPDATE: cancel the booking. Its status becomes CANCELLED and the payment is kept. */
     @PostMapping("/citizen/appointments/{reference}/manage/cancel")
     public String cancel(@PathVariable String reference, @RequestParam(required = false) String token,
                          HttpSession session, RedirectAttributes redirect) {
@@ -69,6 +79,7 @@ public class BiometricBookingChangeController {
         return "redirect:/citizen/appointments/" + reference + "/manage";
     }
 
+    /** UPDATE: move to a new slot (or rebook after a cancel) with no extra payment. */
     @PostMapping({"/citizen/appointments/{reference}/manage/change", "/citizen/appointments/{reference}/manage/pay"})
     public String change(@PathVariable String reference, @RequestParam(required = false) String token,
                       @ModelAttribute("selection") BookingSelectionForm selection,
@@ -89,6 +100,7 @@ public class BiometricBookingChangeController {
         return manage(reference, session, model, redirect);
     }
 
+    /** Checks the token belongs to the booking in the URL. */
     private void requireReference(String reference, BookingChangeRequest request, HttpSession session) {
         if (!bookings.getCitizenAppointment(citizenId(session), reference).getAppointmentId().equals(request.appointmentId())) {
             throw new IllegalArgumentException("Reload this booking before confirming a change.");

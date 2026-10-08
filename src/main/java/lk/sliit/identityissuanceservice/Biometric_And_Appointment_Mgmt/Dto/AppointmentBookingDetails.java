@@ -7,6 +7,9 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import java.time.LocalDate;
 import java.util.List;
 
+/** DTO (record): everything the booking page needs, bundled into one read-only object. */
+// OOP - Immutability and Composition: a record has final fields and no setters, and it groups related
+// objects (has-a).
 public record AppointmentBookingDetails(
         CitizenApplication application,
         Appointment appointment,

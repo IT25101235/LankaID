@@ -13,9 +13,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller: officer biometric desk. Find the appointment, check the citizen in, then complete
+ * collection.
+ */
 @Controller
 public class BiometricController {
 
+    // OOP - Composition and Encapsulation: the services is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final AppointmentService appointmentService;
     private final BiometricService biometricService;
 
@@ -24,6 +31,7 @@ public class BiometricController {
         this.biometricService = biometricService;
     }
 
+    /** READ: NIC officer queue and the selected appointment. */
     @GetMapping("/officer/nic/biometrics")
     public String nicBiometricCollection(
             @RequestParam(required = false) String reference,
@@ -35,6 +43,7 @@ public class BiometricController {
         return biometricPage("NIC", reference, checkInMethod, model, session, redirectAttributes);
     }
 
+    /** READ: passport officer queue and the selected appointment. */
     @GetMapping("/officer/passport/biometrics")
     public String passportBiometricCollection(
             @RequestParam(required = false) String reference,
@@ -46,11 +55,13 @@ public class BiometricController {
         return biometricPage("PASSPORT", reference, checkInMethod, model, session, redirectAttributes);
     }
 
+    /** UPDATE: mark the appointment CHECKED_IN. Role and form token are checked first. */
     @PostMapping("/officer/{service}/biometrics/{reference}/check-in")
     public String checkIn(
             @PathVariable String service,
             @PathVariable String reference,
             @RequestParam(defaultValue = "REFERENCE_NUMBER") String checkInMethod,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -58,14 +69,17 @@ public class BiometricController {
         String accessResult = checkAccess(session, serviceType);
         if (accessResult != null) return accessResult;
         try {
+            BiometricFormToken.check(formToken, session);
             appointmentService.checkIn(reference, serviceType, officerId(session), checkInMethod);
             redirectAttributes.addFlashAttribute("biometricMessage", "Citizen checked in successfully.");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
         }
-        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+        return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
+                + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
+    /** UPDATE: move a missed booking to the next free slot. */
     @PostMapping("/officer/{service}/biometrics/{reference}/reschedule-missed")
     public String rescheduleMissed(
             @PathVariable String service,
@@ -90,10 +104,12 @@ public class BiometricController {
         return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
     }
 
+    /** CREATE: save the biometric collection and finish the appointment. */
     @PostMapping("/officer/{service}/biometrics/{reference}/complete")
     public String completeBiometrics(
             @PathVariable String service,
             @PathVariable String reference,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -101,6 +117,7 @@ public class BiometricController {
         String accessResult = checkAccess(session, serviceType);
         if (accessResult != null) return accessResult;
         try {
+            BiometricFormToken.check(formToken, session);
             biometricService.completeCollection(reference, serviceType, officerId(session));
             redirectAttributes.addFlashAttribute(
                     "biometricMessage",
@@ -109,7 +126,8 @@ public class BiometricController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
         }
-        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+        return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
+                + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private String biometricPage(
@@ -146,6 +164,7 @@ public class BiometricController {
         model.addAttribute("queueRoute", "/officer/" + serviceType.toLowerCase() + "/applications");
     }
 
+    /** Role check: the matching service officer or the director, otherwise back to login. */
     private String checkAccess(HttpSession session, String serviceType) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         Object role = session.getAttribute("loggedInOfficerRole");

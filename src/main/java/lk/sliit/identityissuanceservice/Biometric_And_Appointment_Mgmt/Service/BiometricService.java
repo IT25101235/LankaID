@@ -11,9 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/** Service: finishes the biometric step for an application. */
 @Service
 public class BiometricService {
 
+    // OOP - Composition and Encapsulation: the services and repositories is a private final field handed
+    // in through the constructor (dependency injection), so this class is loosely coupled and the object
+    // is never created here.
     private final AppointmentService appointmentService;
     private final AppointmentRepository appointmentRepository;
     private final BiometricCollectionRepository biometricRepository;
@@ -34,6 +38,10 @@ public class BiometricService {
         this.notificationPublisher = notificationPublisher;
     }
 
+    /**
+     * CREATE: save the collection, mark the appointment COMPLETED and the application ready for
+     * printing. Needs a prior check-in.
+     */
     @Transactional
     public void completeCollection(String reference, String serviceType, Integer staffId) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
@@ -43,6 +51,12 @@ public class BiometricService {
         }
         if (details.biometricCollected()) {
             throw new IllegalArgumentException("Biometrics have already been collected.");
+        }
+        var lockedAppointment = appointmentRepository.findByIdForChange(details.appointment().getAppointmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Appointment was not found."));
+        if (!"CHECKED_IN".equals(lockedAppointment.getAppointmentStatus())
+                || biometricRepository.existsById(details.application().getApplicationId())) {
+            throw new IllegalArgumentException("Check in the citizen before collecting biometrics.");
         }
 
         BiometricCollection collection = new BiometricCollection();

@@ -23,6 +23,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service: core booking logic (book a slot, passes, officer queue, check-in, missed bookings). Sends
+ * notifications through NotificationPublisher (Observer pattern).
+ */
 @Service
 public class AppointmentService {
 
@@ -31,6 +35,9 @@ public class AppointmentService {
     private static final List<String> OFFICER_HISTORY_STATUSES =
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
 
+    // OOP - Composition and Encapsulation: the repositories and other services is a private final field
+    // handed in through the constructor (dependency injection), so this class is loosely coupled and the
+    // object is never created here.
     private final AppointmentRepository appointmentRepository;
     private final AppointmentCheckInRepository checkInRepository;
     private final BiometricCollectionRepository biometricRepository;
@@ -63,6 +70,7 @@ public class AppointmentService {
         this.scheduleService = scheduleService;
     }
 
+    /** READ: booking page data. Payment must be completed first. */
     @Transactional(readOnly = true)
     public AppointmentBookingDetails getBookingDetails(Integer citizenId, Integer applicationId) {
         CitizenApplication application = findOwnedApplication(citizenId, applicationId);
@@ -85,6 +93,12 @@ public class AppointmentService {
         );
     }
 
+    /**
+     * CREATE: confirm a slot for a paid application. Appointment and slot are locked so the last place
+     * cannot be double booked.
+     */
+    // OOP - Abstraction: controllers just call this method; locking, payment check and notification stay
+    // hidden inside.
     @Transactional
     public Appointment bookAppointment(
             Integer citizenId,
@@ -130,6 +144,7 @@ public class AppointmentService {
         return appointment;
     }
 
+    /** Ownership check: citizens can only open their own bookings. */
     @Transactional(readOnly = true)
     public Appointment getCitizenAppointment(Integer citizenId, String reference) {
         Appointment appointment = appointmentRepository.findByReferenceNoIgnoreCase(reference)
@@ -140,6 +155,7 @@ public class AppointmentService {
         return appointment;
     }
 
+    /** READ: pass data, only once the appointment is confirmed. */
     @Transactional(readOnly = true)
     public OfficerBiometricDetails getCitizenPassDetails(Integer citizenId, String reference) {
         Appointment appointment = getCitizenAppointment(citizenId, reference);
@@ -151,6 +167,7 @@ public class AppointmentService {
         return buildOfficerDetails(appointment, application.getServiceType(), true);
     }
 
+    /** READ: appointments waiting for the officer. */
     @Transactional(readOnly = true)
     public List<OfficerBiometricDetails> getOfficerQueue(String serviceType) {
         return appointmentRepository
@@ -162,6 +179,7 @@ public class AppointmentService {
                 .toList();
     }
 
+    /** READ: processed appointments, newest first. */
     @Transactional(readOnly = true)
     public List<OfficerBiometricDetails> getOfficerHistory(String serviceType) {
         return appointmentRepository
@@ -182,6 +200,7 @@ public class AppointmentService {
                 .toList();
     }
 
+    /** READ: find by appointment reference or application number, for this officer's service only. */
     @Transactional(readOnly = true)
     public OfficerBiometricDetails findForOfficer(String reference, String serviceType) {
         String cleanReference = reference == null ? "" : reference.trim();
@@ -202,6 +221,7 @@ public class AppointmentService {
         return details;
     }
 
+    /** UPDATE: CONFIRMED to CHECKED_IN. Rejects repeats and any day other than the booked date. */
     @Transactional
     public OfficerBiometricDetails checkIn(
             String reference,
@@ -212,11 +232,14 @@ public class AppointmentService {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
         Appointment appointment = appointmentRepository.findByIdForChange(details.appointment().getAppointmentId()).orElseThrow();
-        if (!List.of("CONFIRMED", "CHECKED_IN").contains(appointment.getAppointmentStatus())) {
-            throw new IllegalArgumentException("Only a confirmed appointment can be checked in.");
-        }
         if ("COMPLETED".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Biometrics have already been completed.");
+        }
+        if ("CHECKED_IN".equals(appointment.getAppointmentStatus())) {
+            throw new IllegalArgumentException("This citizen has already been checked in.");
+        }
+        if (!"CONFIRMED".equals(appointment.getAppointmentStatus())) {
+            throw new IllegalArgumentException("Only a confirmed appointment can be checked in.");
         }
         BookingChangePolicy.requireCheckInToday(appointment);
 
@@ -282,6 +305,7 @@ public class AppointmentService {
         return findForOfficer(reference, serviceType);
     }
 
+    /** Joins appointment, application, citizen and centre into one DTO for the officer screens. */
     private OfficerBiometricDetails buildOfficerDetails(
             Appointment appointment,
             String serviceType,
@@ -312,11 +336,13 @@ public class AppointmentService {
         );
     }
 
+    /** Ownership check for applications. */
     private CitizenApplication findOwnedApplication(Integer citizenId, Integer applicationId) {
         return applicationRepository.findByApplicationIdAndCitizenId(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
     }
 
+    /** READ: slots with places left, delegated to the schedule service. */
     @Transactional(readOnly = true)
     public List<BiometricSlotView> getAvailableSchedule(
             String serviceType, Integer centreId, LocalDate startDate, LocalDate endDate) {

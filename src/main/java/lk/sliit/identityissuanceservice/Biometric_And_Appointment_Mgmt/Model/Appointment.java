@@ -10,6 +10,10 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity for the Appointment table: one booking. Status flow: PENDING_PAYMENT -> CONFIRMED ->
+ * CHECKED_IN -> COMPLETED (or CANCELLED).
+ */
 @Entity
 @Table(name = "Appointment", schema = "dbo")
 public class Appointment {
@@ -21,6 +25,8 @@ public class Appointment {
 
     public Long getBookingVersion() { return bookingVersion; }
 
+    // OOP - Encapsulation: the fields are private. Other classes can only read or change them through the
+    // getters and setters.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")
@@ -65,12 +71,14 @@ public class Appointment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /** Fills in the default status and created time the first time the row is saved. */
     @PrePersist
     private void applyDefaults() {
         if (appointmentStatus == null) appointmentStatus = "PENDING_PAYMENT";
         if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
+    // OOP - Encapsulation: public getters and setters give controlled access to the private fields.
     public Integer getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
     public Integer getCitizenId() { return citizenId; }

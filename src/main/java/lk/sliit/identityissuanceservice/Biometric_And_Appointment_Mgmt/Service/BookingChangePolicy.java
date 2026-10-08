@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /** The same rules are used for showing actions and accepting submitted changes. */
+// OOP - Encapsulation: a final class with a private constructor cannot be extended or instantiated. It
+// only offers static rule methods.
 public final class BookingChangePolicy {
     private BookingChangePolicy() { }
 
@@ -16,6 +18,9 @@ public final class BookingChangePolicy {
         return canCancel(appointment, now);
     }
 
+    /** Policy rules: a biometric booking can be cancelled up to 72 hours before it. */
+    // OOP - Polymorphism (method overloading): canCancel(a) uses the current time, canCancel(a, now) takes
+    // a given time.
     public static boolean canCancel(Appointment appointment) {
         return canCancel(appointment, LocalDateTime.now());
     }
@@ -29,6 +34,7 @@ public final class BookingChangePolicy {
                 && appointment.getScheduledAt().isAfter(now);
     }
 
+    /** Can be rescheduled if cancellable, or if the booked date has already passed (missed). */
     public static boolean canReschedule(Appointment appointment) {
         return canReschedule(appointment, LocalDateTime.now());
     }
@@ -55,6 +61,7 @@ public final class BookingChangePolicy {
                 && appointment.getScheduledAt().toLocalDate().isBefore(today);
     }
 
+    /** Check-in is only allowed on the booked date. */
     public static void requireCheckInToday(Appointment appointment) {
         LocalDate bookedDate = appointment.getScheduledAt().toLocalDate();
         LocalDate today = LocalDate.now();
@@ -88,6 +95,7 @@ public final class BookingChangePolicy {
         }
     }
 
+    /** Rejects a stale form: the booking changed after the page was opened. */
     public static void requireUnchanged(Appointment appointment,
             lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BookingChangeRequest request) {
         if (!appointment.getAppointmentStatus().equals(request.status())

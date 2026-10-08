@@ -22,9 +22,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 
+/**
+ * Controller (MVC): citizen booking and appointment pass, plus the officer appointment history. It
+ * checks the session and calls AppointmentService.
+ */
 @Controller
 public class AppointmentController {
 
+    // OOP - Composition and Encapsulation: the service is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final AppointmentService appointmentService;
     private final AppointmentPassService passService;
 
@@ -34,6 +41,7 @@ public class AppointmentController {
         this.passService = passService;
     }
 
+    /** READ: show the booking page for a paid application. */
     @GetMapping("/citizen/appointments/biometric")
     public String bookBiometricAppointment(
             @RequestParam(required = false) Integer applicationId,
@@ -64,10 +72,12 @@ public class AppointmentController {
         }
     }
 
+    /** CREATE: confirm the chosen slot. Errors go back to the page as messages. */
     @PostMapping("/citizen/appointments/biometric")
     public String confirmBiometricAppointment(
             @RequestParam(required = false) String applicationId,
             @RequestParam(required = false) String slotId,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -76,6 +86,7 @@ public class AppointmentController {
 
         Integer selectedApplicationId = null;
         try {
+            BiometricFormToken.check(formToken, session);
             selectedApplicationId = readInteger(applicationId, "Application details are missing. Please try again.");
             Integer selectedSlotId = readInteger(slotId, "Select an available appointment time.");
             Appointment appointment = appointmentService.bookAppointment(
@@ -89,6 +100,7 @@ public class AppointmentController {
         }
     }
 
+    /** READ (JSON): free slots grouped by date for the calendar, within the 1-90 day booking window. */
     @GetMapping("/citizen/appointments/biometric/availability")
     public ResponseEntity<?> availability(
             @RequestParam Integer applicationId,
@@ -133,6 +145,7 @@ public class AppointmentController {
         }
     }
 
+    /** READ: show the appointment pass (only its owner can open it). */
     @GetMapping("/citizen/appointments/{reference}/pass")
     public String appointmentPass(
             @PathVariable String reference,
@@ -151,32 +164,43 @@ public class AppointmentController {
         }
     }
 
+    /** Returns the QR code image. */
     @GetMapping("/citizen/appointments/{reference}/qr")
     public ResponseEntity<byte[]> appointmentQrCode(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return ResponseEntity.status(401).build();
-        appointmentService.getCitizenPassDetails(citizenId, reference);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(passService.createQrCode(reference, 420));
+        try {
+            OfficerBiometricDetails details = appointmentService.getCitizenPassDetails(citizenId, reference);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(passService.createQrCode(details.appointment().getReferenceNo(), 420));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    /** Returns the pass as a PNG download. */
     @GetMapping("/citizen/appointments/{reference}/pass/download")
     public ResponseEntity<byte[]> downloadAppointmentPass(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return ResponseEntity.status(401).build();
-        OfficerBiometricDetails details = appointmentService.getCitizenPassDetails(citizenId, reference);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.attachment()
-                                .filename("LankaID-Appointment-" + details.appointment().getReferenceNo() + ".png")
-                                .build().toString()
-                )
-                .body(passService.createDownloadablePass(details));
+        try {
+            OfficerBiometricDetails details = appointmentService.getCitizenPassDetails(citizenId, reference);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            ContentDisposition.attachment()
+                                    .filename("LankaID-Appointment-" + details.appointment().getReferenceNo() + ".png")
+                                    .build().toString()
+                    )
+                    .body(passService.createDownloadablePass(details));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    /** Officer page: appointment history for NIC applications. */
     @GetMapping("/officer/nic/appointments")
     public String nicAppointments(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
@@ -186,6 +210,7 @@ public class AppointmentController {
         return "officers_frontends/officer_appointments";
     }
 
+    /** Officer page: appointment history for passport applications. */
     @GetMapping("/officer/passport/appointments")
     public String passportAppointments(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
@@ -204,17 +229,20 @@ public class AppointmentController {
         model.addAttribute("scheduleRoute", "/officer/" + servicePath + "/appointments/schedule");
     }
 
+    /** Role check: the matching service officer or the director. */
     private boolean canAccess(HttpSession session, String requiredRole) {
         Object role = session.getAttribute("loggedInOfficerRole");
         return requiredRole.equals(role) || OfficerAccountService.DIRECTOR.equals(role);
     }
 
+    /** Session check: returns the citizen id, or null if nobody (or a non-citizen) is logged in. */
     private Integer loggedInCitizenId(HttpSession session) {
         Object userId = session.getAttribute("loggedInUserId");
         Object role = session.getAttribute("loggedInUserRole");
         return userId instanceof Integer id && "CITIZEN".equals(role) ? id : null;
     }
 
+    /** Input validation: form text to a number, or a friendly error. */
     private Integer readInteger(String value, String errorMessage) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(errorMessage);
@@ -226,6 +254,7 @@ public class AppointmentController {
         }
     }
 
+    /** Input validation: form text to a date, or a friendly error. */
     private LocalDate readDate(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Select an appointment date.");

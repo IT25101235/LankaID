@@ -18,12 +18,16 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
 
+/** Service: slot calendar and capacity. Used by officers to publish slots and by citizens to book them. */
 @Service
 public class BiometricScheduleService {
 
     private static final List<String> OCCUPYING_STATUSES = List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
     private static final List<String> CANCELLABLE_STATUSES = List.of("CONFIRMED");
 
+    // OOP - Composition and Encapsulation: the repositories is a private final field handed in through the
+    // constructor (dependency injection), so this class is loosely coupled and the object is never created
+    // here.
     private final BiometricAppointmentSlotRepository slots;
     private final AppointmentRepository appointments;
     private final CentreRepository centres;
@@ -44,11 +48,13 @@ public class BiometricScheduleService {
         this.notificationPublisher = notificationPublisher;
     }
 
+    /** READ: active centres. */
     @Transactional(readOnly = true)
     public List<Centre> getCentres() {
         return centres.findAllByCentreStatusOrderByCentreNameAsc("ACTIVE");
     }
 
+    /** READ: slots in a date range with booked and remaining counts. */
     @Transactional(readOnly = true)
     public List<BiometricSlotView> getSchedule(
             String serviceType,
@@ -69,6 +75,7 @@ public class BiometricScheduleService {
                 .toList();
     }
 
+    /** CREATE: generate 30-minute slots for every day in the range, after validating the input. */
     @Transactional
     public int publishDateRange(
             String serviceType,
@@ -95,6 +102,7 @@ public class BiometricScheduleService {
         return days;
     }
 
+    /** Creates or updates one day's slots and closes slots that fall outside the new opening hours. */
     private void configureDay(
             String serviceType,
             Integer centreId,
@@ -132,6 +140,7 @@ public class BiometricScheduleService {
         }
     }
 
+    /** UPDATE: close every slot in the range and cancel its bookings. */
     @Transactional
     public int closeDateRange(String serviceType, Integer centreId, LocalDate startDate, LocalDate endDate) {
         String service = requireServiceType(serviceType);
@@ -149,6 +158,7 @@ public class BiometricScheduleService {
         return closedDays;
     }
 
+    /** UPDATE: change capacity or open/close one slot. Capacity cannot go below existing bookings. */
     @Transactional
     public void updateSlot(String serviceType, Integer slotId, Integer capacity, boolean available) {
         String service = requireServiceType(serviceType);
@@ -167,6 +177,7 @@ public class BiometricScheduleService {
         }
     }
 
+    /** DELETE: only future slots that never had a booking. */
     @Transactional
     public void deleteUnusedSlot(String serviceType, Integer slotId) {
         BiometricAppointmentSlot slot = findOwnedSlot(slotId, requireServiceType(serviceType));
@@ -180,6 +191,7 @@ public class BiometricScheduleService {
         slots.flush();
     }
 
+    /** READ: one slot with its availability. */
     @Transactional(readOnly = true)
     public BiometricSlotView getBookableSlot(Integer slotId, String serviceType, Integer excludedAppointmentId) {
         BiometricAppointmentSlot slot = slots.findById(slotId)
@@ -191,6 +203,10 @@ public class BiometricScheduleService {
         return toView(slot, centre, excludedAppointmentId);
     }
 
+    /**
+     * Locks the slot row, then checks it is open, has space and is inside the booking window. Stops
+     * double booking.
+     */
     @Transactional
     public BiometricAppointmentSlot lockBookableSlot(Integer slotId, String serviceType, Integer excludedAppointmentId) {
         BiometricAppointmentSlot slot = slots.findByIdForBooking(slotId)
@@ -198,7 +214,14 @@ public class BiometricScheduleService {
         if (!requireServiceType(serviceType).equals(slot.getServiceType())) {
             throw new IllegalArgumentException("That slot belongs to a different document service.");
         }
-        BiometricSlotView view = toView(slot, findCentre(slot.getCentreId()), excludedAppointmentId);
+        Centre centre = findCentre(slot.getCentreId());
+        LocalDate today = LocalDate.now();
+        if (!"ACTIVE".equals(centre.getCentreStatus())
+                || slot.getSlotDate().isBefore(today.plusDays(1))
+                || slot.getSlotDate().isAfter(today.plusDays(90))) {
+            throw new IllegalArgumentException("That appointment slot is no longer available. Choose another slot.");
+        }
+        BiometricSlotView view = toView(slot, centre, excludedAppointmentId);
         if (!view.available()
                 || view.remainingPlaces() < 1
                 || !slot.getSlotDate().atTime(slot.getSlotTime()).isAfter(LocalDateTime.now())) {
@@ -207,11 +230,13 @@ public class BiometricScheduleService {
         return slot;
     }
 
+    /** Number of bookings using this slot. */
     public long bookedCount(Integer slotId, Integer excludedAppointmentId) {
         return appointments.countActiveBiometricSlotBookings(
                 slotId, excludedAppointmentId == null ? -1 : excludedAppointmentId);
     }
 
+    /** Closes a slot, cancels its confirmed bookings and notifies each citizen (Observer pattern). */
     private void closeSlotAndCancelBookings(BiometricAppointmentSlot slot) {
         slot.setIsAvailable("N");
         slots.save(slot);
@@ -236,6 +261,9 @@ public class BiometricScheduleService {
         }
     }
 
+    /** Converts a slot entity into the DTO shown on screen. */
+    // OOP - Polymorphism (method overloading): two toView methods share a name but take different
+    // parameters.
     private BiometricSlotView toView(BiometricAppointmentSlot slot, Centre centre) {
         return toView(slot, centre, null);
     }
@@ -249,6 +277,7 @@ public class BiometricScheduleService {
                 slot.getSlotDate(), slot.getSlotTime(), slot.getSlotCapacity(), booked, remaining, available);
     }
 
+    /** Finds a slot (locked) and checks it belongs to this officer's service. */
     private BiometricAppointmentSlot findOwnedSlot(Integer slotId, String serviceType) {
         BiometricAppointmentSlot slot = slots.findByIdForBooking(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Biometric appointment slot was not found."));
@@ -264,6 +293,7 @@ public class BiometricScheduleService {
                 .orElseThrow(() -> new IllegalArgumentException("Select a valid service centre."));
     }
 
+    /** Input validation: only NIC or PASSPORT. */
     private String requireServiceType(String serviceType) {
         String clean = serviceType == null ? "" : serviceType.trim().toUpperCase(Locale.ROOT);
         if (!List.of("NIC", "PASSPORT").contains(clean)) {
@@ -272,6 +302,7 @@ public class BiometricScheduleService {
         return clean;
     }
 
+    /** Input validation: start from tomorrow, end after start, at most 63 days. */
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null || startDate.isBefore(LocalDate.now().plusDays(1))) {
             throw new IllegalArgumentException("Biometric schedules must start from tomorrow.");
@@ -282,6 +313,7 @@ public class BiometricScheduleService {
         }
     }
 
+    /** Input validation: half-hour times between 8:00 AM and 6:00 PM. */
     private void validateTimes(LocalTime openingTime, LocalTime closingTime) {
         if (openingTime == null || closingTime == null || !openingTime.isBefore(closingTime)
                 || openingTime.isBefore(LocalTime.of(8, 0)) || closingTime.isAfter(LocalTime.of(18, 0))
@@ -290,6 +322,7 @@ public class BiometricScheduleService {
         }
     }
 
+    /** Input validation: capacity from 1 to 100. */
     private void validateCapacity(Integer capacity) {
         if (capacity == null || capacity < 1 || capacity > 100) {
             throw new IllegalArgumentException("Capacity must be between 1 and 100.");
