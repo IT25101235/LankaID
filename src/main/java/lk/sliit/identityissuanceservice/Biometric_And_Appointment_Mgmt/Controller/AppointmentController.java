@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 
 /**
@@ -100,7 +101,7 @@ public class AppointmentController {
         }
     }
 
-    /** READ (JSON): free slots grouped by date for the calendar, within the 1-90 day booking window. */
+    /** READ (JSON): free future slots grouped by date for the calendar, within the booking window. */
     @GetMapping("/citizen/appointments/biometric/availability")
     public ResponseEntity<?> availability(
             @RequestParam Integer applicationId,
@@ -123,8 +124,10 @@ public class AppointmentController {
             var schedule = appointmentService.getAvailableSchedule(
                     details.application().getServiceType(), centreId, from, to);
             var grouped = new LinkedHashMap<LocalDate, java.util.List<java.util.Map<String, Object>>>();
+            LocalDateTime now = LocalDateTime.now();
             for (var slot : schedule) {
-                if (!slot.available() || slot.remainingPlaces() < 1) continue;
+                if (!slot.available() || slot.remainingPlaces() < 1
+                        || !slot.slotDate().atTime(slot.slotTime()).isAfter(now)) continue;
                 grouped.computeIfAbsent(slot.slotDate(), ignored -> new java.util.ArrayList<>()).add(
                         java.util.Map.of(
                                 "slotId", slot.slotId(),

@@ -217,7 +217,7 @@ public class BiometricScheduleService {
         Centre centre = findCentre(slot.getCentreId());
         LocalDate today = LocalDate.now();
         if (!"ACTIVE".equals(centre.getCentreStatus())
-                || slot.getSlotDate().isBefore(today.plusDays(1))
+                || slot.getSlotDate().isBefore(today)
                 || slot.getSlotDate().isAfter(today.plusDays(90))) {
             throw new IllegalArgumentException("That appointment slot is no longer available. Choose another slot.");
         }
@@ -302,10 +302,10 @@ public class BiometricScheduleService {
         return clean;
     }
 
-    /** Input validation: start from tomorrow, end after start, at most 63 days. */
+    /** Input validation: start from today, end after start, at most 63 days. */
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
-        if (startDate == null || endDate == null || startDate.isBefore(LocalDate.now().plusDays(1))) {
-            throw new IllegalArgumentException("Biometric schedules must start from tomorrow.");
+        if (startDate == null || endDate == null || startDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Biometric schedules must start from today or a future date.");
         }
         if (endDate.isBefore(startDate)) throw new IllegalArgumentException("The end date cannot be before the start date.");
         if (endDate.isAfter(startDate.plusDays(62))) {

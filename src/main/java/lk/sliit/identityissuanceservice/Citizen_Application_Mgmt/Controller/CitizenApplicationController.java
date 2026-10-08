@@ -27,6 +27,7 @@ public class CitizenApplicationController {
     private final DocumentDeliveryService deliveryService;
     private final CitizenCorrectionRequestService correctionRequestService;
 
+    /** Receives the services used by the citizen dashboard and new-application workflow. */
     public CitizenApplicationController(
             CitizenApplicationService applicationService,
             DocumentDeliveryService deliveryService,
@@ -37,6 +38,7 @@ public class CitizenApplicationController {
         this.correctionRequestService = correctionRequestService;
     }
 
+    /** Builds the dashboard with eligibility, active applications, corrections, and delivery information. */
     @GetMapping("/citizen/dashboard")
     public String citizenDashboard(HttpSession session, Model model) {
         Integer citizenId = loggedInCitizenId(session);
@@ -63,6 +65,7 @@ public class CitizenApplicationController {
         return "citizen_frontends/citizen_dashboard";
     }
 
+    /** Displays a pre-filled form for starting a new NIC application. */
     @GetMapping("/citizen/applications/nic/new")
     public String newNicForm(
             HttpSession session,
@@ -81,6 +84,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Validates and creates a new NIC draft, or updates an existing editable NIC draft. */
     @PostMapping("/citizen/applications/nic/new")
     public String saveNewNic(
             @Valid @ModelAttribute("applicationForm") NewNicApplicationForm form,
@@ -122,6 +126,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Loads an existing NIC draft into the application form for editing. */
     @GetMapping("/citizen/applications/nic/edit")
     public String editNewNicDraft(
             @RequestParam Integer applicationId,
@@ -143,6 +148,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Loads an NIC application that an officer returned for correction. */
     @GetMapping("/citizen/applications/nic/correction")
     public String correctNewNic(
             @RequestParam Integer applicationId,
@@ -164,6 +170,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Displays a pre-filled form for starting a new passport application. */
     @GetMapping("/citizen/applications/passport/new")
     public String newPassportForm(
             HttpSession session,
@@ -182,6 +189,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Validates and creates a new passport draft, or updates an existing editable passport draft. */
     @PostMapping("/citizen/applications/passport/new")
     public String saveNewPassport(
             @Valid @ModelAttribute("applicationForm") NewPassportApplicationForm form,
@@ -223,6 +231,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Loads an existing passport draft into the application form for editing. */
     @GetMapping("/citizen/applications/passport/edit")
     public String editNewPassportDraft(
             @RequestParam Integer applicationId,
@@ -247,6 +256,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Loads a passport application that an officer returned for correction. */
     @GetMapping("/citizen/applications/passport/correction")
     public String correctNewPassport(
             @RequestParam Integer applicationId,
@@ -268,6 +278,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Displays the document-upload page for a citizen-owned NIC or passport application. */
     @GetMapping("/citizen/applications/{service:nic|passport}/documents")
     public String newDocumentPage(
             @PathVariable String service,
@@ -287,6 +298,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Validates and uploads one document to the selected NIC or passport application. */
     @PostMapping("/citizen/applications/{service:nic|passport}/documents")
     public String uploadNewDocument(
             @PathVariable String service,
@@ -308,6 +320,7 @@ public class CitizenApplicationController {
         return newDocumentRedirect(service, applicationId);
     }
 
+    /** Builds the final review page with application details and uploaded documents. */
     @GetMapping("/citizen/applications/{service:nic|passport}/review")
     public String reviewNewApplication(
             @PathVariable String service,
@@ -339,6 +352,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Submits a complete application and reports either success or a document error. */
     @PostMapping("/citizen/applications/{service:nic|passport}/submit")
     public String submitNewApplication(
             @PathVariable String service,
@@ -362,6 +376,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Deletes a citizen-owned application while it is still an editable draft. */
     @PostMapping("/citizen/applications/{applicationId}/delete")
     public String deleteDraftApplication(
             @PathVariable Integer applicationId,
@@ -383,6 +398,7 @@ public class CitizenApplicationController {
         return "redirect:/citizen/dashboard";
     }
 
+    /** Adds common page labels and existing-identity details required by new-application forms. */
     private void addNewFormData(Model model, Integer citizenId, String service) {
         model.addAttribute("formKind", "new");
         model.addAttribute("applicationKind", "NEW");
@@ -395,6 +411,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Adds the application, uploaded types, missing types, and correction state to the upload page. */
     private void addNewDocumentData(
             Model model,
             Integer citizenId,
@@ -422,6 +439,7 @@ public class CitizenApplicationController {
         addCorrectionMessage(model, citizenId, application);
     }
 
+    /** Adds an application's correction ID and latest officer message to the form model. */
     private void addCorrectionFormData(Model model, Integer citizenId, Integer applicationId) {
         if (applicationId != null) {
             model.addAttribute("correctionApplicationId", applicationId);
@@ -433,11 +451,13 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Marks the form as a saved-draft edit and adds the draft ID to the model. */
     private void addDraftEditFormData(Model model, Integer applicationId) {
         model.addAttribute("draftEditApplicationId", applicationId);
         model.addAttribute("pageTitle", "Edit Saved Draft");
     }
 
+    /** Chooses correction-mode or ordinary draft-edit model data from the application's status. */
     private void addEditFormData(Model model, Integer citizenId, CitizenApplication application) {
         if (application == null) return;
         if ("CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
@@ -447,6 +467,7 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Adds the current officer correction message when the application requires correction. */
     private void addCorrectionMessage(Model model, Integer citizenId, CitizenApplication application) {
         if ("CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
             model.addAttribute(
@@ -456,17 +477,20 @@ public class CitizenApplicationController {
         }
     }
 
+    /** Prevents an application from being opened through the wrong NIC or passport URL. */
     private void checkService(CitizenApplication application, String servicePath) {
         if (!application.getServiceType().equalsIgnoreCase(servicePath)) {
             throw new IllegalArgumentException("Application service type does not match the requested page.");
         }
     }
 
+    /** Builds the redirect URL back to the selected application's document-upload page. */
     private String newDocumentRedirect(String service, Integer applicationId) {
         return "redirect:/citizen/applications/" + service
                 + "/documents?applicationId=" + applicationId;
     }
 
+    /** Returns the signed-in citizen's ID, or null when the session is missing or has another role. */
     private Integer loggedInCitizenId(HttpSession session) {
         Object citizenId = session.getAttribute("loggedInUserId");
         Object role = session.getAttribute("loggedInUserRole");

@@ -52,7 +52,7 @@ public class BiometricScheduleController {
         model.addAttribute("centres", centres);
         model.addAttribute("selectedCentreId", selectedCentre);
         model.addAttribute("selectedMonth", selectedMonth.toString());
-        model.addAttribute("minimumDate", LocalDate.now().plusDays(1));
+        model.addAttribute("minimumDate", LocalDate.now());
         try {
             model.addAttribute("schedule", selectedCentre == null ? java.util.List.of() : schedules.getSchedule(
                     serviceType, selectedCentre, selectedMonth.atDay(1), selectedMonth.atEndOfMonth()));

@@ -13,8 +13,11 @@ import java.util.Locale;
 @Controller
 public class DraftDocumentController {
     private final CitizenApplicationService applications;
+
+    /** Receives the application service used to validate and delete draft documents. */
     public DraftDocumentController(CitizenApplicationService applications) { this.applications = applications; }
 
+    /** Deletes one document from a citizen-owned draft and redirects to the correct upload workflow. */
     @PostMapping("/citizen/applications/{applicationId}/documents/{documentId}/delete")
     public String delete(@PathVariable Integer applicationId, @PathVariable Integer documentId,
             @RequestParam(required = false) String deleteToken, HttpSession session, RedirectAttributes redirect) {

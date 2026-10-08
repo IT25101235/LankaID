@@ -34,3 +34,6 @@ build/
 
 # Citizen documents uploaded while running the application
 /uploads/
+
+# Local viva credentials contain plaintext demo passwords
+/LankaID-viva-passwords.csv

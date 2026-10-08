@@ -15,6 +15,7 @@ public class ApplicationTrackingController {
     private final DocumentDeliveryService deliveryService;
     private final CitizenCorrectionRequestService correctionRequestService;
 
+    /** Receives the services used to assemble the citizen's application-tracking page. */
     public ApplicationTrackingController(
             CitizenApplicationService applicationService,
             DocumentDeliveryService deliveryService,
@@ -25,6 +26,7 @@ public class ApplicationTrackingController {
         this.correctionRequestService = correctionRequestService;
     }
 
+    /** Loads all applications, correction messages, and delivery details for the signed-in citizen. */
     @GetMapping("/citizen/applications")
     public String applicationTracking(HttpSession session, Model model) {
         Integer citizenId = loggedInCitizenId(session);
@@ -38,6 +40,7 @@ public class ApplicationTrackingController {
         return "citizen_frontends/application_tracking";
     }
 
+    /** Returns the signed-in citizen's ID, or null when the session does not belong to a citizen. */
     private Integer loggedInCitizenId(HttpSession session) {
         Object userId = session.getAttribute("loggedInUserId");
         Object role = session.getAttribute("loggedInUserRole");

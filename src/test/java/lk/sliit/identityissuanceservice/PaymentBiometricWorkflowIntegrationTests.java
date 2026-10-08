@@ -280,7 +280,7 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(serviceType + " application " + application.getApplicationNo())))
                 .andExpect(content().string(not(containsString("null application null"))))
-                .andExpect(content().string(containsString(LocalDate.now().plusDays(1).toString())))
+                .andExpect(content().string(containsString(LocalDate.now().toString())))
                 .andExpect(content().string(containsString(LocalDate.now().plusDays(90).toString())));
 
         LocalDate appointmentDate = LocalDate.now().plusDays(1);

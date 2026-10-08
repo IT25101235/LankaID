@@ -88,7 +88,7 @@ public class AppointmentService {
                 application,
                 appointment,
                 centres,
-                LocalDate.now().plusDays(1),
+                LocalDate.now(),
                 LocalDate.now().plusDays(90)
         );
     }
@@ -281,9 +281,10 @@ public class AppointmentService {
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
         BiometricSlotView nextSlot = scheduleService.getSchedule(
-                        serviceType, appointment.getCentreId(), LocalDate.now().plusDays(1), LocalDate.now().plusDays(90))
+                        serviceType, appointment.getCentreId(), LocalDate.now(), LocalDate.now().plusDays(90))
                 .stream()
-                .filter(slot -> slot.available() && slot.remainingPlaces() > 0)
+                .filter(slot -> slot.available() && slot.remainingPlaces() > 0
+                        && slot.slotDate().atTime(slot.slotTime()).isAfter(LocalDateTime.now()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No future slots are available at this centre. The citizen can choose another centre from Manage booking."));
