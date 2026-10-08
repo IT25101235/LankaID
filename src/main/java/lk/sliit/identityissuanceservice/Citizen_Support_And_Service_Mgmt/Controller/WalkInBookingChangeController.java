@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/** Handles the public manage-booking screen after mobile-number recovery. */
 @Controller
 public class WalkInBookingChangeController {
     private final WalkInAppointmentService bookings;
@@ -31,6 +32,7 @@ public class WalkInBookingChangeController {
 
     @GetMapping("/walk-in/bookings/{reference}/manage")
     public String manage(@PathVariable String reference, HttpSession session, Model model, RedirectAttributes redirect) {
+        // A reference alone is not enough; recovery OTP must be valid in the current session.
         if (!bookings.isRecoveryVerified(session)) return "redirect:/walk-in/recover";
         try {
             var appointment = bookings.getVisitorPass(reference, session).appointment();
@@ -57,6 +59,7 @@ public class WalkInBookingChangeController {
     public String cancel(@PathVariable String reference, @RequestParam(required = false) String token,
                          HttpSession session, RedirectAttributes redirect) {
         try {
+            // The change token carries the booking snapshot used to detect stale submissions.
             changes.cancel(reference, BookingChangeRequest.require(token, session), session);
             BookingChangeRequest.clear(session);
             redirect.addFlashAttribute("walkInMessage", "Booking cancelled and its place released. No cancellation fee was charged.");
@@ -76,6 +79,7 @@ public class WalkInBookingChangeController {
         if (!bookings.isRecoveryVerified(session)) return "redirect:/walk-in/recover";
         try {
             var request = BookingChangeRequest.require(token, session);
+            // Validate card input before the service records a charge or changes the appointment.
             var errors = CardPaymentValidation.errors(card);
             if (!errors.isEmpty()) {
                 model.addAttribute("cardErrors", errors);
