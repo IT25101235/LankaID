@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -117,6 +118,30 @@ class CitizenSupportWorkflowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Complaint subject " + unique)))
                 .andExpect(content().string(not(containsString("Contact subject " + unique))));
+    }
+
+    @Test
+    void citizenCanDeleteAnUnansweredComplaint() throws Exception {
+        String unique = unique();
+        Integer citizenId = createCitizen(unique);
+        createRequest(citizenId, "COMPLAINT", "Complaint to delete " + unique);
+
+        SupportRequest complaint = supportRepository
+                .findAllByCitizenIdOrderByCreatedAtDesc(
+                        citizenId,
+                        org.springframework.data.domain.PageRequest.of(0, 15)
+                )
+                .getContent().get(0);
+        String reference = supportService.reference(complaint.getRequestId());
+
+        mockMvc.perform(get("/citizen/support/{reference}", reference)
+                        .session(citizenSession(citizenId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Delete request")));
+
+        supportService.deleteUnansweredRequest(citizenId, reference);
+
+        assertFalse(supportRepository.existsById(complaint.getRequestId()));
     }
 
     @Test

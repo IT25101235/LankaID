@@ -9,6 +9,11 @@ import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 
 import java.util.List;
 
+/**
+ * Immutable composite view model for the officer review page.
+ * A Java record provides encapsulation without mutable setters and groups the common application,
+ * service-specific details, citizen profile and uploaded documents in one value object.
+ */
 public record VerificationReviewDetails(
         CitizenApplication reviewApplication,
         CitizenAccount citizen,

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "SupportRequest", schema = "dbo")
+/** Stores the citizen message, officer response and current support workflow state. */
 public class SupportRequest {
 
     @Id
@@ -48,13 +49,16 @@ public class SupportRequest {
 
     @PrePersist
     private void applyDefaults() {
+        // Defaults are also applied to requests created outside the web form workflow.
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (requestStatus == null) requestStatus = "OPEN";
     }
 
     public Integer getRequestId() { return requestId; }
-    public boolean isDeletableContact() {
-        return "CONTACT".equals(requestType) && "OPEN".equals(requestStatus)
+    public boolean isDeletableByCitizen() {
+        // Once an officer starts handling a request, it stays available for follow-up and audit.
+        return ("CONTACT".equals(requestType) || "COMPLAINT".equals(requestType))
+                && "OPEN".equals(requestStatus)
                 && handledByStaffId == null && respondedAt == null
                 && (response == null || response.isBlank())
                 && !"Existing document verification".equals(subject);

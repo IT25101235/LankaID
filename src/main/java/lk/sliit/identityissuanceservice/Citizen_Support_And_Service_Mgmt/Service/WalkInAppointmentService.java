@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/** Coordinates public walk-in booking, recovery, scheduling and officer check-in operations. */
 @Service
 public class WalkInAppointmentService {
 
@@ -78,6 +79,7 @@ public class WalkInAppointmentService {
         if (name.length() < 2 || name.length() > 100) {
             throw new IllegalArgumentException("Enter the visitor's full name.");
         }
+        // Keep OTP and visitor details together when the same browser sends overlapping requests.
         synchronized (session) {
             otpService.send(phone, OTP_PURPOSE, session);
             session.setAttribute(SESSION_NAME, name);
@@ -113,6 +115,7 @@ public class WalkInAppointmentService {
     @Transactional(readOnly = true)
     public List<WalkInSlotView> getBookableSlots() {
         LocalDateTime now = LocalDateTime.now();
+        // Availability is calculated from live bookings rather than stored as a separate counter.
         return slotRepository
                 .findAllBySlotDateGreaterThanEqualAndIsAvailableOrderBySlotDateAscSlotTimeAsc(
                         now.toLocalDate(), "Y")
@@ -136,6 +139,8 @@ public class WalkInAppointmentService {
             WalkInSlot slot = slotRepository.findById(slotId)
                     .orElseThrow(() -> new IllegalArgumentException("Select an available appointment slot."));
             requireAvailableSlot(slot);
+            // This token binds the payment page to the verified phone, service and chosen slot.
+            // The slot is checked again during payment because this step does not reserve it.
             session.setAttribute(PENDING_BOOKING,
                     new PendingBooking(service, slotId, sessionPhone(session), UUID.randomUUID().toString()));
         }
@@ -157,6 +162,7 @@ public class WalkInAppointmentService {
     public WalkInAppointmentView payAndBook(String token, HttpSession session) {
         synchronized (session) {
             PendingBooking pending = requirePendingBooking(session);
+            // Reject a stale payment tab if the citizen changed the selected booking details.
             if (!pending.token().equals(token)) {
                 throw new IllegalArgumentException("The selection changed. Review the appointment before paying.");
             }
@@ -194,6 +200,7 @@ public class WalkInAppointmentService {
         appointment.setVisitorPhone(sessionPhone(session));
         appointment.setVisitorService(pending.service());
         appointment = appointmentRepository.save(appointment);
+        // Payment and confirmation share this transaction, avoiding a confirmed booking without payment.
         paymentService.pay(appointment);
         appointment.setAppointmentStatus("CONFIRMED");
         appointment = appointmentRepository.save(appointment);
@@ -231,6 +238,7 @@ public class WalkInAppointmentService {
                 throw new IllegalArgumentException("Verify your mobile number to retrieve bookings.");
             }
             String phone = recoveryPhone(session);
+            // Search both normalized and older local formats so existing records remain recoverable.
             return appointmentRepository
                 .findAllByVisitorPhoneInAndAppointmentTypeOrderByScheduledAtDesc(
                         List.of(phone, "0" + phone.substring(3)), WALK_IN)
@@ -281,6 +289,7 @@ public class WalkInAppointmentService {
             boolean justBooked = value instanceof CreatedPass pass
                     && pass.reference().equalsIgnoreCase(clean(reference))
                     && Instant.now().isBefore(pass.expiresAt());
+            // A new pass has a short grace period; later access requires recovery OTP ownership.
             if (!justBooked && !isRecoveryVerified(session)) {
                 throw new IllegalArgumentException("Verify your mobile number to access this pass.");
             }
@@ -303,6 +312,7 @@ public class WalkInAppointmentService {
     public Page<WalkInAppointmentView> getCsrQueue(int page, String visitorService) {
         String service = clean(visitorService).toUpperCase();
         PageRequest pageRequest = PageRequest.of(Math.max(page, 0), PAGE_SIZE);
+        // Only known service values become filters; blank or altered values show the full queue.
         if (!service.isBlank() && SERVICES.contains(service)) {
             return appointmentRepository
                     .findAllByAppointmentTypeAndVisitorServiceOrderByScheduledAtDesc(
@@ -377,6 +387,7 @@ public class WalkInAppointmentService {
         validateOperatingTimes(openingTime, closingTime);
         validateCapacity(capacity);
 
+        // Each day is expanded into half-hour rows so capacity can be managed per time slot.
         int publishedDays = 0;
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             configureDay(centreId, date, openingTime, closingTime, capacity);
@@ -394,6 +405,7 @@ public class WalkInAppointmentService {
     ) {
         List<WalkInSlot> existingSlots =
                 slotRepository.findAllByCentreIdAndSlotDateOrderBySlotTimeAsc(centreId, date);
+        // Old times outside the new opening window are closed instead of deleted for history.
         existingSlots.stream()
                 .filter(slot -> slot.getSlotTime().isBefore(openingTime)
                         || !slot.getSlotTime().isBefore(closingTime))
@@ -405,6 +417,7 @@ public class WalkInAppointmentService {
                     .findByCentreIdAndSlotDateAndSlotTime(centreId, date, time)
                     .orElseGet(WalkInSlot::new);
             long booked = slot.getSlotId() == null ? 0 : bookedCount(slot);
+            // Never publish a capacity that would invalidate bookings already confirmed for the slot.
             if (capacity < booked) {
                 throw new IllegalArgumentException(
                         "Capacity cannot be lower than the existing booking count of " + booked
@@ -445,6 +458,7 @@ public class WalkInAppointmentService {
         slots.forEach(slot -> slot.setIsAvailable("N"));
         slotRepository.saveAll(slots);
 
+        // Closing a day also cancels active visits so old passes cannot still be checked in.
         List<Appointment> appointments = appointmentRepository
                 .findAllByAppointmentTypeAndCentreIdAndScheduledAtBetweenAndAppointmentStatusIn(
                         WALK_IN,
@@ -478,6 +492,7 @@ public class WalkInAppointmentService {
         WalkInSlot slot = slotRepository.findByIdForBooking(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Walk-in slot was not found."));
         long booked = bookedCount(slot);
+        // Capacity may grow freely, but it cannot be reduced below existing occupied places.
         if (capacity < booked) {
             throw new IllegalArgumentException("Capacity cannot be lower than the existing booking count of " + booked + ".");
         }
@@ -517,6 +532,7 @@ public class WalkInAppointmentService {
                 && !"CHECKED_IN".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("This walk-in appointment cannot be checked in.");
         }
+        // A valid pass is still date-bound; early and late check-ins are not accepted.
         BookingChangePolicy.requireCheckInToday(appointment);
         AppointmentCheckIn checkIn = checkInRepository.findById(appointment.getAppointmentId())
                 .orElseGet(AppointmentCheckIn::new);
@@ -541,6 +557,7 @@ public class WalkInAppointmentService {
             throw new IllegalArgumentException("A checked-in appointment cannot be rescheduled.");
         }
 
+        // Officers move missed visits to the earliest free slot at the original centre.
         WalkInSlotView nextSlot = getBookableSlots().stream()
                 .filter(slot -> slot.centreId().equals(appointment.getCentreId()))
                 .findFirst()
@@ -587,6 +604,7 @@ public class WalkInAppointmentService {
 
     private WalkInSlotView buildSlotView(WalkInSlot slot) {
         Centre centre = findCentre(slot.getCentreId());
+        // Cancelled and unpaid rows do not consume capacity; bookedCount applies the status list.
         long booked = bookedCount(slot);
         int remaining = Math.max(0, slot.getSlotCapacity() - (int) booked);
         return new WalkInSlotView(
@@ -657,6 +675,7 @@ public class WalkInAppointmentService {
 
     private String createReference() {
         String reference;
+        // The database check handles the unlikely case where the random part is repeated.
         do {
             reference = "WALK-" + LocalDate.now().getYear() + "-"
                     + UUID.randomUUID().toString().substring(0, 8).toUpperCase();

@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
+/** Produces the QR image and downloadable pass without exposing appointment details in the QR value. */
 @Service
 public class WalkInPassService {
 
@@ -37,6 +38,7 @@ public class WalkInPassService {
     }
 
     public byte[] createPass(WalkInAppointmentView details) {
+        // Build the pass in memory so no temporary citizen document is left on the server.
         BufferedImage pass = new BufferedImage(900, 1200, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = pass.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -53,6 +55,7 @@ public class WalkInPassService {
         graphics.drawString("Walk-in Service Appointment Pass", 105, 170);
 
         try {
+            // Only the reference is encoded; the protected endpoint resolves the actual booking.
             BufferedImage qr = ImageIO.read(new ByteArrayInputStream(
                     createQrCode(details.appointment().getReferenceNo(), 390)
             ));
@@ -93,6 +96,7 @@ public class WalkInPassService {
     }
 
     private byte[] writePng(BufferedImage image) {
+        // Returning bytes lets the controller choose inline display or download headers.
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             ImageIO.write(image, "PNG", output);
             return output.toByteArray();

@@ -12,6 +12,7 @@ import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.AppointmentChangePa
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Applies cancellation and paid rescheduling rules to recovered walk-in bookings. */
 @Service
 public class WalkInBookingChangeService {
     private final WalkInAppointmentService bookings;
@@ -32,6 +33,7 @@ public class WalkInBookingChangeService {
     @Transactional
     public void cancel(String reference, BookingChangeRequest request, HttpSession session) {
         Appointment appointment = ownedBooking(reference, request, session);
+        // The shared policy checks the time window and current status before cancellation.
         BookingChangePolicy.requireCancellationAllowed(appointment);
         appointment.setAppointmentStatus("CANCELLED");
         appointment.setQrCode(null);
@@ -54,6 +56,7 @@ public class WalkInBookingChangeService {
         if (bookings.getPaidPayment(appointment.getAppointmentId()) == null) {
             throw new IllegalArgumentException("The original booking payment was not found. Contact the service centre.");
         }
+        // Record the change charge before moving the booking; the transaction rolls both back on failure.
         payments.record(appointment, newTime, "RESCHEDULE", request.token());
         appointment.setCentreId(slot.getCentreId());
         appointment.setScheduledAt(newTime);
@@ -62,6 +65,7 @@ public class WalkInBookingChangeService {
     }
 
     private Appointment ownedBooking(String reference, BookingChangeRequest request, HttpSession session) {
+        // Recovery verification proves control of the phone number linked to the booking.
         if (!bookings.isRecoveryVerified(session)) {
             throw new IllegalArgumentException("Verify your mobile number again before managing bookings.");
         }
@@ -71,6 +75,7 @@ public class WalkInBookingChangeService {
                 || !SriLankanMobileNumber.normalize(appointment.getVisitorPhone()).equals(bookings.recoveryPhone(session))) {
             throw new IllegalArgumentException("Booking was not found for your verified number.");
         }
+        // The signed request snapshot detects changes made from another tab or officer action.
         BookingChangePolicy.requireUnchanged(appointment, request);
         if (checkIns.existsById(appointment.getAppointmentId())) {
             throw new IllegalArgumentException("A checked-in booking cannot be changed.");

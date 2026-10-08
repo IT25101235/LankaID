@@ -10,10 +10,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/** Limits appointment queries to the walk-in workflow and its officer queue. */
 public interface WalkInAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
     boolean existsByAppointmentTypeAndCentreIdAndScheduledAt(String appointmentType, Integer centreId, LocalDateTime scheduledAt);
 
+    // Booking changes lock the appointment so stale requests cannot update it concurrently.
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select a from Appointment a where a.referenceNo = :reference and a.appointmentType = 'WALK_IN'")
     Optional<Appointment> findForChange(@org.springframework.data.repository.query.Param("reference") String reference);

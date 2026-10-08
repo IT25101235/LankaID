@@ -16,8 +16,7 @@
   };
 </script>
 <script>document.documentElement.classList.add('reveal-ready');</script>
-<link href="/css/government-theme.css?v=20261008-announcement" rel="stylesheet"/>
-<link href="/Chatbot/chatbot.css?v=20261008" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261009-chatbot-maroon" rel="stylesheet"/>
 </head>
 <body id="top" class="gov-landing-page bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 
@@ -40,8 +39,23 @@
   </div>
 </header>
 
+<!-- Maintenance takes priority over normal public announcements. -->
+<section th:if="${maintenanceActive}"
+         class="border-b border-red-200 bg-red-50"
+         role="alert"
+         aria-labelledby="maintenanceNoticeTitle">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-4 flex items-start gap-3">
+    <span class="material-symbols-outlined text-red-700 mt-0.5" aria-hidden="true">engineering</span>
+    <div>
+      <h2 id="maintenanceNoticeTitle" class="font-bold text-red-900">LankaID is under maintenance</h2>
+      <p class="text-sm text-red-800 mt-1" th:text="${maintenanceWarning}">Identity services are temporarily unavailable.</p>
+      <p class="text-xs text-red-700 mt-1">Citizen and officer services will be available again when maintenance is complete.</p>
+    </div>
+  </div>
+</section>
+
 <!-- One high-priority public notice is shown at a time. It stays in the page flow instead of blocking access. -->
-<section th:if="${publicAnnouncement}"
+<section th:if="${maintenanceActive != true and publicAnnouncement != null}"
          id="publicAnnouncement"
          class="gov-public-announcement"
          th:classappend="| gov-public-announcement--${#strings.toLowerCase(publicAnnouncement.announcementType)}|"
@@ -312,7 +326,6 @@
     <div class="lankaid-chatbot-conversation" role="log" aria-label="Conversation with LankaID assistant"
          aria-live="polite" aria-relevant="additions" data-chatbot-log>
       <div class="lankaid-chatbot-welcome" data-chatbot-welcome>
-        <span class="lankaid-chatbot-welcome-tag">A LITTLE GUIDANCE, A SIMPLER JOURNEY</span>
         <h3>Hello! How can we help?</h3>
         <p>Find your next step for identity documents, appointments, and LankaID services.</p>
         <div class="lankaid-chatbot-welcome-note">

@@ -23,6 +23,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Aggregates an application's complete lifecycle for officer tracking.
+ * Data from verification, payment, appointment, biometric and delivery modules is combined into
+ * one immutable DTO without changing any workflow state.
+ */
 @Service
 public class OfficerApplicationTrackingService {
 
@@ -63,6 +68,7 @@ public class OfficerApplicationTrackingService {
             String search,
             int pageNumber
     ) {
+        // Convert the logged-in role into a database scope before searching or paging.
         String serviceScope = serviceScope(officerRole);
         String applicationReference = clean(search);
         PageRequest pageRequest = PageRequest.of(Math.max(pageNumber, 0), PAGE_SIZE);
@@ -92,6 +98,7 @@ public class OfficerApplicationTrackingService {
     }
 
     private OfficerApplicationTrackingItem buildItem(CitizenApplication application) {
+        // Each optional stage may not exist yet, so missing downstream records are represented by null.
         CitizenAccount citizen = citizenRepository.findById(application.getCitizenId()).orElse(null);
         UserAccount user = userRepository.findById(application.getCitizenId()).orElse(null);
         ApplicationReview review = reviewRepository
@@ -125,6 +132,7 @@ public class OfficerApplicationTrackingService {
     }
 
     private String serviceScope(String officerRole) {
+        // Director has no service filter; each application officer receives a fixed service filter.
         return switch (officerRole) {
             case OfficerAccountService.DIRECTOR -> null;
             case OfficerAccountService.NIC_OFFICER -> "NIC";

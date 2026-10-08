@@ -16,6 +16,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * MVC controller for the NIC verification workflow.
+ *
+ * <p>The controller is responsible for HTTP/session concerns: it checks the officer role,
+ * prepares data for Thymeleaf, and converts service errors into flash messages. The actual
+ * verification rules and database updates remain encapsulated in the service layer.</p>
+ *
+ * <p>OOP concepts: composition is used through constructor-injected services, while the
+ * controller depends on service abstractions instead of creating repository objects itself.</p>
+ */
 @Controller
 public class NicVerificationController {
 
@@ -51,6 +61,7 @@ public class NicVerificationController {
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
+        // Every decision passes through the same authorization and error-handling path.
         String accessResult = checkAccess(session);
         if (accessResult != null) {
             return accessResult;
@@ -126,6 +137,7 @@ public class NicVerificationController {
 
         try {
             Integer staffId = session.getAttribute("loggedInOfficerId") instanceof Integer id ? id : null;
+            // Delegate the business state transition to the transactional service.
             if ("approve".equals(decision)) {
                 verificationReviewService.approve(reference, "NIC", staffId);
                 redirectAttributes.addFlashAttribute("verificationMessage", "Application approved successfully.");
@@ -156,11 +168,13 @@ public class NicVerificationController {
     }
 
     private String checkAccess(HttpSession session) {
+        // System administrators use their own dashboard and cannot act as verification officers.
         if (session.getAttribute("loggedInAdminId") != null) {
             return "redirect:/officer/admin";
         }
 
         Object role = session.getAttribute("loggedInOfficerRole");
+        // A director may supervise both queues; a normal officer is restricted to the NIC queue.
         boolean allowed = OfficerAccountService.NIC_OFFICER.equals(role)
                 || OfficerAccountService.DIRECTOR.equals(role);
         return allowed ? null : "redirect:/login";

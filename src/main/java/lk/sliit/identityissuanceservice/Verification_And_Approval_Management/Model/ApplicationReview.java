@@ -10,6 +10,13 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+/**
+ * Persistent audit entry for one officer decision.
+ * Multiple rows may belong to the same application, so corrections and later re-reviews remain
+ * historically traceable instead of overwriting the previous decision.
+ *
+ * <p>OOP encapsulation: fields remain private and are accessed through getters and setters.</p>
+ */
 @Entity
 @Table(name = "ApplicationReview", schema = "dbo")
 public class ApplicationReview {
@@ -39,6 +46,7 @@ public class ApplicationReview {
 
     @PrePersist
     private void applyDefaults() {
+        // JPA assigns the audit timestamp automatically when a new review row is persisted.
         if (reviewedAt == null) reviewedAt = LocalDateTime.now();
     }
 

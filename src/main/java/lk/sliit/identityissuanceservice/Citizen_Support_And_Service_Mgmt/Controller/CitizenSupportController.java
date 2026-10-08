@@ -28,18 +28,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+/** Routes citizen support forms and the CSR officer work queue to the same service layer. */
 @Controller
 public class CitizenSupportController {
 
     @PostMapping("/citizen/support/{reference}/delete")
-    public String deleteContact(@PathVariable String reference, @RequestParam(required = false) String deleteToken,
+    public String deleteRequest(@PathVariable String reference, @RequestParam(required = false) String deleteToken,
             HttpSession session, RedirectAttributes redirect) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
         try {
+            // The one-time form token protects this destructive POST from replayed submissions.
             DeletionFormToken.check(deleteToken, session);
-            supportService.deleteUnansweredContact(citizenId, reference);
-            redirect.addFlashAttribute("supportMessage", "Contact request deleted.");
+            supportService.deleteUnansweredRequest(citizenId, reference);
+            redirect.addFlashAttribute("supportMessage", "Support request deleted.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("supportError", exception.getMessage());
         } catch (DataAccessException exception) {
@@ -74,6 +76,7 @@ public class CitizenSupportController {
         if (citizenId == null) return "redirect:/login";
 
         SupportRequestForm form = new SupportRequestForm();
+        // One form serves both URLs; the route decides which request type and labels to show.
         String route = currentRouteType(type, request.getRequestURI());
         form.setRequestType(route);
         model.addAttribute("supportForm", form);
@@ -103,6 +106,7 @@ public class CitizenSupportController {
                     "supportMessage",
                     created.reference() + " was submitted successfully."
             );
+            // Redirect after a successful POST so refreshing the detail page cannot resubmit it.
             return "redirect:/citizen/support/" + created.reference();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("support.request.failed", exception.getMessage());
@@ -138,6 +142,7 @@ public class CitizenSupportController {
         if (citizenId == null) return "redirect:/login";
 
         try {
+            // The service includes citizenId in its lookup, so references are not enough for access.
             model.addAttribute("supportRequest", supportService.getCitizenRequest(citizenId, reference));
         } catch (IllegalArgumentException exception) {
             model.addAttribute("supportError", exception.getMessage());
@@ -147,6 +152,7 @@ public class CitizenSupportController {
 
     @GetMapping("/officer/csr")
     public String csrDashboard(HttpSession session, Model model) {
+        // Administrators have a separate dashboard; only CSR staff and directors use these pages.
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         if (!canAccessCsrPages(session)) return "redirect:/login";
 
@@ -235,6 +241,7 @@ public class CitizenSupportController {
         if (!canAccessCsrPages(session)) return "redirect:/login";
 
         try {
+            // The service records both the officer and response time in the same transaction.
             supportService.respond(reference, loggedInOfficerId(session), response);
             redirectAttributes.addFlashAttribute("supportMessage", "Response sent to the citizen.");
         } catch (IllegalArgumentException exception) {
@@ -253,6 +260,7 @@ public class CitizenSupportController {
         if (!canAccessCsrPages(session)) return "redirect:/login";
 
         try {
+            // Resolution is refused until an officer response has been saved.
             supportService.resolve(reference, loggedInOfficerId(session));
             redirectAttributes.addFlashAttribute("supportMessage", "Support request marked as resolved.");
         } catch (IllegalArgumentException exception) {
@@ -290,6 +298,7 @@ public class CitizenSupportController {
     }
 
     private boolean canAccessCsrPages(HttpSession session) {
+        // Directors share CSR access for supervision, while other officer roles remain isolated.
         Object role = session.getAttribute("loggedInOfficerRole");
         return OfficerAccountService.CSR.equals(role)
                 || OfficerAccountService.DIRECTOR.equals(role);

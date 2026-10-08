@@ -22,6 +22,7 @@ import java.time.Year;
 import java.util.List;
 import java.util.Set;
 
+/** Handles the full support-request lifecycle shared by citizens and CSR officers. */
 @Service
 public class CitizenSupportService {
 
@@ -57,6 +58,7 @@ public class CitizenSupportService {
 
     @Transactional
     public SupportRequestView createRequest(Integer citizenId, SupportRequestForm form) {
+        // Confirm the session still points to a real user before accepting citizen-owned data.
         findUser(citizenId);
         String requestType = clean(form.getRequestType()).toUpperCase();
         if (!REQUEST_TYPES.contains(requestType)) {
@@ -71,6 +73,7 @@ public class CitizenSupportService {
         request.setRequestStatus(OPEN);
         request = supportRepository.save(request);
 
+        // The saved ID is used in the public reference, so notification happens after persistence.
         notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
@@ -94,6 +97,7 @@ public class CitizenSupportService {
     @Transactional(readOnly = true)
     public SupportRequestView getCitizenRequest(Integer citizenId, String reference) {
         Integer requestId = requestId(reference);
+        // Querying by both values prevents one citizen from opening another citizen's request.
         SupportRequest request = supportRepository
                 .findByRequestIdAndCitizenId(requestId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
@@ -106,6 +110,7 @@ public class CitizenSupportService {
             String requestStatus,
             int pageNumber
     ) {
+        // Unknown filter values fall back to the full queue instead of reaching the repository query.
         String type = filterValue(requestType, REQUEST_TYPES);
         String status = filterValue(requestStatus, REQUEST_STATUSES);
         PageRequest pageRequest = PageRequest.of(Math.max(pageNumber, 0), PAGE_SIZE);
@@ -139,6 +144,7 @@ public class CitizenSupportService {
 
     @Transactional
     public SupportRequestView respond(String reference, Integer staffId, String response) {
+        // Locking keeps two officers from overwriting each other's response at the same time.
         SupportRequest request = supportRepository.findForUpdate(requestId(reference))
                 .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
         String cleanResponse = clean(response);
@@ -152,6 +158,7 @@ public class CitizenSupportService {
         request.setHandledByStaffId(staffId);
         request.setResponse(cleanResponse);
         request.setRespondedAt(LocalDateTime.now());
+        // A reply means work has started; resolution remains a separate officer action.
         request.setRequestStatus(IN_PROGRESS);
         request = supportRepository.save(request);
 
@@ -167,9 +174,11 @@ public class CitizenSupportService {
 
     @Transactional
     public SupportRequestView resolve(String reference, Integer staffId) {
+        // Read the latest state under a write lock before applying the final transition.
         SupportRequest request = supportRepository.findForUpdate(requestId(reference))
                 .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
         if ("Existing document verification".equals(request.getSubject())) {
+            // Verification requests are closed by their own decision workflow and audit record.
             throw new IllegalArgumentException("Use the identity verification decision form to close this request.");
         }
         if (request.getResponse() == null || request.getResponse().isBlank()) {
@@ -210,6 +219,7 @@ public class CitizenSupportService {
         List<SupportRequest> answeredRequests = supportRepository.findAllByRespondedAtIsNotNull();
         if (answeredRequests.isEmpty()) return "N/A";
 
+        // Measure the first recorded response delay and display it in the most readable unit.
         double averageHours = answeredRequests.stream()
                 .mapToLong(request -> Duration.between(
                         request.getCreatedAt(),
@@ -252,6 +262,7 @@ public class CitizenSupportService {
     private Integer requestId(String reference) {
         String value = clean(reference);
         if (value.isBlank()) throw new IllegalArgumentException("Support request was not found.");
+        // Both the formatted SUP-year-number reference and a raw internal ID are accepted.
         String idPart = value.contains("-") ? value.substring(value.lastIndexOf('-') + 1) : value;
         try {
             return Integer.valueOf(idPart);
@@ -261,6 +272,7 @@ public class CitizenSupportService {
     }
 
     private SupportRequestView buildView(SupportRequest request) {
+        // Keep entity relationships out of the templates by preparing all display values here.
         UserAccount user = findUser(request.getCitizenId());
         CitizenAccount citizen = citizenRepository.findById(request.getCitizenId()).orElse(null);
         String employeeNo = request.getHandledByStaffId() == null ? "Not assigned"
@@ -299,12 +311,13 @@ public class CitizenSupportService {
     }
 
     @Transactional
-    public void deleteUnansweredContact(Integer citizenId, String reference) {
+    public void deleteUnansweredRequest(Integer citizenId, String reference) {
+        // Citizens may remove their own request only before a CSR officer starts handling it.
         SupportRequest request = supportRepository.findForUpdate(requestId(reference))
                 .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
         if (!citizenId.equals(request.getCitizenId())) throw new IllegalArgumentException("Support request was not found.");
-        if (!request.isDeletableContact()) {
-            throw new IllegalArgumentException("Only unanswered Contact Us requests can be deleted. Complaints and identity verification requests are retained.");
+        if (!request.isDeletableByCitizen()) {
+            throw new IllegalArgumentException("Only unanswered support requests can be deleted.");
         }
         supportRepository.delete(request);
         supportRepository.flush();

@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 
+/** Serves the citizen booking journey and the CSR walk-in management workbench. */
 @Controller
 public class WalkInAppointmentController {
 
@@ -115,6 +116,7 @@ public class WalkInAppointmentController {
 
     @GetMapping("/walk-in/book")
     public String bookingPage(HttpSession session, Model model) {
+        // Slot selection is available only after the booking phone has been verified.
         if (!walkInService.isPhoneVerified(session)) return "redirect:/walk-in";
         model.addAttribute("step", "BOOK");
         model.addAttribute("visitorName", walkInService.sessionName(session));
@@ -142,6 +144,7 @@ public class WalkInAppointmentController {
     @GetMapping("/walk-in/payment")
     public String walkInPaymentPage(HttpSession session, Model model,
                                     HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        // Payment and pass pages contain private booking data and must not be browser-cached.
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
         try {
             model.addAttribute("paymentDetails", walkInService.getPaymentDetails(session));
@@ -202,6 +205,7 @@ public class WalkInAppointmentController {
     ) {
         WalkInAppointmentView details;
         try {
+            // getVisitorPass applies the same ownership rule used by the HTML pass page.
             details = walkInService.getVisitorPass(reference, session);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.status(403).header(HttpHeaders.CACHE_CONTROL, "no-store").build();
@@ -334,6 +338,7 @@ public class WalkInAppointmentController {
     ) {
         String accessRedirect = csrAccessRedirect(session);
         if (accessRedirect != null) return accessRedirect;
+        // Queue, schedule and an optional selected booking are prepared for one officer screen.
         Page<WalkInAppointmentView> queue = walkInService.getCsrQueue(page, walkInServiceFilter);
         model.addAttribute("walkIns", queue.getContent());
         model.addAttribute("currentPage", queue.getNumber());
@@ -403,6 +408,7 @@ public class WalkInAppointmentController {
         String accessRedirect = csrAccessRedirect(session);
         if (accessRedirect != null) return accessRedirect;
         try {
+            // The service expands this range and validates every generated half-hour slot.
             int days = walkInService.publishDateRange(
                     centreId,
                     startDate,
@@ -505,6 +511,7 @@ public class WalkInAppointmentController {
         String accessRedirect = csrAccessRedirect(session);
         if (accessRedirect != null) return accessRedirect;
         try {
+            // Both QR scans and typed references use the same date and status checks.
             walkInService.checkIn(reference, officerId(session), method);
             redirectAttributes.addFlashAttribute("walkInMessage", "Visitor checked in successfully.");
         } catch (IllegalArgumentException exception) {
@@ -552,6 +559,7 @@ public class WalkInAppointmentController {
     }
 
     private String csrAccessRedirect(HttpSession session) {
+        // Directors can supervise this workflow; unrelated officer roles return to login.
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         Object role = session.getAttribute("loggedInOfficerRole");
         if (OfficerAccountService.CSR.equals(role) || OfficerAccountService.DIRECTOR.equals(role)) {

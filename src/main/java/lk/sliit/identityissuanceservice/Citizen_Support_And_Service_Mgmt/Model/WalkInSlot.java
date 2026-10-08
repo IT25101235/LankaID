@@ -12,6 +12,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "WalkInSlot", schema = "dbo")
+/** Represents one centre's capacity for a single walk-in date and time. */
 public class WalkInSlot {
 
     @Id
