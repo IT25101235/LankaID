@@ -1141,7 +1141,7 @@ body.gov-landing-page > main {
   position: relative;
   z-index: 40;
   color: #ffffff;
-  background: var(--gov-navy);
+  background: linear-gradient(105deg, var(--gov-maroon-dark), var(--gov-maroon));
   border-bottom: 3px solid var(--gov-gold);
   box-shadow: 0 8px 24px rgb(15 39 71 / 0.16);
   animation: gov-announcement-enter 360ms ease-out both;
@@ -1152,12 +1152,12 @@ body.gov-landing-page > main {
 }
 
 .gov-public-announcement--emergency {
-  background: linear-gradient(105deg, #881b1b, #b42318);
+  background: linear-gradient(105deg, var(--gov-maroon-dark), var(--gov-maroon));
   border-bottom-color: #ffd166;
 }
 
 .gov-public-announcement--service_update {
-  background: linear-gradient(105deg, #123f54, var(--gov-teal));
+  background: linear-gradient(105deg, var(--gov-maroon-dark), var(--gov-maroon));
 }
 
 .gov-public-announcement__layout {
@@ -1445,11 +1445,28 @@ button[onclick^="togglePassword"]:focus-visible { color: #075985; }
 .gov-auth-visual {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
+  background: var(--gov-navy-dark);
+}
+
+.gov-auth-visual::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  content: "";
   background-image:
     linear-gradient(180deg, rgb(16 40 61 / 0.9), rgb(75 11 47 / 0.9)),
     url("/images/presidential-secretariat-wide.jpg");
   background-position: center;
   background-size: cover;
+  transform-origin: center;
+  animation: govAuthSubtleZoom 14s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes govAuthSubtleZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.035); }
 }
 
 .gov-auth-visual::after {
@@ -1459,6 +1476,10 @@ button[onclick^="togglePassword"]:focus-visible { color: #075985; }
   width: 0.35rem;
   content: "";
   background: var(--gov-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gov-auth-visual::before { animation: none; }
 }
 
 .auth-tab { transition: color 160ms ease, border-color 160ms ease; }

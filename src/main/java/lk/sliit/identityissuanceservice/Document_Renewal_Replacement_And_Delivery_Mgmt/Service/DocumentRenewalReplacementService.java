@@ -97,6 +97,7 @@ public class DocumentRenewalReplacementService {
         NicRenewalReplacementForm form = new NicRenewalReplacementForm();
         CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
         form.setLastNicNo(eligibility.getNicNumber());
+        form.setLastIssuedDate(eligibility.getNicIssuedDate());
         return form;
     }
 
@@ -118,13 +119,32 @@ public class DocumentRenewalReplacementService {
     @Transactional(readOnly = true)
     public NicRenewalReplacementForm prepareNicCorrection(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getCorrectionRequest(citizenId, applicationId, NIC);
+        return prepareNicEditForm(citizenId, application);
+    }
+
+    @Transactional(readOnly = true)
+    public NicRenewalReplacementForm prepareNicDraftEdit(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getDraftRequest(citizenId, applicationId, NIC);
+        return prepareNicEditForm(citizenId, application);
+    }
+
+    private NicRenewalReplacementForm prepareNicEditForm(
+            Integer citizenId,
+            CitizenApplication application
+    ) {
+        Integer applicationId = application.getApplicationId();
         NicApplication details = nicRepository.findById(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("NIC application details were not found."));
+        CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
 
         NicRenewalReplacementForm form = new NicRenewalReplacementForm();
         CitizenProfileMapper.copyToForm(findCitizen(citizenId), form);
-        form.setLastNicNo(details.getLastNicNo());
-        form.setLastIssuedDate(details.getLastIssuedDate() == null ? null : details.getLastIssuedDate().toLocalDate());
+        form.setLastNicNo(eligibility.getNicNumber());
+        if (eligibility.getNicIssuedDate() != null) {
+            form.setLastIssuedDate(eligibility.getNicIssuedDate());
+        } else if (RENEWAL.equals(application.getApplicationKind()) && details.getLastIssuedDate() != null) {
+            form.setLastIssuedDate(details.getLastIssuedDate().toLocalDate());
+        }
         form.setPoliceStation(details.getPoliceStation());
         form.setPoliceReportDate(details.getPoliceReportDate() == null ? null : details.getPoliceReportDate().toLocalDate());
         return form;
@@ -132,7 +152,21 @@ public class DocumentRenewalReplacementService {
 
     @Transactional(readOnly = true)
     public PassportRenewalReplacementForm preparePassportCorrection(Integer citizenId, Integer applicationId) {
-        getCorrectionRequest(citizenId, applicationId, PASSPORT);
+        CitizenApplication application = getCorrectionRequest(citizenId, applicationId, PASSPORT);
+        return preparePassportEditForm(citizenId, application);
+    }
+
+    @Transactional(readOnly = true)
+    public PassportRenewalReplacementForm preparePassportDraftEdit(Integer citizenId, Integer applicationId) {
+        CitizenApplication application = getDraftRequest(citizenId, applicationId, PASSPORT);
+        return preparePassportEditForm(citizenId, application);
+    }
+
+    private PassportRenewalReplacementForm preparePassportEditForm(
+            Integer citizenId,
+            CitizenApplication application
+    ) {
+        Integer applicationId = application.getApplicationId();
         PassportApplication details = passportRepository.findById(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("Passport application details were not found."));
 
@@ -154,6 +188,7 @@ public class DocumentRenewalReplacementService {
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
         checkExistingDocument(eligibility, NIC);
         form.setLastNicNo(eligibility.getNicNumber());
+        applyTrustedNicIssueDate(applicationKind, eligibility, form);
         CitizenProfileMapper.validateConditionalFields(form);
         validateNicDetails(applicationKind, form);
         checkForActiveApplication(citizenId, NIC);
@@ -201,19 +236,17 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
-    public CitizenApplication updateNicCorrection(
+    public CitizenApplication updateNicRequest(
             Integer citizenId,
             Integer applicationId,
             NicRenewalReplacementForm form
     ) {
-        CitizenApplication application = getCorrectionRequest(citizenId, applicationId, NIC);
+        CitizenApplication application = getEditableRequest(citizenId, applicationId, NIC);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
         form.setLastNicNo(eligibility.getNicNumber());
+        applyTrustedNicIssueDate(application.getApplicationKind(), eligibility, form);
         NicApplication details = nicRepository.findById(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("NIC application details were not found."));
-        if (details.getLastIssuedDate() != null) {
-            form.setLastIssuedDate(details.getLastIssuedDate().toLocalDate());
-        }
         CitizenProfileMapper.validateConditionalFields(form);
         validateNicDetails(application.getApplicationKind(), form);
         saveCitizenProfile(citizenId, form);
@@ -227,12 +260,12 @@ public class DocumentRenewalReplacementService {
     }
 
     @Transactional
-    public CitizenApplication updatePassportCorrection(
+    public CitizenApplication updatePassportRequest(
             Integer citizenId,
             Integer applicationId,
             PassportRenewalReplacementForm form
     ) {
-        CitizenApplication application = getCorrectionRequest(citizenId, applicationId, PASSPORT);
+        CitizenApplication application = getEditableRequest(citizenId, applicationId, PASSPORT);
         CitizenEligibilityDto eligibility = eligibilityService.getEligibility(citizenId);
         if (eligibility.isHasNic()) {
             form.setNicProofNo(eligibility.getNicNumber());
@@ -398,6 +431,39 @@ public class DocumentRenewalReplacementService {
         return application;
     }
 
+    private CitizenApplication getDraftRequest(
+            Integer citizenId,
+            Integer applicationId,
+            String serviceType
+    ) {
+        CitizenApplication application = getRequest(citizenId, applicationId);
+        if (!serviceType.equals(application.getServiceType())) {
+            throw new IllegalArgumentException("Application service type does not match.");
+        }
+        if (!"DRAFT".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException("Only an unsubmitted draft can be edited here.");
+        }
+        return application;
+    }
+
+    private CitizenApplication getEditableRequest(
+            Integer citizenId,
+            Integer applicationId,
+            String serviceType
+    ) {
+        CitizenApplication application = getRequest(citizenId, applicationId);
+        if (!serviceType.equals(application.getServiceType())) {
+            throw new IllegalArgumentException("Application service type does not match.");
+        }
+        if (!"DRAFT".equals(application.getCurrentStatus())
+                && !"CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
+            throw new IllegalArgumentException(
+                    "This application is locked after submission unless an officer requests a correction."
+            );
+        }
+        return application;
+    }
+
     public List<String> requiredDocumentTypes(CitizenApplication application) {
         if (NIC.equals(application.getServiceType())) {
             return LOST.equals(application.getApplicationKind())
@@ -441,6 +507,22 @@ public class DocumentRenewalReplacementService {
             throw new IllegalArgumentException(
                     "Police station and police report date are required for a lost NIC."
             );
+        }
+        if (RENEWAL.equals(applicationKind) && form.getLastIssuedDate() == null) {
+            throw new IllegalArgumentException("The previous NIC issue date is required for a renewal.");
+        }
+    }
+
+    private void applyTrustedNicIssueDate(
+            String applicationKind,
+            CitizenEligibilityDto eligibility,
+            NicRenewalReplacementForm form
+    ) {
+        if (eligibility.getNicIssuedDate() != null) {
+            form.setLastIssuedDate(eligibility.getNicIssuedDate());
+        } else if (LOST.equals(applicationKind)) {
+            // A lost-card applicant must not guess security data that should come from the official record.
+            form.setLastIssuedDate(null);
         }
     }
 
