@@ -56,7 +56,7 @@
 </section>
 
 <!-- One high-priority public notice is shown at a time. It stays in the page flow instead of blocking access. -->
-<section th:if="${!maintenanceActive and publicAnnouncement}"
+<section th:if="${maintenanceActive != true and publicAnnouncement != null}"
          id="publicAnnouncement"
          class="gov-public-announcement"
          th:classappend="| gov-public-announcement--${#strings.toLowerCase(publicAnnouncement.announcementType)}|"
