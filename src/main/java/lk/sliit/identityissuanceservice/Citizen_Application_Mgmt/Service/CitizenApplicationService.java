@@ -109,7 +109,8 @@ public class CitizenApplicationService {
                 passportNumber != null,
                 false,
                 nicNumber,
-                passportNumber
+                passportNumber,
+                usableRecord ? record.getNicIssuedDate() : null
         );
     }
 

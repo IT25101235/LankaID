@@ -20,8 +20,8 @@
     <p class="font-mono text-sm mt-1" th:text="${appointment.referenceNo}">Reference</p>
     <p class="mt-2 text-sm" th:text="${#temporals.format(appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Time</p>
     <p class="text-sm mt-1">Status: <strong th:text="${appointment.appointmentStatus}">Confirmed</strong></p>
-    <p class="text-sm text-slate-600 mt-4" th:if="${biometric}">Cancel or reschedule at least 72 hours before your appointment. You cannot change a booking after check-in.</p>
-    <p class="text-sm text-slate-600 mt-4" th:unless="${biometric}">Cancel or reschedule before the appointment starts. You cannot change a booking after check-in.</p>
+    <p class="text-sm text-slate-600 mt-4" th:if="${biometric}">Cancel or reschedule at least 72 hours before your appointment. If you miss the date, you can still reschedule it. You cannot change a booking after check-in.</p>
+    <p class="text-sm text-slate-600 mt-4" th:unless="${biometric}">Cancel or reschedule before the appointment starts. If you miss the date, you can still reschedule it. You cannot change a booking after check-in.</p>
   </section>
 
   <section th:if="${biometric and canBook}" class="mt-5 rounded-2xl border bg-white p-5 sm:p-6">

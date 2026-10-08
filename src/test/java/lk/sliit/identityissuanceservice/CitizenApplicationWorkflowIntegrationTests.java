@@ -274,7 +274,7 @@ class CitizenApplicationWorkflowIntegrationTests {
                         .param("applicationId", applicationId)
                         .session(session))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Edit bio data")))
+                .andExpect(content().string(containsString("Edit application details")))
                 .andExpect(content().string(containsString(
                         "/citizen/applications/nic/edit?applicationId=" + applicationId
                 )));

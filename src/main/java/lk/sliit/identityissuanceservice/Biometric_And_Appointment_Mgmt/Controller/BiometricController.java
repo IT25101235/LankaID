@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BiometricService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BookingChangePolicy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,6 +69,30 @@ public class BiometricController {
                 + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
+    @PostMapping("/officer/{service}/biometrics/{reference}/reschedule-missed")
+    public String rescheduleMissed(
+            @PathVariable String service,
+            @PathVariable String reference,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        String serviceType = serviceType(service);
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
+        try {
+            var details = appointmentService.rescheduleMissed(
+                    reference, serviceType, officerId(session));
+            redirectAttributes.addFlashAttribute(
+                    "biometricMessage",
+                    "Missed appointment moved to " + details.appointment().getScheduledAt()
+                            + ". The same QR pass remains valid."
+            );
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+        }
+        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+    }
+
     @PostMapping("/officer/{service}/biometrics/{reference}/complete")
     public String completeBiometrics(
             @PathVariable String service,
@@ -109,7 +134,10 @@ public class BiometricController {
         model.addAttribute("appointments", appointmentService.getOfficerQueue(serviceType));
         if (reference != null && !reference.isBlank()) {
             try {
-                model.addAttribute("selectedAppointment", appointmentService.findForOfficer(reference, serviceType));
+                var selected = appointmentService.findForOfficer(reference, serviceType);
+                model.addAttribute("selectedAppointment", selected);
+                model.addAttribute("selectedAppointmentToday", BookingChangePolicy.isToday(selected.appointment()));
+                model.addAttribute("selectedAppointmentMissed", BookingChangePolicy.isMissed(selected.appointment()));
             } catch (IllegalArgumentException exception) {
                 redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
                 return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics";

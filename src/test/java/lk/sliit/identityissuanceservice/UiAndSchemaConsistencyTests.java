@@ -273,7 +273,8 @@ class UiAndSchemaConsistencyTests {
         assertTrue(support.contains("Make a Complaint"));
         assertFalse(support.contains("<header class="));
         assertTrue(nicForm.contains("th:field=\"*{lastNicNo}\" required readonly"));
-        assertTrue(nicForm.contains("th:readonly=\"${applicationForm.lastIssuedDate != null}\""));
+        assertTrue(nicForm.contains("th:readonly=\"${verifiedNicIssuedDate}\""));
+        assertTrue(nicForm.contains("applicationKind == 'RENEWAL' or verifiedNicIssuedDate"));
         assertTrue(passportForm.contains("cannot be changed"));
         assertTrue(payment.contains("centreSelection.classList.toggle('hidden', home)"));
         assertTrue(payment.contains("centre.disabled = home"));
@@ -318,6 +319,11 @@ class UiAndSchemaConsistencyTests {
                 TEMPLATE_ROOT.resolve("officers_frontends/officer_appointments.html"));
         String schedule = Files.readString(
                 TEMPLATE_ROOT.resolve("officers_frontends/biometric_schedule.html"));
+        String biometricCollection = Files.readString(
+                TEMPLATE_ROOT.resolve("officers_frontends/biometric_collection.html"));
+        String appointmentService = Files.readString(Path.of(
+                "src", "main", "java", "lk", "sliit", "identityissuanceservice",
+                "Biometric_And_Appointment_Mgmt", "Service", "AppointmentService.java"));
 
         assertTrue(history.contains("Appointment History"));
         assertTrue(history.contains("Schedule Settings"));
@@ -329,6 +335,9 @@ class UiAndSchemaConsistencyTests {
         assertTrue(history.contains("data-appointment-to"));
         assertTrue(history.contains("/js/officer-appointment-history.js"));
         assertTrue(history.contains("${scheduleRoute}"));
+        assertTrue(biometricCollection.contains("Active appointment queue"));
+        assertTrue(appointmentService.contains("OFFICER_ACTIVE_QUEUE_STATUSES"));
+        assertTrue(appointmentService.contains("List.of(\"CONFIRMED\", \"CHECKED_IN\")"));
         assertTrue(schedule.contains("Appointment History"));
         assertTrue(schedule.contains("Schedule Settings"));
         assertTrue(schedule.contains("/appointments/schedule"));

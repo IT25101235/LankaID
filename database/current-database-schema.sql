@@ -75,6 +75,7 @@ GO
 CREATE TABLE [dbo].[GovernmentIdentityRecord](
 	[government_record_id] [int] IDENTITY(1,1) NOT NULL,
 	[nic_no] [varchar](12) NULL,
+	[nic_issued_date] [date] NULL,
 	[passport_no] [varchar](20) NULL,
 	[registered_email] [varchar](100) NULL,
 	[registered_phone] [varchar](15) NULL,

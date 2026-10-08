@@ -156,6 +156,18 @@ class WalkInAppointmentWorkflowIntegrationTests {
                         .param("method", "QR"))
                 .andExpect(status().is3xxRedirection());
         assertEquals(
+                "CONFIRMED",
+                appointmentRepository.findById(appointment.getAppointmentId()).orElseThrow().getAppointmentStatus()
+        );
+
+        appointment.setScheduledAt(java.time.LocalDateTime.now());
+        appointmentRepository.saveAndFlush(appointment);
+        mockMvc.perform(post("/officer/csr/walk-ins/check-in")
+                        .session(csrSession)
+                        .param("reference", appointment.getReferenceNo())
+                        .param("method", "QR"))
+                .andExpect(status().is3xxRedirection());
+        assertEquals(
                 "CHECKED_IN",
                 appointmentRepository.findById(appointment.getAppointmentId()).orElseThrow().getAppointmentStatus()
         );

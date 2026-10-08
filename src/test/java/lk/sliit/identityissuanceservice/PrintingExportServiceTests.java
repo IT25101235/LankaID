@@ -72,6 +72,7 @@ class PrintingExportServiceTests {
         byte[] csv = printingService.printAndCreateCsv(List.of(123), 70);
 
         assertNotNull(savedRecord.getNicNo());
+        assertNotNull(savedRecord.getNicIssuedDate());
         assertTrue(savedRecord.getNicNo().matches("2000\\d{8}"));
         assertEquals(12, savedRecord.getNicNo().length());
         assertEquals("ISSUED", data.application.getCurrentStatus());

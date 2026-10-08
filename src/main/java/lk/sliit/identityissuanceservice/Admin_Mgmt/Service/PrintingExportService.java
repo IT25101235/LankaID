@@ -148,10 +148,11 @@ public class PrintingExportService {
             GovernmentIdentityRecord record
     ) {
         if ("NIC".equals(application.getServiceType())) {
-            if (hasText(record.getNicNo())) return record.getNicNo();
-            String number = generateNicNumber(citizen, application.getApplicationId());
-            record.setNicNo(number);
-            return number;
+            if (!hasText(record.getNicNo())) {
+                record.setNicNo(generateNicNumber(citizen, application.getApplicationId()));
+            }
+            record.setNicIssuedDate(LocalDate.now());
+            return record.getNicNo();
         }
 
         String number = generatePassportNumber(application.getApplicationId());
