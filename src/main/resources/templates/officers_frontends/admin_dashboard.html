@@ -703,6 +703,8 @@ function showSection(s) {
     document.getElementById('pageSubtitle').textContent = titles[s][1];
   }
   document.getElementById('addOfficerButton').classList.toggle('hidden', s !== 'users');
+  // Hide this shortcut when the announcement forms are already open.
+  document.getElementById('sendAnnouncementButton').classList.toggle('hidden', s === 'notifications');
   const nextUrl = s === 'overview' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
   window.history.replaceState(null, '', nextUrl);
   return false;
