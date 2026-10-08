@@ -311,13 +311,13 @@ public class CitizenSupportService {
     }
 
     @Transactional
-    public void deleteUnansweredContact(Integer citizenId, String reference) {
-        // Deletion is intentionally limited to the owner's untouched Contact Us message.
+    public void deleteUnansweredRequest(Integer citizenId, String reference) {
+        // Citizens may remove their own request only before a CSR officer starts handling it.
         SupportRequest request = supportRepository.findForUpdate(requestId(reference))
                 .orElseThrow(() -> new IllegalArgumentException("Support request was not found."));
         if (!citizenId.equals(request.getCitizenId())) throw new IllegalArgumentException("Support request was not found.");
-        if (!request.isDeletableContact()) {
-            throw new IllegalArgumentException("Only unanswered Contact Us requests can be deleted. Complaints and identity verification requests are retained.");
+        if (!request.isDeletableByCitizen()) {
+            throw new IllegalArgumentException("Only unanswered support requests can be deleted.");
         }
         supportRepository.delete(request);
         supportRepository.flush();
