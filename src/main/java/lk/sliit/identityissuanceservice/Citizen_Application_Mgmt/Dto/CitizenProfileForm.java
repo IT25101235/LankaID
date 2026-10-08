@@ -96,6 +96,7 @@ public class CitizenProfileForm {
     private String postalCity;
 
     @Size(max = 10, message = "Postal postal code cannot exceed 10 characters.")
+    @Pattern(regexp = "^$|[0-9]{5}", message = "Postal address postal code must contain exactly 5 digits.")
     private String postalPostalCode;
 
     private boolean dualCitizen;

@@ -16,8 +16,8 @@
   };
 </script>
 <script>document.documentElement.classList.add('reveal-ready');</script>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
-<link href="/Chatbot/chatbot.css?v=20261005" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261008-announcement" rel="stylesheet"/>
+<link href="/Chatbot/chatbot.css?v=20261008" rel="stylesheet"/>
 </head>
 <body id="top" class="gov-landing-page bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 
@@ -40,13 +40,35 @@
   </div>
 </header>
 
-<section th:if="${maintenanceActive}" class="bg-amber-50 border-b border-amber-300" role="alert">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-4 flex items-start gap-3">
-    <span class="material-symbols-outlined text-amber-700">engineering</span>
-    <div>
-      <p class="font-bold text-amber-900">LankaID is under maintenance</p>
-      <p class="text-sm text-amber-800 mt-1" th:text="${maintenanceWarning}">Identity services are temporarily unavailable.</p>
-      <p class="text-xs text-amber-700 mt-1">Citizen, officer and walk-in QR operations are currently paused.</p>
+<!-- One high-priority public notice is shown at a time. It stays in the page flow instead of blocking access. -->
+<section th:if="${publicAnnouncement}"
+         id="publicAnnouncement"
+         class="gov-public-announcement"
+         th:classappend="| gov-public-announcement--${#strings.toLowerCase(publicAnnouncement.announcementType)}|"
+         th:attr="data-announcement-id=${publicAnnouncement.announcementId}"
+         role="region"
+         aria-labelledby="publicAnnouncementTitle">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-4">
+    <div class="gov-public-announcement__layout">
+      <span class="gov-public-announcement__icon material-symbols-outlined" aria-hidden="true"
+            th:text="${publicAnnouncement.announcementType == 'EMERGENCY' ? 'warning' : (publicAnnouncement.announcementType == 'PRESIDENTIAL' ? 'account_balance' : 'campaign')}">campaign</span>
+      <div class="min-w-0">
+        <p class="gov-public-announcement__eyebrow"
+           th:text="${publicAnnouncement.announcementType == 'PRESIDENTIAL' ? 'Official presidential announcement' : (publicAnnouncement.announcementType == 'EMERGENCY' ? 'Emergency public notice' : (publicAnnouncement.announcementType == 'SERVICE_UPDATE' ? 'LankaID service update' : 'Important government notice'))}">Important government notice</p>
+        <h2 id="publicAnnouncementTitle" class="gov-public-announcement__title" th:text="${publicAnnouncement.title}">Announcement title</h2>
+        <p class="gov-public-announcement__message" th:text="${publicAnnouncement.message}">Announcement message</p>
+        <a th:if="${publicAnnouncement.sourceUrl}"
+           th:href="${publicAnnouncement.sourceUrl}"
+           class="gov-public-announcement__link"
+           target="_blank"
+           rel="noopener noreferrer">
+          <span th:text="${publicAnnouncement.sourceLabel}">Read the official announcement</span>
+          <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+        </a>
+      </div>
+      <button id="dismissPublicAnnouncement" class="gov-public-announcement__dismiss" type="button" aria-label="Dismiss this announcement">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
     </div>
   </div>
 </section>
@@ -343,6 +365,7 @@
   }
 </script>
 <script src="/js/walkin-phone.js"></script>
+<script src="/js/public-announcement.js"></script>
 <script src="/Chatbot/chatbot-guide.js?v=20261005" defer></script>
 <script src="/Chatbot/chatbot.js?v=20261005" defer></script>
 </body></html>

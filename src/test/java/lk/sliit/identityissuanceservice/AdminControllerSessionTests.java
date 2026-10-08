@@ -6,13 +6,16 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountRowDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.DirectorDashboardStats;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.ApplicationFeeSettings;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.SystemMaintenance;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ApplicationFeeSettingsService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.CitizenAccountDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.DirectorDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.PublicAnnouncementService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +48,8 @@ class AdminControllerSessionTests {
     private DirectorDashboardStats overviewStats;
     private AdminAccountService adminAccountService;
     private SystemMaintenanceService maintenanceService;
+    private ApplicationFeeSettingsService feeSettingsService;
+    private PublicAnnouncementService publicAnnouncementService;
 
     @BeforeEach
     void setUp() {
@@ -54,12 +59,20 @@ class AdminControllerSessionTests {
         directorDashboardService = mock(DirectorDashboardService.class);
         adminAccountService = mock(AdminAccountService.class);
         maintenanceService = mock(SystemMaintenanceService.class);
+        feeSettingsService = mock(ApplicationFeeSettingsService.class);
+        publicAnnouncementService = mock(PublicAnnouncementService.class);
 
         SystemMaintenance settings = new SystemMaintenance();
         settings.setMaintenanceId(1);
         settings.setMaintenanceActive(false);
         settings.setMaintenanceMessage(SystemMaintenanceService.DEFAULT_MESSAGE);
         when(maintenanceService.getSettings()).thenReturn(settings);
+
+        ApplicationFeeSettings feeSettings = new ApplicationFeeSettings();
+        feeSettings.setSettingsId(1);
+        feeSettings.setNicFee(ApplicationFeeSettingsService.DEFAULT_NIC_FEE);
+        feeSettings.setPassportFee(ApplicationFeeSettingsService.DEFAULT_PASSPORT_FEE);
+        when(feeSettingsService.getSettings()).thenReturn(feeSettings);
 
         overviewStats = new DirectorDashboardStats(
                 12, 5, 2, 1, 7, 5, 3, 2, 1, 1,
@@ -69,7 +82,8 @@ class AdminControllerSessionTests {
         when(directorDashboardService.getStats()).thenReturn(overviewStats);
         mockMvc = standaloneSetup(new AdminController(
                 officerAccountService, serviceCentreService, citizenAccountDashboardService,
-                directorDashboardService, adminAccountService, maintenanceService)).build();
+                directorDashboardService, adminAccountService, maintenanceService,
+                feeSettingsService, publicAnnouncementService)).build();
     }
 
     @Test
@@ -186,6 +200,49 @@ class AdminControllerSessionTests {
                 ));
 
         verify(maintenanceService).updateMaintenance(true, "Scheduled maintenance");
+    }
+
+    @Test
+    void adminPasswordIsRequiredToChangeApplicationFees() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+        session.setAttribute("loggedInAdminEmail", "admin@gov.lk");
+
+        mockMvc.perform(post("/officer/admin/settings")
+                        .session(session)
+                        .param("nicFee", "2500.00")
+                        .param("passportFee", "12000.00")
+                        .param("password", "wrong-password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=settings"))
+                .andExpect(flash().attribute(
+                        "settingsError", "The administrator password is incorrect."));
+
+        org.mockito.Mockito.verify(feeSettingsService, org.mockito.Mockito.never())
+                .updateFees(any(), any());
+    }
+
+    @Test
+    void authenticatedAdminCanChangeApplicationFees() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loggedInAdminId", 50);
+        session.setAttribute("loggedInAdminEmail", "admin@gov.lk");
+        UserAccount admin = new UserAccount();
+        admin.setUserId(50);
+        when(adminAccountService.authenticateAdmin("admin@gov.lk", "admin12345"))
+                .thenReturn(Optional.of(admin));
+
+        mockMvc.perform(post("/officer/admin/settings")
+                        .session(session)
+                        .param("nicFee", "2500.00")
+                        .param("passportFee", "12000.00")
+                        .param("password", "admin12345"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/officer/admin?section=settings"))
+                .andExpect(flash().attribute(
+                        "settingsMessage", "Application service fees updated successfully."));
+
+        verify(feeSettingsService).updateFees("2500.00", "12000.00");
     }
 
     @Test

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Upload Documents | LankaID</title><script src="https://cdn.tailwindcss.com?plugins=forms"></script><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/><link href="/css/government-theme.css?v=20260918" rel="stylesheet"/>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Upload Documents | LankaID</title><script src="https://cdn.tailwindcss.com?plugins=forms"></script><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/><link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-citizen min-h-screen bg-slate-100 text-slate-800">
 <header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
@@ -27,4 +27,4 @@
       </form></div>
   </section>
   <div class="flex flex-wrap justify-between mt-6 gap-3"><div class="flex flex-wrap gap-2"><a th:href="@{/citizen/dashboard}" class="border bg-white rounded-xl px-5 py-2.5 text-sm font-semibold">Save and return later</a><form th:if="${currentApplication.currentStatus == 'DRAFT'}" th:action="@{/citizen/applications/{applicationId}/delete(applicationId=${currentApplication.applicationId})}" method="post" onsubmit="return confirm('Delete this unsubmitted draft? This cannot be undone.')"><button type="submit" class="rounded-xl border border-red-200 bg-red-50 px-5 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100">Delete draft</button></form></div><a th:href="@{/citizen/{workflow}/{service}/review(workflow=${workflowPath},service=${servicePath},applicationId=${currentApplication.applicationId})}" class="bg-sky-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Review application</a></div>
-</main><script src="/js/portal-shell.js?v=20260918-navbar"></script></body></html>
+</main><script src="/js/portal-shell.js?v=20261007-ui"></script></body></html>

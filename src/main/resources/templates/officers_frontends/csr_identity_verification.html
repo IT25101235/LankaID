@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Verify existing identity | LankaID</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${session.loggedInOfficerEmail},data-officer-rank=${session.loggedInOfficerRoleLabel},data-officer-login-time=${session.loggedInOfficerLoginTime}">
 <main class="max-w-2xl mx-auto px-4 py-8">
@@ -49,6 +49,6 @@
     </div>
   </form>
 </main>
-<script src="/js/portal-shell.js"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 </body>
 </html>

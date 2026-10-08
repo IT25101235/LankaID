@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <aside class="w-64 min-h-screen bg-slate-950 fixed inset-y-0 left-0 z-30 border-r border-slate-800 flex flex-col">
@@ -116,6 +116,6 @@ function showSection(section) {
   document.getElementById('pageTitle').textContent = titles[section];
 }
 </script>
-<script src="/js/portal-shell.js"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-officer bg-slate-100 min-h-screen text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
 <header class="bg-slate-950 text-white"><div class="max-w-7xl mx-auto h-16 px-5 flex items-center gap-4"><a th:href="${queueRoute}" class="text-sm text-slate-300">← Pending queue</a><h1 class="font-bold" th:text="|${documentType} Reviewed Applications|">Reviewed Applications</h1><a th:href="${biometricRoute}" class="gov-button-primary ml-auto px-4 py-2 text-xs">Biometric collection</a></div></header>
@@ -42,5 +42,5 @@
     </div>
   </section>
 </main>
-<script src="/js/portal-shell.js?v=20260915-signout"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 </body></html>

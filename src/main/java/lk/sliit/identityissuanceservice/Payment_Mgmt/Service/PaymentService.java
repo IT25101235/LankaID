@@ -1,5 +1,6 @@
 package lk.sliit.identityissuanceservice.Payment_Mgmt.Service;
 
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ApplicationFeeSettingsService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentRepository;
@@ -27,9 +28,6 @@ import java.util.UUID;
 @Service
 public class PaymentService {
 
-    public static final BigDecimal NIC_FEE = new BigDecimal("2000.00");
-    public static final BigDecimal PASSPORT_FEE = new BigDecimal("10000.00");
-
     private final CitizenApplicationRepository applicationRepository;
     private final AppointmentRepository appointmentRepository;
     private final CentreRepository centreRepository;
@@ -37,6 +35,7 @@ public class PaymentService {
     private final UserAccountRepository userRepository;
     private final NotificationPublisher notificationPublisher;
     private final DocumentDeliveryService deliveryService;
+    private final ApplicationFeeSettingsService feeSettingsService;
 
     public PaymentService(
             CitizenApplicationRepository applicationRepository,
@@ -45,7 +44,8 @@ public class PaymentService {
             PaymentRepository paymentRepository,
             UserAccountRepository userRepository,
             NotificationPublisher notificationPublisher,
-            DocumentDeliveryService deliveryService
+            DocumentDeliveryService deliveryService,
+            ApplicationFeeSettingsService feeSettingsService
     ) {
         this.applicationRepository = applicationRepository;
         this.appointmentRepository = appointmentRepository;
@@ -54,6 +54,7 @@ public class PaymentService {
         this.userRepository = userRepository;
         this.notificationPublisher = notificationPublisher;
         this.deliveryService = deliveryService;
+        this.feeSettingsService = feeSettingsService;
     }
 
     @Transactional(readOnly = true)
@@ -104,13 +105,11 @@ public class PaymentService {
 
         if (existingPayment != null) {
             BigDecimal extraFee = deliveryService.deliveryFee(application.getServiceType(), deliveryMethod);
-            BigDecimal totalWithDelivery = amountFor(application.getServiceType()).add(extraFee);
-            if (extraFee.compareTo(BigDecimal.ZERO) > 0
-                    && existingPayment.getAmount().compareTo(totalWithDelivery) < 0) {
+            if (extraFee.compareTo(BigDecimal.ZERO) > 0) {
                 // Payment.appointment_id is unique in the existing database. For an older
                 // paid application, include the delivery fee in that payment instead of
                 // trying to insert a second payment row for the same appointment.
-                existingPayment.setAmount(totalWithDelivery);
+                existingPayment.setAmount(existingPayment.getAmount().add(extraFee));
                 existingPayment.setPaidAt(LocalDateTime.now());
                 existingPayment = paymentRepository.save(existingPayment);
                 sendDeliveryFeeNotification(citizenId, application, extraFee);
@@ -222,7 +221,7 @@ public class PaymentService {
     }
 
     private BigDecimal amountFor(String serviceType) {
-        return "NIC".equals(serviceType) ? NIC_FEE : PASSPORT_FEE;
+        return feeSettingsService.getFee(serviceType);
     }
 
     private String generateAppointmentReference() {

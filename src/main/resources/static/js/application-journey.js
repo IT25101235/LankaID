@@ -15,7 +15,6 @@
   };
 
   const deliveryStages = {
-    PREPARING: { step: 5, icon: 'inventory_2', title: 'Preparing for handover', message: 'Your printed document is being prepared for the selected delivery method.' },
     DISPATCHED: { step: 6, icon: 'local_shipping', title: 'Document dispatched', message: 'Your document is on its way. Follow the delivery reference for updates.' },
     READY_FOR_COLLECTION: { step: 6, icon: 'storefront', title: 'Ready for collection', message: 'Your document is ready at the selected service centre.' },
     DELIVERED: { step: 6, icon: 'task_alt', title: 'Delivered successfully', message: 'Your application journey is complete and the document has been delivered.', complete: true },

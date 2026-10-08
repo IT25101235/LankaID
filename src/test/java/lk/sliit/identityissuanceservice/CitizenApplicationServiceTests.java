@@ -1,6 +1,8 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewPassportApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.ApplicationDocument;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.GovernmentIdentityRecord;
@@ -25,6 +27,8 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,6 +73,7 @@ class CitizenApplicationServiceTests {
         user.setEmailVerified("Y");
         user.setPhone("+94771234567");
         citizen = new CitizenAccount(25);
+        citizen.setDateOfBirth(LocalDateTime.of(2000, 1, 1, 0, 0));
     }
 
     @Test
@@ -127,6 +132,58 @@ class CitizenApplicationServiceTests {
 
         assertTrue(exception.getMessage().contains("already in progress"));
         assertTrue(exception.getMessage().contains("Continue"));
+    }
+
+    @Test
+    void underageCitizenCannotCreateANicApplication() {
+        stubAccountAndIdentity(Optional.empty(), Optional.empty());
+        NewNicApplicationForm form = new NewNicApplicationForm();
+        form.setDateOfBirth(LocalDate.now().minusYears(15).plusDays(1));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.createNewNicApplication(25, form)
+        );
+
+        assertTrue(exception.getMessage().contains("at least 15"));
+        verify(applicationRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void passportCannotUseParentNicWhenCitizenHasAnNicRecord() {
+        GovernmentIdentityRecord record = governmentRecord();
+        record.setPassportNo(null);
+        citizen.setGovernmentRecordId(record.getGovernmentRecordId());
+        when(userRepository.findById(25)).thenReturn(Optional.of(user));
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+        when(governmentRepository.findById(10)).thenReturn(Optional.of(record));
+        NewPassportApplicationForm form = new NewPassportApplicationForm();
+        form.setParentNicNo("197012345678");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.createNewPassportApplication(25, form)
+        );
+
+        assertTrue(exception.getMessage().contains("parent NIC cannot be used"));
+        verify(applicationRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void underageNicDraftCannotBeSubmitted() {
+        citizen.setDateOfBirth(LocalDateTime.now().minusYears(14));
+        stubAccountAndIdentity(Optional.empty(), Optional.empty());
+        CitizenApplication application = application();
+        when(applicationRepository.findEditableForUpdate(101, 25)).thenReturn(Optional.of(application));
+        when(applicationRepository.findByApplicationIdAndCitizenId(101, 25)).thenReturn(Optional.of(application));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.submitNewApplication(25, 101)
+        );
+
+        assertTrue(exception.getMessage().contains("at least 15"));
+        verify(applicationRepository, never()).save(application);
     }
 
     @Test

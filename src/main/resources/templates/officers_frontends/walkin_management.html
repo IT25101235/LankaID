@@ -6,10 +6,10 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<link href="/css/government-theme.css?v=20260917" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261007-ui" rel="stylesheet"/>
 </head>
 <body class="portal-shell portal-officer min-h-screen bg-slate-100 text-slate-800" th:attr="data-officer-email=${loggedInOfficerEmail},data-officer-rank=${loggedInOfficerRoleLabel},data-officer-login-time=${loggedInOfficerLoginTime}">
-<script src="/js/portal-shell.js?v=20260915"></script>
+<script src="/js/portal-shell.js?v=20261007-ui"></script>
 <header class="bg-slate-950 text-white"><div class="max-w-[1500px] mx-auto min-h-16 px-4 sm:px-6 py-3 flex items-center gap-4"><a th:href="@{/officer/csr}" class="text-sm text-slate-300">← CSR Dashboard</a><div class="h-6 w-px bg-slate-700"></div><div><p class="font-bold">Walk-in Appointment Management</p><p class="text-xs text-cyan-400">Published slots, visitor queue and QR check-in</p></div><div class="ml-auto text-right"><p class="text-xs font-bold" th:text="${loggedInOfficerRoleLabel}">CSR</p><p class="text-[11px] text-slate-400" th:text="${loggedInOfficerEmployeeNo + ' · ' + loggedInOfficerEmail}">Officer</p></div></div></header>
 <main class="max-w-[1500px] mx-auto p-4 sm:p-6">
   <div th:if="${walkInMessage}" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-bold text-emerald-700" th:text="${walkInMessage}"></div>

@@ -7,12 +7,14 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerRegistrationDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerUpdateDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.CitizenAccountDashboardDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
+import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ApplicationFeeSettingsService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.CitizenAccountDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.DirectorDashboardService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.PublicAnnouncementService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,6 +38,8 @@ public class AdminController {
     private final DirectorDashboardService directorDashboardService;
     private final AdminAccountService adminAccountService;
     private final SystemMaintenanceService maintenanceService;
+    private final ApplicationFeeSettingsService feeSettingsService;
+    private final PublicAnnouncementService publicAnnouncementService;
 
     public AdminController(
             OfficerAccountService officerAccountService,
@@ -43,7 +47,9 @@ public class AdminController {
             CitizenAccountDashboardService citizenAccountDashboardService,
             DirectorDashboardService directorDashboardService,
             AdminAccountService adminAccountService,
-            SystemMaintenanceService maintenanceService
+            SystemMaintenanceService maintenanceService,
+            ApplicationFeeSettingsService feeSettingsService,
+            PublicAnnouncementService publicAnnouncementService
     ) {
         this.officerAccountService = officerAccountService;
         this.serviceCentreService = serviceCentreService;
@@ -51,6 +57,8 @@ public class AdminController {
         this.directorDashboardService = directorDashboardService;
         this.adminAccountService = adminAccountService;
         this.maintenanceService = maintenanceService;
+        this.feeSettingsService = feeSettingsService;
+        this.publicAnnouncementService = publicAnnouncementService;
     }
 
     @GetMapping({"/officer/admin", "/officer/admin/officers"})
@@ -312,6 +320,36 @@ public class AdminController {
         return "redirect:/officer/admin?section=maintenance";
     }
 
+    @PostMapping("/officer/admin/settings")
+    public String updateApplicationFees(
+            @RequestParam String nicFee,
+            @RequestParam String passportFee,
+            @RequestParam String password,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (session.getAttribute("loggedInAdminId") == null) {
+            return "redirect:/login";
+        }
+
+        String adminEmail = String.valueOf(session.getAttribute("loggedInAdminEmail"));
+        if (password.isBlank()
+                || adminAccountService.authenticateAdmin(adminEmail, password).isEmpty()) {
+            redirectAttributes.addFlashAttribute(
+                    "settingsError", "The administrator password is incorrect.");
+            return "redirect:/officer/admin?section=settings";
+        }
+
+        try {
+            feeSettingsService.updateFees(nicFee, passportFee);
+            redirectAttributes.addFlashAttribute(
+                    "settingsMessage", "Application service fees updated successfully.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("settingsError", exception.getMessage());
+        }
+        return "redirect:/officer/admin?section=settings";
+    }
+
     @PostMapping("/officer/admin/logout")
     public String adminLogout(HttpSession session, RedirectAttributes redirectAttributes) {
         session.invalidate();
@@ -335,6 +373,8 @@ public class AdminController {
         model.addAttribute("csrCount", countRole(officers, OfficerAccountService.CSR));
         model.addAttribute("directorCount", countRole(officers, OfficerAccountService.DIRECTOR));
         model.addAttribute("maintenanceSettings", maintenanceService.getSettings());
+        model.addAttribute("feeSettings", feeSettingsService.getSettings());
+        model.addAttribute("publicAnnouncements", publicAnnouncementService.getRecentAnnouncements());
         model.addAttribute("centres", centres);
         model.addAttribute("centreBookingCounts", centreBookingCounts);
         model.addAttribute("activeOfficerCount", officers.stream()
