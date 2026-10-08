@@ -156,8 +156,13 @@ class UiAndSchemaConsistencyTests {
     @Test
     void landingPageIncludesPublicChatbot() throws IOException {
         String landingPage = Files.readString(TEMPLATE_ROOT.resolve("index.html"));
+        String governmentTheme = Files.readString(Path.of(
+                "src", "main", "resources", "static", "css", "government-theme.css"));
 
-        assertTrue(landingPage.contains("/Chatbot/chatbot.css"));
+        assertTrue(landingPage.contains("/css/government-theme.css"));
+        assertFalse(landingPage.contains("/Chatbot/chatbot.css"));
+        assertTrue(governmentTheme.contains(".lankaid-chatbot-panel"));
+        assertFalse(landingPage.contains("A LITTLE GUIDANCE, A SIMPLER JOURNEY"));
         assertTrue(landingPage.contains("data-chatbot-launcher"));
         assertTrue(landingPage.contains("data-chatbot-open"));
         assertTrue(landingPage.contains("/Chatbot/chatbot-guide.js"));
