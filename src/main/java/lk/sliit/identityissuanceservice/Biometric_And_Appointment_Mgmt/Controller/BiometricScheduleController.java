@@ -48,8 +48,13 @@ public class BiometricScheduleController {
         model.addAttribute("selectedCentreId", selectedCentre);
         model.addAttribute("selectedMonth", selectedMonth.toString());
         model.addAttribute("minimumDate", LocalDate.now().plusDays(1));
-        model.addAttribute("schedule", selectedCentre == null ? java.util.List.of() : schedules.getSchedule(
-                serviceType, selectedCentre, selectedMonth.atDay(1), selectedMonth.atEndOfMonth()));
+        try {
+            model.addAttribute("schedule", selectedCentre == null ? java.util.List.of() : schedules.getSchedule(
+                    serviceType, selectedCentre, selectedMonth.atDay(1), selectedMonth.atEndOfMonth()));
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("schedule", java.util.List.of());
+            model.addAttribute("scheduleError", exception.getMessage());
+        }
         return "officers_frontends/biometric_schedule";
     }
 
@@ -62,12 +67,14 @@ public class BiometricScheduleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime openingTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime closingTime,
             @RequestParam Integer capacity,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
         if (!canAccess(session, serviceType)) return "redirect:/login";
         try {
+            BiometricFormToken.check(formToken, session);
             int days = schedules.publishDateRange(serviceType, centreId, startDate, endDate,
                     openingTime, closingTime, capacity, officerId(session));
             redirect.addFlashAttribute("scheduleMessage", days + " day(s) published for " + serviceType + " biometrics.");
@@ -83,12 +90,14 @@ public class BiometricScheduleController {
             @RequestParam Integer centreId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
         if (!canAccess(session, serviceType)) return "redirect:/login";
         try {
+            BiometricFormToken.check(formToken, session);
             int days = schedules.closeDateRange(serviceType, centreId, startDate, endDate);
             redirect.addFlashAttribute("scheduleMessage", days
                     + " day(s) closed. Confirmed citizens were notified and can rebook without paying again.");
@@ -106,12 +115,14 @@ public class BiometricScheduleController {
             @RequestParam(defaultValue = "false") boolean available,
             @RequestParam Integer centreId,
             @RequestParam String month,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
         if (!canAccess(session, serviceType)) return "redirect:/login";
         try {
+            BiometricFormToken.check(formToken, session);
             schedules.updateSlot(serviceType, slotId, capacity, available);
             redirect.addFlashAttribute("scheduleMessage", "Slot capacity and availability updated.");
         } catch (IllegalArgumentException exception) {
@@ -168,7 +179,8 @@ public class BiometricScheduleController {
     private String serviceType(String service) {
         if ("nic".equalsIgnoreCase(service)) return "NIC";
         if ("passport".equalsIgnoreCase(service)) return "PASSPORT";
-        throw new IllegalArgumentException("Unknown biometric service.");
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Unknown biometric service.");
     }
 
     private YearMonth readMonth(String value) {

@@ -68,6 +68,7 @@ public class AppointmentController {
     public String confirmBiometricAppointment(
             @RequestParam(required = false) String applicationId,
             @RequestParam(required = false) String slotId,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -76,6 +77,7 @@ public class AppointmentController {
 
         Integer selectedApplicationId = null;
         try {
+            BiometricFormToken.check(formToken, session);
             selectedApplicationId = readInteger(applicationId, "Application details are missing. Please try again.");
             Integer selectedSlotId = readInteger(slotId, "Select an available appointment time.");
             Appointment appointment = appointmentService.bookAppointment(
@@ -155,26 +157,34 @@ public class AppointmentController {
     public ResponseEntity<byte[]> appointmentQrCode(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return ResponseEntity.status(401).build();
-        appointmentService.getCitizenPassDetails(citizenId, reference);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(passService.createQrCode(reference, 420));
+        try {
+            OfficerBiometricDetails details = appointmentService.getCitizenPassDetails(citizenId, reference);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(passService.createQrCode(details.appointment().getReferenceNo(), 420));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/citizen/appointments/{reference}/pass/download")
     public ResponseEntity<byte[]> downloadAppointmentPass(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return ResponseEntity.status(401).build();
-        OfficerBiometricDetails details = appointmentService.getCitizenPassDetails(citizenId, reference);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.attachment()
-                                .filename("LankaID-Appointment-" + details.appointment().getReferenceNo() + ".png")
-                                .build().toString()
-                )
-                .body(passService.createDownloadablePass(details));
+        try {
+            OfficerBiometricDetails details = appointmentService.getCitizenPassDetails(citizenId, reference);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            ContentDisposition.attachment()
+                                    .filename("LankaID-Appointment-" + details.appointment().getReferenceNo() + ".png")
+                                    .build().toString()
+                    )
+                    .body(passService.createDownloadablePass(details));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/officer/nic/appointments")

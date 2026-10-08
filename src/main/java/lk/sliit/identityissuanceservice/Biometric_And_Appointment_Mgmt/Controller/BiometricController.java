@@ -50,6 +50,7 @@ public class BiometricController {
             @PathVariable String service,
             @PathVariable String reference,
             @RequestParam(defaultValue = "REFERENCE_NUMBER") String checkInMethod,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -57,18 +58,21 @@ public class BiometricController {
         String accessResult = checkAccess(session, serviceType);
         if (accessResult != null) return accessResult;
         try {
+            BiometricFormToken.check(formToken, session);
             appointmentService.checkIn(reference, serviceType, officerId(session), checkInMethod);
             redirectAttributes.addFlashAttribute("biometricMessage", "Citizen checked in successfully.");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
         }
-        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+        return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
+                + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     @PostMapping("/officer/{service}/biometrics/{reference}/complete")
     public String completeBiometrics(
             @PathVariable String service,
             @PathVariable String reference,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -76,6 +80,7 @@ public class BiometricController {
         String accessResult = checkAccess(session, serviceType);
         if (accessResult != null) return accessResult;
         try {
+            BiometricFormToken.check(formToken, session);
             biometricService.completeCollection(reference, serviceType, officerId(session));
             redirectAttributes.addFlashAttribute(
                     "biometricMessage",
@@ -84,7 +89,8 @@ public class BiometricController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
         }
-        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+        return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
+                + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private String biometricPage(
