@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,6 +61,21 @@ class DocumentRenewalReplacementServiceTests {
         var form = renewalService.prepareNicForm(25, "renewal");
 
         assertEquals("200012345678", form.getLastNicNo());
+    }
+
+    @Test
+    void renewalServicePrefillsVerifiedNicIssueDate() {
+        CitizenAccount citizen = new CitizenAccount(25);
+        LocalDate verifiedDate = LocalDate.of(2020, 1, 15);
+        when(eligibilityService.getEligibility(25))
+                .thenReturn(new CitizenEligibilityDto(
+                        true, false, false, "200012345678", null, verifiedDate
+                ));
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+
+        var form = renewalService.prepareNicForm(25, "replacement");
+
+        assertEquals(verifiedDate, form.getLastIssuedDate());
     }
 
     @Test
