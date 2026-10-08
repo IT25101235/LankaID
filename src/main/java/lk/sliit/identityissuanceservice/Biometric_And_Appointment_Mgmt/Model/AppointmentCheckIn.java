@@ -8,6 +8,10 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity: records that an officer checked a citizen in. One row per appointment (same id as the
+ * appointment).
+ */
 @Entity
 @Table(name = "AppointmentCheckIn", schema = "dbo")
 public class AppointmentCheckIn {
@@ -25,6 +29,7 @@ public class AppointmentCheckIn {
     @Column(name = "check_in_method", nullable = false, length = 25)
     private String checkInMethod;
 
+    /** Sets the check-in time automatically on first save. */
     @PrePersist
     private void applyDefaults() {
         if (checkedInAt == null) checkedInAt = LocalDateTime.now();

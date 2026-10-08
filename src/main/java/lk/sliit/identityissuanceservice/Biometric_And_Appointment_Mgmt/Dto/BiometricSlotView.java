@@ -3,6 +3,7 @@ package lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+/** DTO: a slot with its centre name and how many places are booked and left. */
 public record BiometricSlotView(
         Integer slotId,
         Integer centreId,

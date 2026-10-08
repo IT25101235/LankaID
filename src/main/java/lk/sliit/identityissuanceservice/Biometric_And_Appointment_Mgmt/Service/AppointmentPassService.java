@@ -18,12 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 
+/** Builds the QR code and the downloadable PNG pass (ZXing library and Java 2D). */
 @Service
 public class AppointmentPassService {
 
     private static final DateTimeFormatter APPOINTMENT_FORMAT =
             DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
 
+    /** The QR holds only the appointment reference number, no personal data. */
     public byte[] createQrCode(String reference, int size) {
         try {
             BitMatrix matrix = new QRCodeWriter().encode(reference, BarcodeFormat.QR_CODE, size, size);
@@ -39,6 +41,7 @@ public class AppointmentPassService {
         }
     }
 
+    /** Draws the full pass image: logo, QR code, citizen, centre, date and status. */
     public byte[] createDownloadablePass(OfficerBiometricDetails details) {
         BufferedImage pass = new BufferedImage(900, 1200, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = pass.createGraphics();

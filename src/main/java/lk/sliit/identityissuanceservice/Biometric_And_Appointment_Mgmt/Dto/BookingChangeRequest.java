@@ -14,6 +14,7 @@ public record BookingChangeRequest(Integer appointmentId, String status, LocalDa
     // Several tabs can be open at once; keep the most recent confirmations and drop the oldest.
     private static final int MAX_OPEN_REQUESTS = 10;
 
+    /** Runs when the manage page opens: remembers the booking state and returns a one-time token. */
     public static BookingChangeRequest prepare(Appointment appointment, HttpSession session) {
         BookingChangeRequest request = new BookingChangeRequest(appointment.getAppointmentId(),
                 appointment.getAppointmentStatus(), appointment.getScheduledAt(), appointment.getBookingVersion(), UUID.randomUUID().toString());
@@ -24,6 +25,7 @@ public record BookingChangeRequest(Integer appointmentId, String status, LocalDa
         return request;
     }
 
+    /** Runs on submit: finds the saved state, or rejects an expired or unknown token. */
     public static BookingChangeRequest require(String token, HttpSession session) {
         BookingChangeRequest request = token == null ? null : open(session).get(token);
         if (request == null) {

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 
+/** Controller: officers manage the biometric calendar (publish, close, edit and delete slots). */
 @Controller
 public class BiometricScheduleController {
 
@@ -27,6 +28,7 @@ public class BiometricScheduleController {
         this.schedules = schedules;
     }
 
+    /** READ: monthly calendar of slots for one centre. */
     @GetMapping("/officer/{service}/appointments/schedule")
     public String schedule(
             @PathVariable String service,
@@ -58,6 +60,7 @@ public class BiometricScheduleController {
         return "officers_frontends/biometric_schedule";
     }
 
+    /** CREATE: publish half-hour slots for a date range. */
     @PostMapping("/officer/{service}/appointments/schedule/publish")
     public String publish(
             @PathVariable String service,
@@ -84,6 +87,7 @@ public class BiometricScheduleController {
         return redirect(service, centreId, startDate, redirect);
     }
 
+    /** UPDATE: close a date range. Confirmed bookings are cancelled and citizens notified. */
     @PostMapping("/officer/{service}/appointments/schedule/close")
     public String close(
             @PathVariable String service,
@@ -107,6 +111,7 @@ public class BiometricScheduleController {
         return redirect(service, centreId, startDate, redirect);
     }
 
+    /** UPDATE: change one slot's capacity, or open/close it. */
     @PostMapping("/officer/{service}/appointments/schedule/slot")
     public String updateSlot(
             @PathVariable String service,
@@ -133,6 +138,7 @@ public class BiometricScheduleController {
         return "redirect:/officer/" + service + "/appointments/schedule";
     }
 
+    /** DELETE: remove a future slot that has no bookings (needs the delete token too). */
     @PostMapping("/officer/{service}/appointments/schedule/slot/{slotId}/delete")
     public String deleteSlot(
             @PathVariable String service,
@@ -165,6 +171,7 @@ public class BiometricScheduleController {
         return "redirect:/officer/" + service + "/appointments/schedule";
     }
 
+    /** Role check: the director or the officer for this service. */
     private boolean canAccess(HttpSession session, String serviceType) {
         Object role = session.getAttribute("loggedInOfficerRole");
         return OfficerAccountService.DIRECTOR.equals(role)
@@ -183,6 +190,7 @@ public class BiometricScheduleController {
                 org.springframework.http.HttpStatus.NOT_FOUND, "Unknown biometric service.");
     }
 
+    /** Falls back to the current month if the value is invalid. */
     private YearMonth readMonth(String value) {
         try {
             return value == null || value.isBlank() ? YearMonth.now() : YearMonth.parse(value);

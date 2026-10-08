@@ -22,6 +22,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 
+/**
+ * Controller (MVC): citizen booking and appointment pass, plus the officer appointment history. It
+ * checks the session and calls AppointmentService.
+ */
 @Controller
 public class AppointmentController {
 
@@ -34,6 +38,7 @@ public class AppointmentController {
         this.passService = passService;
     }
 
+    /** READ: show the booking page for a paid application. */
     @GetMapping("/citizen/appointments/biometric")
     public String bookBiometricAppointment(
             @RequestParam(required = false) Integer applicationId,
@@ -64,6 +69,7 @@ public class AppointmentController {
         }
     }
 
+    /** CREATE: confirm the chosen slot. Errors go back to the page as messages. */
     @PostMapping("/citizen/appointments/biometric")
     public String confirmBiometricAppointment(
             @RequestParam(required = false) String applicationId,
@@ -91,6 +97,7 @@ public class AppointmentController {
         }
     }
 
+    /** READ (JSON): free slots grouped by date for the calendar, within the 1-90 day booking window. */
     @GetMapping("/citizen/appointments/biometric/availability")
     public ResponseEntity<?> availability(
             @RequestParam Integer applicationId,
@@ -135,6 +142,7 @@ public class AppointmentController {
         }
     }
 
+    /** READ: show the appointment pass (only its owner can open it). */
     @GetMapping("/citizen/appointments/{reference}/pass")
     public String appointmentPass(
             @PathVariable String reference,
@@ -153,6 +161,7 @@ public class AppointmentController {
         }
     }
 
+    /** Returns the QR code image. */
     @GetMapping("/citizen/appointments/{reference}/qr")
     public ResponseEntity<byte[]> appointmentQrCode(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
@@ -167,6 +176,7 @@ public class AppointmentController {
         }
     }
 
+    /** Returns the pass as a PNG download. */
     @GetMapping("/citizen/appointments/{reference}/pass/download")
     public ResponseEntity<byte[]> downloadAppointmentPass(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
@@ -187,6 +197,7 @@ public class AppointmentController {
         }
     }
 
+    /** Officer page: appointment history for NIC applications. */
     @GetMapping("/officer/nic/appointments")
     public String nicAppointments(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
@@ -196,6 +207,7 @@ public class AppointmentController {
         return "officers_frontends/officer_appointments";
     }
 
+    /** Officer page: appointment history for passport applications. */
     @GetMapping("/officer/passport/appointments")
     public String passportAppointments(Model model, HttpSession session) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
@@ -214,17 +226,20 @@ public class AppointmentController {
         model.addAttribute("scheduleRoute", "/officer/" + servicePath + "/appointments/schedule");
     }
 
+    /** Role check: the matching service officer or the director. */
     private boolean canAccess(HttpSession session, String requiredRole) {
         Object role = session.getAttribute("loggedInOfficerRole");
         return requiredRole.equals(role) || OfficerAccountService.DIRECTOR.equals(role);
     }
 
+    /** Session check: returns the citizen id, or null if nobody (or a non-citizen) is logged in. */
     private Integer loggedInCitizenId(HttpSession session) {
         Object userId = session.getAttribute("loggedInUserId");
         Object role = session.getAttribute("loggedInUserRole");
         return userId instanceof Integer id && "CITIZEN".equals(role) ? id : null;
     }
 
+    /** Input validation: form text to a number, or a friendly error. */
     private Integer readInteger(String value, String errorMessage) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(errorMessage);
@@ -236,6 +251,7 @@ public class AppointmentController {
         }
     }
 
+    /** Input validation: form text to a date, or a friendly error. */
     private LocalDate readDate(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Select an appointment date.");

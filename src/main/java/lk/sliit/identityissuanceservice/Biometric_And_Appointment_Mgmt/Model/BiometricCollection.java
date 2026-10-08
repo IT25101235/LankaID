@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+/** Entity: proof that biometrics were collected for an application, and which officer collected them. */
 @Entity
 @Table(name = "BiometricCollection", schema = "dbo")
 public class BiometricCollection {
@@ -25,6 +26,7 @@ public class BiometricCollection {
     @Column(name = "collection_status", length = 20)
     private String collectionStatus;
 
+    /** Fills in the collected time and COLLECTED status on first save. */
     @PrePersist
     private void applyDefaults() {
         if (collectedAt == null) collectedAt = LocalDateTime.now();

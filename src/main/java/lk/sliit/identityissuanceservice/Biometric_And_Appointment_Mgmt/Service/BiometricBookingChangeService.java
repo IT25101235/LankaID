@@ -9,6 +9,10 @@ import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service: cancel or reschedule a confirmed biometric booking. The original payment is kept, so no new
+ * payment.
+ */
 @Service
 public class BiometricBookingChangeService {
     private final AppointmentRepository appointments;
@@ -30,6 +34,7 @@ public class BiometricBookingChangeService {
         this.notificationPublisher = notificationPublisher;
     }
 
+    /** UPDATE: status becomes CANCELLED, the QR is removed and the application goes back to APPROVED. */
     @Transactional
     public Appointment cancel(Integer citizenId, BookingChangeRequest request) {
         Appointment appointment = ownedBooking(citizenId, request);
@@ -46,6 +51,7 @@ public class BiometricBookingChangeService {
         return appointment;
     }
 
+    /** UPDATE: lock the new slot and move the booking to it (also used to rebook after a cancel). */
     @Transactional
     public Appointment changeBooking(Integer citizenId, BookingChangeRequest request, Integer slotId) {
         Appointment appointment = ownedBooking(citizenId, request);
@@ -71,6 +77,7 @@ public class BiometricBookingChangeService {
         return appointment;
     }
 
+    /** Safety checks: owner, unchanged since the page opened, not checked in, application paid. */
     private Appointment ownedBooking(Integer citizenId, BookingChangeRequest request) {
         Appointment appointment = appointments.findByIdForChange(request.appointmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Booking was not found."));
