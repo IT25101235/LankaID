@@ -15,6 +15,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.DirectorDashboardServ
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.ServiceCentreService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.PublicAnnouncementService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ class AdminControllerSessionTests {
     private AdminAccountService adminAccountService;
     private SystemMaintenanceService maintenanceService;
     private ApplicationFeeSettingsService feeSettingsService;
+    private PublicAnnouncementService publicAnnouncementService;
 
     @BeforeEach
     void setUp() {
@@ -58,6 +60,7 @@ class AdminControllerSessionTests {
         adminAccountService = mock(AdminAccountService.class);
         maintenanceService = mock(SystemMaintenanceService.class);
         feeSettingsService = mock(ApplicationFeeSettingsService.class);
+        publicAnnouncementService = mock(PublicAnnouncementService.class);
 
         SystemMaintenance settings = new SystemMaintenance();
         settings.setMaintenanceId(1);
@@ -80,7 +83,7 @@ class AdminControllerSessionTests {
         mockMvc = standaloneSetup(new AdminController(
                 officerAccountService, serviceCentreService, citizenAccountDashboardService,
                 directorDashboardService, adminAccountService, maintenanceService,
-                feeSettingsService)).build();
+                feeSettingsService, publicAnnouncementService)).build();
     }
 
     @Test
