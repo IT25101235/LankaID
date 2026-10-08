@@ -8,15 +8,19 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 
 /** Form data used for NIC renewal and lost-card replacement. */
+// Reuse common profile fields and validation, then add NIC-specific request details.
 public class NicRenewalReplacementForm extends CitizenProfileForm {
 
+    // The service replaces this value with the verified linked NIC number.
     @Size(max = 12)
     private String lastNicNo;
 
+    // Required for renewal; the service uses the government issue date when it is known.
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @PastOrPresent(message = "Last issued date cannot be in the future.")
     private LocalDate lastIssuedDate;
 
+    // Police station and report date are required by the service for a lost NIC.
     @Size(max = 100)
     private String policeStation;
 
