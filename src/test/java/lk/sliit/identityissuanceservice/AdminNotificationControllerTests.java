@@ -2,6 +2,7 @@ package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.EmailDispatchResult;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.AdminNotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.PublicAnnouncementService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Controller.AdminNotificationController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,13 @@ class AdminNotificationControllerTests {
 
     private AdminNotificationService service;
     private MockMvc mockMvc;
+    private PublicAnnouncementService publicAnnouncementService;
 
     @BeforeEach
     void setUp() {
         service = mock(AdminNotificationService.class);
-        mockMvc = standaloneSetup(new AdminNotificationController(service)).build();
+        publicAnnouncementService = mock(PublicAnnouncementService.class);
+        mockMvc = standaloneSetup(new AdminNotificationController(service, publicAnnouncementService)).build();
     }
 
     @Test
