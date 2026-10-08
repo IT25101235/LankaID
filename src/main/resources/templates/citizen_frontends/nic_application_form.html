@@ -11,12 +11,14 @@
 <header th:replace="~{fragments/citizen_navbar :: navbar(activeSection='applications')}"></header>
 <main class="max-w-5xl mx-auto px-4 py-7">
   <div class="mb-6"><a th:href="@{/citizen/dashboard}" class="text-sm text-sky-700 font-semibold">← Back to dashboard</a><h1 class="text-2xl font-bold mt-3" th:text="${pageTitle}">New NIC Application</h1></div>
+  <!-- For renewal or replacement, bind the DTO and select its form route. -->
   <form th:action="@{/citizen/applications/nic/{kind}(kind=${formKind})}" th:object="${applicationForm}" method="post" data-validate data-application-form class="space-y-5">
     <input th:if="${correctionApplicationId != null or draftEditApplicationId != null}" type="hidden" name="applicationId" th:value="${correctionApplicationId != null ? correctionApplicationId : draftEditApplicationId}"/>
     <div th:if="${draftEditApplicationId != null}" class="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800"><p class="font-bold">Editing saved draft</p><p class="mt-1">Update your bio data and save it to return to the same document-upload step.</p></div>
     <div th:if="${correctionApplicationId != null}" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><p class="font-bold">Officer correction requested</p><p class="mt-2"><span class="font-semibold">Items to correct:</span> <span th:text="${correctionMessage != null and !#strings.isEmpty(correctionMessage) ? correctionMessage : 'Review the application form and uploaded documents.'}">Application form details</span></p><p class="mt-2 text-amber-800">Update only the requested items, save your changes, and resubmit the same application.</p></div>
     <div th:if="${#fields.hasAnyErrors()}" class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700"><p class="font-bold">Please correct the following:</p><ul class="list-disc ml-5 mt-1"><li th:each="error : ${#fields.allErrors()}" th:text="${error}">Invalid detail</li></ul></div>
 
+    <!-- Renewal and replacement show the verified existing NIC details. -->
     <section th:if="${applicationKind != 'NEW'}" class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
       <h2 class="font-bold">Existing NIC</h2><p class="text-xs text-slate-500 mt-1">Matched from the government identity record.</p>
       <div class="grid sm:grid-cols-2 gap-4 mt-4">
@@ -24,6 +26,7 @@
         <label th:if="${applicationKind == 'RENEWAL' or verifiedNicIssuedDate}" class="text-sm font-semibold">Last issued date<input type="date" th:field="*{lastIssuedDate}" th:required="${applicationKind == 'RENEWAL'}" th:readonly="${verifiedNicIssuedDate}" th:attr="aria-readonly=${verifiedNicIssuedDate}" class="mt-1 w-full rounded-lg border-slate-300" th:classappend="${verifiedNicIssuedDate ? ' bg-slate-100 text-slate-600 cursor-not-allowed' : ' bg-white'}"/><span class="block text-xs font-normal text-red-600 mt-1" th:if="${#fields.hasErrors('lastIssuedDate')}" th:errors="*{lastIssuedDate}"></span><span th:if="${verifiedNicIssuedDate}" class="block text-xs font-normal text-slate-500 mt-1">Verified from the government identity record and cannot be changed.</span><span th:unless="${verifiedNicIssuedDate}" class="block text-xs font-normal text-slate-500 mt-1">Enter the date printed on the NIC being renewed.</span></label>
       </div>
     </section>
+    <!-- LOST replacement requires police details before the report upload. -->
     <section th:if="${applicationKind == 'LOST'}" class="bg-red-50 border border-red-200 rounded-2xl p-5">
       <h2 class="font-bold text-red-800">Police report details</h2>
       <div class="grid sm:grid-cols-2 gap-4 mt-4">
@@ -79,6 +82,7 @@
       </div>
     </section>
     <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"><label class="flex gap-3 text-sm"><input type="checkbox" th:field="*{declarationAccepted}" required class="mt-1 rounded text-sky-600"/><span class="block text-xs font-normal text-red-600 mt-1" th:if="${#fields.hasErrors('declarationAccepted')}" th:errors="*{declarationAccepted}"></span><span>I declare that the information supplied in this application is true and correct.</span></label></section>
+    <!-- Save the draft or corrections, then continue to document upload. -->
     <div class="flex justify-between gap-3"><a th:if="${correctionApplicationId == null and draftEditApplicationId == null}" th:href="@{/citizen/dashboard}" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold">Cancel</a><a th:if="${correctionApplicationId != null or draftEditApplicationId != null}" th:href="@{/citizen/{workflow}/nic/documents(workflow=${workflowPath},applicationId=${correctionApplicationId != null ? correctionApplicationId : draftEditApplicationId})}" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold">Back to documents</a><button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-bold" th:text="${correctionApplicationId != null ? 'Save corrections and continue' : (draftEditApplicationId != null ? 'Save changes and continue' : 'Save and upload documents')}">Save and upload documents</button></div>
   </form>
 </main>

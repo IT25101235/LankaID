@@ -28,17 +28,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+// Coordinates delivery choices, printing handoff, and confirmation of document receipt.
 @Service
 public class DocumentDeliveryService {
 
     public static final String HOME_DELIVERY = "HOME_DELIVERY";
     public static final String CENTRE_COLLECTION = "CENTRE_COLLECTION";
+    // Delivery progress is stored separately from the application status, such as ISSUED.
     public static final String PREPARING = "PREPARING";
     public static final String DISPATCHED = "DISPATCHED";
     public static final String READY_FOR_COLLECTION = "READY_FOR_COLLECTION";
     public static final String DELIVERED = "DELIVERED";
     public static final String COLLECTED = "COLLECTED";
 
+    // These home delivery charges are added to the application fee; centre collection is free.
     public static final BigDecimal NIC_HOME_DELIVERY_FEE = new BigDecimal("500.00");
     public static final BigDecimal PASSPORT_HOME_DELIVERY_FEE = new BigDecimal("2000.00");
 
@@ -92,6 +95,7 @@ public class DocumentDeliveryService {
         return HOME_DELIVERY.equals(deliveryMethod) ? homeDeliveryFee(serviceType) : BigDecimal.ZERO;
     }
 
+    // Save the chosen delivery method and destination during payment.
     @Transactional
     public DocumentDelivery chooseDelivery(
             Integer citizenId,
@@ -99,6 +103,7 @@ public class DocumentDeliveryService {
             String deliveryMethod,
             Integer centreId
     ) {
+        // Matching both IDs prevents a citizen from choosing delivery for another citizen's application.
         CitizenApplication application = applicationRepository
                 .findByApplicationIdAndCitizenId(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
@@ -106,6 +111,7 @@ public class DocumentDeliveryService {
 
         DocumentDelivery delivery = deliveryRepository.findByApplicationId(applicationId)
                 .orElseGet(DocumentDelivery::new);
+        // An existing choice can be changed only while its delivery status is PREPARING.
         if (delivery.getDeliveryId() != null && !PREPARING.equals(delivery.getDeliveryStatus())) {
             throw new IllegalArgumentException("The delivery method cannot be changed after printing has started.");
         }
@@ -125,6 +131,7 @@ public class DocumentDeliveryService {
                         "Your permanent address is incomplete. Update the application address before selecting home delivery."
                 );
             }
+            // Store an address snapshot so later profile edits do not change this destination.
             delivery.setDeliveryAddress(address);
             delivery.setCentreId(null);
         } else {
@@ -133,6 +140,7 @@ public class DocumentDeliveryService {
             }
             Centre centre = centreRepository.findById(centreId)
                     .orElseThrow(() -> new IllegalArgumentException("The selected service centre was not found."));
+            // Store either a home address or a collection centre, never both.
             delivery.setCentreId(centre.getCentreId());
             delivery.setDeliveryAddress(null);
         }
@@ -147,6 +155,7 @@ public class DocumentDeliveryService {
         return saved;
     }
 
+    // Printing moves home delivery to DISPATCHED or centre pickup to READY_FOR_COLLECTION.
     @Transactional
     public void updateAfterPrinting(CitizenApplication application, Integer directorId) {
         DocumentDelivery delivery = deliveryRepository.findByApplicationId(application.getApplicationId())
@@ -176,6 +185,7 @@ public class DocumentDeliveryService {
         notificationPublisher.sendToCitizen(application.getCitizenId(), directorId, type, message);
     }
 
+    // Build tracking details using only application IDs belonging to this citizen.
     @Transactional(readOnly = true)
     public Map<Integer, CitizenDeliveryDetails> getCitizenDeliveryMap(Integer citizenId) {
         List<Integer> applicationIds = applicationRepository
@@ -192,6 +202,7 @@ public class DocumentDeliveryService {
         return result;
     }
 
+    // The owner can confirm receipt only for a dispatched home delivery.
     @Transactional
     public DocumentDelivery confirmHomeDelivery(Integer citizenId, Integer applicationId) {
         CitizenApplication application = applicationRepository
@@ -203,6 +214,7 @@ public class DocumentDeliveryService {
         if (!HOME_DELIVERY.equals(delivery.getDeliveryMethod())) {
             throw new IllegalArgumentException("Only a home delivery can be confirmed by the citizen.");
         }
+        // Return unchanged if the citizen already confirmed receipt.
         if (DELIVERED.equals(delivery.getDeliveryStatus())) return delivery;
         if (!DISPATCHED.equals(delivery.getDeliveryStatus())) {
             throw new IllegalArgumentException("This document is not currently out for home delivery.");
@@ -234,6 +246,7 @@ public class DocumentDeliveryService {
                 .toList();
     }
 
+    // Resolve an internal reference without case sensitivity and reject home delivery references.
     @Transactional(readOnly = true)
     public CsrCollectionDetails findCollection(String trackingReference) {
         if (trackingReference == null || trackingReference.isBlank()) {
@@ -248,10 +261,12 @@ public class DocumentDeliveryService {
         return buildCsrDetails(delivery);
     }
 
+    // Record centre handover only when the document is READY_FOR_COLLECTION.
     @Transactional
     public CsrCollectionDetails handOver(String trackingReference, Integer csrOfficerId) {
         CsrCollectionDetails details = findCollection(trackingReference);
         DocumentDelivery delivery = details.delivery();
+        // Return unchanged if the document was already handed over.
         if (COLLECTED.equals(delivery.getDeliveryStatus())) return details;
         if (!READY_FOR_COLLECTION.equals(delivery.getDeliveryStatus())) {
             throw new IllegalArgumentException("This document is not ready to be handed over.");
@@ -366,6 +381,7 @@ public class DocumentDeliveryService {
         return value == null ? "" : value.trim();
     }
 
+    // Create an internal DEL-year-reference and check uniqueness before the database save.
     private String generateTrackingReference() {
         String reference;
         do {

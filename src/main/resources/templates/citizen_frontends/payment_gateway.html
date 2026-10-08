@@ -33,6 +33,7 @@
           Your application fee is already paid. Select collection for free, or simulate the separate home-delivery payment below.
         </div>
 
+        <!-- Submit the delivery method and destination with the application payment. -->
         <form th:if="${!paymentSummary.deliverySelected()}" th:action="@{/citizen/payment}" method="post" data-validate data-payment-form class="mt-5">
           <input type="hidden" name="applicationId" th:value="${paymentSummary.application.applicationId}"/>
           <h2 class="font-bold">How should we provide your document?</h2>
@@ -49,11 +50,13 @@
             </label>
           </div>
 
+          <!-- Home delivery uses the permanent-address preview supplied by the server. -->
           <div id="homeAddress" class="hidden mt-4 rounded-xl border border-sky-200 bg-sky-50 p-4">
             <p class="text-xs font-bold uppercase text-sky-700">Delivery address from your application</p>
             <p class="text-sm mt-1" th:text="${#strings.isEmpty(paymentSummary.homeAddress) ? 'Address not available' : paymentSummary.homeAddress}">Citizen address</p>
           </div>
 
+          <!-- Centre collection sends the selected service-centre ID. -->
           <label id="centreSelection" class="block mt-4 text-sm font-semibold">Collection centre
             <span class="block text-xs font-normal text-slate-500 mt-1">Required only when you select centre collection.</span>
             <select id="centreId" name="centreId" class="w-full mt-1.5 rounded-xl border-slate-300">
@@ -94,6 +97,7 @@
 function money(value) {
   return 'LKR ' + Number(value).toLocaleString('en-LK', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
+// Toggle address, centre and card inputs for the selected delivery method.
 function updateDeliveryChoice() {
   const selected = document.querySelector('input[name="deliveryMethod"]:checked');
   if (!selected) return;
@@ -108,6 +112,7 @@ function updateDeliveryChoice() {
   centreSelection.classList.toggle('ring-2', !home);
   centreSelection.classList.toggle('ring-sky-200', !home);
 
+  // Display the delivery fee and amount due using server-supplied values.
   const summary = document.getElementById('paymentSummaryBox');
   const base = Number(summary.dataset.base);
   const fee = home ? Number(summary.dataset.homeFee) : 0;
