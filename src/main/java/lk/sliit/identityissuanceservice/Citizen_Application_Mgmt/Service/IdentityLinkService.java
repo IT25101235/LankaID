@@ -8,7 +8,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Citi
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Model.SupportRequest;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.SupportRequestRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SmsOtpService;
 import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SriLankanMobileNumber;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
@@ -41,12 +41,12 @@ public class IdentityLinkService {
     private final StaffAccountRepository staff;
     private final CitizenApplicationRepository applications;
     private final SmsOtpService otp;
-    private final NotificationService notifications;
+    private final NotificationPublisher notificationPublisher;
 
     public IdentityLinkService(CitizenAccountRepository citizens, UserAccountRepository users,
             GovernmentIdentityRecordRepository records, SupportRequestRepository requests,
             StaffAccountRepository staff, CitizenApplicationRepository applications,
-            SmsOtpService otp, NotificationService notifications) {
+            SmsOtpService otp, NotificationPublisher notificationPublisher) {
         this.citizens = citizens;
         this.users = users;
         this.records = records;
@@ -54,7 +54,7 @@ public class IdentityLinkService {
         this.staff = staff;
         this.applications = applications;
         this.otp = otp;
-        this.notifications = notifications;
+        this.notificationPublisher = notificationPublisher;
     }
 
     // Save the claim even if sending the SMS later fails. The citizen can then ask an officer for help.
@@ -224,7 +224,7 @@ public class IdentityLinkService {
         request.setRespondedAt(LocalDateTime.now());
         request.setRequestStatus("RESOLVED");
         requests.save(request);
-        notifications.sendToCitizen(request.getCitizenId(), officerId, "IDENTITY_VERIFICATION",
+        notificationPublisher.sendToCitizen(request.getCitizenId(), officerId, "IDENTITY_VERIFICATION",
                 "Your identity verification request has been updated. View Citizen Support for the decision.");
     }
 

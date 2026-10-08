@@ -7,7 +7,7 @@ import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.AdminNotificationR
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.AdminRecipient;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.EmailDispatchResult;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.AdminNotificationService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.OfficialNotificationEmailService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
@@ -33,7 +33,7 @@ class AdminNotificationServiceTests {
     private StaffAccountRepository staff;
     private UserAccountRepository users;
     private CitizenApplicationRepository applications;
-    private NotificationService notifications;
+    private NotificationPublisher notifications;
     private OfficialNotificationEmailService email;
     private AdminNotificationService service;
 
@@ -43,7 +43,7 @@ class AdminNotificationServiceTests {
         staff = mock(StaffAccountRepository.class);
         users = mock(UserAccountRepository.class);
         applications = mock(CitizenApplicationRepository.class);
-        notifications = mock(NotificationService.class);
+        notifications = mock(NotificationPublisher.class);
         email = mock(OfficialNotificationEmailService.class);
         service = new AdminNotificationService(citizens, staff, users, applications, notifications, email);
     }

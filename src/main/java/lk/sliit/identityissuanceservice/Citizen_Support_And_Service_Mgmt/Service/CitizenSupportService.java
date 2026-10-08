@@ -6,7 +6,7 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.Sup
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.SupportRequestView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Model.SupportRequest;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.SupportRequestRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -39,20 +39,20 @@ public class CitizenSupportService {
     private final CitizenAccountRepository citizenRepository;
     private final UserAccountRepository userRepository;
     private final StaffAccountRepository staffRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
 
     public CitizenSupportService(
             SupportRequestRepository supportRepository,
             CitizenAccountRepository citizenRepository,
             UserAccountRepository userRepository,
             StaffAccountRepository staffRepository,
-            NotificationService notificationService
+            NotificationPublisher notificationPublisher
     ) {
         this.supportRepository = supportRepository;
         this.citizenRepository = citizenRepository;
         this.userRepository = userRepository;
         this.staffRepository = staffRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
     }
 
     @Transactional
@@ -71,7 +71,7 @@ public class CitizenSupportService {
         request.setRequestStatus(OPEN);
         request = supportRepository.save(request);
 
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
                 "SUPPORT_REQUEST_CREATED",
@@ -155,7 +155,7 @@ public class CitizenSupportService {
         request.setRequestStatus(IN_PROGRESS);
         request = supportRepository.save(request);
 
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 request.getCitizenId(),
                 staffId,
                 "CSR_RESPONSE",
@@ -180,7 +180,7 @@ public class CitizenSupportService {
         if (request.getRespondedAt() == null) request.setRespondedAt(LocalDateTime.now());
         request = supportRepository.save(request);
 
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 request.getCitizenId(),
                 staffId,
                 "SUPPORT_REQUEST_RESOLVED",

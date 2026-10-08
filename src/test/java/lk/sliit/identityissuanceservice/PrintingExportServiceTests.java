@@ -7,7 +7,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Appl
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -39,7 +39,7 @@ class PrintingExportServiceTests {
     @Mock UserAccountRepository userRepository;
     @Mock GovernmentIdentityRecordRepository governmentRepository;
     @Mock ApplicationDocumentRepository documentRepository;
-    @Mock NotificationService notificationService;
+    @Mock NotificationPublisher notificationPublisher;
     @Mock DocumentDeliveryService deliveryService;
 
     private PrintingExportService printingService;
@@ -53,7 +53,7 @@ class PrintingExportServiceTests {
                 userRepository,
                 governmentRepository,
                 documentRepository,
-                notificationService,
+                notificationPublisher,
                 deliveryService
         );
         when(governmentRepository.save(any(GovernmentIdentityRecord.class))).thenAnswer(invocation -> {
@@ -77,7 +77,7 @@ class PrintingExportServiceTests {
         assertEquals("ISSUED", data.application.getCurrentStatus());
         assertEquals(91, data.citizen.getGovernmentRecordId());
         assertTrue(new String(csv, StandardCharsets.UTF_8).contains(savedRecord.getNicNo()));
-        verify(notificationService).sendToCitizen(
+        verify(notificationPublisher).sendToCitizen(
                 data.application.getCitizenId(), 70, "DOCUMENT_PRINTED",
                 "NIC application APP-123 has been printed. Document number: " + savedRecord.getNicNo() + "."
         );

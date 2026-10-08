@@ -7,7 +7,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Appl
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -33,7 +33,7 @@ public class PrintingExportService {
     private final UserAccountRepository userRepository;
     private final GovernmentIdentityRecordRepository governmentRepository;
     private final ApplicationDocumentRepository documentRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final DocumentDeliveryService deliveryService;
 
     public PrintingExportService(
@@ -42,7 +42,7 @@ public class PrintingExportService {
             UserAccountRepository userRepository,
             GovernmentIdentityRecordRepository governmentRepository,
             ApplicationDocumentRepository documentRepository,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             DocumentDeliveryService deliveryService
     ) {
         this.applicationRepository = applicationRepository;
@@ -50,7 +50,7 @@ public class PrintingExportService {
         this.userRepository = userRepository;
         this.governmentRepository = governmentRepository;
         this.documentRepository = documentRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.deliveryService = deliveryService;
     }
 
@@ -104,7 +104,7 @@ public class PrintingExportService {
             applicationRepository.save(application);
             deliveryService.updateAfterPrinting(application, directorId);
 
-            notificationService.sendToCitizen(
+            notificationPublisher.sendToCitizen(
                     application.getCitizenId(),
                     directorId,
                     "DOCUMENT_PRINTED",

@@ -87,9 +87,13 @@
         <span class="material-symbols-outlined text-base">person_add</span>
         Add Officer
       </button>
-      <button class="relative text-slate-400 hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-xl">notifications</span>
-        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">2</span>
+      <!-- This shortcut opens the existing announcement forms. It does not send a message;
+           the existing form submission still handles validation and notification delivery. -->
+      <button id="sendAnnouncementButton" type="button" onclick="return showSection('notifications')"
+              aria-controls="section-notifications"
+              class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 transition-colors whitespace-nowrap">
+        <span class="material-symbols-outlined text-base" aria-hidden="true">campaign</span>
+        Send announcement
       </button>
     </div>
   </header>
@@ -771,6 +775,8 @@ function showSection(s) {
     document.getElementById('pageSubtitle').textContent = titles[s][1];
   }
   document.getElementById('addOfficerButton').classList.toggle('hidden', s !== 'users');
+  // Hide this shortcut when the announcement forms are already open.
+  document.getElementById('sendAnnouncementButton').classList.toggle('hidden', s === 'notifications');
   const nextUrl = s === 'overview' ? '/officer/admin' : '/officer/admin?section=' + encodeURIComponent(s);
   window.history.replaceState(null, '', nextUrl);
   return false;

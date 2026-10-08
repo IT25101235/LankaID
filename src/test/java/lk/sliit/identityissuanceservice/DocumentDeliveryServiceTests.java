@@ -5,7 +5,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Citi
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentDeliveryService;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ class DocumentDeliveryServiceTests {
                 mock(UserAccountRepository.class),
                 mock(CentreRepository.class),
                 mock(GovernmentIdentityRecordRepository.class),
-                mock(NotificationService.class)
+                mock(NotificationPublisher.class)
         );
     }
 
