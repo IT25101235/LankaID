@@ -6,6 +6,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.AdminAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.PublicAnnouncementService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.LoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Dto.OfficerLoginRequestDto;
 import lk.sliit.identityissuanceservice.User_Mgmt.Service.UserAccountService;
@@ -32,16 +33,19 @@ public class UserController {
     private final AdminAccountService adminAccountService;
     private final OfficerAccountService officerAccountService;
     private final SystemMaintenanceService maintenanceService;
+    private final PublicAnnouncementService publicAnnouncementService;
 
     public UserController(
             UserAccountService userAccountService,
             AdminAccountService adminAccountService,
             OfficerAccountService officerAccountService,
-            SystemMaintenanceService maintenanceService) {
+            SystemMaintenanceService maintenanceService,
+            PublicAnnouncementService publicAnnouncementService) {
         this.userAccountService = userAccountService;
         this.adminAccountService = adminAccountService;
         this.officerAccountService = officerAccountService;
         this.maintenanceService = maintenanceService;
+        this.publicAnnouncementService = publicAnnouncementService;
     }
 
     @GetMapping("/")
@@ -50,6 +54,8 @@ public class UserController {
         String dashboardPath = landingDashboardPath(session);
         model.addAttribute("landingSignedIn", dashboardPath != null);
         model.addAttribute("landingDashboardPath", dashboardPath == null ? "" : dashboardPath);
+        publicAnnouncementService.getCurrentAnnouncement()
+                .ifPresent(announcement -> model.addAttribute("publicAnnouncement", announcement));
         return "index";
     }
 
