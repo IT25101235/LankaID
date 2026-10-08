@@ -98,7 +98,7 @@ public class AppointmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Appointment record was not found."));
         appointment = appointmentRepository.findByIdForChange(appointment.getAppointmentId()).orElseThrow();
         if (!"PENDING_PAYMENT".equals(appointment.getAppointmentStatus())
-                || !"APPROVED".equals(application.getCurrentStatus())) {
+                || !List.of("APPROVED", "PAYMENT_PENDING").contains(application.getCurrentStatus())) {
             throw new IllegalArgumentException("Use Manage booking to change your confirmed appointment.");
         }
 

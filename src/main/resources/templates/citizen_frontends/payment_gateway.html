@@ -25,8 +25,8 @@
           <p class="text-sm text-emerald-700 mt-2">Transaction: <span class="font-mono" th:text="${paymentSummary.payment.transactionReference}">PAY-REF</span></p>
           <p class="text-sm text-emerald-700 mt-1">Delivery reference: <span class="font-mono font-bold" th:text="${paymentSummary.delivery.trackingReference}">DEL-REF</span></p>
           <p class="text-sm text-emerald-700 mt-1" th:text="${paymentSummary.delivery.deliveryMethod == 'HOME_DELIVERY' ? 'Home delivery selected' : 'Service-centre collection selected'}">Delivery method</p>
-          <a th:if="${paymentSummary.application.currentStatus == 'APPROVED'}" th:href="@{/citizen/appointments/biometric(applicationId=${paymentSummary.application.applicationId})}" class="inline-flex mt-4 bg-emerald-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Select appointment</a>
-          <a th:unless="${paymentSummary.application.currentStatus == 'APPROVED'}" th:href="@{/citizen/applications}" class="inline-flex mt-4 bg-emerald-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Return to applications</a>
+          <a th:if="${paymentSummary.application.currentStatus == 'APPROVED' or paymentSummary.application.currentStatus == 'PAYMENT_PENDING'}" th:href="@{/citizen/appointments/biometric(applicationId=${paymentSummary.application.applicationId})}" class="inline-flex mt-4 bg-emerald-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Select appointment</a>
+          <a th:unless="${paymentSummary.application.currentStatus == 'APPROVED' or paymentSummary.application.currentStatus == 'PAYMENT_PENDING'}" th:href="@{/citizen/applications}" class="inline-flex mt-4 bg-emerald-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold">Return to applications</a>
         </div>
 
         <div th:if="${paymentSummary.paid() and !paymentSummary.deliverySelected()}" class="mt-5 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">

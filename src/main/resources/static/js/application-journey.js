@@ -6,12 +6,13 @@
     UNDER_REVIEW: { step: 1, icon: 'manage_search', title: 'Verification in progress', message: 'An officer is checking your details and supporting documents.' },
     CORRECTION_REQUIRED: { step: 1, icon: 'rate_review', title: 'Correction required', message: 'Update the requested information so your application can continue.' },
     REJECTED: { step: 1, icon: 'cancel', title: 'Application not approved', message: 'Review the decision notice or contact support if you need assistance.' },
-    APPROVED: { step: 2, icon: 'verified', title: 'Application approved', message: 'Your details are approved. Complete payment and book your biometric appointment.' },
-    PAYMENT_PENDING: { step: 2, icon: 'payments', title: 'Payment and booking required', message: 'Complete payment to reserve your biometric appointment.' },
-    APPOINTMENT_BOOKED: { step: 3, icon: 'event_available', title: 'Appointment confirmed', message: 'Your biometric visit is booked. Keep your appointment pass ready.' },
-    BIOMETRIC_COLLECTED: { step: 4, icon: 'fingerprint', title: 'Biometrics completed', message: 'Your identity details were captured and the document can now be produced.' },
+    CANCELLED: { step: 0, icon: 'cancel', title: 'Application cancelled', message: 'This application is no longer being processed.' },
+    APPROVED: { step: 3, icon: 'payments', title: 'Payment and booking required', message: 'Your application is approved. Complete payment and book your biometric appointment.' },
+    PAYMENT_PENDING: { step: 3, icon: 'payments', title: 'Payment and booking required', message: 'Complete payment to reserve your biometric appointment.' },
+    APPOINTMENT_BOOKED: { step: 4, icon: 'fingerprint', title: 'Biometric appointment confirmed', message: 'Your appointment is booked. Attend the visit with your appointment pass.' },
+    BIOMETRIC_COLLECTED: { step: 5, icon: 'print', title: 'Ready for printing', message: 'Your biometrics are complete and your document is waiting to be produced.' },
     PROCESSING: { step: 5, icon: 'print', title: 'Document in production', message: 'Your document is being prepared by the printing team.' },
-    ISSUED: { step: 5, icon: 'print', title: 'Document printed', message: 'Your document has been produced and is being prepared for handover.' }
+    ISSUED: { step: 6, icon: 'local_shipping', title: 'Document printed', message: 'Your document has been produced and is being prepared for delivery or collection.' }
   };
 
   const deliveryStages = {
@@ -35,7 +36,7 @@
     });
 
     journey.classList.toggle('is-correction', status === 'CORRECTION_REQUIRED');
-    journey.classList.toggle('is-rejected', status === 'REJECTED');
+    journey.classList.toggle('is-rejected', status === 'REJECTED' || status === 'CANCELLED');
     journey.classList.toggle('is-complete', Boolean(state.complete));
     journey.style.setProperty('--journey-progress', `${progress}%`);
     journey.setAttribute('aria-valuenow', String(state.complete ? steps.length : currentStep + 1));

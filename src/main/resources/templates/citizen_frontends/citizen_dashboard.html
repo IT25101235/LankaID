@@ -65,7 +65,7 @@
           <span class="flex items-center gap-3 sm:gap-4">
             <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-sky-700 flex-shrink-0 flex items-center justify-center material-symbols-outlined" th:text="${citizenApplication.serviceType == 'NIC' ? 'badge' : 'flight_takeoff'}">badge</span>
             <span class="min-w-0 flex-1">
-              <span class="block font-bold" th:text="${citizenApplication.serviceType + ' ' + #strings.toLowerCase(citizenApplication.applicationKind)}">NIC new</span>
+              <span class="block font-bold" th:text="${citizenApplication.serviceType + ' ' + (citizenApplication.applicationKind == 'LOST' ? 'lost replacement' : #strings.toLowerCase(citizenApplication.applicationKind))}">NIC new</span>
               <span class="block text-xs text-slate-500 font-mono mt-1 truncate" th:text="${citizenApplication.applicationNo}">Reference</span>
               <span class="block text-xs text-slate-400 mt-1" th:text="${'Created ' + #temporals.format(citizenApplication.createdAt, 'dd MMM yyyy, HH:mm')}">Created</span>
             </span>
@@ -87,14 +87,19 @@
           </div>
           <div class="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
             <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Next action</span>
+            <span th:if="${citizenApplication.currentStatus == 'SUBMITTED' or citizenApplication.currentStatus == 'RESUBMITTED' or citizenApplication.currentStatus == 'UNDER_REVIEW'}" class="text-sm font-semibold text-slate-600">Wait for the officer review</span>
+            <span th:if="${citizenApplication.currentStatus == 'REJECTED'}" class="text-sm font-bold text-red-700">Application was not approved</span>
+            <span th:if="${citizenApplication.currentStatus == 'CANCELLED'}" class="text-sm font-bold text-slate-600">Application cancelled</span>
             <a th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:href="@{/citizen/{workflow}/{service}/documents(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">Continue</a>
             <form th:if="${citizenApplication.currentStatus == 'DRAFT'}" th:action="@{/citizen/applications/{applicationId}/delete(applicationId=${citizenApplication.applicationId})}" method="post" onsubmit="return confirm('Delete this unsubmitted draft? This cannot be undone.')">
               <button type="submit" class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-bold text-red-700 hover:bg-red-100">Delete draft</button>
             </form>
             <a th:if="${citizenApplication.currentStatus == 'CORRECTION_REQUIRED'}" th:href="@{/citizen/{workflow}/{service}/correction(workflow=${citizenApplication.applicationKind == 'NEW' ? 'applications' : 'renewals'},service=${#strings.toLowerCase(citizenApplication.serviceType)},applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-amber-700">Correct form</a>
             <a th:if="${citizenApplication.currentStatus == 'APPROVED'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-emerald-700">Pay &amp; book biometrics</a>
+            <a th:if="${citizenApplication.currentStatus == 'PAYMENT_PENDING'}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-emerald-700">Complete payment &amp; book biometrics</a>
             <a th:if="${citizenApplication.currentStatus == 'APPOINTMENT_BOOKED'}" th:href="@{/citizen/appointments/biometric(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-sky-700">View QR pass</a>
             <span th:if="${citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED'}" class="text-sm font-bold text-purple-700">Ready for printing</span>
+            <span th:if="${citizenApplication.currentStatus == 'PROCESSING'}" class="text-sm font-bold text-purple-700">Document is being printed</span>
             <a th:if="${deliveryInfo == null and (citizenApplication.currentStatus == 'APPOINTMENT_BOOKED' or citizenApplication.currentStatus == 'BIOMETRIC_COLLECTED' or citizenApplication.currentStatus == 'ISSUED')}" th:href="@{/citizen/payment(applicationId=${citizenApplication.applicationId})}" class="text-sm font-bold text-orange-700">Choose delivery</a>
             <span th:if="${citizenApplication.currentStatus == 'ISSUED' and deliveryInfo == null}" class="text-sm font-bold text-emerald-700">Document printed</span>
             <form th:if="${deliveryInfo != null and deliveryInfo.delivery.deliveryMethod == 'HOME_DELIVERY' and deliveryInfo.delivery.deliveryStatus == 'DISPATCHED'}" th:action="@{/citizen/deliveries/confirm}" method="post" onsubmit="return confirm('Confirm that you have received your document?')">
@@ -141,7 +146,7 @@
     </div>
   </section>
 </main>
-<script src="/js/application-journey.js?v=20261007"></script>
+<script src="/js/application-journey.js?v=20261008-2"></script>
 <script src="/js/portal-shell.js?v=20260918-navbar"></script>
 </body>
 </html>

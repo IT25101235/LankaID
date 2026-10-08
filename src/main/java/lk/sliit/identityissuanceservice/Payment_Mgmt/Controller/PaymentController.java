@@ -80,7 +80,7 @@ public class PaymentController {
             paymentService.payForApplication(citizenId, applicationId, deliveryMethod, centreId);
             String status = paymentService.getPaymentSummary(citizenId, applicationId)
                     .application().getCurrentStatus();
-            if ("APPROVED".equals(status)) {
+            if ("APPROVED".equals(status) || "PAYMENT_PENDING".equals(status)) {
                 redirectAttributes.addFlashAttribute(
                         "appointmentMessage",
                         "Payment and delivery choice confirmed. Select a biometric appointment within the next 14 days."
