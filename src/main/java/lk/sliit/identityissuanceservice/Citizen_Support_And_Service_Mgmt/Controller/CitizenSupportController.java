@@ -33,15 +33,15 @@ import java.util.Locale;
 public class CitizenSupportController {
 
     @PostMapping("/citizen/support/{reference}/delete")
-    public String deleteContact(@PathVariable String reference, @RequestParam(required = false) String deleteToken,
+    public String deleteRequest(@PathVariable String reference, @RequestParam(required = false) String deleteToken,
             HttpSession session, RedirectAttributes redirect) {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
         try {
             // The one-time form token protects this destructive POST from replayed submissions.
             DeletionFormToken.check(deleteToken, session);
-            supportService.deleteUnansweredContact(citizenId, reference);
-            redirect.addFlashAttribute("supportMessage", "Contact request deleted.");
+            supportService.deleteUnansweredRequest(citizenId, reference);
+            redirect.addFlashAttribute("supportMessage", "Support request deleted.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("supportError", exception.getMessage());
         } catch (DataAccessException exception) {
