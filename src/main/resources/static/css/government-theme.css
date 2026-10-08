@@ -1138,16 +1138,32 @@ body.gov-landing-page > main {
 
 /* Landing page: authentic civic photography with a readable, restrained overlay. */
 .gov-hero {
+  --gov-hero-background-position: center 54%;
   position: relative;
   isolation: isolate;
   min-height: 34rem;
   overflow: hidden;
+  border-color: rgb(212 167 44 / 0.65) !important;
+}
+
+.gov-hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  content: "";
   background-image:
     linear-gradient(90deg, rgb(16 40 61 / 0.94) 0%, rgb(23 53 79 / 0.83) 48%, rgb(75 11 47 / 0.66) 100%),
     url("/images/presidential-secretariat-wide.jpg");
-  background-position: center 54%;
+  background-position: var(--gov-hero-background-position);
   background-size: cover;
-  border-color: rgb(212 167 44 / 0.65) !important;
+  transform-origin: center;
+  animation: govHeroSubtleZoom 9s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes govHeroSubtleZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
 }
 
 .gov-hero::after {
@@ -1774,7 +1790,7 @@ body:not(.portal-shell) > header.bg-white { border-top: 3px solid var(--gov-gold
 @keyframes scan { 0%, 100% { top: 15%; } 50% { top: 82%; } }
 
 @media (max-width: 900px) {
-  .gov-hero { min-height: auto; background-position: 62% center; }
+  .gov-hero { --gov-hero-background-position: 62% center; min-height: auto; }
   .gov-hero > div { padding-top: 3.5rem !important; padding-bottom: 4rem !important; }
 }
 
@@ -1834,7 +1850,7 @@ body:not(.portal-shell) > header.bg-white { border-top: 3px solid var(--gov-gold
     line-height: 0.72rem;
     white-space: normal;
   }
-  .gov-hero { background-position: 68% center; }
+  .gov-hero { --gov-hero-background-position: 68% center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
