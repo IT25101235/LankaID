@@ -6,6 +6,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Dto.OfficerDetailsDto;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Model.SystemMaintenance;
 import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.SystemMaintenanceService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.PublicAnnouncementService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.UserController;
 import lk.sliit.identityissuanceservice.User_Mgmt.Controller.OfficerSessionIdentityAdvice;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
@@ -49,6 +50,9 @@ class UserControllerSessionTests {
     @Mock
     private SystemMaintenanceService maintenanceService;
 
+    @Mock
+    private PublicAnnouncementService publicAnnouncementService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -62,7 +66,8 @@ class UserControllerSessionTests {
                 userAccountService,
                 adminAccountService,
                 officerAccountService,
-                maintenanceService
+                maintenanceService,
+                publicAnnouncementService
         )).build();
     }
 
