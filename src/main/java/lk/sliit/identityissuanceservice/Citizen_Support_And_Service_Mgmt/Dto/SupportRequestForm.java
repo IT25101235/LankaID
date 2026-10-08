@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/** Captures and validates the fields a citizen may submit for a support request. */
 public class SupportRequestForm {
 
     @NotBlank(message = "Select Contact Us or Complaint.")

@@ -14,7 +14,9 @@ import java.util.Optional;
 import java.util.List;
 
 @Repository
+/** Provides citizen-owned lookups, CSR queue filters and locked workflow updates. */
 public interface SupportRequestRepository extends JpaRepository<SupportRequest, Integer> {
+    // Response, resolution and deletion obtain the same row lock to avoid lost updates.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from SupportRequest r where r.requestId = :id")
     Optional<SupportRequest> findForUpdate(Integer id);
