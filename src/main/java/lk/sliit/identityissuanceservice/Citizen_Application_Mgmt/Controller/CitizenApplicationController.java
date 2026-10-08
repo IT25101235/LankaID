@@ -388,6 +388,7 @@ public class CitizenApplicationController {
         model.addAttribute("applicationKind", "NEW");
         model.addAttribute("pageTitle", "New " + service + " Application");
         model.addAttribute("existingDocumentNo", null);
+        model.addAttribute("workflowPath", "applications");
         if ("Passport".equals(service)) {
             CitizenEligibilityDto eligibility = applicationService.getEligibility(citizenId);
             model.addAttribute("existingNicNo", eligibility.getNicNumber());
@@ -408,7 +409,13 @@ public class CitizenApplicationController {
                 "uploadedTypes",
                 documents.stream().map(document -> document.getDocumentType()).toList()
         );
-        model.addAttribute("requiredTypes", applicationService.requiredNewDocumentTypes(application));
+        var requiredTypes = applicationService.requiredNewDocumentTypes(application);
+        var uploadedTypes = documents.stream().map(document -> document.getDocumentType()).toList();
+        model.addAttribute("requiredTypes", requiredTypes);
+        model.addAttribute(
+                "missingRequiredTypes",
+                requiredTypes.stream().filter(type -> !uploadedTypes.contains(type)).toList()
+        );
         model.addAttribute("servicePath", service);
         model.addAttribute("workflowPath", "applications");
         model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
