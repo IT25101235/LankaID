@@ -72,7 +72,7 @@
         <h2 class="font-bold"><span th:text="${documentType}">NIC</span> application details</h2>
         <div th:if="${nicApplication != null}" class="grid sm:grid-cols-2 gap-5 text-sm mt-4">
           <div><p class="text-xs text-slate-400">Previous NIC number</p><p class="font-semibold mt-1" th:text="${nicApplication.lastNicNo ?: 'Not applicable'}"></p></div>
-          <div><p class="text-xs text-slate-400">Previous issue date</p><p class="font-semibold mt-1" th:text="${nicApplication.lastIssuedDate == null ? 'Not applicable' : #temporals.format(nicApplication.lastIssuedDate, 'dd MMM yyyy')}"></p></div>
+          <div><p class="text-xs text-slate-400">Previous issue date</p><p class="font-semibold mt-1" th:text="${nicApplication.lastIssuedDate == null ? 'Officer verification required' : #temporals.format(nicApplication.lastIssuedDate, 'dd MMM yyyy')}"></p><p th:if="${reviewApplication.applicationKind != 'NEW'}" class="text-xs text-amber-700 mt-1">Confirm this date against the official NIC record or presented identity evidence before approval.</p></div>
           <div><p class="text-xs text-slate-400">Police station</p><p class="font-semibold mt-1" th:text="${nicApplication.policeStation ?: 'Not applicable'}"></p></div>
           <div><p class="text-xs text-slate-400">Police report date</p><p class="font-semibold mt-1" th:text="${nicApplication.policeReportDate == null ? 'Not applicable' : #temporals.format(nicApplication.policeReportDate, 'dd MMM yyyy')}"></p></div>
         </div>

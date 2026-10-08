@@ -7,6 +7,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Citi
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Service.CitizenApplicationService;
+import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.NicRenewalReplacementForm;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Service.DocumentRenewalReplacementService;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
@@ -76,6 +77,27 @@ class DocumentRenewalReplacementServiceTests {
         var form = renewalService.prepareNicForm(25, "replacement");
 
         assertEquals(verifiedDate, form.getLastIssuedDate());
+    }
+
+    @Test
+    void renewalRejectsIssueDateThatConflictsWithGovernmentRecord() {
+        LocalDate verifiedDate = LocalDate.of(2020, 1, 15);
+        when(eligibilityService.getEligibility(25))
+                .thenReturn(new CitizenEligibilityDto(
+                        true, false, false, "200012345678", null, verifiedDate
+                ));
+        var form = new NicRenewalReplacementForm();
+        form.setLastIssuedDate(LocalDate.of(2021, 2, 20));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> renewalService.createNicRequest(25, "renewal", form)
+        );
+
+        assertEquals(
+                "The previous NIC issue date does not match the verified government record.",
+                exception.getMessage()
+        );
     }
 
     @Test

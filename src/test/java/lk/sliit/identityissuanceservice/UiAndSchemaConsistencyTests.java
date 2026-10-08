@@ -274,7 +274,7 @@ class UiAndSchemaConsistencyTests {
         assertFalse(support.contains("<header class="));
         assertTrue(nicForm.contains("th:field=\"*{lastNicNo}\" required readonly"));
         assertTrue(nicForm.contains("th:readonly=\"${verifiedNicIssuedDate}\""));
-        assertTrue(nicForm.contains("You do not need to guess this date"));
+        assertTrue(nicForm.contains("applicationKind == 'RENEWAL' or verifiedNicIssuedDate"));
         assertTrue(passportForm.contains("cannot be changed"));
         assertTrue(payment.contains("centreSelection.classList.toggle('hidden', home)"));
         assertTrue(payment.contains("centre.disabled = home"));
