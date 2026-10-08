@@ -40,8 +40,8 @@ public class WalkInBookingChangeController {
             model.addAttribute("appointment", appointment);
             model.addAttribute("biometric", false);
             model.addAttribute("rebooking", false);
-            model.addAttribute("canChange", BookingChangePolicy.canChange(appointment));
-            model.addAttribute("canPay", BookingChangePolicy.canChange(appointment));
+            model.addAttribute("canChange", BookingChangePolicy.canCancel(appointment));
+            model.addAttribute("canPay", BookingChangePolicy.canReschedule(appointment));
             model.addAttribute("slots", bookings.getBookableSlots());
             model.addAttribute("changeToken", BookingChangeRequest.prepare(appointment, session).token());
             model.addAttribute("manageUrl", "/walk-in/bookings/" + reference + "/manage");

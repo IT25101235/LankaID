@@ -26,7 +26,9 @@ import java.util.List;
 @Service
 public class AppointmentService {
 
-    private static final List<String> OFFICER_QUEUE_STATUSES =
+    private static final List<String> OFFICER_ACTIVE_QUEUE_STATUSES =
+            List.of("CONFIRMED", "CHECKED_IN");
+    private static final List<String> OFFICER_HISTORY_STATUSES =
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
 
     private final AppointmentRepository appointmentRepository;
@@ -143,7 +145,7 @@ public class AppointmentService {
         Appointment appointment = getCitizenAppointment(citizenId, reference);
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
-        if (!OFFICER_QUEUE_STATUSES.contains(appointment.getAppointmentStatus())) {
+        if (!OFFICER_HISTORY_STATUSES.contains(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Confirm an appointment before opening its pass.");
         }
         return buildOfficerDetails(appointment, application.getServiceType(), true);
@@ -153,7 +155,7 @@ public class AppointmentService {
     public List<OfficerBiometricDetails> getOfficerQueue(String serviceType) {
         return appointmentRepository
                 .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-                        "BIOMETRIC", OFFICER_QUEUE_STATUSES)
+                        "BIOMETRIC", OFFICER_ACTIVE_QUEUE_STATUSES)
                 .stream()
                 .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
                 .filter(java.util.Objects::nonNull)
@@ -164,7 +166,7 @@ public class AppointmentService {
     public List<OfficerBiometricDetails> getOfficerHistory(String serviceType) {
         return appointmentRepository
                 .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-                        "BIOMETRIC", OFFICER_QUEUE_STATUSES)
+                        "BIOMETRIC", OFFICER_HISTORY_STATUSES)
                 .stream()
                 .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
                 .filter(java.util.Objects::nonNull)
@@ -216,6 +218,7 @@ public class AppointmentService {
         if ("COMPLETED".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Biometrics have already been completed.");
         }
+        BookingChangePolicy.requireCheckInToday(appointment);
 
         AppointmentCheckIn checkIn = checkInRepository.findById(appointment.getAppointmentId())
                 .orElseGet(AppointmentCheckIn::new);
@@ -236,6 +239,49 @@ public class AppointmentService {
         return findForOfficer(reference, serviceType);
     }
 
+    /** Moves a missed booking to the first available future slot at the same centre. */
+    @Transactional
+    public OfficerBiometricDetails rescheduleMissed(
+            String reference,
+            String serviceType,
+            Integer staffId
+    ) {
+        if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
+        OfficerBiometricDetails details = findForOfficer(reference, serviceType);
+        Appointment appointment = appointmentRepository
+                .findByIdForChange(details.appointment().getAppointmentId()).orElseThrow();
+        BookingChangePolicy.requireMissedAppointment(appointment);
+        if (checkInRepository.existsById(appointment.getAppointmentId())) {
+            throw new IllegalArgumentException("A checked-in appointment cannot be rescheduled.");
+        }
+
+        CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
+                .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
+        BiometricSlotView nextSlot = scheduleService.getSchedule(
+                        serviceType, appointment.getCentreId(), LocalDate.now().plusDays(1), LocalDate.now().plusDays(90))
+                .stream()
+                .filter(slot -> slot.available() && slot.remainingPlaces() > 0)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No future slots are available at this centre. The citizen can choose another centre from Manage booking."));
+        var slot = scheduleService.lockBookableSlot(
+                nextSlot.slotId(), serviceType, appointment.getAppointmentId());
+        LocalDateTime newTime = slot.getSlotDate().atTime(slot.getSlotTime());
+        appointment.setBiometricSlotId(slot.getSlotId());
+        appointment.setScheduledAt(newTime);
+        appointment.setAppointmentStatus("CONFIRMED");
+        appointment.setQrCode(appointment.getReferenceNo());
+        appointmentRepository.save(appointment);
+        application.setCurrentStatus("APPOINTMENT_BOOKED");
+        applicationRepository.save(application);
+        notificationPublisher.sendToCitizen(
+                appointment.getCitizenId(), staffId, "APPOINTMENT_CONFIRMED",
+                "Missed biometric appointment " + appointment.getReferenceNo()
+                        + " was moved to " + newTime + ". The same QR pass remains valid."
+        );
+        return findForOfficer(reference, serviceType);
+    }
+
     private OfficerBiometricDetails buildOfficerDetails(
             Appointment appointment,
             String serviceType,
@@ -244,7 +290,7 @@ public class AppointmentService {
         CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
                 .orElse(null);
         if (application == null || !serviceType.equals(application.getServiceType())) return null;
-        if (rejectPendingPayment && !OFFICER_QUEUE_STATUSES.contains(appointment.getAppointmentStatus())) {
+        if (rejectPendingPayment && !OFFICER_HISTORY_STATUSES.contains(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("This appointment has not been paid and confirmed.");
         }
         CitizenAccount citizen = citizenRepository.findById(application.getCitizenId())

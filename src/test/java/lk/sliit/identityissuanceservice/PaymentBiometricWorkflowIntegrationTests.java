@@ -43,6 +43,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -335,7 +336,8 @@ class PaymentBiometricWorkflowIntegrationTests {
                         .session(officerSession))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(serviceType + " Citizen Perera")))
-                .andExpect(content().string(containsString("Check in citizen")))
+                .andExpect(content().string(not(containsString("Check in citizen"))))
+                .andExpect(content().string(containsString("Check-in is available only on the booked date.")))
                 .andExpect(content().string(containsString("/webjars/jsqr/1.4.0/dist/jsQR.js")))
                 .andExpect(content().string(containsString("scanWebcamFrame")))
                 .andExpect(content().string(not(containsString("BarcodeDetector"))));
@@ -346,6 +348,15 @@ class PaymentBiometricWorkflowIntegrationTests {
                 .andExpect(content().string(containsString("Biometric Collection")))
                 .andExpect(content().string(not(containsString("Collection Workbench"))));
 
+        mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
+                                servicePath, appointment.getReferenceNo())
+                        .param("checkInMethod", "QR")
+                        .session(officerSession))
+                .andExpect(status().is3xxRedirection());
+        assertFalse(checkInRepository.existsById(appointment.getAppointmentId()));
+
+        appointment.setScheduledAt(LocalDateTime.now());
+        appointment = appointmentRepository.saveAndFlush(appointment);
         mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
                                 servicePath, appointment.getReferenceNo())
                         .param("checkInMethod", "QR")
@@ -367,6 +378,12 @@ class PaymentBiometricWorkflowIntegrationTests {
                 "COMPLETED",
                 appointmentRepository.findById(appointment.getAppointmentId()).orElseThrow().getAppointmentStatus()
         );
+        mockMvc.perform(get("/officer/{service}/biometrics", servicePath).session(officerSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString(appointment.getReferenceNo()))));
+        mockMvc.perform(get("/officer/{service}/appointments", servicePath).session(officerSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(appointment.getReferenceNo())));
         assertTrue(userNotificationRepository
                 .findAllById_UserIdOrderByDeliveredAtDesc(citizenUser.getUserId()).size() >= 4);
 

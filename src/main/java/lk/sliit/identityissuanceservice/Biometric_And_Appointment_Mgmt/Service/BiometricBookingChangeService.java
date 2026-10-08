@@ -33,7 +33,7 @@ public class BiometricBookingChangeService {
     @Transactional
     public Appointment cancel(Integer citizenId, BookingChangeRequest request) {
         Appointment appointment = ownedBooking(citizenId, request);
-        BookingChangePolicy.requireChangeAllowed(appointment);
+        BookingChangePolicy.requireCancellationAllowed(appointment);
         appointment.setAppointmentStatus("CANCELLED");
         appointment.setQrCode(null);
         appointments.save(appointment);
@@ -51,7 +51,7 @@ public class BiometricBookingChangeService {
         Appointment appointment = ownedBooking(citizenId, request);
         var application = applications.findById(appointment.getApplicationId()).orElseThrow();
         boolean rebooking = "CANCELLED".equals(appointment.getAppointmentStatus());
-        if (!rebooking) BookingChangePolicy.requireChangeAllowed(appointment);
+        if (!rebooking) BookingChangePolicy.requireRescheduleAllowed(appointment);
         var slot = schedules.lockBookableSlot(slotId, application.getServiceType(), appointment.getAppointmentId());
         var newTime = slot.getSlotDate().atTime(slot.getSlotTime());
         if (!rebooking && slot.getSlotId().equals(appointment.getBiometricSlotId())) {
