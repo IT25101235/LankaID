@@ -15,12 +15,33 @@
     <a th:href="${historyRoute}" aria-current="page" class="rounded-xl bg-slate-900 px-4 py-3 text-center text-sm font-bold text-white"><span class="material-symbols-outlined mr-1 align-middle text-lg">history</span>Appointment History</a>
     <a th:href="${scheduleRoute}" class="rounded-xl px-4 py-3 text-center text-sm font-bold text-slate-600 hover:bg-cyan-50 hover:text-cyan-700"><span class="material-symbols-outlined mr-1 align-middle text-lg">calendar_month</span>Schedule Settings</a>
   </nav>
-  <section class="bg-white border rounded-2xl shadow-sm overflow-hidden">
-    <div class="p-5 border-b"><h1 class="font-bold">Appointment schedule</h1><p class="text-xs text-slate-500 mt-1" th:text="${#lists.size(appointments) + ' appointment(s) found'}">0 appointments</p></div>
+  <section class="bg-white border rounded-2xl shadow-sm overflow-hidden" data-appointment-history>
+    <div class="p-5 border-b"><h1 class="font-bold">Recent appointment activity</h1><p class="text-xs text-slate-500 mt-1"><span data-appointment-count th:text="${#lists.size(appointments) + ' appointment(s) shown'}">0 appointments shown</span><span> · Most recent updates first</span></p></div>
+    <form class="grid gap-3 border-b bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_170px_160px_160px_auto]" data-appointment-filters>
+      <label class="text-xs font-bold text-slate-600">Search
+        <input type="search" data-appointment-search placeholder="Citizen, application or reference" class="mt-1 w-full rounded-lg border-slate-300 bg-white text-sm"/>
+      </label>
+      <label class="text-xs font-bold text-slate-600">Status
+        <select data-appointment-status class="mt-1 w-full rounded-lg border-slate-300 bg-white text-sm">
+          <option value="">All statuses</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="CHECKED_IN">Checked in</option>
+          <option value="COMPLETED">Completed</option>
+        </select>
+      </label>
+      <label class="text-xs font-bold text-slate-600">Scheduled from
+        <input type="date" data-appointment-from class="mt-1 w-full rounded-lg border-slate-300 bg-white text-sm"/>
+      </label>
+      <label class="text-xs font-bold text-slate-600">Scheduled to
+        <input type="date" data-appointment-to class="mt-1 w-full rounded-lg border-slate-300 bg-white text-sm"/>
+      </label>
+      <button type="button" data-appointment-clear class="self-end rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-100">Clear</button>
+    </form>
     <div th:if="${#lists.isEmpty(appointments)}" class="p-10 text-center"><span class="material-symbols-outlined text-5xl text-slate-300">event_busy</span><p class="font-bold mt-2">No biometric appointments</p></div>
-<div th:unless="${#lists.isEmpty(appointments)}" class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Date &amp; time</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Application</th><th class="p-4 text-left">Appointment reference</th><th class="p-4 text-left">Centre</th><th class="p-4 text-left">Status</th><th class="p-4"></th></tr></thead><tbody class="divide-y"><tr th:each="item : ${appointments}"><td class="p-4 font-semibold" th:text="${#temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Date</td><td class="p-4" th:text="${item.applicantName}">Citizen</td><td class="p-4 font-mono text-xs" th:text="${item.application.applicationNo}">Application</td><td class="p-4 font-mono text-xs font-bold text-sky-700" th:text="${item.appointment.referenceNo}">Reference</td><td class="p-4" th:text="${item.centre.centreName}">Centre</td><td class="p-4"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold" th:text="${#strings.replace(item.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</span></td><td class="p-4 text-right"><a th:href="${biometricRoute + '?reference=' + item.appointment.referenceNo}" class="bg-sky-600 text-white rounded-lg px-3 py-2 text-xs font-bold">Open</a></td></tr></tbody></table></div>
+<div th:unless="${#lists.isEmpty(appointments)}" class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-4 text-left">Latest activity</th><th class="p-4 text-left">Scheduled date &amp; time</th><th class="p-4 text-left">Citizen</th><th class="p-4 text-left">Application</th><th class="p-4 text-left">Appointment reference</th><th class="p-4 text-left">Centre</th><th class="p-4 text-left">Status</th><th class="p-4"></th></tr></thead><tbody class="divide-y"><tr th:each="item : ${appointments}" data-appointment-row th:attr="data-search=${item.applicantName + ' ' + item.application.applicationNo + ' ' + item.appointment.referenceNo},data-status=${item.appointment.appointmentStatus},data-date=${#temporals.format(item.appointment.scheduledAt, 'yyyy-MM-dd')}"><td class="p-4 text-xs text-slate-500" th:text="${#temporals.format(item.application.updatedAt, 'dd MMM yyyy, hh:mm a')}">Updated</td><td class="p-4 font-semibold" th:text="${#temporals.format(item.appointment.scheduledAt, 'dd MMM yyyy, hh:mm a')}">Date</td><td class="p-4" th:text="${item.applicantName}">Citizen</td><td class="p-4 font-mono text-xs" th:text="${item.application.applicationNo}">Application</td><td class="p-4 font-mono text-xs font-bold text-sky-700" th:text="${item.appointment.referenceNo}">Reference</td><td class="p-4" th:text="${item.centre.centreName}">Centre</td><td class="p-4"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold" th:text="${#strings.replace(item.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</span></td><td class="p-4 text-right"><a th:href="${biometricRoute + '?reference=' + item.appointment.referenceNo}" class="bg-sky-600 text-white rounded-lg px-3 py-2 text-xs font-bold">Open</a></td></tr><tr data-appointment-empty hidden><td colspan="8" class="p-10 text-center text-sm font-semibold text-slate-500">No appointments match these filters.</td></tr></tbody></table></div>
   </section>
 </main>
 <script src="/js/portal-shell.js?v=20261007-ui"></script>
+<script src="/js/officer-appointment-history.js?v=20261008"></script>
 </body>
 </html>

@@ -321,6 +321,13 @@ class UiAndSchemaConsistencyTests {
 
         assertTrue(history.contains("Appointment History"));
         assertTrue(history.contains("Schedule Settings"));
+        assertTrue(history.contains("Most recent updates first"));
+        assertTrue(history.contains("item.application.updatedAt"));
+        assertTrue(history.contains("data-appointment-filters"));
+        assertTrue(history.contains("data-appointment-status"));
+        assertTrue(history.contains("data-appointment-from"));
+        assertTrue(history.contains("data-appointment-to"));
+        assertTrue(history.contains("/js/officer-appointment-history.js"));
         assertTrue(history.contains("${scheduleRoute}"));
         assertTrue(schedule.contains("Appointment History"));
         assertTrue(schedule.contains("Schedule Settings"));

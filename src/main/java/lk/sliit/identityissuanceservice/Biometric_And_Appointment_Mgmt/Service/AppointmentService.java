@@ -161,6 +161,26 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
+    public List<OfficerBiometricDetails> getOfficerHistory(String serviceType) {
+        return appointmentRepository
+                .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
+                        "BIOMETRIC", OFFICER_QUEUE_STATUSES)
+                .stream()
+                .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
+                .filter(java.util.Objects::nonNull)
+                .sorted(java.util.Comparator
+                        .comparing(
+                                (OfficerBiometricDetails details) -> details.application().getUpdatedAt(),
+                                java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())
+                        )
+                        .thenComparing(
+                                details -> details.appointment().getAppointmentId(),
+                                java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())
+                        ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public OfficerBiometricDetails findForOfficer(String reference, String serviceType) {
         String cleanReference = reference == null ? "" : reference.trim();
         if (cleanReference.isBlank()) {

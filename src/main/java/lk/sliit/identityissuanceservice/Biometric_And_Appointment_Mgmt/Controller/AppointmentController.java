@@ -182,7 +182,7 @@ public class AppointmentController {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         if (!canAccess(session, OfficerAccountService.NIC_OFFICER)) return "redirect:/login";
         addAppointmentPageData(model, "NIC", "/officer/nic/applications", "/officer/nic/biometrics");
-        model.addAttribute("appointments", appointmentService.getOfficerQueue("NIC"));
+        model.addAttribute("appointments", appointmentService.getOfficerHistory("NIC"));
         return "officers_frontends/officer_appointments";
     }
 
@@ -191,7 +191,7 @@ public class AppointmentController {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         if (!canAccess(session, OfficerAccountService.PASSPORT_OFFICER)) return "redirect:/login";
         addAppointmentPageData(model, "Passport", "/officer/passport/applications", "/officer/passport/biometrics");
-        model.addAttribute("appointments", appointmentService.getOfficerQueue("PASSPORT"));
+        model.addAttribute("appointments", appointmentService.getOfficerHistory("PASSPORT"));
         return "officers_frontends/officer_appointments";
     }
 
