@@ -32,6 +32,7 @@ public class WalkInBookingChangeService {
     @Transactional
     public void cancel(String reference, BookingChangeRequest request, HttpSession session) {
         Appointment appointment = ownedBooking(reference, request, session);
+        BookingChangePolicy.requireCancellationAllowed(appointment);
         appointment.setAppointmentStatus("CANCELLED");
         appointment.setQrCode(null);
         appointments.save(appointment);
@@ -44,6 +45,7 @@ public class WalkInBookingChangeService {
         var slot = slots.findByIdForBooking(slotId)
                 .orElseThrow(() -> new IllegalArgumentException("Select an available slot."));
         Appointment appointment = ownedBooking(reference, request, session);
+        BookingChangePolicy.requireRescheduleAllowed(appointment);
         var newTime = slot.getSlotDate().atTime(slot.getSlotTime());
         if (slot.getCentreId().equals(appointment.getCentreId()) && newTime.equals(appointment.getScheduledAt())) {
             throw new IllegalArgumentException("Choose a different slot. Your existing booking does not need another payment.");
@@ -70,7 +72,6 @@ public class WalkInBookingChangeService {
             throw new IllegalArgumentException("Booking was not found for your verified number.");
         }
         BookingChangePolicy.requireUnchanged(appointment, request);
-        BookingChangePolicy.requireChangeAllowed(appointment);
         if (checkIns.existsById(appointment.getAppointmentId())) {
             throw new IllegalArgumentException("A checked-in booking cannot be changed.");
         }
