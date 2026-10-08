@@ -5,7 +5,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.ApplicationDocumentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.ApplicationReviewRepository;
@@ -35,7 +35,7 @@ class VerificationReviewFeeNotificationTests {
     @Mock NicApplicationRepository nicRepository;
     @Mock PassportApplicationRepository passportRepository;
     @Mock ApplicationReviewRepository reviewRepository;
-    @Mock NotificationService notificationService;
+    @Mock NotificationPublisher notificationPublisher;
     @Mock ApplicationFeeSettingsService feeSettingsService;
 
     @Test
@@ -63,14 +63,14 @@ class VerificationReviewFeeNotificationTests {
                 nicRepository,
                 passportRepository,
                 reviewRepository,
-                notificationService,
+                notificationPublisher,
                 feeSettingsService,
                 "target/test-uploads"
         );
 
         service.approve("NIC-TEST-42", "NIC", 9);
 
-        verify(notificationService).sendToCitizen(
+        verify(notificationPublisher).sendToCitizen(
                 eq(7),
                 eq(9),
                 eq("APPLICATION_APPROVED"),

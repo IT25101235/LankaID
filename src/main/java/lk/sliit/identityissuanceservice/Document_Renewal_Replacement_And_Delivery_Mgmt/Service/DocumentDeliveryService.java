@@ -10,7 +10,7 @@ import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Deliver
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.CsrCollectionDetails;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Repository.DocumentDeliveryRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -48,7 +48,7 @@ public class DocumentDeliveryService {
     private final UserAccountRepository userRepository;
     private final CentreRepository centreRepository;
     private final GovernmentIdentityRecordRepository governmentRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
 
     public DocumentDeliveryService(
             DocumentDeliveryRepository deliveryRepository,
@@ -57,7 +57,7 @@ public class DocumentDeliveryService {
             UserAccountRepository userRepository,
             CentreRepository centreRepository,
             GovernmentIdentityRecordRepository governmentRepository,
-            NotificationService notificationService
+            NotificationPublisher notificationPublisher
     ) {
         this.deliveryRepository = deliveryRepository;
         this.applicationRepository = applicationRepository;
@@ -65,7 +65,7 @@ public class DocumentDeliveryService {
         this.userRepository = userRepository;
         this.centreRepository = centreRepository;
         this.governmentRepository = governmentRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -138,7 +138,7 @@ public class DocumentDeliveryService {
         }
 
         DocumentDelivery saved = deliveryRepository.save(delivery);
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
                 "DELIVERY_SELECTED",
@@ -173,7 +173,7 @@ public class DocumentDeliveryService {
                     + ". Present reference " + delivery.getTrackingReference() + " to the CSR officer.";
         }
         deliveryRepository.save(delivery);
-        notificationService.sendToCitizen(application.getCitizenId(), directorId, type, message);
+        notificationPublisher.sendToCitizen(application.getCitizenId(), directorId, type, message);
     }
 
     @Transactional(readOnly = true)
@@ -211,7 +211,7 @@ public class DocumentDeliveryService {
         delivery.setDeliveryStatus(DELIVERED);
         delivery.setCompletedAt(LocalDateTime.now());
         DocumentDelivery saved = deliveryRepository.save(delivery);
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 citizenId,
                 null,
                 "DOCUMENT_DELIVERED",
@@ -262,7 +262,7 @@ public class DocumentDeliveryService {
         deliveryRepository.save(delivery);
 
         CitizenApplication application = findApplication(delivery.getApplicationId());
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 application.getCitizenId(),
                 csrOfficerId,
                 "DOCUMENT_COLLECTED",

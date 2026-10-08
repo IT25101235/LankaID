@@ -7,7 +7,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenAp
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.ApplicationDocumentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -42,7 +42,7 @@ public class VerificationReviewService {
     private final NicApplicationRepository nicRepository;
     private final PassportApplicationRepository passportRepository;
     private final ApplicationReviewRepository reviewRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
     private final ApplicationFeeSettingsService feeSettingsService;
     private final Path uploadRoot;
 
@@ -54,7 +54,7 @@ public class VerificationReviewService {
             NicApplicationRepository nicRepository,
             PassportApplicationRepository passportRepository,
             ApplicationReviewRepository reviewRepository,
-            NotificationService notificationService,
+            NotificationPublisher notificationPublisher,
             ApplicationFeeSettingsService feeSettingsService,
             @Value("${app.upload.directory:uploads}") String uploadDirectory
     ) {
@@ -65,7 +65,7 @@ public class VerificationReviewService {
         this.nicRepository = nicRepository;
         this.passportRepository = passportRepository;
         this.reviewRepository = reviewRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisher = notificationPublisher;
         this.feeSettingsService = feeSettingsService;
         this.uploadRoot = Path.of(uploadDirectory).toAbsolutePath().normalize();
     }
@@ -78,7 +78,7 @@ public class VerificationReviewService {
         if ("SUBMITTED".equals(status) || "RESUBMITTED".equals(status)) {
             application.setCurrentStatus("UNDER_REVIEW");
             application = applicationRepository.save(application);
-            notificationService.sendToCitizen(
+            notificationPublisher.sendToCitizen(
                     application.getCitizenId(),
                     null,
                     "APPLICATION_UNDER_REVIEW",
@@ -132,7 +132,7 @@ public class VerificationReviewService {
         saveReview(application, staffId, "APPROVED", null);
         String fee = String.format(Locale.US, "%,.2f",
                 feeSettingsService.getFee(application.getServiceType()));
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 application.getCitizenId(),
                 staffId,
                 "APPLICATION_APPROVED",
@@ -158,7 +158,7 @@ public class VerificationReviewService {
         application.setCurrentStatus("REJECTED");
         applicationRepository.save(application);
         saveReview(application, staffId, "REJECTED", null);
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 application.getCitizenId(),
                 staffId,
                 "APPLICATION_REJECTED",
@@ -207,7 +207,7 @@ public class VerificationReviewService {
         application.setCurrentStatus("CORRECTION_REQUIRED");
         applicationRepository.save(application);
         saveReview(application, staffId, "CORRECTION_REQUIRED", correctionMessage);
-        notificationService.sendToCitizen(
+        notificationPublisher.sendToCitizen(
                 application.getCitizenId(),
                 staffId,
                 "CORRECTION_REQUIRED",
