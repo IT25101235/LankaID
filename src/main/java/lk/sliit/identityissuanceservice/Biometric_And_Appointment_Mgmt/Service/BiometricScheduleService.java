@@ -112,8 +112,7 @@ public class BiometricScheduleService {
             int capacity,
             Integer officerId
     ) {
-        List<BiometricAppointmentSlot> existing =
-                slots.findAllByServiceTypeAndCentreIdAndSlotDateOrderBySlotTimeAsc(serviceType, centreId, date);
+        List<BiometricAppointmentSlot> existing = slots.findDayForUpdate(serviceType, centreId, date);
         for (BiometricAppointmentSlot slot : existing) {
             if (slot.getSlotTime().isBefore(openingTime) || !slot.getSlotTime().isBefore(closingTime)) {
                 closeSlotAndCancelBookings(slot);
@@ -148,8 +147,7 @@ public class BiometricScheduleService {
         validateDateRange(startDate, endDate);
         int closedDays = 0;
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            List<BiometricAppointmentSlot> daySlots =
-                    slots.findAllByServiceTypeAndCentreIdAndSlotDateOrderBySlotTimeAsc(service, centreId, date);
+            List<BiometricAppointmentSlot> daySlots = slots.findDayForUpdate(service, centreId, date);
             if (daySlots.isEmpty()) continue;
             daySlots.forEach(this::closeSlotAndCancelBookings);
             closedDays++;

@@ -16,6 +16,8 @@ import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationP
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.PaymentService;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,9 @@ public class AppointmentService {
     private final PaymentService paymentService;
     private final NotificationPublisher notificationPublisher;
     private final BiometricScheduleService scheduleService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
@@ -231,7 +236,7 @@ public class AppointmentService {
     ) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
-        Appointment appointment = appointmentRepository.findByIdForChange(details.appointment().getAppointmentId()).orElseThrow();
+        Appointment appointment = lockAppointment(details.appointment().getAppointmentId());
         if ("COMPLETED".equals(appointment.getAppointmentStatus())) {
             throw new IllegalArgumentException("Biometrics have already been completed.");
         }
@@ -271,8 +276,7 @@ public class AppointmentService {
     ) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
-        Appointment appointment = appointmentRepository
-                .findByIdForChange(details.appointment().getAppointmentId()).orElseThrow();
+        Appointment appointment = lockAppointment(details.appointment().getAppointmentId());
         BookingChangePolicy.requireMissedAppointment(appointment);
         if (checkInRepository.existsById(appointment.getAppointmentId())) {
             throw new IllegalArgumentException("A checked-in appointment cannot be rescheduled.");
@@ -304,6 +308,18 @@ public class AppointmentService {
                         + " was moved to " + newTime + ". The same QR pass remains valid."
         );
         return findForOfficer(reference, serviceType);
+    }
+
+    /**
+     * Locks the booking row and re-reads it. The officer lookup has already loaded the appointment, so
+     * without the re-read a request that waited for the lock would still see its old status.
+     */
+    @Transactional
+    public Appointment lockAppointment(Integer appointmentId) {
+        Appointment appointment = appointmentRepository.findByIdForChange(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment was not found."));
+        entityManager.refresh(appointment);
+        return appointment;
     }
 
     /** Joins appointment, application, citizen and centre into one DTO for the officer screens. */

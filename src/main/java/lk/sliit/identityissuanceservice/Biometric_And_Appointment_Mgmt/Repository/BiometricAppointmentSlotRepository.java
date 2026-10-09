@@ -22,6 +22,14 @@ public interface BiometricAppointmentSlotRepository extends JpaRepository<Biomet
     @Query("select slot from BiometricAppointmentSlot slot where slot.slotId = :slotId")
     Optional<BiometricAppointmentSlot> findByIdForBooking(@Param("slotId") Integer slotId);
 
+    /** Locks every slot of one day, so publishing or closing it cannot race with a booking. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select slot from BiometricAppointmentSlot slot where slot.serviceType = :serviceType "
+            + "and slot.centreId = :centreId and slot.slotDate = :slotDate order by slot.slotTime")
+    List<BiometricAppointmentSlot> findDayForUpdate(
+            @Param("serviceType") String serviceType, @Param("centreId") Integer centreId,
+            @Param("slotDate") LocalDate slotDate);
+
     Optional<BiometricAppointmentSlot> findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
             Integer centreId, String serviceType, LocalDate slotDate, LocalTime slotTime);
 
