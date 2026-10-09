@@ -101,17 +101,28 @@ class DeletionAndReviewedApplicationsIntegrationTests {
         var request = request("CONTACT", "Question about my appointment");
         var session = citizenSession(request.getCitizenId());
         mvc.perform(get("/citizen/support/" + request.getRequestId()).session(session))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Delete contact request")));
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Delete request")));
         mvc.perform(post("/citizen/support/" + request.getRequestId() + "/delete").session(session)
                 .param("deleteToken", token(session))).andExpect(redirectedUrl("/citizen/support"));
         assertFalse(support.existsById(request.getRequestId()));
     }
 
-    @Test void complaintsIdentityRequestsAndRespondedContactsCannotBeDeleted() throws Exception {
-        for (String type : java.util.List.of("COMPLAINT", "IDENTITY", "RESPONDED")) {
-            var request = request("COMPLAINT".equals(type) ? "COMPLAINT" : "CONTACT",
+    @Test void unansweredComplaintCanBeDeletedThroughItsDetailPage() throws Exception {
+        var request = request("COMPLAINT", "Unanswered complaint");
+        var session = citizenSession(request.getCitizenId());
+        mvc.perform(get("/citizen/support/" + request.getRequestId()).session(session))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Delete request")));
+        mvc.perform(post("/citizen/support/" + request.getRequestId() + "/delete").session(session)
+                .param("deleteToken", token(session))).andExpect(redirectedUrl("/citizen/support"))
+                .andExpect(flash().attributeExists("supportMessage"));
+        assertFalse(support.existsById(request.getRequestId()));
+    }
+
+    @Test void identityRequestsAndRespondedContactsAndComplaintsCannotBeDeleted() throws Exception {
+        for (String type : java.util.List.of("IDENTITY", "RESPONDED_CONTACT", "RESPONDED_COMPLAINT")) {
+            var request = request("RESPONDED_COMPLAINT".equals(type) ? "COMPLAINT" : "CONTACT",
                     "IDENTITY".equals(type) ? "Existing document verification" : "Protected request");
-            if ("RESPONDED".equals(type)) {
+            if (type.startsWith("RESPONDED")) {
                 request.setResponse("An officer has replied."); request.setRespondedAt(LocalDateTime.now());
                 request.setRequestStatus("IN_PROGRESS"); support.saveAndFlush(request);
             }

@@ -45,6 +45,10 @@ public class VerificationDocumentController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
                     .body(document.resource());
         } catch (IllegalArgumentException exception) {
+            // Preserve the service's role rules while distinguishing denial from a missing file.
+            if ("You do not have access to this document.".equals(exception.getMessage())) {
+                return ResponseEntity.status(403).build();
+            }
             return ResponseEntity.notFound().build();
         }
     }
