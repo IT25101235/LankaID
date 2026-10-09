@@ -2290,22 +2290,6 @@ body:has(.gov-auth-visual) > main {
   text-shadow: 0 2px 18px rgb(18 3 11 / .55);
 }
 
-/* Replace the static gold bar with a flowing silk thread. */
-.gov-auth-visual::after {
-  background: linear-gradient(0deg, #d4a72c, #fff2bd, #d4a72c, #e11d48, #d4a72c) 0 0 / 100% 240px repeat-y;
-  animation: authEdgeFlowUp 2.8s linear infinite, authEdgeSilk 4s ease-in-out infinite;
-}
-
-@keyframes authEdgeFlowUp {
-  from { background-position: 0 0; }
-  to { background-position: 0 -240px; }
-}
-
-@keyframes authEdgeSilk {
-  0%, 100% { box-shadow: 6px 0 22px 2px rgb(212 167 44 / .5); }
-  50% { box-shadow: 10px 0 42px 8px rgb(225 29 72 / .42); }
-}
-
 /* Smooth field focus: no double gold ring, a soft glow that eases in and out. */
 body:has(.gov-auth-visual) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
 body:has(.gov-auth-visual) select:focus-visible,
@@ -2328,8 +2312,7 @@ body:has(.gov-auth-visual) textarea {
 
 @media (prefers-reduced-motion: reduce) {
   body:has(.gov-auth-visual)::before,
-  body:has(.gov-auth-visual)::after,
-  .gov-auth-visual::after {
+  body:has(.gov-auth-visual)::after {
     animation: none !important;
   }
 }
