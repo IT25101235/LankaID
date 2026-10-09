@@ -79,11 +79,12 @@ public class BiometricController {
                 + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    /** UPDATE: move a missed booking to the next free slot. */
+    /** UPDATE: move a missed booking to the next free slot. Role and form token are checked first. */
     @PostMapping("/officer/{service}/biometrics/{reference}/reschedule-missed")
     public String rescheduleMissed(
             @PathVariable String service,
             @PathVariable String reference,
+            @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -91,6 +92,7 @@ public class BiometricController {
         String accessResult = checkAccess(session, serviceType);
         if (accessResult != null) return accessResult;
         try {
+            BiometricFormToken.check(formToken, session);
             var details = appointmentService.rescheduleMissed(
                     reference, serviceType, officerId(session));
             redirectAttributes.addFlashAttribute(
@@ -101,7 +103,8 @@ public class BiometricController {
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
         }
-        return "redirect:/officer/" + service.toLowerCase() + "/biometrics?reference=" + reference;
+        return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
+                + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     /** CREATE: save the biometric collection and finish the appointment. */
