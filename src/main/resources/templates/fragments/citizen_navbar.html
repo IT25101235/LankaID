@@ -14,26 +14,49 @@
       <span class="material-symbols-outlined">menu</span><span class="citizen-menu-label">Menu</span>
     </button>
     <nav class="citizen-primary-nav" id="citizen-primary-nav" aria-label="Citizen navigation">
-      <a class="citizen-nav-link" th:classappend="${activeSection == 'home'} ? ' active'" th:attr="aria-current=${activeSection == 'home' ? 'page' : null}" th:href="@{/citizen/dashboard}">
-        <span class="material-symbols-outlined">home</span><span>Home</span>
-      </a>
-      <a class="citizen-nav-link" th:classappend="${activeSection == 'applications'} ? ' active'" th:attr="aria-current=${activeSection == 'applications' ? 'page' : null}" th:href="@{/citizen/applications}">
-        <span class="material-symbols-outlined">description</span><span>My applications</span>
-      </a>
-      <a class="citizen-nav-link" th:classappend="${activeSection == 'biometrics'} ? ' active'" th:attr="aria-current=${activeSection == 'biometrics' ? 'page' : null}" th:href="@{/citizen/appointments/biometric}">
-        <span class="material-symbols-outlined">fingerprint</span><span>Biometrics</span>
-      </a>
-      <a class="citizen-nav-link" th:classappend="${activeSection == 'notifications'} ? ' active'" th:attr="aria-current=${activeSection == 'notifications' ? 'page' : null},aria-label=${unreadNotificationCount != null and unreadNotificationCount > 0 ? 'Notifications, ' + unreadNotificationCount + ' unread' : 'Notifications'}" th:href="@{/citizen/notifications}">
-        <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
-        <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}" class="citizen-notification-tag" th:text="${unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}">1</span>
-      </a>
-      <a class="citizen-nav-link" th:classappend="${activeSection == 'support'} ? ' active'" th:attr="aria-current=${activeSection == 'support' ? 'page' : null},aria-label=${activeSupportRequestCount != null and activeSupportRequestCount > 0 ? 'Contact or Complaint, ' + activeSupportRequestCount + ' active requests' : 'Contact or Complaint'}" th:href="@{/citizen/support}">
-        <span class="material-symbols-outlined">support_agent</span><span>Contact / Complaint</span>
-        <span th:if="${activeSupportRequestCount != null and activeSupportRequestCount > 0}" class="citizen-notification-tag" th:text="${activeSupportRequestCount > 99 ? '99+' : activeSupportRequestCount}">1</span>
-      </a>
-      <form class="citizen-signout-form" th:action="@{/logout}" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>
+      <!-- Main pages on the left -->
+      <div class="citizen-nav-main">
+        <a class="citizen-nav-link" th:classappend="${activeSection == 'home'} ? ' active'" th:attr="aria-current=${activeSection == 'home' ? 'page' : null}" th:href="@{/citizen/dashboard}">
+          <span class="material-symbols-outlined">home</span><span>Home</span>
+        </a>
+        <a class="citizen-nav-link" th:classappend="${activeSection == 'applications'} ? ' active'" th:attr="aria-current=${activeSection == 'applications' ? 'page' : null}" th:href="@{/citizen/applications}">
+          <span class="material-symbols-outlined">description</span><span>My applications</span>
+        </a>
+        <a class="citizen-nav-link" th:classappend="${activeSection == 'biometrics'} ? ' active'" th:attr="aria-current=${activeSection == 'biometrics' ? 'page' : null}" th:href="@{/citizen/appointments/biometric}">
+          <span class="material-symbols-outlined">fingerprint</span><span>Biometrics</span>
+        </a>
+      </div>
+
+      <!-- Account tools on the right: notifications dropdown, support and sign out -->
+      <div class="citizen-nav-tools">
+        <div class="citizen-notify" data-notify>
+          <button class="citizen-nav-link citizen-notify-button" type="button" title="Notifications"
+                  th:classappend="${activeSection == 'notifications'} ? ' active'"
+                  th:attr="aria-label=${unreadNotificationCount != null and unreadNotificationCount > 0 ? 'Notifications, ' + unreadNotificationCount + ' unread' : 'Notifications'}"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="citizen-notify-panel" data-notify-button>
+            <span class="material-symbols-outlined">notifications</span><span class="citizen-nav-text">Notifications</span>
+            <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}" class="citizen-notification-tag" data-notify-badge th:text="${unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}">1</span>
+          </button>
+          <div class="citizen-notify-panel" id="citizen-notify-panel" role="region" aria-label="Recent notifications" data-notify-panel hidden>
+            <div class="citizen-notify-head">
+              <strong>Notifications</strong>
+              <span class="citizen-notify-unread" data-notify-unread></span>
+            </div>
+            <ul class="citizen-notify-list" data-notify-list>
+              <li class="citizen-notify-empty">Loading…</li>
+            </ul>
+            <a class="citizen-notify-all" th:href="@{/citizen/notifications}">See all</a>
+          </div>
+        </div>
+        <a class="citizen-nav-link" title="Contact / Complaint" th:classappend="${activeSection == 'support'} ? ' active'" th:attr="aria-current=${activeSection == 'support' ? 'page' : null},aria-label=${activeSupportRequestCount != null and activeSupportRequestCount > 0 ? 'Contact or Complaint, ' + activeSupportRequestCount + ' active requests' : 'Contact or Complaint'}" th:href="@{/citizen/support}">
+          <span class="material-symbols-outlined">support_agent</span><span class="citizen-nav-text">Contact / Complaint</span>
+          <span th:if="${activeSupportRequestCount != null and activeSupportRequestCount > 0}" class="citizen-notification-tag" th:text="${activeSupportRequestCount > 99 ? '99+' : activeSupportRequestCount}">1</span>
+        </a>
+        <form class="citizen-signout-form" th:action="@{/logout}" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>
+      </div>
     </nav>
   </div>
+  <script src="/js/citizen-notify.js" defer></script>
 </header>
 </body>
 </html>
