@@ -86,6 +86,8 @@ public class BiometricScheduleController {
             redirect.addFlashAttribute("scheduleMessage", days + " day(s) published for " + serviceType + " biometrics.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("scheduleError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirect.addFlashAttribute("scheduleError", "The schedule could not be saved. Reload and try again.");
         }
         return redirect(service, centreId, startDate, redirect);
     }
@@ -110,6 +112,8 @@ public class BiometricScheduleController {
                     + " day(s) closed. Confirmed citizens were notified and can rebook without paying again.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("scheduleError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirect.addFlashAttribute("scheduleError", "The dates could not be closed. Reload and try again.");
         }
         return redirect(service, centreId, startDate, redirect);
     }
@@ -135,6 +139,8 @@ public class BiometricScheduleController {
             redirect.addFlashAttribute("scheduleMessage", "Slot capacity and availability updated.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("scheduleError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirect.addFlashAttribute("scheduleError", "The slot could not be saved. Reload and try again.");
         }
         redirect.addAttribute("centreId", centreId);
         redirect.addAttribute("month", readMonth(month));

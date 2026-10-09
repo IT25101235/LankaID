@@ -5,6 +5,7 @@ import lk.sliit.identityissuanceservice.Admin_Mgmt.Service.OfficerAccountService
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BiometricService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BookingChangePolicy;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,6 +75,9 @@ public class BiometricController {
             redirectAttributes.addFlashAttribute("biometricMessage", "Citizen checked in successfully.");
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute("biometricError",
+                    "The change could not be saved. Reload the appointment and try again.");
         }
         return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
                 + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
@@ -102,6 +106,9 @@ public class BiometricController {
             );
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute("biometricError",
+                    "The change could not be saved. Reload the appointment and try again.");
         }
         return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
                 + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
@@ -128,6 +135,9 @@ public class BiometricController {
             );
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute("biometricError",
+                    "The change could not be saved. Reload the appointment and try again.");
         }
         return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics?reference="
                 + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);

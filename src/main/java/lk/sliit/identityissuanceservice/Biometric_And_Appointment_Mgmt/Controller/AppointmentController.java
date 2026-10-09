@@ -7,6 +7,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.Offic
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentPassService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -96,6 +97,11 @@ public class AppointmentController {
             return "redirect:/citizen/appointments/" + appointment.getReferenceNo() + "/pass";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("appointmentError", exception.getMessage());
+            if (selectedApplicationId == null) return "redirect:/citizen/applications";
+            return "redirect:/citizen/appointments/biometric?applicationId=" + selectedApplicationId;
+        } catch (DataAccessException exception) {
+            redirectAttributes.addFlashAttribute("appointmentError",
+                    "The appointment could not be saved. Reload the page and try again.");
             if (selectedApplicationId == null) return "redirect:/citizen/applications";
             return "redirect:/citizen/appointments/biometric?applicationId=" + selectedApplicationId;
         }
