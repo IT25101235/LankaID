@@ -359,8 +359,16 @@ class PaymentBiometricWorkflowIntegrationTests {
                         .param("formToken", "test-form-token")
                         .session(officerSession))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("biometricError", containsString("only available on the appointment date")));
-        assertTrue(!checkInRepository.existsById(appointment.getAppointmentId()));
+                .andExpect(flash().attributeExists("biometricError"))
+                .andExpect(flash().attributeCount(1));
+        assertFalse(checkInRepository.existsById(appointment.getAppointmentId()));
+        assertEquals("CONFIRMED", appointmentRepository.findById(appointment.getAppointmentId())
+                .orElseThrow().getAppointmentStatus());
+        assertEquals("APPOINTMENT_BOOKED", applicationRepository.findById(application.getApplicationId())
+                .orElseThrow().getCurrentStatus());
+
+        appointment.setScheduledAt(LocalDateTime.now());
+        appointment = appointmentRepository.saveAndFlush(appointment);
         // A request without the form token is rejected.
         mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
                                 servicePath, appointment.getReferenceNo())
@@ -368,25 +376,31 @@ class PaymentBiometricWorkflowIntegrationTests {
                         .session(officerSession))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("biometricError", containsString("Reload the page")));
+        assertFalse(checkInRepository.existsById(appointment.getAppointmentId()));
 
-        appointment.setScheduledAt(java.time.LocalDateTime.now());
-        appointmentRepository.saveAndFlush(appointment);
+        // A token from a different form is rejected even on the appointment date.
+        mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
+                                servicePath, appointment.getReferenceNo())
+                        .param("checkInMethod", "QR")
+                        .param("formToken", "invalid-form-token")
+                        .session(officerSession))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("biometricError", containsString("Reload the page")));
+        assertFalse(checkInRepository.existsById(appointment.getAppointmentId()));
+        assertEquals("CONFIRMED", appointmentRepository.findById(appointment.getAppointmentId())
+                .orElseThrow().getAppointmentStatus());
+
         mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
                                 servicePath, appointment.getReferenceNo())
                         .param("checkInMethod", "QR")
                         .param("formToken", "test-form-token")
                         .session(officerSession))
-                .andExpect(status().is3xxRedirection());
-        assertFalse(checkInRepository.existsById(appointment.getAppointmentId()));
-
-        appointment.setScheduledAt(LocalDateTime.now());
-        appointment = appointmentRepository.saveAndFlush(appointment);
-        mockMvc.perform(post("/officer/{service}/biometrics/{reference}/check-in",
-                                servicePath, appointment.getReferenceNo())
-                        .param("checkInMethod", "QR")
-                        .session(officerSession))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("biometricMessage"))
+                .andExpect(flash().attributeCount(1));
         assertTrue(checkInRepository.existsById(appointment.getAppointmentId()));
+        assertEquals("CHECKED_IN", appointmentRepository.findById(appointment.getAppointmentId())
+                .orElseThrow().getAppointmentStatus());
 
         mockMvc.perform(post("/officer/{service}/biometrics/{reference}/complete",
                                 servicePath, appointment.getReferenceNo())
