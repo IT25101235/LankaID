@@ -30,7 +30,7 @@ class PhoneSmsSenderTests {
         server.start();
         try {
             PhoneSmsSender sender = new PhoneSmsSender(
-                    "http://127.0.0.1:" + server.getAddress().getPort() + "/api/sms", "test-key", 1, 1);
+                    "http://127.0.0.1:" + server.getAddress().getPort() + "/api/sms", "test-key", 5, 10);
             sender.send("+94778833578", "LankaID (OTP) - 648467", 180);
             assertEquals("POST", method.get());
             assertEquals("Bearer test-key", auth.get());
@@ -52,24 +52,32 @@ class PhoneSmsSenderTests {
     @Test void authenticationAndServerFailuresGiveSafeErrors() throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/unauthorized", exchange -> {
+            exchange.getRequestBody().readAllBytes();
             byte[] body = "private provider response".getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(401, body.length);
             exchange.getResponseBody().write(body);
             exchange.close();
         });
         server.createContext("/unavailable", exchange -> {
+            exchange.getRequestBody().readAllBytes();
             exchange.sendResponseHeaders(503, -1);
             exchange.close();
         });
         server.createContext("/bad-request", exchange -> {
+            exchange.getRequestBody().readAllBytes();
             exchange.sendResponseHeaders(400, -1);
+            exchange.close();
+        });
+        server.createContext("/missing", exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(404, -1);
             exchange.close();
         });
         server.start();
         try {
             for (String path : new String[]{"/unauthorized", "/unavailable", "/missing", "/bad-request"}) {
                 PhoneSmsSender sender = new PhoneSmsSender(
-                        "http://127.0.0.1:" + server.getAddress().getPort() + path, "test-secret", 1, 1);
+                        "http://127.0.0.1:" + server.getAddress().getPort() + path, "test-secret", 5, 10);
                 Exception error = assertThrows(IllegalArgumentException.class,
                         () -> sender.send("+94778833578", "LankaID (OTP) - 648467", 180));
                 String expected = switch (path) {

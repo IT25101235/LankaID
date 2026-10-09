@@ -19,6 +19,7 @@ import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Ser
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.data.domain.Page;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,6 +47,8 @@ class OfficerRoleAccessTests {
         WalkInAppointmentService walkInAppointmentService = mock(WalkInAppointmentService.class);
         when(walkInAppointmentService.getAppointmentsForDate(org.mockito.ArgumentMatchers.any()))
                 .thenReturn(java.util.List.of());
+        when(citizenSupportService.getCsrRequests(CitizenSupportService.COMPLAINT, null, 0))
+                .thenReturn(Page.empty());
         when(printingExportService.getReadyApplications()).thenReturn(java.util.List.of());
         when(printingExportService.getPrintedApplications()).thenReturn(java.util.List.of());
         when(verificationQueueService.getNicQueue()).thenReturn(java.util.List.of());

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -136,8 +137,10 @@ class UiAndSchemaConsistencyTests {
                 portalShell.indexOf("function publicWalkInConfig()"),
                 portalShell.indexOf("function officerConfig("));
 
-        assertTrue(portalShell.contains("if (isOfficer) mountOfficerSidebar()"));
-        assertTrue(portalShell.contains("else mountCitizenTopbar(publicWalkIn)"));
+        assertTrue(Pattern.compile("if\\s*\\(isOfficer\\)\\s*\\{?\\s*mountOfficerSidebar\\(\\)")
+                .matcher(portalShell).find(), "Officer pages must mount the officer sidebar");
+        assertTrue(Pattern.compile("else\\s*\\{?\\s*mountCitizenTopbar\\(publicWalkIn\\)")
+                .matcher(portalShell).find(), "Citizen and public pages must mount the citizen topbar");
         assertTrue(portalShell.contains("replace(/;[^/]+/g, '')"));
         assertTrue(portalShell.contains("function publicWalkInConfig()"));
         assertTrue(portalShell.contains("Contact / Complaint"));
@@ -349,17 +352,23 @@ class UiAndSchemaConsistencyTests {
     }
 
     @Test
-    void teammateSetupScriptContainsEveryMappedPhysicalTable() throws IOException {
-        String sql = Files.readString(Path.of("DATABASE_SETUP.sql"));
+    void databaseSetupScriptsContainEveryMappedPhysicalTable() throws IOException {
+        String sql = Files.readString(Path.of("database", "current-database-schema.sql"))
+                + Files.readString(Path.of("database", "system-maintenance.sql"))
+                + Files.readString(Path.of("database", "public-announcements.sql"));
         List<String> tables = List.of(
                 "GovernmentIdentityRecord", "UserAccount", "CitizenAccount", "StaffAccount", "Centre",
                 "Application", "NICApplication", "PassportApplication", "ApplicationDocument",
                 "ApplicationReview", "Appointment", "AppointmentCheckIn", "Payment", "BiometricCollection",
-                "Notification", "UserNotification", "SupportRequest", "DocumentDelivery", "WalkInSlot"
+                "Notification", "UserNotification", "SupportRequest", "DocumentDelivery", "WalkInSlot",
+                "BiometricAppointmentSlot", "AppointmentChangePayment", "ApplicationFeeSettings",
+                "SystemMaintenance", "PublicAnnouncement"
         );
 
         for (String table : tables) {
-            assertTrue(sql.contains("CREATE TABLE dbo." + table), table + " must be present in DATABASE_SETUP.sql");
+            Pattern createTable = Pattern.compile("(?i)\\bCREATE\\s+TABLE\\s+\\[?dbo\\]?\\s*\\.\\s*\\[?"
+                    + Pattern.quote(table) + "\\]?\\s*\\(");
+            assertTrue(createTable.matcher(sql).find(), table + " must be present in the database setup scripts");
         }
     }
 }
