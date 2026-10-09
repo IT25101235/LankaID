@@ -15,8 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Service: slot calendar and capacity. Used by officers to publish slots and by citizens to book them. */
 @Service
@@ -187,6 +190,19 @@ public class BiometricScheduleService {
         }
         slots.delete(slot);
         slots.flush();
+    }
+
+    /** READ: ids of the slots deleteUnusedSlot would accept: in the future and never booked, even if cancelled. */
+    @Transactional(readOnly = true)
+    public Set<Integer> getDeletableSlotIds(List<BiometricSlotView> schedule) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Integer> future = schedule.stream()
+                .filter(slot -> slot.slotDate().atTime(slot.slotTime()).isAfter(now))
+                .map(BiometricSlotView::slotId)
+                .toList();
+        if (future.isEmpty()) return Set.of();
+        Set<Integer> used = new HashSet<>(appointments.findUsedBiometricSlotIds(future));
+        return future.stream().filter(id -> !used.contains(id)).collect(Collectors.toSet());
     }
 
     /** READ: one slot with its availability. */

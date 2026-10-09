@@ -54,10 +54,13 @@ public class BiometricScheduleController {
         model.addAttribute("selectedMonth", selectedMonth.toString());
         model.addAttribute("minimumDate", LocalDate.now());
         try {
-            model.addAttribute("schedule", selectedCentre == null ? java.util.List.of() : schedules.getSchedule(
-                    serviceType, selectedCentre, selectedMonth.atDay(1), selectedMonth.atEndOfMonth()));
+            var schedule = selectedCentre == null ? java.util.List.<lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BiometricSlotView>of()
+                    : schedules.getSchedule(serviceType, selectedCentre, selectedMonth.atDay(1), selectedMonth.atEndOfMonth());
+            model.addAttribute("schedule", schedule);
+            model.addAttribute("deletableSlotIds", schedules.getDeletableSlotIds(schedule));
         } catch (IllegalArgumentException exception) {
             model.addAttribute("schedule", java.util.List.of());
+            model.addAttribute("deletableSlotIds", java.util.Set.of());
             model.addAttribute("scheduleError", exception.getMessage());
         }
         return "officers_frontends/biometric_schedule";

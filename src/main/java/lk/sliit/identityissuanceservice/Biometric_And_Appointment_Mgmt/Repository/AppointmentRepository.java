@@ -39,6 +39,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     boolean existsByBiometricSlotId(Integer biometricSlotId);
 
+    /** Slots that have ever had a booking, including cancelled ones. */
+    @org.springframework.data.jpa.repository.Query(
+            "select distinct a.biometricSlotId from Appointment a where a.biometricSlotId in :slotIds")
+    List<Integer> findUsedBiometricSlotIds(Collection<Integer> slotIds);
+
     /** Each application has one biometric appointment. */
     Optional<Appointment> findByApplicationIdAndAppointmentType(Integer applicationId, String appointmentType);
 
