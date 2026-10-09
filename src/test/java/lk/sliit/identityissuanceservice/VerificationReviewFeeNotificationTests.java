@@ -9,6 +9,7 @@ import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationP
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.ApplicationReviewRepository;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.DirectorReviewReferralRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.VerificationApplicationRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Service.VerificationReviewService;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class VerificationReviewFeeNotificationTests {
     @Mock NicApplicationRepository nicRepository;
     @Mock PassportApplicationRepository passportRepository;
     @Mock ApplicationReviewRepository reviewRepository;
+    @Mock DirectorReviewReferralRepository directorReferralRepository;
     @Mock NotificationPublisher notificationPublisher;
     @Mock ApplicationFeeSettingsService feeSettingsService;
 
@@ -63,6 +65,7 @@ class VerificationReviewFeeNotificationTests {
                 nicRepository,
                 passportRepository,
                 reviewRepository,
+                directorReferralRepository,
                 notificationPublisher,
                 feeSettingsService,
                 "target/test-uploads"

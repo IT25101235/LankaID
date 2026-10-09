@@ -70,6 +70,9 @@ public class NicVerificationController {
         try {
             addReviewData(model, verificationReviewService.getReviewDetails(reference, "NIC"));
             addOfficerPageData(model, "NIC", "/officer/nic/applications", "/officer/nic/biometrics");
+            model.addAttribute("directorMode", false);
+            model.addAttribute("canReferToDirector",
+                    OfficerAccountService.NIC_OFFICER.equals(session.getAttribute("loggedInOfficerRole")));
             return "officers_frontends/application_review";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("verificationError", exception.getMessage());
@@ -164,7 +167,12 @@ public class NicVerificationController {
         model.addAttribute("documents", details.documents());
         model.addAttribute("applicantName", details.applicantName());
         model.addAttribute("permanentAddress", details.permanentAddress());
-        model.addAttribute("decisionAllowed", "UNDER_REVIEW".equals(details.reviewApplication().getCurrentStatus()));
+        model.addAttribute("directorReferral", details.latestDirectorReferral());
+        boolean referralPending = details.latestDirectorReferral() != null
+                && "PENDING".equals(details.latestDirectorReferral().getReferralStatus());
+        model.addAttribute("referralPending", referralPending);
+        model.addAttribute("decisionAllowed",
+                "UNDER_REVIEW".equals(details.reviewApplication().getCurrentStatus()) && !referralPending);
     }
 
     private String checkAccess(HttpSession session) {

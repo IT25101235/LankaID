@@ -359,7 +359,7 @@ class UiAndSchemaConsistencyTests {
         List<String> tables = List.of(
                 "GovernmentIdentityRecord", "UserAccount", "CitizenAccount", "StaffAccount", "Centre",
                 "Application", "NICApplication", "PassportApplication", "ApplicationDocument",
-                "ApplicationReview", "Appointment", "AppointmentCheckIn", "Payment", "BiometricCollection",
+                "ApplicationReview", "DirectorReviewReferral", "Appointment", "AppointmentCheckIn", "Payment", "BiometricCollection",
                 "Notification", "UserNotification", "SupportRequest", "DocumentDelivery", "WalkInSlot",
                 "BiometricAppointmentSlot", "AppointmentChangePayment", "ApplicationFeeSettings",
                 "SystemMaintenance", "PublicAnnouncement"

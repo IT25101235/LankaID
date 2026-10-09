@@ -460,6 +460,41 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE TABLE [dbo].[DirectorReviewReferral](
+	[referral_id] [int] IDENTITY(1,1) NOT NULL,
+	[application_id] [int] NOT NULL,
+	[referred_by_staff_id] [int] NOT NULL,
+	[referral_category] [varchar](30) NOT NULL,
+	[referral_reason] [varchar](1000) NOT NULL,
+	[referral_status] [varchar](20) NOT NULL,
+	[created_at] [datetime2] NOT NULL,
+	[director_id] [int] NULL,
+	[recommendation] [varchar](30) NULL,
+	[director_comment] [varchar](1000) NULL,
+	[responded_at] [datetime2] NULL,
+	[withdrawn_by_staff_id] [int] NULL,
+	[withdrawal_reason] [varchar](500) NULL,
+	[withdrawn_at] [datetime2] NULL,
+ CONSTRAINT [pk_director_review_referral] PRIMARY KEY CLUSTERED ([referral_id] ASC)
+)
+
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX [ux_director_referral_pending_application]
+ON [dbo].[DirectorReviewReferral] ([application_id] ASC)
+WHERE ([referral_status]='PENDING')
+GO
+
+CREATE NONCLUSTERED INDEX [ix_director_referral_queue]
+ON [dbo].[DirectorReviewReferral] ([referral_status] ASC, [created_at] ASC, [referral_id] ASC)
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 CREATE TABLE [dbo].[ApplicationDocument](
 	[document_id] [int] IDENTITY(1,1) NOT NULL,
 	[application_id] [int] NOT NULL,
@@ -894,6 +929,55 @@ REFERENCES [dbo].[StaffAccount] ([user_id])
 GO
 
 ALTER TABLE [dbo].[ApplicationReview] CHECK CONSTRAINT [fk_review_staff]
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] ADD CONSTRAINT [df_director_referral_status]
+DEFAULT ('PENDING') FOR [referral_status]
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] ADD CONSTRAINT [df_director_referral_created]
+DEFAULT (sysdatetime()) FOR [created_at]
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [fk_director_referral_application]
+FOREIGN KEY([application_id]) REFERENCES [dbo].[Application] ([application_id])
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [fk_director_referral_referrer]
+FOREIGN KEY([referred_by_staff_id]) REFERENCES [dbo].[StaffAccount] ([user_id])
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [fk_director_referral_director]
+FOREIGN KEY([director_id]) REFERENCES [dbo].[StaffAccount] ([user_id])
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [fk_director_referral_withdrawer]
+FOREIGN KEY([withdrawn_by_staff_id]) REFERENCES [dbo].[StaffAccount] ([user_id])
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [chk_director_referral_category]
+CHECK ([referral_category] IN ('IDENTITY_CONFLICT','DOCUMENT_CONCERN','POSSIBLE_DUPLICATE','POLICY_EXCEPTION','OTHER'))
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [chk_director_referral_status]
+CHECK ([referral_status] IN ('PENDING','RESPONDED','WITHDRAWN'))
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [chk_director_referral_recommendation]
+CHECK ([recommendation] IS NULL OR [recommendation] IN ('APPROVE','REJECT','REQUEST_CORRECTION'))
+GO
+
+ALTER TABLE [dbo].[DirectorReviewReferral] WITH CHECK ADD CONSTRAINT [chk_director_referral_state]
+CHECK (
+    ([referral_status]='PENDING' AND [director_id] IS NULL AND [recommendation] IS NULL
+        AND [responded_at] IS NULL AND [withdrawn_at] IS NULL)
+    OR
+    ([referral_status]='RESPONDED' AND [director_id] IS NOT NULL AND [recommendation] IS NOT NULL
+        AND [director_comment] IS NOT NULL AND [responded_at] IS NOT NULL AND [withdrawn_at] IS NULL)
+    OR
+    ([referral_status]='WITHDRAWN' AND [withdrawn_by_staff_id] IS NOT NULL
+        AND [withdrawal_reason] IS NOT NULL AND [withdrawn_at] IS NOT NULL AND [responded_at] IS NULL)
+)
 GO
 
 ALTER TABLE [dbo].[ApplicationDocument]  WITH CHECK ADD  CONSTRAINT [fk_document_application] FOREIGN KEY([application_id])

@@ -16,6 +16,7 @@ import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Dto
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Dto.VerificationReviewDetails;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Model.ApplicationReview;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.ApplicationReviewRepository;
+import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.DirectorReviewReferralRepository;
 import lk.sliit.identityissuanceservice.Verification_And_Approval_Management.Repository.VerificationApplicationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -53,6 +54,7 @@ public class VerificationReviewService {
     private final NicApplicationRepository nicRepository;
     private final PassportApplicationRepository passportRepository;
     private final ApplicationReviewRepository reviewRepository;
+    private final DirectorReviewReferralRepository directorReferralRepository;
     private final NotificationPublisher notificationPublisher;
     private final ApplicationFeeSettingsService feeSettingsService;
     private final Path uploadRoot;
@@ -65,6 +67,7 @@ public class VerificationReviewService {
             NicApplicationRepository nicRepository,
             PassportApplicationRepository passportRepository,
             ApplicationReviewRepository reviewRepository,
+            DirectorReviewReferralRepository directorReferralRepository,
             NotificationPublisher notificationPublisher,
             ApplicationFeeSettingsService feeSettingsService,
             @Value("${app.upload.directory:uploads}") String uploadDirectory
@@ -76,6 +79,7 @@ public class VerificationReviewService {
         this.nicRepository = nicRepository;
         this.passportRepository = passportRepository;
         this.reviewRepository = reviewRepository;
+        this.directorReferralRepository = directorReferralRepository;
         this.notificationPublisher = notificationPublisher;
         this.feeSettingsService = feeSettingsService;
         this.uploadRoot = Path.of(uploadDirectory).toAbsolutePath().normalize();
@@ -122,7 +126,10 @@ public class VerificationReviewService {
                 passportRepository.findById(application.getApplicationId()).orElse(null),
                 documentRepository.findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId()),
                 buildApplicantName(citizen),
-                buildPermanentAddress(citizen)
+                buildPermanentAddress(citizen),
+                directorReferralRepository
+                        .findTopByApplicationIdOrderByCreatedAtDescReferralIdDesc(application.getApplicationId())
+                        .orElse(null)
         );
     }
 
@@ -304,6 +311,11 @@ public class VerificationReviewService {
         CitizenApplication application = findApplication(reference, serviceType);
         if (!"UNDER_REVIEW".equals(application.getCurrentStatus())) {
             throw new IllegalArgumentException("Open the submitted application for review before making a decision.");
+        }
+        if (directorReferralRepository
+                .findByApplicationIdAndReferralStatus(application.getApplicationId(), DirectorReviewReferralService.PENDING)
+                .isPresent()) {
+            throw new IllegalArgumentException("Wait for the Director response or withdraw the pending referral first.");
         }
         return application;
     }
