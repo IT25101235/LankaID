@@ -17,7 +17,7 @@
   };
 </script>
 <script>document.documentElement.classList.add('reveal-ready');</script>
-<link href="/css/government-theme.css?v=20261009-landing-flow" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261010-hero-panel" rel="stylesheet"/>
 </head>
 <body id="top" class="gov-landing-page bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 
@@ -26,17 +26,36 @@
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 h-[4.75rem] flex items-center justify-between">
     <div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div>
     <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-200" aria-label="Primary navigation">
-      <a class="text-cyan-300" href="#top">Home</a>
-      <a class="hover:text-white transition-colors" href="#services">Services</a>
-      <a class="hover:text-white transition-colors" href="#process">How It Works</a>
-      <a class="hover:text-white transition-colors" href="#support">Support</a>
+      <a class="is-current" data-nav-section="top" href="#top">Home</a>
+      <a class="hover:text-white transition-colors" data-nav-section="services" href="#services">Services</a>
+      <a class="hover:text-white transition-colors" data-nav-section="phone" href="#phone">On your phone</a>
+      <a class="hover:text-white transition-colors" data-nav-section="process" href="#process">How It Works</a>
+      <a class="hover:text-white transition-colors" data-nav-section="help" href="#help">Support</a>
     </nav>
-    <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
-      Sign In
-    </a>
-    <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
-      Access Dashboard
-    </a>
+    <div class="flex items-center">
+      <a th:if="${!landingSignedIn}" th:href="@{/login}" class="hidden sm:inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
+        Sign In
+      </a>
+      <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="hidden sm:inline-flex items-center justify-center h-10 px-5 rounded-lg bg-white text-[#0f2747] text-sm font-bold hover:bg-cyan-50 transition-colors">
+        Access Dashboard
+      </a>
+      <button type="button" class="landing-menu-button md:hidden" data-landing-menu-button aria-expanded="false" aria-controls="landingMenu" aria-label="Open menu">
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Phone menu: the same links with touch-sized rows -->
+  <div id="landingMenu" class="landing-menu md:hidden" hidden>
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 grid gap-1">
+      <a class="landing-menu-link is-current" data-nav-section="top" href="#top">Home<span class="material-symbols-outlined" aria-hidden="true">home</span></a>
+      <a class="landing-menu-link" data-nav-section="services" href="#services">Services<span class="material-symbols-outlined" aria-hidden="true">badge</span></a>
+      <a class="landing-menu-link" data-nav-section="phone" href="#phone">On your phone<span class="material-symbols-outlined" aria-hidden="true">smartphone</span></a>
+      <a class="landing-menu-link" data-nav-section="process" href="#process">How It Works<span class="material-symbols-outlined" aria-hidden="true">route</span></a>
+      <a class="landing-menu-link" data-nav-section="help" href="#help">Support<span class="material-symbols-outlined" aria-hidden="true">support_agent</span></a>
+      <a th:if="${!landingSignedIn}" th:href="@{/login}" class="sm:hidden mt-2 inline-flex h-12 items-center justify-center rounded-xl bg-white text-[#0f2747] text-sm font-bold">Sign In</a>
+      <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="sm:hidden mt-2 inline-flex h-12 items-center justify-center rounded-xl bg-white text-[#0f2747] text-sm font-bold">Access Dashboard</a>
+    </div>
   </div>
 </header>
 
@@ -124,46 +143,53 @@
       </div>
     </div>
 
-    <aside class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6" aria-label="Portal status">
-      <div class="pb-4 border-b border-slate-100">
-        <div>
-          <p class="text-sm font-bold text-slate-900">Identity services</p>
-          <p class="text-xs text-slate-500 mt-1">Available through LankaID</p>
-        </div>
+    <aside class="gov-hero-panel" aria-label="Identity services">
+      <div class="gov-hero-panel__head">
+        <p class="gov-hero-panel__eyebrow">Quick access</p>
+        <h2 class="gov-hero-panel__title">Identity services</h2>
+        <p class="gov-hero-panel__sub">Available through LankaID</p>
       </div>
-      <div class="divide-y divide-slate-100">
-        <div class="py-4 flex items-center gap-4">
-          <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
-            <span class="material-symbols-outlined">id_card</span>
-          </div>
-          <div class="flex-1">
-            <p class="text-sm font-bold text-slate-900">National Identity Card</p>
-            <p class="text-xs text-slate-500 mt-1">Applications, renewals and replacements</p>
-          </div>
-          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+
+      <ul class="gov-hero-panel__list">
+        <li>
+          <a class="gov-hero-panel__row" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login" aria-label="National Identity Card: apply, renew or replace your card">
+            <span class="gov-hero-panel__icon"><span class="material-symbols-outlined" aria-hidden="true">id_card</span></span>
+            <span class="gov-hero-panel__text">
+              <span class="gov-hero-panel__name">National Identity Card</span>
+              <span class="gov-hero-panel__desc">Apply, renew or replace your card</span>
+            </span>
+            <span class="material-symbols-outlined gov-hero-panel__chevron" aria-hidden="true">chevron_right</span>
+          </a>
+        </li>
+        <li>
+          <a class="gov-hero-panel__row" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login" aria-label="Passport Services: first-time, renewal, lost or damaged">
+            <span class="gov-hero-panel__icon"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span></span>
+            <span class="gov-hero-panel__text">
+              <span class="gov-hero-panel__name">Passport Services</span>
+              <span class="gov-hero-panel__desc">First-time, renewal, lost or damaged</span>
+            </span>
+            <span class="material-symbols-outlined gov-hero-panel__chevron" aria-hidden="true">chevron_right</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="gov-hero-panel__recover">
+        <div class="gov-hero-panel__recover-head">
+          <span class="material-symbols-outlined" aria-hidden="true">qr_code_2</span>
+          <p class="gov-hero-panel__recover-title">Lost your walk-in QR pass?</p>
         </div>
-        <div class="py-4 flex items-center gap-4">
-          <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center">
-            <span class="material-symbols-outlined">flight_takeoff</span>
-          </div>
-          <div class="flex-1">
-            <p class="text-sm font-bold text-slate-900">Passport Services</p>
-            <p class="text-xs text-slate-500 mt-1">Applications, renewals and replacements</p>
-          </div>
-          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
-        </div>
-      </div>
-      <div class="mt-4 pt-4 border-t border-slate-100">
-        <p class="text-sm font-bold text-slate-900">Lost your walk-in QR pass?</p>
-        <form th:action="@{/walk-in/recover/otp/send}" method="post" class="flex gap-2 mt-3">
+        <p class="gov-hero-panel__help" id="visitorPhoneHelp">Enter the mobile number you booked with. We&rsquo;ll send a one-time code.</p>
+        <form th:action="@{/walk-in/recover/otp/send}" method="post" class="gov-hero-panel__form">
           <label for="visitorPhone" class="sr-only">Mobile number used for booking, country code +94</label>
-          <div class="flex min-w-0 flex-1">
-            <span class="inline-flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-100 px-3 text-sm font-bold">+94</span>
-            <input id="visitorPhone" name="phone" required pattern="7[0-9]{8}" minlength="9" maxlength="9" inputmode="numeric" autocomplete="tel-national" title="Enter nine digits starting with 7, without the leading zero." class="w-full min-w-0 rounded-r-lg border-slate-300 text-sm" placeholder="771234567"/>
+          <div class="gov-hero-panel__phone">
+            <span class="gov-hero-panel__prefix">+94</span>
+            <input id="visitorPhone" name="phone" required pattern="7[0-9]{8}" minlength="9" maxlength="9" inputmode="numeric" autocomplete="tel-national" aria-describedby="visitorPhoneHelp" title="Enter nine digits starting with 7, without the leading zero." class="gov-hero-panel__input" placeholder="7X XXX XXXX"/>
           </div>
-          <button class="rounded-lg bg-cyan-600 text-white px-4 text-xs font-bold">Get your QR code</button>
+          <button type="submit" class="gov-hero-panel__submit">Get your QR code</button>
         </form>
       </div>
+
+      <a class="gov-hero-panel__all" href="#services">See all services<span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span></a>
     </aside>
   </div>
 </section>
@@ -194,6 +220,7 @@
           <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Renewals and information updates</li>
           <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Lost or damaged card replacement</li>
         </ul>
+        <a class="service-action gov-button-primary w-full h-12 px-6 text-sm" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login" aria-label="Start a National Identity Card application">Start application<span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span></a>
       </article>
 
       <article class="service-card bg-white border border-slate-200 rounded-2xl p-7">
@@ -212,6 +239,7 @@
           <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Passport validity renewals</li>
           <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Lost or damaged passport replacement</li>
         </ul>
+        <a class="service-action gov-button-primary w-full h-12 px-6 text-sm" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login" aria-label="Start a passport application">Start application<span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span></a>
       </article>
     </div>
   </div>
@@ -321,69 +349,6 @@
   </div>
 </section>
 
-<!-- How it works -->
-<section id="process" class="bg-slate-100 border-y border-slate-200 py-16 lg:py-20">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
-    <div class="max-w-2xl mb-10">
-      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">How it works</p>
-      <h2 class="text-3xl font-bold text-slate-900 mt-2">A clear four-step process</h2>
-      <p class="text-base text-slate-600 mt-3">Complete the online steps before attending any required in-person verification.</p>
-    </div>
-
-    <div class="process-flow" data-process-flow>
-      <div class="flow-sky" aria-hidden="true">
-        <i class="flow-star" style="--x:4%;--y:10%;--s:11px;--d:0s"></i>
-        <i class="flow-star" style="--x:11%;--y:34%;--s:7px;--d:1.1s"></i>
-        <i class="flow-star" style="--x:19%;--y:6%;--s:9px;--d:2.2s"></i>
-        <i class="flow-star" style="--x:27%;--y:24%;--s:6px;--d:0.6s"></i>
-        <i class="flow-star" style="--x:34%;--y:8%;--s:12px;--d:1.7s"></i>
-        <i class="flow-star" style="--x:42%;--y:30%;--s:7px;--d:2.9s"></i>
-        <i class="flow-star" style="--x:49%;--y:5%;--s:8px;--d:0.3s"></i>
-        <i class="flow-star" style="--x:57%;--y:22%;--s:10px;--d:1.4s"></i>
-        <i class="flow-star" style="--x:64%;--y:9%;--s:6px;--d:2.5s"></i>
-        <i class="flow-star" style="--x:72%;--y:32%;--s:9px;--d:0.9s"></i>
-        <i class="flow-star" style="--x:79%;--y:7%;--s:12px;--d:2s"></i>
-        <i class="flow-star" style="--x:86%;--y:26%;--s:7px;--d:3.1s"></i>
-        <i class="flow-star" style="--x:93%;--y:11%;--s:10px;--d:0.5s"></i>
-        <i class="flow-star" style="--x:97%;--y:38%;--s:6px;--d:1.8s"></i>
-        <i class="flow-star" style="--x:8%;--y:88%;--s:8px;--d:2.4s"></i>
-        <i class="flow-star" style="--x:38%;--y:92%;--s:6px;--d:1.2s"></i>
-        <i class="flow-star" style="--x:68%;--y:90%;--s:9px;--d:0.7s"></i>
-        <i class="flow-star" style="--x:91%;--y:86%;--s:7px;--d:2.7s"></i>
-        <i class="flow-shoot" style="--y:6%;--d:1s"></i>
-        <i class="flow-shoot" style="--y:18%;--d:5.5s"></i>
-      </div>
-
-      <ol class="flow-steps">
-        <li class="flow-step" style="--i:0">
-          <span class="flow-node is-first">1</span>
-          <h3>Apply Online</h3>
-          <p>Complete the relevant form and submit the required supporting documents.</p>
-          <span class="flow-tag">Online</span>
-        </li>
-        <li class="flow-step" style="--i:1">
-          <span class="flow-node">2</span>
-          <h3>Book Appointment</h3>
-          <p>Choose an available time at the most convenient service centre.</p>
-          <span class="flow-tag">Online</span>
-        </li>
-        <li class="flow-step" style="--i:2">
-          <span class="flow-node">3</span>
-          <h3>Verify Identity</h3>
-          <p>Attend the centre for document checks and biometric capture where required.</p>
-          <span class="flow-tag is-centre">At a service centre</span>
-        </li>
-        <li class="flow-step" style="--i:3">
-          <span class="flow-node">4</span>
-          <h3>Receive Document</h3>
-          <p>Track the final status and receive the completed identity document securely.</p>
-          <span class="flow-tag">Track online</span>
-        </li>
-      </ol>
-    </div>
-  </div>
-</section>
-
 <!-- Services on a phone -->
 <section id="phone" class="bg-white py-16 lg:py-20" aria-labelledby="phoneTitle">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -405,9 +370,9 @@
             <div class="phone-status" aria-hidden="true">
               <span>9:41</span>
               <span>
-                <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
-                <svg viewBox="0 0 28 13"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".6"/><rect x="2" y="2" width="17" height="9" rx="2"/><rect x="25" y="4" width="2.5" height="5" rx="1"/></svg>
-              </span>
+              <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+              <svg viewBox="0 0 28 13"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".6"/><rect x="2" y="2" width="17" height="9" rx="2"/><rect x="25" y="4" width="2.5" height="5" rx="1"/></svg>
+            </span>
             </div>
             <div class="phone-brand">
               <img src="/images/sri-lanka-government-emblem.png" alt="" width="40" height="57"/>
@@ -483,6 +448,69 @@
   </div>
 </section>
 
+<!-- How it works -->
+<section id="process" class="bg-slate-100 border-y border-slate-200 py-16 lg:py-20">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">How it works</p>
+      <h2 class="text-3xl font-bold text-slate-900 mt-2">A clear four-step process</h2>
+      <p class="text-base text-slate-600 mt-3">Complete the online steps before attending any required in-person verification.</p>
+    </div>
+
+    <div class="process-flow" data-process-flow>
+      <div class="flow-sky" aria-hidden="true">
+        <i class="flow-star" style="--x:4%;--y:10%;--s:11px;--d:0s"></i>
+        <i class="flow-star" style="--x:11%;--y:34%;--s:7px;--d:1.1s"></i>
+        <i class="flow-star" style="--x:19%;--y:6%;--s:9px;--d:2.2s"></i>
+        <i class="flow-star" style="--x:27%;--y:24%;--s:6px;--d:0.6s"></i>
+        <i class="flow-star" style="--x:34%;--y:8%;--s:12px;--d:1.7s"></i>
+        <i class="flow-star" style="--x:42%;--y:30%;--s:7px;--d:2.9s"></i>
+        <i class="flow-star" style="--x:49%;--y:5%;--s:8px;--d:0.3s"></i>
+        <i class="flow-star" style="--x:57%;--y:22%;--s:10px;--d:1.4s"></i>
+        <i class="flow-star" style="--x:64%;--y:9%;--s:6px;--d:2.5s"></i>
+        <i class="flow-star" style="--x:72%;--y:32%;--s:9px;--d:0.9s"></i>
+        <i class="flow-star" style="--x:79%;--y:7%;--s:12px;--d:2s"></i>
+        <i class="flow-star" style="--x:86%;--y:26%;--s:7px;--d:3.1s"></i>
+        <i class="flow-star" style="--x:93%;--y:11%;--s:10px;--d:0.5s"></i>
+        <i class="flow-star" style="--x:97%;--y:38%;--s:6px;--d:1.8s"></i>
+        <i class="flow-star" style="--x:8%;--y:88%;--s:8px;--d:2.4s"></i>
+        <i class="flow-star" style="--x:38%;--y:92%;--s:6px;--d:1.2s"></i>
+        <i class="flow-star" style="--x:68%;--y:90%;--s:9px;--d:0.7s"></i>
+        <i class="flow-star" style="--x:91%;--y:86%;--s:7px;--d:2.7s"></i>
+        <i class="flow-shoot" style="--y:6%;--d:1s"></i>
+        <i class="flow-shoot" style="--y:18%;--d:5.5s"></i>
+      </div>
+
+      <ol class="flow-steps">
+        <li class="flow-step" style="--i:0">
+          <span class="flow-node is-first">1</span>
+          <h3>Apply Online</h3>
+          <p>Complete the relevant form and submit the required supporting documents.</p>
+          <span class="flow-tag">Online</span>
+        </li>
+        <li class="flow-step" style="--i:1">
+          <span class="flow-node">2</span>
+          <h3>Book Appointment</h3>
+          <p>Choose an available time at the most convenient service centre.</p>
+          <span class="flow-tag">Online</span>
+        </li>
+        <li class="flow-step" style="--i:2">
+          <span class="flow-node">3</span>
+          <h3>Verify Identity</h3>
+          <p>Attend the centre for document checks and biometric capture where required.</p>
+          <span class="flow-tag is-centre">At a service centre</span>
+        </li>
+        <li class="flow-step" style="--i:3">
+          <span class="flow-node">4</span>
+          <h3>Receive Document</h3>
+          <p>Track the final status and receive the completed identity document securely.</p>
+          <span class="flow-tag">Track online</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
 <!-- Help before the footer -->
 <section id="help" class="bg-slate-50 border-t border-slate-200 py-16 lg:py-20" aria-labelledby="helpTitle">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -527,45 +555,58 @@
 
 </main>
 
-<!-- Simplified footer -->
-<footer id="support" class="bg-slate-900 text-slate-300 border-t border-slate-800">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
-    <div class="grid md:grid-cols-[1.2fr_0.8fr] gap-10 pb-9 border-b border-slate-800">
-      <div class="max-w-lg">
+<!-- Footer -->
+<footer id="support" class="gov-footer bg-slate-900 text-slate-300 border-t border-slate-800">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-8">
+    <div class="gov-footer-grid">
+      <div class="gov-footer-brand">
         <div th:replace="~{fragments/government_brand :: brand(@{/}, 'dark')}"></div>
         <p class="text-sm text-slate-400 leading-relaxed mt-5">The official digital identity and citizen verification service of Sri Lanka.</p>
+
+        <p class="gov-footer-helpline">
+          <span class="material-symbols-outlined" aria-hidden="true">call</span>
+          <span><span class="gov-footer-helpline-label">National Helpline</span><strong>1919</strong></span>
+        </p>
+
+        <button type="button" class="lankaid-chatbot-support-link" data-chatbot-open>
+          <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+          <span>Chat with LankaID <small>Get help finding the right service</small></span>
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
       </div>
 
-      <div>
-        <h2 class="text-sm font-bold text-white">Support and assistance</h2>
-        <div class="grid sm:grid-cols-2 gap-4 mt-5 text-sm">
-          <button type="button" class="lankaid-chatbot-support-link sm:col-span-2" data-chatbot-open>
-            <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
-            <span>Chat with LankaID <small>Get help finding the right service</small></span>
-            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-          </button>
-          <div class="flex gap-3">
-            <span class="material-symbols-outlined text-cyan-400">call</span>
-            <div><p class="font-semibold text-slate-200">National Helpline</p><p class="text-slate-400 mt-1">1919</p></div>
-          </div>
-          <div class="flex gap-3">
-            <span class="material-symbols-outlined text-cyan-400">mail</span>
-            <div><p class="font-semibold text-slate-200">Email Support</p><p class="text-slate-400 mt-1">support@lankaid.gov.lk</p></div>
-          </div>
-          <div class="sm:col-span-2 flex gap-3">
-            <span class="material-symbols-outlined text-cyan-400">location_on</span>
-            <div><p class="font-semibold text-slate-200">Department Headquarters</p><p class="text-slate-400 mt-1">Department for Registration of Persons, Battaramulla, Sri Lanka</p></div>
-          </div>
-        </div>
-      </div>
+      <nav class="gov-footer-column" aria-label="Services">
+        <h2 class="gov-footer-title">Services</h2>
+        <ul>
+          <li><a href="#services">National Identity Card</a></li>
+          <li><a href="#services">Passport Services</a></li>
+          <li><a th:href="@{/walk-in}" href="/walk-in">Book a walk-in</a></li>
+          <li><a href="#visitorPhone">Lost your walk-in QR pass?</a></li>
+        </ul>
+      </nav>
+
+      <nav class="gov-footer-column" aria-label="Explore LankaID">
+        <h2 class="gov-footer-title">Explore</h2>
+        <ul>
+          <li><a href="#top">Home</a></li>
+          <li><a href="#process">How It Works</a></li>
+          <li><a href="#phone">On your phone</a></li>
+          <li><a href="#help">Support</a></li>
+          <li>
+            <a th:if="${!landingSignedIn}" th:href="@{/login}" href="/login">Access LankaID</a>
+            <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}">Access Dashboard</a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
-    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+    <div class="gov-footer-bottom">
       <p>© 2026 Democratic Socialist Republic of Sri Lanka. LankaID National Portal.</p>
-      <div class="flex items-center gap-5">
-        <a class="hover:text-slate-300 transition-colors" href="#">Privacy</a>
-        <a class="hover:text-slate-300 transition-colors" href="#">Accessibility</a>
-        <a class="hover:text-slate-300 transition-colors" href="#">Security</a>
+      <div class="gov-footer-legal">
+        <a href="#">Privacy</a>
+        <a href="#">Accessibility</a>
+        <a href="#">Security</a>
+        <a class="gov-footer-top" href="#top"><span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>Back to top</a>
       </div>
     </div>
   </div>
@@ -669,6 +710,7 @@
   }
 </script>
 <script src="/js/nic-card.js" defer></script>
+<script src="/js/landing-nav.js" defer></script>
 <script src="/js/walkin-phone.js"></script>
 <script src="/js/public-announcement.js"></script>
 <script src="/Chatbot/chatbot-guide.js?v=20261005" defer></script>

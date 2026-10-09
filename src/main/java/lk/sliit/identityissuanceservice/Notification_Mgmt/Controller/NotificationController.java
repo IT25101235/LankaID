@@ -3,6 +3,8 @@ package lk.sliit.identityissuanceservice.Notification_Mgmt.Controller;
 import jakarta.servlet.http.HttpSession;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Dto.CitizenNotificationDto;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
 public class NotificationController {
@@ -47,6 +50,30 @@ public class NotificationController {
         if (citizenId == null) return "redirect:/login";
         notificationService.markAllAsRead(citizenId);
         return "redirect:/citizen/notifications";
+    }
+
+    /** READ (JSON): the five newest notifications for the navigation dropdown. */
+    @ResponseBody
+    @GetMapping("/citizen/notifications/recent")
+    public ResponseEntity<Map<String, Object>> citizenRecentNotifications(HttpSession session) {
+        Integer citizenId = loggedInCitizenId(session);
+        if (citizenId == null) return ResponseEntity.status(401).build();
+
+        List<CitizenNotificationDto> all = notificationService.getCitizenNotifications(citizenId);
+        List<Map<String, Object>> latest = all.stream()
+                .limit(5)
+                .map(item -> Map.<String, Object>of(
+                        "notificationId", item.notificationId(),
+                        "type", Objects.toString(item.notificationType(), ""),
+                        "message", Objects.toString(item.message(), ""),
+                        "createdAt", item.createdAt() == null ? "" : item.createdAt().toString(),
+                        "read", item.read()))
+                .toList();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(Map.of(
+                        "notifications", latest,
+                        "unreadCount", all.stream().filter(item -> !item.read()).count()));
     }
 
     @GetMapping("/officer/notifications")

@@ -119,13 +119,24 @@
             '<span class="material-symbols-outlined">menu</span><span class="citizen-menu-label">Menu</span>' +
           '</button>' +
           '<nav class="citizen-primary-nav" id="citizen-primary-nav" aria-label="Citizen navigation">' +
-            config.items.map(citizenNavItem).join('') +
+            '<div class="citizen-nav-main">' + config.items.filter(function (entry) { return !isToolItem(entry); }).map(citizenNavItem).join('') + '</div>' +
             (publicAccess
               ? ''
-              : '<form class="citizen-signout-form" action="/logout" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>') +
+              : '<div class="citizen-nav-tools">' +
+                  config.items.filter(isToolItem).map(citizenToolItem).join('') +
+                  '<form class="citizen-signout-form" action="/logout" method="post"><button class="citizen-session-link" type="submit">Sign out</button></form>' +
+                '</div>') +
           '</nav>' +
         '</div>';
       document.body.prepend(header);
+
+      // The bell built here needs the dropdown script (pages using the shared fragment load it themselves).
+      if (header.querySelector('[data-notify]') && !window.__lankaidNotify) {
+        const notifyScript = document.createElement('script');
+        notifyScript.src = '/js/citizen-notify.js';
+        notifyScript.defer = true;
+        document.body.appendChild(notifyScript);
+      }
     }
 
     const menuButton = header.querySelector('.citizen-menu-button');
@@ -170,6 +181,29 @@
     return '<a class="citizen-nav-link' + (active ? ' active' : '') + '" href="' + item.href + '"' +
       (active ? ' aria-current="page"' : '') + '><span class="material-symbols-outlined">' +
       item.icon + '</span><span>' + item.label + '</span></a>';
+  }
+
+  // Notifications and support sit in the tools group on the right of the citizen bar.
+  function isToolItem(item) {
+    return item.href === '/citizen/notifications' || item.href === '/citizen/support';
+  }
+
+  function citizenToolItem(item) {
+    if (item.href !== '/citizen/notifications') {
+      const active = isActive(item);
+      return '<a class="citizen-nav-link' + (active ? ' active' : '') + '" href="' + item.href + '" title="' + item.label + '"' +
+        (active ? ' aria-current="page"' : '') + '><span class="material-symbols-outlined">' +
+        item.icon + '</span><span class="citizen-nav-text">' + item.label + '</span></a>';
+    }
+    return '<div class="citizen-notify" data-notify data-notify-prefetch>' +
+      '<button class="citizen-nav-link citizen-notify-button' + (isActive(item) ? ' active' : '') + '" type="button" title="Notifications" aria-label="Notifications" ' +
+        'aria-haspopup="true" aria-expanded="false" aria-controls="citizen-notify-panel" data-notify-button>' +
+        '<span class="material-symbols-outlined">notifications</span><span class="citizen-nav-text">Notifications</span></button>' +
+      '<div class="citizen-notify-panel" id="citizen-notify-panel" role="region" aria-label="Recent notifications" data-notify-panel hidden>' +
+        '<div class="citizen-notify-head"><strong>Notifications</strong><span class="citizen-notify-unread" data-notify-unread></span></div>' +
+        '<ul class="citizen-notify-list" data-notify-list><li class="citizen-notify-empty">Loading\u2026</li></ul>' +
+        '<a class="citizen-notify-all" href="/citizen/notifications">See all</a>' +
+      '</div></div>';
   }
 
   function isActive(item) {
