@@ -69,7 +69,7 @@ public class BiometricBookingChangeController {
             var request = BookingChangeRequest.require(token, session);
             requireReference(reference, request, session);
             changes.cancel(citizenId(session), request);
-            BookingChangeRequest.clear(session);
+            BookingChangeRequest.clear(request.token(), session);
             redirect.addFlashAttribute("changeMessage", "Booking cancelled. Your place is released. Choose another published slot without paying again to continue your application.");
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("changeError", exception.getMessage());
@@ -89,7 +89,7 @@ public class BiometricBookingChangeController {
             var request = BookingChangeRequest.require(token, session);
             requireReference(reference, request, session);
             changes.changeBooking(citizenId(session), request, selection.readSlot());
-            BookingChangeRequest.clear(session);
+            BookingChangeRequest.clear(request.token(), session);
             redirect.addFlashAttribute("appointmentMessage", "Your new booking is confirmed. No additional payment was required.");
             return "redirect:/citizen/appointments/" + reference + "/pass";
         } catch (IllegalArgumentException exception) {

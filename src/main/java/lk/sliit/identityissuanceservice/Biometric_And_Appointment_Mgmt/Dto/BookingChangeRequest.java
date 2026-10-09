@@ -38,6 +38,13 @@ public record BookingChangeRequest(Integer appointmentId, String status, LocalDa
 
     public static void clear(HttpSession session) { session.removeAttribute(KEY); }
 
+    /** Removes only the confirmation that was just used, so the booking page open in another tab keeps working. */
+    public static void clear(String token, HttpSession session) {
+        LinkedHashMap<String, BookingChangeRequest> open = open(session);
+        open.remove(token);
+        session.setAttribute(KEY, open);
+    }
+
     @SuppressWarnings("unchecked")
     private static LinkedHashMap<String, BookingChangeRequest> open(HttpSession session) {
         return session.getAttribute(KEY) instanceof LinkedHashMap<?, ?> existing
