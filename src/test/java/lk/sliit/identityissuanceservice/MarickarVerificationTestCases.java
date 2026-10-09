@@ -10,7 +10,7 @@ import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.Appl
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Repository.NotificationRepository;
-import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.OfficialNotificationEmailService;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Repository.UserNotificationRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
@@ -27,7 +27,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -78,8 +74,7 @@ class MarickarVerificationTestCases {
     @Autowired ApplicationDocumentRepository documentRepository;
     @Autowired ApplicationReviewRepository reviewRepository;
     @Autowired NotificationRepository notificationRepository;
-
-    @MockitoBean OfficialNotificationEmailService emailService;
+    @Autowired UserNotificationRepository userNotificationRepository;
 
     private final List<Path> createdFiles = new ArrayList<>();
 
@@ -141,8 +136,13 @@ class MarickarVerificationTestCases {
         );
         assertNotification("APPLICATION_APPROVED", application.getApplicationNo());
 
-        // The report explicitly expects an approval email in addition to the in-app notification.
-        verify(emailService).sendOfficialEmail(anyList(), anyString(), anyString());
+        var approvalNotification = notificationRepository.findAll().stream()
+                .filter(notification -> "APPLICATION_APPROVED".equals(notification.getNotificationType())
+                        && notification.getMessage().contains(application.getApplicationNo()))
+                .findFirst().orElseThrow();
+        assertTrue(userNotificationRepository.findById_NotificationIdAndId_UserId(
+                approvalNotification.getNotificationId(), application.getCitizenId()).isPresent(),
+                "The approval notification must be delivered to the applicant.");
     }
 
     @Test
@@ -329,6 +329,8 @@ class MarickarVerificationTestCases {
         CitizenApplication application = application("UNDER_REVIEW", "Private Document Citizen");
         ApplicationDocument document = document(application, "PHOTOGRAPH", "private-photo.png");
         StaffAccount csr = officer(OfficerAccountService.CSR);
+        StaffAccount passportOfficer = officer(OfficerAccountService.PASSPORT_OFFICER);
+        StaffAccount nicOfficer = officer(OfficerAccountService.NIC_OFFICER);
 
         MvcResult csrResult = mockMvc.perform(
                 get("/officer/verification/documents/{documentId}/view", document.getDocumentId())
@@ -337,14 +339,28 @@ class MarickarVerificationTestCases {
         MvcResult anonymousResult = mockMvc.perform(
                 get("/officer/verification/documents/{documentId}/view", document.getDocumentId()))
                 .andReturn();
+        MvcResult wrongServiceResult = mockMvc.perform(
+                get("/officer/verification/documents/{documentId}/view", document.getDocumentId())
+                        .session(officerSession(passportOfficer)))
+                .andReturn();
+        MvcResult missingDocumentResult = mockMvc.perform(
+                get("/officer/verification/documents/{documentId}/view", Integer.MAX_VALUE)
+                        .session(officerSession(nicOfficer)))
+                .andReturn();
 
         assertAll(
                 () -> assertEquals(403, csrResult.getResponse().getStatus(),
                         "A CSR officer must receive HTTP 403, not a not-found response"),
                 () -> assertEquals(403, anonymousResult.getResponse().getStatus(),
                         "An unauthenticated request must receive HTTP 403"),
+                () -> assertEquals(403, wrongServiceResult.getResponse().getStatus(),
+                        "An officer for another service must receive HTTP 403"),
+                () -> assertEquals(404, missingDocumentResult.getResponse().getStatus(),
+                        "A missing document must still receive HTTP 404"),
                 () -> assertEquals(0, csrResult.getResponse().getContentAsByteArray().length,
-                        "No document bytes may be streamed to a CSR officer")
+                        "No document bytes may be streamed to a CSR officer"),
+                () -> assertEquals(0, wrongServiceResult.getResponse().getContentAsByteArray().length,
+                        "No document bytes may be streamed to an officer for another service")
         );
     }
 

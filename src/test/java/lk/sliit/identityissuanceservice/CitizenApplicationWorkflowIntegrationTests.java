@@ -3,6 +3,7 @@ package lk.sliit.identityissuanceservice;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.GovernmentIdentityRecord;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.ApplicationDocumentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.NicApplicationRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.PassportApplicationRepository;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,6 +53,7 @@ class CitizenApplicationWorkflowIntegrationTests {
     @Autowired private CitizenAccountRepository citizenRepository;
     @Autowired private GovernmentIdentityRecordRepository governmentRepository;
     @Autowired private CitizenApplicationRepository applicationRepository;
+    @Autowired private ApplicationDocumentRepository documentRepository;
     @Autowired private NicApplicationRepository nicRepository;
     @Autowired private PassportApplicationRepository passportRepository;
 
@@ -158,7 +162,9 @@ class CitizenApplicationWorkflowIntegrationTests {
                         .session(citizenSession(user)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("PHOTOGRAPH")))
-                .andExpect(content().string(containsString("Photograph (already uploaded)")))
+                .andExpect(model().attribute("uploadedTypes", hasItem("PHOTOGRAPH")))
+                .andExpect(model().attribute("missingRequiredTypes", not(hasItem("PHOTOGRAPH"))))
+                .andExpect(content().string(not(containsString("<option value=\"PHOTOGRAPH\""))))
                 .andExpect(content().string(containsString(application.getApplicationNo())));
 
         MockMultipartFile duplicatePhotograph = new MockMultipartFile(
@@ -181,6 +187,8 @@ class CitizenApplicationWorkflowIntegrationTests {
                         "/citizen/applications/nic/documents?applicationId="
                                 + application.getApplicationId()
                 ));
+        assertEquals(1, documentRepository
+                .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId()).size());
     }
 
     @Test

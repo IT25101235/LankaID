@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Controller.PaymentController;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.PaymentSummary;
@@ -58,8 +59,11 @@ class PaymentControllerValidationTests {
         application.setCurrentStatus("APPROVED");
         Payment payment = new Payment();
         payment.setPaymentStatus("PAID");
+        Centre centre = new Centre();
+        centre.setCentreId(2);
+        centre.setCentreStatus("ACTIVE");
         return new PaymentSummary(application, new BigDecimal("2000"), new BigDecimal("500"),
-                paid ? payment : null, null, List.of(), "12 Main Street");
+                paid ? payment : null, null, List.of(centre), "12 Main Street");
     }
 
     private MockHttpSession citizenSession() {

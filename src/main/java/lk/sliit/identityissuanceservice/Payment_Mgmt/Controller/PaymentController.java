@@ -67,7 +67,8 @@ public class PaymentController {
         try {
             PaymentSummary summary = paymentService.getPaymentSummary(citizenId, applicationId);
             model.addAttribute("paymentSummary", summary);
-            boolean cardNeeded = !summary.deliverySelected()
+            boolean paymentComplete = summary.paid() && summary.deliverySelected();
+            boolean cardNeeded = !paymentComplete
                     && (!summary.paid() || "HOME_DELIVERY".equals(deliveryMethod));
             if (cardNeeded) {
                 Map<String, String> errors = CardPaymentValidation.errors(cardForm);
@@ -76,6 +77,11 @@ public class PaymentController {
                     model.addAttribute("paymentError", "Please correct the card details below.");
                     return "citizen_frontends/payment_gateway";
                 }
+            }
+            if (!paymentComplete && "CENTRE_COLLECTION".equals(deliveryMethod)
+                    && (centreId == null || summary.centres().stream()
+                    .noneMatch(centre -> centreId.equals(centre.getCentreId())))) {
+                throw new IllegalArgumentException("Select an active service centre for document collection.");
             }
             paymentService.payForApplication(citizenId, applicationId, deliveryMethod, centreId);
             String status = paymentService.getPaymentSummary(citizenId, applicationId)

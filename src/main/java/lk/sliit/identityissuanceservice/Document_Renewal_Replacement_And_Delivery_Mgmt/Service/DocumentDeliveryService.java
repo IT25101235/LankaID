@@ -3,9 +3,7 @@ package lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delive
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.CentreRepository;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.CitizenApplication;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Model.GovernmentIdentityRecord;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.CitizenApplicationRepository;
-import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Repository.GovernmentIdentityRecordRepository;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.CitizenDeliveryDetails;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Dto.CsrCollectionDetails;
 import lk.sliit.identityissuanceservice.Document_Renewal_Replacement_And_Delivery_Mgmt.Model.DocumentDelivery;
@@ -50,7 +48,6 @@ public class DocumentDeliveryService {
     private final CitizenAccountRepository citizenRepository;
     private final UserAccountRepository userRepository;
     private final CentreRepository centreRepository;
-    private final GovernmentIdentityRecordRepository governmentRepository;
     private final NotificationPublisher notificationPublisher;
 
     public DocumentDeliveryService(
@@ -59,7 +56,6 @@ public class DocumentDeliveryService {
             CitizenAccountRepository citizenRepository,
             UserAccountRepository userRepository,
             CentreRepository centreRepository,
-            GovernmentIdentityRecordRepository governmentRepository,
             NotificationPublisher notificationPublisher
     ) {
         this.deliveryRepository = deliveryRepository;
@@ -67,7 +63,6 @@ public class DocumentDeliveryService {
         this.citizenRepository = citizenRepository;
         this.userRepository = userRepository;
         this.centreRepository = centreRepository;
-        this.governmentRepository = governmentRepository;
         this.notificationPublisher = notificationPublisher;
     }
 
@@ -305,12 +300,10 @@ public class DocumentDeliveryService {
         CitizenAccount citizen = findCitizen(application.getCitizenId());
         UserAccount user = userRepository.findById(application.getCitizenId())
                 .orElseThrow(() -> new IllegalArgumentException("Citizen account was not found."));
-        GovernmentIdentityRecord identity = citizen.getGovernmentRecordId() == null
-                ? null : governmentRepository.findById(citizen.getGovernmentRecordId()).orElse(null);
         Centre centre = delivery.getCentreId() == null
                 ? null : centreRepository.findById(delivery.getCentreId()).orElse(null);
-        String documentNumber = identity == null ? "Not generated"
-                : "NIC".equals(application.getServiceType()) ? identity.getNicNo() : identity.getPassportNo();
+        String documentNumber = clean(application.getIssuedDocumentNumber());
+        if (documentNumber.isBlank()) documentNumber = "Not recorded";
 
         return new CsrCollectionDetails(
                 delivery,
