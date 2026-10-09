@@ -217,7 +217,106 @@
   </div>
 </section>
 
-<!-- Example National Identity Card: illustration with masked details -->
+  <!-- Services on a phone -->
+  <section id="phone" class="bg-white py-16 lg:py-20" aria-labelledby="phoneTitle">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="max-w-2xl mb-10">
+        <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">On your phone</p>
+        <h2 id="phoneTitle" class="text-3xl font-bold text-slate-900 mt-2">The service, right on the first screen</h2>
+        <p class="text-base text-slate-600 mt-3">Scroll inside the phone to see the identity services as they appear on a mobile screen.</p>
+      </div>
+
+      <div class="phone-panel">
+        <div class="phone" role="group" aria-label="Phone preview of the LankaID services">
+          <span class="phone-btn is-action" aria-hidden="true"></span>
+          <span class="phone-btn is-up" aria-hidden="true"></span>
+          <span class="phone-btn is-down" aria-hidden="true"></span>
+          <span class="phone-btn is-power" aria-hidden="true"></span>
+          <div class="phone-screen">
+            <span class="phone-island" aria-hidden="true"></span>
+            <div class="phone-top">
+              <div class="phone-status" aria-hidden="true">
+                <span>9:41</span>
+                <span>
+                <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                <svg viewBox="0 0 28 13"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".6"/><rect x="2" y="2" width="17" height="9" rx="2"/><rect x="25" y="4" width="2.5" height="5" rx="1"/></svg>
+              </span>
+              </div>
+              <div class="phone-brand">
+                <img src="/images/sri-lanka-government-emblem.png" alt="" width="40" height="57"/>
+                <b>Lanka<span>ID</span></b>
+              </div>
+            </div>
+
+            <div class="phone-scroll" tabindex="0" role="region" aria-label="Services we provide. Scroll to see more.">
+              <p class="phone-eyebrow">Services we provide</p>
+              <h3 class="phone-title">Identity documents for citizens</h3>
+
+              <article class="phone-card">
+                <div class="phone-card-head">
+                  <span class="phone-icon"><span class="material-symbols-outlined" aria-hidden="true">id_card</span></span>
+                  <div>
+                    <h3>National Identity Card</h3>
+                    <p>Proof of identity and citizenship</p>
+                  </div>
+                </div>
+                <p class="phone-desc">Apply for a first NIC, renew an existing card, or request a secure replacement for a lost or damaged document.</p>
+                <ul>
+                  <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>New applications from age 16</li>
+                  <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Renewals and information updates</li>
+                  <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Lost or damaged card replacement</li>
+                </ul>
+                <span class="phone-pill"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Verification at a service centre</span>
+                <a class="phone-button" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login">Start application <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">arrow_forward</span></a>
+              </article>
+
+              <article class="phone-card">
+                <div class="phone-card-head">
+                  <span class="phone-icon"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span></span>
+                  <div>
+                    <h3>Passport Services</h3>
+                    <p>Secure international travel documents</p>
+                  </div>
+                </div>
+                <p class="phone-desc">Submit a first passport application, renew an expiring document, or replace a passport that is missing or damaged.</p>
+                <ul>
+                  <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>First-time passport applications</li>
+                  <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Passport validity renewals</li>
+                  <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Lost or damaged passport replacement</li>
+                </ul>
+                <span class="phone-pill"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Verification at a service centre</span>
+                <a class="phone-button" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login">Start application <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">arrow_forward</span></a>
+              </article>
+
+              <p class="phone-help"><span class="material-symbols-outlined" aria-hidden="true">call</span>Helpline 1919</p>
+            </div>
+            <span class="phone-home" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <ul class="phone-points">
+          <li>
+            <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">touch_app</span></span>
+            <div><h3>Start with the service</h3><p>The two identity services are the first thing on the screen, so people begin with the document they need.</p></div>
+          </li>
+          <li>
+            <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">location_on</span></span>
+            <div><h3>Know about the visit early</h3><p>Each service card says up front that verification takes place at a service centre.</p></div>
+          </li>
+          <li>
+            <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">swipe_up</span></span>
+            <div><h3>Swipe to the next service</h3><p>Move from the National Identity Card to Passport Services with one swipe or scroll.</p></div>
+          </li>
+          <li>
+            <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">ads_click</span></span>
+            <div><h3>One full-width button</h3><p>Start application is a single large button on every card, easy to tap with a thumb.</p></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Example National Identity Card: illustration with masked details -->
 <section id="nic-card" class="bg-slate-50 border-y border-slate-200 py-16 lg:py-20" aria-labelledby="nicCardTitle">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-14 items-center">
     <div>
@@ -380,105 +479,6 @@
           <span class="flow-tag">Track online</span>
         </li>
       </ol>
-    </div>
-  </div>
-</section>
-
-<!-- Services on a phone -->
-<section id="phone" class="bg-white py-16 lg:py-20" aria-labelledby="phoneTitle">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
-    <div class="max-w-2xl mb-10">
-      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">On your phone</p>
-      <h2 id="phoneTitle" class="text-3xl font-bold text-slate-900 mt-2">The service, right on the first screen</h2>
-      <p class="text-base text-slate-600 mt-3">Scroll inside the phone to see the identity services as they appear on a mobile screen.</p>
-    </div>
-
-    <div class="phone-panel">
-      <div class="phone" role="group" aria-label="Phone preview of the LankaID services">
-        <span class="phone-btn is-action" aria-hidden="true"></span>
-        <span class="phone-btn is-up" aria-hidden="true"></span>
-        <span class="phone-btn is-down" aria-hidden="true"></span>
-        <span class="phone-btn is-power" aria-hidden="true"></span>
-        <div class="phone-screen">
-          <span class="phone-island" aria-hidden="true"></span>
-          <div class="phone-top">
-            <div class="phone-status" aria-hidden="true">
-              <span>9:41</span>
-              <span>
-                <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
-                <svg viewBox="0 0 28 13"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".6"/><rect x="2" y="2" width="17" height="9" rx="2"/><rect x="25" y="4" width="2.5" height="5" rx="1"/></svg>
-              </span>
-            </div>
-            <div class="phone-brand">
-              <img src="/images/sri-lanka-government-emblem.png" alt="" width="40" height="57"/>
-              <b>Lanka<span>ID</span></b>
-            </div>
-          </div>
-
-          <div class="phone-scroll" tabindex="0" role="region" aria-label="Services we provide. Scroll to see more.">
-            <p class="phone-eyebrow">Services we provide</p>
-            <h3 class="phone-title">Identity documents for citizens</h3>
-
-            <article class="phone-card">
-              <div class="phone-card-head">
-                <span class="phone-icon"><span class="material-symbols-outlined" aria-hidden="true">id_card</span></span>
-                <div>
-                  <h3>National Identity Card</h3>
-                  <p>Proof of identity and citizenship</p>
-                </div>
-              </div>
-              <p class="phone-desc">Apply for a first NIC, renew an existing card, or request a secure replacement for a lost or damaged document.</p>
-              <ul>
-                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>New applications from age 16</li>
-                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Renewals and information updates</li>
-                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Lost or damaged card replacement</li>
-              </ul>
-              <span class="phone-pill"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Verification at a service centre</span>
-              <a class="phone-button" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login">Start application <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">arrow_forward</span></a>
-            </article>
-
-            <article class="phone-card">
-              <div class="phone-card-head">
-                <span class="phone-icon"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span></span>
-                <div>
-                  <h3>Passport Services</h3>
-                  <p>Secure international travel documents</p>
-                </div>
-              </div>
-              <p class="phone-desc">Submit a first passport application, renew an expiring document, or replace a passport that is missing or damaged.</p>
-              <ul>
-                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>First-time passport applications</li>
-                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Passport validity renewals</li>
-                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Lost or damaged passport replacement</li>
-              </ul>
-              <span class="phone-pill"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Verification at a service centre</span>
-              <a class="phone-button" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login">Start application <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">arrow_forward</span></a>
-            </article>
-
-            <p class="phone-help"><span class="material-symbols-outlined" aria-hidden="true">call</span>Helpline 1919</p>
-          </div>
-          <span class="phone-home" aria-hidden="true"></span>
-        </div>
-      </div>
-
-      <ul class="phone-points">
-        <li>
-          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">touch_app</span></span>
-          <div><h3>Start with the service</h3><p>The two identity services are the first thing on the screen, so people begin with the document they need.</p></div>
-        </li>
-        <li>
-          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">location_on</span></span>
-          <div><h3>Know about the visit early</h3><p>Each service card says up front that verification takes place at a service centre.</p></div>
-        </li>
-        <li>
-          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">swipe_up</span></span>
-          <div><h3>Swipe to the next service</h3><p>Move from the National Identity Card to Passport Services with one swipe or scroll.</p></div>
-        </li>
-        <li>
-          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">ads_click</span></span>
-          <div><h3>One full-width button</h3><p>Start application is a single large button on every card, easy to tap with a thumb.</p></div>
-        </li>
-      </ul>
     </div>
   </div>
 </section>
