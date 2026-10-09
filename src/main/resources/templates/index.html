@@ -6,6 +6,7 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700&amp;family=Noto+Sans+Tamil:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
   tailwind.config = {
     theme: {
@@ -16,7 +17,7 @@
   };
 </script>
 <script>document.documentElement.classList.add('reveal-ready');</script>
-<link href="/css/government-theme.css?v=20261009-chatbot-maroon" rel="stylesheet"/>
+<link href="/css/government-theme.css?v=20261009-landing-flow" rel="stylesheet"/>
 </head>
 <body id="top" class="gov-landing-page bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 
@@ -216,6 +217,110 @@
   </div>
 </section>
 
+<!-- Example National Identity Card: illustration with masked details -->
+<section id="nic-card" class="bg-slate-50 border-y border-slate-200 py-16 lg:py-20" aria-labelledby="nicCardTitle">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-14 items-center">
+    <div>
+      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">National Identity Card</p>
+      <h2 id="nicCardTitle" class="text-3xl font-bold text-slate-900 mt-2">Proof of identity and citizenship</h2>
+      <p class="text-base text-slate-600 mt-3 leading-relaxed">Apply for a first NIC, renew an existing card, or request a secure replacement for a lost or damaged document.</p>
+      <ul class="space-y-3 text-sm text-slate-700 mt-6">
+        <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>New applications from age 16</li>
+        <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Renewals and information updates</li>
+        <li class="flex items-center gap-3"><span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>Lost or damaged card replacement</li>
+      </ul>
+      <div class="flex flex-wrap gap-3 mt-8">
+        <a th:if="${!landingSignedIn}" th:href="@{/login}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+          Access LankaID
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a th:if="${landingSignedIn}" th:href="${landingDashboardPath}" class="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-cyan-600 text-white text-sm font-bold hover:bg-cyan-700 transition-colors shadow-sm shadow-cyan-700/20">
+          Access Dashboard
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a href="#process" class="inline-flex items-center h-12 px-6 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm font-bold hover:border-cyan-400 hover:text-cyan-700 transition-colors">
+          View the process
+        </a>
+      </div>
+    </div>
+
+    <div class="nic-stage">
+      <div class="nic-scene">
+        <div class="nic-card" id="nicCardFlip" data-nic-card role="button" tabindex="0" aria-pressed="false"
+             aria-label="National Identity Card illustration with masked details. Front of card shown. Press to show the back.">
+
+          <!-- FRONT -->
+          <div class="nic-face nic-front" aria-hidden="true">
+            <span class="nic-blob nic-blob-1"></span>
+            <span class="nic-blob nic-blob-2"></span>
+            <p class="nic-t nic-specimen">SPECIMEN</p>
+
+            <svg class="nic-lotus" viewBox="0 0 120 100" focusable="false">
+              <defs><linearGradient id="nicLotusFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cf9384"/><stop offset="1" stop-color="#7a4234"/></linearGradient></defs>
+              <g fill="url(#nicLotusFill)" stroke="#6e3a2e" stroke-width="1.2" stroke-linejoin="round" opacity=".92">
+                <path d="M6 56 C20 52 36 62 46 80 C30 84 12 76 6 56Z"/>
+                <path d="M114 56 C100 52 84 62 74 80 C90 84 108 76 114 56Z"/>
+                <path d="M19 34 C33 34 48 50 54 74 C37 74 21 57 19 34Z"/>
+                <path d="M101 34 C87 34 72 50 66 74 C83 74 99 57 101 34Z"/>
+                <path d="M60 5 C45 24 43 54 60 79 C77 54 75 24 60 5Z"/>
+              </g>
+              <path d="M26 86 C44 96 76 96 94 86" fill="none" stroke="#6e3a2e" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+
+            <img class="nic-emblem" src="/images/sri-lanka-government-emblem.png" alt="" width="64" height="91"/>
+            <p class="nic-t nic-country"><span class="nic-si">ශ්‍රී ලංකා</span><span class="nic-ta">இலங்கை</span><b>SRI LANKA</b></p>
+            <p class="nic-t nic-title"><span class="nic-si">ජාතික හැඳුනුම්පත</span><span class="nic-ta">தேசிய அடையாள அட்டை</span><b>NATIONAL IDENTITY CARD</b></p>
+            <p class="nic-t nic-no"><span class="nic-lbl nic-si">අංකය / இல. / No.:</span><b>••••••••••••</b></p>
+
+            <div class="nic-photo">
+              <svg viewBox="0 0 100 130" preserveAspectRatio="xMidYMax slice" focusable="false">
+                <circle cx="50" cy="50" r="21" fill="#a9afb5"/>
+                <path d="M6 130 C6 94 28 82 50 82 C72 82 94 94 94 130Z" fill="#a9afb5"/>
+              </svg>
+            </div>
+
+            <p class="nic-t nic-name nic-name-si"><span class="nic-lbl nic-si">නම :</span><b class="nic-si">•••••• ••••••••<br/>•••••••••</b></p>
+            <p class="nic-t nic-name nic-name-ta"><span class="nic-lbl nic-ta">பெயர் :</span><b class="nic-ta">•••• •••••••<br/>••••••••••</b></p>
+            <p class="nic-t nic-name nic-name-en"><span class="nic-lbl">Name :</span><b>•••• •••••••<br/>•••••••</b></p>
+            <p class="nic-t nic-row nic-sex"><span class="nic-lbl nic-si">ස්ත්‍රී පුරුෂ භාවය / பால் / Sex :</span><b>••••• / ••••• / ••••</b></p>
+            <p class="nic-t nic-row nic-dob"><span class="nic-lbl nic-si">උපන් දිනය / பிறந்த திகதி / Date of Birth :</span><b>••••/••/••</b></p>
+            <p class="nic-t nic-sign nic-si">දරන්නාගේ අත්සන / வைத்திருப்பாளரின் கையொப்பம் / Holder's Signature</p>
+            <svg class="nic-signature" viewBox="0 0 120 40" focusable="false"><path d="M4 28 C14 6 26 6 24 20 C22 32 34 10 44 14 C54 18 40 30 56 24 C70 18 74 8 88 12 C102 16 96 30 116 14" fill="none" stroke="#2b3540" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </div>
+
+          <!-- BACK -->
+          <div class="nic-face nic-back" aria-hidden="true">
+            <div class="nic-back-top"></div>
+            <p class="nic-t nic-addr-label nic-si"><span class="nic-lbl">ලිපිනය / முகவரி / Address :</span></p>
+            <p class="nic-t nic-addr"><span class="nic-si">••/•, ••••• •••••••••• •••••, •••••••••.</span><span class="nic-ta">••/•, ••••••••••••• •••••, •••••••••••.</span><b>••/•, ••••• ••••••••• ••••••, ••••••••</b></p>
+            <p class="nic-t nic-code-a">•••••••••V</p>
+            <p class="nic-t nic-code-b">••Y••••• - •</p>
+            <p class="nic-t nic-code-v">••A•A-•••</p>
+
+            <p class="nic-t nic-issue nic-si"><span>නිකුත් කළ දිනය</span><span>வழங்கப்பட்ட திகதி</span><span>Date of Issue</span></p>
+            <p class="nic-t nic-issue-val">: ••••/••/••</p>
+            <p class="nic-t nic-birth nic-si"><span>උපන් ස්ථානය :</span><span>பிறந்த இடம் :</span><span>Place of Birth :</span></p>
+            <p class="nic-t nic-birth-val"><span class="nic-si">•••••••••••</span><span class="nic-ta">•••••••••••</span><b>•••••••••••</b></p>
+
+            <svg class="nic-signature" viewBox="0 0 120 40" focusable="false"><path d="M4 30 C12 8 24 4 22 18 C20 30 32 8 44 12 C56 16 42 30 58 24 C72 18 78 6 92 10 C104 14 100 28 116 12" fill="none" stroke="#2b3540" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <p class="nic-t nic-commissioner"><span class="nic-si">කොමසාරිස් ජනරාල්</span><span class="nic-ta">ஆணையாளர் தலைமையதிபதி</span><b>Commissioner General</b></p>
+
+            <p class="nic-t nic-act"><span class="nic-si">1968 අංක 32 දරන පුද්ගලයන් ලියාපදිංචි කිරීමේ පනත</span><span class="nic-ta">1968 ஆம் ஆண்டின் 32 ஆம் இலக்க ஆட்கள் பதிவு செய்தல் சட்டம்</span><b>Registration of Persons Act, No. 32 of 1968</b></p>
+
+            <div class="nic-barcode" data-nic-barcode></div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="nic-flip-button" data-nic-flip-button aria-controls="nicCardFlip">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5"/></svg>
+        <span data-nic-flip-label>Show back of card</span>
+      </button>
+      <p class="nic-caption">Illustration with masked details. Hover to tilt, or flip it over.</p>
+    </div>
+  </div>
+</section>
+
 <!-- How it works -->
 <section id="process" class="bg-slate-100 border-y border-slate-200 py-16 lg:py-20">
   <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -225,27 +330,197 @@
       <p class="text-base text-slate-600 mt-3">Complete the online steps before attending any required in-person verification.</p>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
-        <div class="w-10 h-10 rounded-xl bg-cyan-600 text-white font-bold flex items-center justify-center mb-5">1</div>
-        <h3 class="text-base font-bold text-slate-900">Apply Online</h3>
-        <p class="text-sm leading-relaxed text-slate-600 mt-2">Complete the relevant form and submit the required supporting documents.</p>
-      </article>
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
-        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">2</div>
-        <h3 class="text-base font-bold text-slate-900">Book Appointment</h3>
-        <p class="text-sm leading-relaxed text-slate-600 mt-2">Choose an available time at the most convenient service centre.</p>
-      </article>
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
-        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">3</div>
-        <h3 class="text-base font-bold text-slate-900">Verify Identity</h3>
-        <p class="text-sm leading-relaxed text-slate-600 mt-2">Attend the centre for document checks and biometric capture where required.</p>
-      </article>
-      <article class="reveal-step bg-white border border-slate-200 rounded-2xl p-6">
-        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-5">4</div>
-        <h3 class="text-base font-bold text-slate-900">Receive Document</h3>
-        <p class="text-sm leading-relaxed text-slate-600 mt-2">Track the final status and receive the completed identity document securely.</p>
-      </article>
+    <div class="process-flow" data-process-flow>
+      <div class="flow-sky" aria-hidden="true">
+        <i class="flow-star" style="--x:4%;--y:10%;--s:11px;--d:0s"></i>
+        <i class="flow-star" style="--x:11%;--y:34%;--s:7px;--d:1.1s"></i>
+        <i class="flow-star" style="--x:19%;--y:6%;--s:9px;--d:2.2s"></i>
+        <i class="flow-star" style="--x:27%;--y:24%;--s:6px;--d:0.6s"></i>
+        <i class="flow-star" style="--x:34%;--y:8%;--s:12px;--d:1.7s"></i>
+        <i class="flow-star" style="--x:42%;--y:30%;--s:7px;--d:2.9s"></i>
+        <i class="flow-star" style="--x:49%;--y:5%;--s:8px;--d:0.3s"></i>
+        <i class="flow-star" style="--x:57%;--y:22%;--s:10px;--d:1.4s"></i>
+        <i class="flow-star" style="--x:64%;--y:9%;--s:6px;--d:2.5s"></i>
+        <i class="flow-star" style="--x:72%;--y:32%;--s:9px;--d:0.9s"></i>
+        <i class="flow-star" style="--x:79%;--y:7%;--s:12px;--d:2s"></i>
+        <i class="flow-star" style="--x:86%;--y:26%;--s:7px;--d:3.1s"></i>
+        <i class="flow-star" style="--x:93%;--y:11%;--s:10px;--d:0.5s"></i>
+        <i class="flow-star" style="--x:97%;--y:38%;--s:6px;--d:1.8s"></i>
+        <i class="flow-star" style="--x:8%;--y:88%;--s:8px;--d:2.4s"></i>
+        <i class="flow-star" style="--x:38%;--y:92%;--s:6px;--d:1.2s"></i>
+        <i class="flow-star" style="--x:68%;--y:90%;--s:9px;--d:0.7s"></i>
+        <i class="flow-star" style="--x:91%;--y:86%;--s:7px;--d:2.7s"></i>
+        <i class="flow-shoot" style="--y:6%;--d:1s"></i>
+        <i class="flow-shoot" style="--y:18%;--d:5.5s"></i>
+      </div>
+
+      <ol class="flow-steps">
+        <li class="flow-step" style="--i:0">
+          <span class="flow-node is-first">1</span>
+          <h3>Apply Online</h3>
+          <p>Complete the relevant form and submit the required supporting documents.</p>
+          <span class="flow-tag">Online</span>
+        </li>
+        <li class="flow-step" style="--i:1">
+          <span class="flow-node">2</span>
+          <h3>Book Appointment</h3>
+          <p>Choose an available time at the most convenient service centre.</p>
+          <span class="flow-tag">Online</span>
+        </li>
+        <li class="flow-step" style="--i:2">
+          <span class="flow-node">3</span>
+          <h3>Verify Identity</h3>
+          <p>Attend the centre for document checks and biometric capture where required.</p>
+          <span class="flow-tag is-centre">At a service centre</span>
+        </li>
+        <li class="flow-step" style="--i:3">
+          <span class="flow-node">4</span>
+          <h3>Receive Document</h3>
+          <p>Track the final status and receive the completed identity document securely.</p>
+          <span class="flow-tag">Track online</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- Services on a phone -->
+<section id="phone" class="bg-white py-16 lg:py-20" aria-labelledby="phoneTitle">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">On your phone</p>
+      <h2 id="phoneTitle" class="text-3xl font-bold text-slate-900 mt-2">The service, right on the first screen</h2>
+      <p class="text-base text-slate-600 mt-3">Scroll inside the phone to see the identity services as they appear on a mobile screen.</p>
+    </div>
+
+    <div class="phone-panel">
+      <div class="phone" role="group" aria-label="Phone preview of the LankaID services">
+        <span class="phone-btn is-action" aria-hidden="true"></span>
+        <span class="phone-btn is-up" aria-hidden="true"></span>
+        <span class="phone-btn is-down" aria-hidden="true"></span>
+        <span class="phone-btn is-power" aria-hidden="true"></span>
+        <div class="phone-screen">
+          <span class="phone-island" aria-hidden="true"></span>
+          <div class="phone-top">
+            <div class="phone-status" aria-hidden="true">
+              <span>9:41</span>
+              <span>
+                <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                <svg viewBox="0 0 28 13"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".6"/><rect x="2" y="2" width="17" height="9" rx="2"/><rect x="25" y="4" width="2.5" height="5" rx="1"/></svg>
+              </span>
+            </div>
+            <div class="phone-brand">
+              <img src="/images/sri-lanka-government-emblem.png" alt="" width="40" height="57"/>
+              <b>Lanka<span>ID</span></b>
+            </div>
+          </div>
+
+          <div class="phone-scroll" tabindex="0" role="region" aria-label="Services we provide. Scroll to see more.">
+            <p class="phone-eyebrow">Services we provide</p>
+            <h3 class="phone-title">Identity documents for citizens</h3>
+
+            <article class="phone-card">
+              <div class="phone-card-head">
+                <span class="phone-icon"><span class="material-symbols-outlined" aria-hidden="true">id_card</span></span>
+                <div>
+                  <h3>National Identity Card</h3>
+                  <p>Proof of identity and citizenship</p>
+                </div>
+              </div>
+              <p class="phone-desc">Apply for a first NIC, renew an existing card, or request a secure replacement for a lost or damaged document.</p>
+              <ul>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>New applications from age 16</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Renewals and information updates</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Lost or damaged card replacement</li>
+              </ul>
+              <span class="phone-pill"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Verification at a service centre</span>
+              <a class="phone-button" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login">Start application <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">arrow_forward</span></a>
+            </article>
+
+            <article class="phone-card">
+              <div class="phone-card-head">
+                <span class="phone-icon"><span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span></span>
+                <div>
+                  <h3>Passport Services</h3>
+                  <p>Secure international travel documents</p>
+                </div>
+              </div>
+              <p class="phone-desc">Submit a first passport application, renew an expiring document, or replace a passport that is missing or damaged.</p>
+              <ul>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>First-time passport applications</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Passport validity renewals</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Lost or damaged passport replacement</li>
+              </ul>
+              <span class="phone-pill"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Verification at a service centre</span>
+              <a class="phone-button" th:href="${landingSignedIn} ? ${landingDashboardPath} : @{/login}" href="/login">Start application <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1.1rem">arrow_forward</span></a>
+            </article>
+
+            <p class="phone-help"><span class="material-symbols-outlined" aria-hidden="true">call</span>Helpline 1919</p>
+          </div>
+          <span class="phone-home" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <ul class="phone-points">
+        <li>
+          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">touch_app</span></span>
+          <div><h3>Start with the service</h3><p>The two identity services are the first thing on the screen, so people begin with the document they need.</p></div>
+        </li>
+        <li>
+          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">location_on</span></span>
+          <div><h3>Know about the visit early</h3><p>Each service card says up front that verification takes place at a service centre.</p></div>
+        </li>
+        <li>
+          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">swipe_up</span></span>
+          <div><h3>Swipe to the next service</h3><p>Move from the National Identity Card to Passport Services with one swipe or scroll.</p></div>
+        </li>
+        <li>
+          <span class="tile"><span class="material-symbols-outlined" aria-hidden="true">ads_click</span></span>
+          <div><h3>One full-width button</h3><p>Start application is a single large button on every card, easy to tap with a thumb.</p></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Help before the footer -->
+<section id="help" class="bg-slate-50 border-t border-slate-200 py-16 lg:py-20" aria-labelledby="helpTitle">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10">
+    <div class="max-w-2xl mb-10">
+      <p class="text-sm font-bold text-cyan-700 uppercase tracking-wider">Support and assistance</p>
+      <h2 id="helpTitle" class="text-3xl font-bold text-slate-900 mt-2">Frequently asked questions</h2>
+    </div>
+
+    <div class="help-panel">
+      <div class="faq-list">
+        <details class="faq-item" name="faq" open>
+          <summary>Do I need to visit a service centre?<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <p>Some services need in-person document checks and biometric capture. You complete the online steps first, then book a time at a centre.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>How do I follow my application?<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <p>Sign in to your LankaID account to see each stage of your application.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>I lost my walk-in QR pass<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <p>Enter the mobile number you used for booking and request your QR code again.</p>
+        </details>
+        <details class="faq-item" name="faq">
+          <summary>Which documents can I apply for?<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <p>National Identity Cards and passports: new applications, renewals and replacements for lost or damaged documents.</p>
+        </details>
+      </div>
+
+      <aside class="help-line" aria-label="National helpline">
+        <p class="kicker">National Helpline</p>
+        <p class="number">1919</p>
+        <p class="lead">Call for help with any LankaID service</p>
+        <p class="row"><span class="material-symbols-outlined" aria-hidden="true">mail</span>support@lankaid.gov.lk</p>
+        <p class="row"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Department for Registration of Persons, Battaramulla</p>
+        <button type="button" class="help-chat" data-chatbot-open>
+          <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>Chat with LankaID
+        </button>
+      </aside>
     </div>
   </div>
 </section>
@@ -362,6 +637,22 @@
 </div>
 
 <script>
+  const processFlow = document.querySelector('[data-process-flow]');
+  if (processFlow) {
+    if ('IntersectionObserver' in window) {
+      const flowObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            processFlow.classList.add('is-drawn');
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.3 });
+      flowObserver.observe(processFlow);
+    } else {
+      processFlow.classList.add('is-drawn');
+    }
+  }
   const revealSteps = document.querySelectorAll('.reveal-step');
   if ('IntersectionObserver' in window) {
     const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -377,6 +668,7 @@
     revealSteps.forEach(step => step.classList.add('is-visible'));
   }
 </script>
+<script src="/js/nic-card.js" defer></script>
 <script src="/js/walkin-phone.js"></script>
 <script src="/js/public-announcement.js"></script>
 <script src="/Chatbot/chatbot-guide.js?v=20261005" defer></script>
