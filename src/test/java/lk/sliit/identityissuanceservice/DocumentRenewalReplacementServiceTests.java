@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.List;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -128,5 +129,56 @@ class DocumentRenewalReplacementServiceTests {
                 "This application is locked after submission. It can only be edited when an officer requests a correction.",
                 exception.getMessage()
         );
+    }
+
+    @Test
+    void lostPassportForDualCitizenIncludesEveryConditionalDocument() {
+        CitizenApplication application = new CitizenApplication();
+        application.setCitizenId(25);
+        application.setServiceType("PASSPORT");
+        application.setApplicationKind("LOST");
+        CitizenAccount citizen = new CitizenAccount(25);
+        citizen.setDualCitizen("Y");
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+
+        assertEquals(
+                List.of(
+                        "PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF",
+                        "POLICE_REPORT", "CITIZENSHIP_CERTIFICATE"
+                ),
+                renewalService.requiredDocumentTypes(application)
+        );
+    }
+
+    @Test
+    void renewalAndLostRequestsUseTheExpectedDocumentMatrix() {
+        CitizenAccount citizen = new CitizenAccount(25);
+        citizen.setDualCitizen("N");
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+
+        assertEquals(
+                List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE"),
+                renewalService.requiredDocumentTypes(application("NIC", "RENEWAL"))
+        );
+        assertEquals(
+                List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "POLICE_REPORT"),
+                renewalService.requiredDocumentTypes(application("NIC", "LOST"))
+        );
+        assertEquals(
+                List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF"),
+                renewalService.requiredDocumentTypes(application("PASSPORT", "RENEWAL"))
+        );
+        assertEquals(
+                List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF", "POLICE_REPORT"),
+                renewalService.requiredDocumentTypes(application("PASSPORT", "LOST"))
+        );
+    }
+
+    private CitizenApplication application(String serviceType, String applicationKind) {
+        CitizenApplication application = new CitizenApplication();
+        application.setCitizenId(25);
+        application.setServiceType(serviceType);
+        application.setApplicationKind(applicationKind);
+        return application;
     }
 }

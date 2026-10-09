@@ -76,6 +76,7 @@ class FormValidationTests {
     @Test
     void postalCodesKeepLeadingZerosAndRejectWrongLength() {
         NewNicApplicationForm form = new NewNicApplicationForm();
+        setValidSriLankanBirthLocation(form);
         form.setPermanentPostalCode("00100");
         assertTrue(validator.validateProperty(form, "permanentPostalCode").isEmpty());
         for (String code : new String[]{"100", "123456", "A0100", "12 34"}) {
@@ -90,6 +91,32 @@ class FormValidationTests {
         assertThrows(IllegalArgumentException.class, () -> CitizenProfileMapper.validateConditionalFields(form));
         form.setPostalPostalCode("00100");
         assertDoesNotThrow(() -> CitizenProfileMapper.validateConditionalFields(form));
+    }
+
+    @Test
+    void sriLankanBirthLocationMustUseOneConsistentDistrictHierarchy() {
+        NewNicApplicationForm form = new NewNicApplicationForm();
+        setValidSriLankanBirthLocation(form);
+        assertDoesNotThrow(() -> CitizenProfileMapper.validateConditionalFields(form));
+
+        form.setBirthDivision("Jaffna");
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> CitizenProfileMapper.validateConditionalFields(form)
+        );
+        assertTrue(exception.getMessage().contains("belongs to the birth district"));
+    }
+
+    @Test
+    void foreignBirthLocationAcceptsSafeRegionAndCityText() {
+        NewNicApplicationForm form = new NewNicApplicationForm();
+        form.setCountryOfBirth("India");
+        form.setBirthDistrict("Tamil Nadu");
+        form.setBirthCity("Chennai");
+        assertDoesNotThrow(() -> CitizenProfileMapper.validateConditionalFields(form));
+
+        form.setBirthCity("<script>");
+        assertThrows(IllegalArgumentException.class, () -> CitizenProfileMapper.validateConditionalFields(form));
     }
 
     @Test
@@ -123,5 +150,12 @@ class FormValidationTests {
         form.setExpiry(YearMonth.now().format(DateTimeFormatter.ofPattern("MM/yy")));
         form.setCvv("123");
         return form;
+    }
+
+    private static void setValidSriLankanBirthLocation(NewNicApplicationForm form) {
+        form.setCountryOfBirth("Sri Lanka");
+        form.setBirthDistrict("Colombo");
+        form.setBirthDivision("Colombo");
+        form.setBirthCity("Colombo");
     }
 }

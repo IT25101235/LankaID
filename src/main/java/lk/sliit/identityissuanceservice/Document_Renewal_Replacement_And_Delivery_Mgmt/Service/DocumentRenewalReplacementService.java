@@ -50,7 +50,7 @@ public class DocumentRenewalReplacementService {
     );
     private static final Set<String> ALLOWED_DOCUMENT_TYPES = Set.of(
             "PHOTOGRAPH", "BIRTH_CERTIFICATE", "POLICE_REPORT",
-            "NIC_PROOF", "CITIZENSHIP_CERTIFICATE", "OTHER"
+            "NIC_PROOF", "CITIZENSHIP_CERTIFICATE"
     );
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "jpg", "jpeg", "png");
     private static final long MAX_FILE_SIZE = 5L * 1024L * 1024L;
@@ -338,6 +338,10 @@ public class DocumentRenewalReplacementService {
         CitizenApplication application = getRequest(citizenId, applicationId);
         String type = documentType == null ? "" : documentType.trim().toUpperCase(Locale.ROOT);
         validateDocument(type, file);
+        // Keep conditional evidence strict; a citizenship certificate is accepted only for dual citizens.
+        if (!requiredDocumentTypes(application).contains(type)) {
+            throw new IllegalArgumentException("That document type is not required for this application.");
+        }
         boolean correctionMode = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
         if (!"DRAFT".equals(application.getCurrentStatus()) && !correctionMode) {
             throw new IllegalArgumentException("Documents can only be uploaded for a draft or correction request.");
@@ -483,14 +487,42 @@ public class DocumentRenewalReplacementService {
 
     // Lost replacements add a police report; passport requests also need NIC proof.
     public List<String> requiredDocumentTypes(CitizenApplication application) {
+        List<String> required;
         if (NIC.equals(application.getServiceType())) {
-            return LOST.equals(application.getApplicationKind())
+            required = LOST.equals(application.getApplicationKind())
                     ? List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "POLICE_REPORT")
                     : List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE");
+        } else {
+            required = LOST.equals(application.getApplicationKind())
+                    ? List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF", "POLICE_REPORT")
+                    : List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF");
         }
-        return LOST.equals(application.getApplicationKind())
-                ? List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF", "POLICE_REPORT")
-                : List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF");
+        return addConditionalCitizenshipCertificate(required, application.getCitizenId());
+    }
+
+    /** Returns missing evidence for upload controls and server-side review protection. */
+    public List<String> missingDocumentTypes(CitizenApplication application) {
+        Set<String> uploaded = documentRepository
+                .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId())
+                .stream().map(ApplicationDocument::getDocumentType)
+                .collect(java.util.stream.Collectors.toSet());
+        return requiredDocumentTypes(application).stream()
+                .filter(type -> !uploaded.contains(type))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CitizenAccount getCitizenProfile(Integer citizenId) {
+        return findCitizen(citizenId);
+    }
+
+    private List<String> addConditionalCitizenshipCertificate(List<String> required, Integer citizenId) {
+        boolean dualCitizen = citizenRepository.findById(citizenId)
+                .map(citizen -> "Y".equals(citizen.getDualCitizen()))
+                .orElse(false);
+        if (!dualCitizen) return required;
+        return java.util.stream.Stream.concat(required.stream(), java.util.stream.Stream.of("CITIZENSHIP_CERTIFICATE"))
+                .toList();
     }
 
     // Renewal or replacement requires a verified existing document with no identity conflict.

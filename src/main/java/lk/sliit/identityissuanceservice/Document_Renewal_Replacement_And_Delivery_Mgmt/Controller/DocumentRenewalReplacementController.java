@@ -254,9 +254,18 @@ public class DocumentRenewalReplacementController {
         try {
             CitizenApplication application = renewalService.getRequest(citizenId, applicationId);
             checkService(application, service);
+            var missingTypes = renewalService.missingDocumentTypes(application);
+            if (!missingTypes.isEmpty()) {
+                redirectAttributes.addFlashAttribute(
+                        "documentError",
+                        "Upload the required documents before review: " + String.join(", ", missingTypes)
+                );
+                return renewalDocumentRedirect(service, applicationId);
+            }
             model.addAttribute("currentApplication", application);
             model.addAttribute("documents", renewalService.getDocuments(citizenId, applicationId));
             model.addAttribute("requiredTypes", renewalService.requiredDocumentTypes(application));
+            model.addAttribute("citizen", renewalService.getCitizenProfile(citizenId));
             model.addAttribute("servicePath", service);
             model.addAttribute("workflowPath", "renewals");
             model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
@@ -326,11 +335,10 @@ public class DocumentRenewalReplacementController {
         );
         var requiredTypes = renewalService.requiredDocumentTypes(application);
         var uploadedTypes = documents.stream().map(document -> document.getDocumentType()).toList();
+        var missingTypes = renewalService.missingDocumentTypes(application);
         model.addAttribute("requiredTypes", requiredTypes);
-        model.addAttribute(
-                "missingRequiredTypes",
-                requiredTypes.stream().filter(type -> !uploadedTypes.contains(type)).toList()
-        );
+        model.addAttribute("missingRequiredTypes", missingTypes);
+        model.addAttribute("canReview", missingTypes.isEmpty());
         model.addAttribute("servicePath", service);
         model.addAttribute("workflowPath", "renewals");
         model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));

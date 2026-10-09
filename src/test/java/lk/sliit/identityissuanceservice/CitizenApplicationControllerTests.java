@@ -132,6 +132,29 @@ class CitizenApplicationControllerTests {
                 .andExpect(redirectedUrl("/login"));
     }
 
+    @Test
+    void directReviewUrlReturnsToDocumentsWhenEvidenceIsMissing() throws Exception {
+        CitizenApplication application = new CitizenApplication();
+        application.setApplicationId(42);
+        application.setCitizenId(25);
+        application.setServiceType("NIC");
+        application.setApplicationKind("NEW");
+        application.setCurrentStatus("DRAFT");
+        when(applicationService.getNewApplication(25, 42)).thenReturn(application);
+        when(applicationService.missingNewDocumentTypes(application))
+                .thenReturn(List.of("BIRTH_CERTIFICATE"));
+
+        mockMvc.perform(get("/citizen/applications/nic/review")
+                        .param("applicationId", "42")
+                        .session(citizenSession()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/citizen/applications/nic/documents?applicationId=42"))
+                .andExpect(flash().attribute(
+                        "documentError",
+                        "Upload the required documents before review: BIRTH_CERTIFICATE"
+                ));
+    }
+
     private MockHttpSession citizenSession() {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("loggedInUserId", 25);

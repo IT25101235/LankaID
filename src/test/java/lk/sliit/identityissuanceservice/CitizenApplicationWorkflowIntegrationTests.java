@@ -136,9 +136,10 @@ class CitizenApplicationWorkflowIntegrationTests {
                         .param("applicationId", application.getApplicationId().toString())
                         .session(citizenSession(user)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString(
+                .andExpect(content().string(containsString("Review unavailable")))
+                .andExpect(content().string(not(containsString(
                         "/citizen/applications/nic/review?applicationId=" + application.getApplicationId()
-                )));
+                ))));
 
         MockMultipartFile photograph = new MockMultipartFile(
                 "file",
@@ -167,6 +168,36 @@ class CitizenApplicationWorkflowIntegrationTests {
                 .andExpect(content().string(not(containsString("<option value=\"PHOTOGRAPH\""))))
                 .andExpect(content().string(containsString(application.getApplicationNo())));
 
+        MockMultipartFile birthCertificate = new MockMultipartFile(
+                "file", "birth-certificate.pdf", "application/pdf", "test-pdf".getBytes()
+        );
+        mockMvc.perform(multipart("/citizen/applications/nic/documents")
+                        .file(birthCertificate)
+                        .param("applicationId", application.getApplicationId().toString())
+                        .param("documentType", "BIRTH_CERTIFICATE")
+                        .session(citizenSession(user)))
+                .andExpect(status().is3xxRedirection());
+
+        // The review route appears only after every required file is present.
+        mockMvc.perform(get("/citizen/applications/nic/documents")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "/citizen/applications/nic/review?applicationId=" + application.getApplicationId()
+                )));
+
+        mockMvc.perform(get("/citizen/applications/nic/review")
+                        .param("applicationId", application.getApplicationId().toString())
+                        .session(citizenSession(user)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Review your application")))
+                .andExpect(content().string(containsString("Edit application")))
+                .andExpect(content().string(containsString("Perera")))
+                .andExpect(content().string(containsString("Uploaded document overview")))
+                .andExpect(content().string(containsString("/citizen/documents/")))
+                .andExpect(content().string(not(containsString("name=\"familyName\""))));
+
         MockMultipartFile duplicatePhotograph = new MockMultipartFile(
                 "file",
                 "another-photograph.jpg",
@@ -187,7 +218,7 @@ class CitizenApplicationWorkflowIntegrationTests {
                         "/citizen/applications/nic/documents?applicationId="
                                 + application.getApplicationId()
                 ));
-        assertEquals(1, documentRepository
+        assertEquals(2, documentRepository
                 .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId()).size());
     }
 
@@ -338,9 +369,10 @@ class CitizenApplicationWorkflowIntegrationTests {
                         .param("applicationId", application.getApplicationId().toString())
                         .session(citizenSession(user)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString(
+                .andExpect(content().string(containsString("Review unavailable")))
+                .andExpect(content().string(not(containsString(
                         "/citizen/renewals/nic/review?applicationId=" + application.getApplicationId()
-                )));
+                ))));
     }
 
     private UserAccount createCitizen(boolean createGovernmentRecord) {

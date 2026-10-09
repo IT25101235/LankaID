@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -87,5 +89,20 @@ class UiRouteSmokeTests {
                 mockMvc.perform(request).andExpect(status().isOk());
             }
         }
+    }
+
+    @Test
+    void localBirthLocationAssetsAreServedToTheApplicationForm() throws Exception {
+        mockMvc.perform(get("/Citizen_Application_Mgmt/application-form.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("loadBirthLocations")));
+        mockMvc.perform(get("/Citizen_Application_Mgmt/reference-data/countries.json"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(content().string(containsString("Sri Lanka")));
+        mockMvc.perform(get("/Citizen_Application_Mgmt/reference-data/sri-lanka-locations.json"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(content().string(containsString("Colombo")));
     }
 }

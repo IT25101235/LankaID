@@ -334,9 +334,18 @@ public class CitizenApplicationController {
         try {
             CitizenApplication application = applicationService.getNewApplication(citizenId, applicationId);
             checkService(application, service);
+            var missingTypes = applicationService.missingNewDocumentTypes(application);
+            if (!missingTypes.isEmpty()) {
+                redirectAttributes.addFlashAttribute(
+                        "documentError",
+                        "Upload the required documents before review: " + String.join(", ", missingTypes)
+                );
+                return newDocumentRedirect(service, applicationId);
+            }
             model.addAttribute("currentApplication", application);
             model.addAttribute("documents", applicationService.getNewDocuments(citizenId, applicationId));
             model.addAttribute("requiredTypes", applicationService.requiredNewDocumentTypes(application));
+            model.addAttribute("citizen", applicationService.getCitizenProfile(citizenId));
             model.addAttribute("servicePath", service);
             model.addAttribute("workflowPath", "applications");
             model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));
@@ -428,11 +437,10 @@ public class CitizenApplicationController {
         );
         var requiredTypes = applicationService.requiredNewDocumentTypes(application);
         var uploadedTypes = documents.stream().map(document -> document.getDocumentType()).toList();
+        var missingTypes = applicationService.missingNewDocumentTypes(application);
         model.addAttribute("requiredTypes", requiredTypes);
-        model.addAttribute(
-                "missingRequiredTypes",
-                requiredTypes.stream().filter(type -> !uploadedTypes.contains(type)).toList()
-        );
+        model.addAttribute("missingRequiredTypes", missingTypes);
+        model.addAttribute("canReview", missingTypes.isEmpty());
         model.addAttribute("servicePath", service);
         model.addAttribute("workflowPath", "applications");
         model.addAttribute("correctionMode", "CORRECTION_REQUIRED".equals(application.getCurrentStatus()));

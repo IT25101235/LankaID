@@ -1,6 +1,7 @@
 package lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto;
 
 import lk.sliit.identityissuanceservice.User_Mgmt.Model.CitizenAccount;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Validation.BirthLocationReference;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +25,8 @@ public final class CitizenProfileMapper {
         form.setBirthPlace(citizen.getBirthPlace());
         form.setBirthDivision(citizen.getBirthDivision());
         form.setBirthDistrict(citizen.getBirthDistrict());
-        form.setCountryOfBirth(citizen.getCountryOfBirth());
+        form.setCountryOfBirth(blankToNull(citizen.getCountryOfBirth()) == null
+                ? BirthLocationReference.SRI_LANKA : citizen.getCountryOfBirth());
         form.setBirthCity(citizen.getBirthCity());
         form.setPermanentHouseNo(citizen.getPermanentHouseNo());
         form.setPermanentStreet(citizen.getPermanentStreet());
@@ -50,7 +52,8 @@ public final class CitizenProfileMapper {
         citizen.setDateOfBirth(atStartOfDay(form.getDateOfBirth()));
         citizen.setBirthCertificateNo(clean(form.getBirthCertificateNo()));
         citizen.setBirthPlace(clean(form.getBirthPlace()));
-        citizen.setBirthDivision(clean(form.getBirthDivision()));
+        citizen.setBirthDivision(BirthLocationReference.isSriLanka(form.getCountryOfBirth())
+                ? clean(form.getBirthDivision()) : null);
         citizen.setBirthDistrict(clean(form.getBirthDistrict()));
         citizen.setCountryOfBirth(clean(form.getCountryOfBirth()));
         citizen.setBirthCity(clean(form.getBirthCity()));
@@ -82,6 +85,8 @@ public final class CitizenProfileMapper {
     }
 
     public static void validateConditionalFields(CitizenProfileForm form) {
+        // Validate the posted hierarchy on the server; browser dropdowns are not a trust boundary.
+        BirthLocationReference.validate(form);
         if (!form.isPostalSameAsPermanent()
                 && (blankToNull(form.getPostalHouseNo()) == null
                 || blankToNull(form.getPostalStreet()) == null

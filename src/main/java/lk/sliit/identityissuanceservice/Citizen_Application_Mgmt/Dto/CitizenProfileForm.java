@@ -52,11 +52,9 @@ public class CitizenProfileForm {
     @Size(max = 100, message = "Birth place cannot exceed 100 characters.")
     private String birthPlace;
 
-    @NotBlank(message = "Birth division is required.")
     @Size(max = 100, message = "Birth division cannot exceed 100 characters.")
     private String birthDivision;
 
-    @NotBlank(message = "Birth district is required.")
     @Size(max = 100, message = "Birth district cannot exceed 100 characters.")
     private String birthDistrict;
 

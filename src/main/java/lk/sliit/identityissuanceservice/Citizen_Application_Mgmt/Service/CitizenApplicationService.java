@@ -4,6 +4,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionSynchronization;
 
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenEligibilityDto;
+import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenDocumentFile;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.CitizenProfileMapper;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewNicApplicationForm;
 import lk.sliit.identityissuanceservice.Citizen_Application_Mgmt.Dto.NewPassportApplicationForm;
@@ -23,6 +24,7 @@ import lk.sliit.identityissuanceservice.User_Mgmt.Model.UserAccount;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.CitizenAccountRepository;
 import lk.sliit.identityissuanceservice.User_Mgmt.Repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,7 +56,7 @@ public class CitizenApplicationService {
     );
     private static final Set<String> ALLOWED_DOCUMENT_TYPES = Set.of(
             "PHOTOGRAPH", "BIRTH_CERTIFICATE", "POLICE_REPORT",
-            "NIC_PROOF", "CITIZENSHIP_CERTIFICATE", "OTHER"
+            "NIC_PROOF", "CITIZENSHIP_CERTIFICATE"
     );
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "jpg", "jpeg", "png");
     private static final long MAX_FILE_SIZE = 5L * 1024L * 1024L;
@@ -419,9 +421,59 @@ public class CitizenApplicationService {
     }
 
     public List<String> requiredNewDocumentTypes(CitizenApplication application) {
-        return NIC.equals(application.getServiceType())
+        List<String> required = NIC.equals(application.getServiceType())
                 ? List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE")
                 : List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "NIC_PROOF");
+        return addConditionalCitizenshipCertificate(required, application.getCitizenId());
+    }
+
+    /** Returns missing evidence for both the upload page and the protected review route. */
+    public List<String> missingNewDocumentTypes(CitizenApplication application) {
+        Set<String> uploaded = documentRepository
+                .findAllByApplicationIdOrderByUploadedAtAsc(application.getApplicationId())
+                .stream().map(ApplicationDocument::getDocumentType)
+                .collect(java.util.stream.Collectors.toSet());
+        return requiredNewDocumentTypes(application).stream()
+                .filter(type -> !uploaded.contains(type))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CitizenAccount getCitizenProfile(Integer citizenId) {
+        return findCitizen(citizenId);
+    }
+
+    /** Resolves a preview only after the document's application owner has been checked. */
+    @Transactional(readOnly = true)
+    public CitizenDocumentFile getDocumentForCitizen(Integer documentId, Integer citizenId) {
+        ApplicationDocument document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new IllegalArgumentException("Document was not found."));
+        CitizenApplication application = applicationRepository.findById(document.getApplicationId())
+                .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
+        if (!citizenId.equals(application.getCitizenId())) {
+            throw new IllegalArgumentException("Document was not found.");
+        }
+
+        Path file = uploadRoot.resolve(document.getFilePath()).normalize();
+        if (!file.startsWith(uploadRoot) || !Files.isRegularFile(file)) {
+            throw new IllegalArgumentException("The uploaded file is not available.");
+        }
+        String extension = fileExtension(file.getFileName().toString());
+        String contentType = switch (extension) {
+            case "pdf" -> "application/pdf";
+            case "png" -> "image/png";
+            case "jpg", "jpeg" -> "image/jpeg";
+            default -> "application/octet-stream";
+        };
+        try {
+            return new CitizenDocumentFile(
+                    new UrlResource(file.toUri()),
+                    contentType,
+                    document.getDocumentType().toLowerCase(Locale.ROOT) + "." + extension
+            );
+        } catch (java.net.MalformedURLException exception) {
+            throw new IllegalArgumentException("The uploaded file is not available.");
+        }
     }
 
     private CitizenApplication createBaseApplication(Integer citizenId, String serviceType) {
@@ -498,6 +550,10 @@ public class CitizenApplicationService {
             MultipartFile file) {
         String type = documentType == null ? "" : documentType.trim().toUpperCase(Locale.ROOT);
         validateDocument(type, file);
+        // Only documents required by this exact application and citizenship state are accepted.
+        if (!requiredNewDocumentTypes(application).contains(type)) {
+            throw new IllegalArgumentException("That document type is not required for this application.");
+        }
         boolean correctionMode = "CORRECTION_REQUIRED".equals(application.getCurrentStatus());
         if (!"DRAFT".equals(application.getCurrentStatus()) && !correctionMode) {
             throw new IllegalArgumentException("Documents can only be uploaded for a draft or correction request.");
@@ -602,6 +658,15 @@ public class CitizenApplicationService {
         application.setCurrentStatus(resubmission ? "RESUBMITTED" : "SUBMITTED");
         application.setSubmittedAt(LocalDateTime.now());
         application.setDeclarationAccepted("Y");
+    }
+
+    private List<String> addConditionalCitizenshipCertificate(List<String> required, Integer citizenId) {
+        boolean dualCitizen = citizenRepository.findById(citizenId)
+                .map(citizen -> "Y".equals(citizen.getDualCitizen()))
+                .orElse(false);
+        if (!dualCitizen) return required;
+        return java.util.stream.Stream.concat(required.stream(), java.util.stream.Stream.of("CITIZENSHIP_CERTIFICATE"))
+                .toList();
     }
 
     private void sendSubmissionNotification(CitizenApplication application) {

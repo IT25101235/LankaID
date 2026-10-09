@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -158,6 +159,7 @@ class CitizenApplicationServiceTests {
         when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
         when(governmentRepository.findById(10)).thenReturn(Optional.of(record));
         NewPassportApplicationForm form = new NewPassportApplicationForm();
+        setValidSriLankanBirthLocation(form);
         form.setParentNicNo("197012345678");
 
         IllegalArgumentException exception = assertThrows(
@@ -258,6 +260,37 @@ class CitizenApplicationServiceTests {
     }
 
     @Test
+    void dualCitizenMustUploadCitizenshipCertificate() {
+        CitizenApplication application = application();
+        citizen.setDualCitizen("Y");
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+
+        assertEquals(
+                List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE", "CITIZENSHIP_CERTIFICATE"),
+                service.requiredNewDocumentTypes(application)
+        );
+    }
+
+    @Test
+    void nonDualCitizenCannotUploadCitizenshipCertificate() {
+        CitizenApplication application = application();
+        when(applicationRepository.findByApplicationIdAndCitizenId(101, 25))
+                .thenReturn(Optional.of(application));
+        when(citizenRepository.findById(25)).thenReturn(Optional.of(citizen));
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "citizenship.pdf", "application/pdf", new byte[]{1, 2, 3}
+        );
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.uploadNewDocument(25, 101, "CITIZENSHIP_CERTIFICATE", file)
+        );
+
+        assertTrue(exception.getMessage().contains("not required"));
+        verify(documentRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void submittedApplicationDocumentFormCannotBeOpened() {
         CitizenApplication application = application();
         application.setCurrentStatus("SUBMITTED");
@@ -307,5 +340,12 @@ class CitizenApplicationServiceTests {
         application.setApplicationKind("NEW");
         application.setCurrentStatus("DRAFT");
         return application;
+    }
+
+    private void setValidSriLankanBirthLocation(NewPassportApplicationForm form) {
+        form.setCountryOfBirth("Sri Lanka");
+        form.setBirthDistrict("Colombo");
+        form.setBirthDivision("Colombo");
+        form.setBirthCity("Colombo");
     }
 }
