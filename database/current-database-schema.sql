@@ -258,6 +258,7 @@ CREATE TABLE [dbo].[Application](
 	[service_type] [varchar](20) NOT NULL,
 	[application_kind] [varchar](20) NOT NULL,
 	[current_status] [varchar](30) NULL,
+	[issued_document_number] [varchar](30) NULL,
 	[submitted_at] [datetime] NULL,
 	[declaration_accepted] [char](1) NULL,
 	[created_at] [datetime] NULL,

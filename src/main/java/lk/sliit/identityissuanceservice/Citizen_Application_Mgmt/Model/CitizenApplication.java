@@ -35,6 +35,9 @@ public class CitizenApplication {
     @Column(name = "current_status", length = 30)
     private String currentStatus;
 
+    @Column(name = "issued_document_number", length = 30)
+    private String issuedDocumentNumber;
+
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
@@ -73,6 +76,8 @@ public class CitizenApplication {
     public void setApplicationKind(String applicationKind) { this.applicationKind = applicationKind; }
     public String getCurrentStatus() { return currentStatus; }
     public void setCurrentStatus(String currentStatus) { this.currentStatus = currentStatus; }
+    public String getIssuedDocumentNumber() { return issuedDocumentNumber; }
+    public void setIssuedDocumentNumber(String issuedDocumentNumber) { this.issuedDocumentNumber = issuedDocumentNumber; }
     public LocalDateTime getSubmittedAt() { return submittedAt; }
     public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
     public String getDeclarationAccepted() { return declarationAccepted; }

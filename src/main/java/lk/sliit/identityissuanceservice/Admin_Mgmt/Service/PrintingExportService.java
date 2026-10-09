@@ -101,6 +101,7 @@ public class PrintingExportService {
             governmentRepository.save(record);
 
             application.setCurrentStatus(ISSUED);
+            application.setIssuedDocumentNumber(documentNumber);
             applicationRepository.save(application);
             deliveryService.updateAfterPrinting(application, directorId);
 
@@ -198,11 +199,13 @@ public class PrintingExportService {
     private PrintingExportRow buildRow(CitizenApplication application) {
         CitizenAccount citizen = findCitizen(application.getCitizenId());
         UserAccount user = findUser(application.getCitizenId());
-        GovernmentIdentityRecord record = citizen.getGovernmentRecordId() == null
-                ? null
-                : governmentRepository.findById(citizen.getGovernmentRecordId()).orElse(null);
-        String documentNumber = record == null ? null
-                : "NIC".equals(application.getServiceType()) ? record.getNicNo() : record.getPassportNo();
+        String documentNumber = clean(application.getIssuedDocumentNumber());
+        if (READY_FOR_PRINTING.equals(application.getCurrentStatus())) {
+            GovernmentIdentityRecord record = citizen.getGovernmentRecordId() == null
+                    ? null : governmentRepository.findById(citizen.getGovernmentRecordId()).orElse(null);
+            documentNumber = record == null ? null
+                    : "NIC".equals(application.getServiceType()) ? record.getNicNo() : record.getPassportNo();
+        }
         String photographPath = documentRepository
                 .findByApplicationIdAndDocumentType(application.getApplicationId(), "PHOTOGRAPH")
                 .map(document -> document.getFilePath())
