@@ -35,6 +35,21 @@ public class Payment {
     @Column(name = "payment_status", length = 20)
     private String paymentStatus;
 
+    @Column(name = "payment_method", length = 20)
+    private String paymentMethod;
+
+    @Column(name = "card_brand", length = 20)
+    private String cardBrand;
+
+    @Column(name = "card_last_four", length = 4)
+    private String cardLastFour;
+
+    @Column(name = "cardholder_name", length = 150)
+    private String cardholderName;
+
+    @Column(name = "card_expiry", length = 5)
+    private String cardExpiry;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -56,6 +71,16 @@ public class Payment {
     public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
     public String getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public String getCardBrand() { return cardBrand; }
+    public void setCardBrand(String cardBrand) { this.cardBrand = cardBrand; }
+    public String getCardLastFour() { return cardLastFour; }
+    public void setCardLastFour(String cardLastFour) { this.cardLastFour = cardLastFour; }
+    public String getCardholderName() { return cardholderName; }
+    public void setCardholderName(String cardholderName) { this.cardholderName = cardholderName; }
+    public String getCardExpiry() { return cardExpiry; }
+    public void setCardExpiry(String cardExpiry) { this.cardExpiry = cardExpiry; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

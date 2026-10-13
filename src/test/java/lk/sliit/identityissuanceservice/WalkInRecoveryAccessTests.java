@@ -12,6 +12,7 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
 import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SmsOtpService;
 import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.SmsSender;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
@@ -213,7 +214,7 @@ class WalkInRecoveryAccessTests {
         service.startPhoneVerification("Visitor", PHONE, session);
         service.verifyPhone(sentCode.get(), session);
         service.preparePayment("NIC_APPLICATION_HELP", 1, session);
-        String reference = service.payAndBook(service.getPaymentDetails(session).token(), session)
+        String reference = service.payAndBook(service.getPaymentDetails(session).token(), validCard(), session)
                 .appointment().getReferenceNo();
         assertFalse(service.isPhoneVerified(session));
         assertFalse(service.isRecoveryVerified(session));
@@ -285,5 +286,14 @@ class WalkInRecoveryAccessTests {
             mvc.perform(get("/walk-in/pass/" + reference + suffix).session(active))
                     .andExpect(status().isForbidden()).andExpect(content().string(""));
         }
+    }
+
+    private CardPaymentForm validCard() {
+        CardPaymentForm card = new CardPaymentForm();
+        card.setCardholderName("Test Visitor");
+        card.setCardNumber("4111 1111 1111 1111");
+        card.setExpiry("12/99");
+        card.setCvv("123");
+        return card;
     }
 }

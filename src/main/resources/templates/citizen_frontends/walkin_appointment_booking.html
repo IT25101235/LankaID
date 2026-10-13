@@ -77,11 +77,30 @@
       <div><dt class="text-slate-500">Date and time</dt><dd class="font-bold" th:text="${#temporals.format(paymentDetails.slot.slotDate, 'dd MMM yyyy') + ' at ' + #temporals.format(paymentDetails.slot.slotTime, 'hh:mm a')}">Appointment time</dd></div>
       <div class="border-t pt-4 flex justify-between items-center"><dt class="font-bold">Total</dt><dd class="text-2xl font-extrabold text-cyan-700" th:text="${'LKR ' + #numbers.formatDecimal(paymentDetails.amount, 1, 'COMMA', 2, 'POINT')}">LKR 1,500.00</dd></div>
     </dl>
-    <p class="mt-5 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">Demo payment: no real money is charged. A payment receipt is saved when you confirm.</p>
     <p class="mt-3 text-xs text-slate-500">Your slot is confirmed after payment. Availability is checked again when you pay.</p>
-    <form th:action="@{/walk-in/payment}" method="post" class="mt-5">
+    <form th:action="@{/walk-in/payment}" method="post" data-payment-form class="mt-5 space-y-4">
       <input type="hidden" name="token" th:value="${paymentDetails.token}"/>
-      <button class="w-full rounded-xl bg-cyan-600 text-white py-3 font-bold">Simulate payment and confirm booking</button>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="sm:col-span-2 text-sm font-semibold">Cardholder name
+          <input name="cardholderName" th:value="${cardForm.cardholderName}" maxlength="150" required autocomplete="cc-name" pattern="[\p{L}][\p{L}\p{M} ]*" class="w-full mt-1.5 rounded-xl border-slate-300" placeholder="Name on card"/>
+          <span class="block text-xs text-red-600 mt-1" th:if="${cardErrors != null and cardErrors.containsKey('cardholderName')}" th:text="${cardErrors['cardholderName']}"></span>
+        </label>
+        <label class="sm:col-span-2 text-sm font-semibold">Card number
+          <input name="cardNumber" th:value="${cardForm.cardNumber}" maxlength="19" required inputmode="numeric" autocomplete="cc-number" pattern="[0-9]{4}( [0-9]{4}){3}" class="w-full mt-1.5 rounded-xl border-slate-300 font-mono" placeholder="4111 1111 1111 1111"/>
+          <span class="block text-xs text-slate-500 mt-1">Visa or Mastercard · exactly 16 digits</span>
+          <span class="block text-xs text-red-600 mt-1" th:if="${cardErrors != null and cardErrors.containsKey('cardNumber')}" th:text="${cardErrors['cardNumber']}"></span>
+        </label>
+        <label class="text-sm font-semibold">Expiry
+          <input name="expiry" th:value="${cardForm.expiry}" maxlength="5" required inputmode="numeric" autocomplete="cc-exp" pattern="(0[1-9]|1[0-2])/[0-9]{2}" class="w-full mt-1.5 rounded-xl border-slate-300" placeholder="MM/YY"/>
+          <span class="block text-xs text-red-600 mt-1" th:if="${cardErrors != null and cardErrors.containsKey('expiry')}" th:text="${cardErrors['expiry']}"></span>
+        </label>
+        <label class="text-sm font-semibold">CVV
+          <input name="cvv" maxlength="3" required type="password" inputmode="numeric" autocomplete="cc-csc" pattern="[0-9]{3}" class="w-full mt-1.5 rounded-xl border-slate-300" placeholder="123"/>
+          <span class="block text-xs text-red-600 mt-1" th:if="${cardErrors != null and cardErrors.containsKey('cvv')}" th:text="${cardErrors['cvv']}"></span>
+        </label>
+      </div>
+      <p class="text-xs text-slate-500">For security, the full card number and CVV are never saved.</p>
+      <button class="w-full rounded-xl bg-cyan-600 text-white py-3 font-bold">Simulate card payment and confirm booking</button>
     </form>
     <a th:href="@{/walk-in/book}" class="inline-block mt-4 text-sm font-bold text-slate-600">Change service or slot</a>
   </section>
@@ -90,5 +109,6 @@
 <script src="/js/walkin-phone.js"></script>
 <script src="/js/walkin-otp.js"></script>
 <script src="/js/walkin-calendar.js"></script>
+<script src="/Payment_Mgmt/payment-form.js"></script>
 </body>
 </html>

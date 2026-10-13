@@ -544,6 +544,11 @@ CREATE TABLE [dbo].[Payment](
 	[amount] [money] NOT NULL,
 	[paid_at] [datetime] NULL,
 	[payment_status] [varchar](20) NULL,
+	[payment_method] [varchar](20) NULL,
+	[card_brand] [varchar](20) NULL,
+	[card_last_four] [varchar](4) NULL,
+	[cardholder_name] [varchar](150) NULL,
+	[card_expiry] [varchar](5) NULL,
 	[created_at] [datetime] NULL,
  CONSTRAINT [pk_payment] PRIMARY KEY CLUSTERED 
 (

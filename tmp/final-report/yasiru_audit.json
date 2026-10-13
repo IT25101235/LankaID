@@ -1,0 +1,57 @@
+{
+  "sha256": "182264f6964ee03c70d9d019e1d460b459e9d91226ef32f15e37369c95d570ff",
+  "sections": [
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "styles": {
+    "Normal": {
+      "font": null,
+      "size": null
+    },
+    "Heading 1": {
+      "font": null,
+      "size": 18.0
+    },
+    "Heading 2": {
+      "font": null,
+      "size": 14.0
+    },
+    "Heading 3": {
+      "font": null,
+      "size": null
+    },
+    "Title": {
+      "font": null,
+      "size": 28.0
+    }
+  }
+}

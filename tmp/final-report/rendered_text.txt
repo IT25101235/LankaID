@@ -1,0 +1,910 @@
+--- PAGE 1 ---
+   
+ 
+   
+ 
+ 
+ 
+ Web Based Identity Issuing Service 
+SE2030: Software Engineering – 2026 Year 2 Semester 1 
+Continuous Assessment- Final Report  
+Group ID: 2026-Y2-S1-MTR-02 
+  
+  
+  
+Student ID Student Name 
+IT25100565 Weerakoon W M Y B 
+IT25100604 Dharshan S 
+IT25100689 Jeniviya G A 
+IT25100885  Rithika R K  
+IT25101235 Marickar A A A  
+ 
+  
+ B.Sc. (Hons) Information Technology 
+Faculty of Computing 
+Sri Lanka Institute of Information Technology 
+11/10/2026
+
+--- PAGE 2 ---
+   
+ 
+    Web-based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Table of Contents 
+Introduction ................................................................................................................................................... 2 
+Project overview ....................................................................................................................................... 2 
+Problem and objectives ............................................................................................................................. 2 
+Users and stakeholders .............................................................................................................................. 2 
+Scope and boundaries ............................................................................................................................... 2 
+Requirements ................................................................................................................................................ 3 
+Functional requirements for citizen services............................................................................................. 3 
+Citizen service flow .................................................................................................................................. 3 
+Functional requirements for staff and supporting services ....................................................................... 4 
+Supporting requirements and data rules .................................................................................................... 4 
+Priority and completion boundaries .......................................................................................................... 4 
+Nonfunctional requirements and constraints ............................................................................................. 5 
+Constraints and assumptions ..................................................................................................................... 5 
+Design ........................................................................................................................................................... 6 
+Use cases for citizens and application officers ......................................................................................... 6 
+Use cases for assisted service and administration ..................................................................................... 7 
+Database design for accounts and applications ......................................................................................... 8 
+Database design for appointments and supporting records ....................................................................... 9 
+Interface design for account access and progress ................................................................................... 10 
+Interface design for booking and appointment passes ............................................................................ 11 
+Implementation ........................................................................................................................................... 12 
+Tools and technologies ........................................................................................................................... 12 
+Architecture and design patterns ............................................................................................................. 12 
+Implemented review and decision workflow .......................................................................................... 13 
+Implemented appointment and issuance workflow ................................................................................. 14 
+Testing evidence and implementation boundaries .................................................................................. 15 
+Recorded results and remaining findings ................................................................................................ 15 
+Ethical and operational considerations ................................................................................................... 15 
+Project Management ................................................................................................................................... 16 
+Agile approach and sprint summary ....................................................................................................... 16 
+Coordination and integration .................................................................................................................. 16 
+Task distribution and development milestones ....................................................................................... 17 
+Dated milestones ..................................................................................................................................... 17 
+--- PAGE 3 ---
+ 
+1 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Conclusion and Future Work ...................................................................................................................... 18 
+Summary of achievements ...................................................................................................................... 18 
+Challenges and responses ....................................................................................................................... 18 
+Prioritised future work ............................................................................................................................ 18 
+Individual Contribution Teamwork and Lessons Learned .......................................................................... 19 
+Individual reflections and team learning ................................................................................................. 20 
+Teamwork and improvement .................................................................................................................. 20 
+References ................................................................................................................................................... 21 
+References continued .............................................................................................................................. 22 
+Appendix ..................................................................................................................................................... 23 
+Source and reproducibility ...................................................................................................................... 23 
+Requirements to evidence map ............................................................................................................... 23 
+Traceability of project evidence .............................................................................................................. 23 
+ 
+--- PAGE 4 ---
+Introduction 
+ 
+2 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Introduction 
+Project overview 
+LankaID is a Java web application for managing National Identity Card (NIC) and passport services in 
+one portal. Citizens can register, submit a new application or request renewal or replacement, upload 
+supporting evidence, follow officer feedback, pay a simulated fee and book a biometric appointment. 
+Staff review applications, record centre attendance and biometric completion, prepare an issuance 
+register, and manage delivery or collection. 
+The five-member team developed the prototype for SE2030 Software Engineering. Requirements 
+analysis, UML modelling, iterative development, object-oriented implementation and testing support a 
+connected citizen-service workflow [1], [2]. Payments, biometric device capture and physical document 
+production remain simulations; the portal records their workflow outcomes. 
+Problem and objectives 
+The project addresses fragmented application handling: paper-based evidence, repeated visits, separate 
+staff records and limited visibility of application progress. A shared portal can reduce repeated data entry 
+and expose the next action to the applicant and responsible officer. These benefits are design goals; 
+processing-time savings have not been measured in a government deployment. 
+The objectives are to provide online applications with saved drafts; make review decisions traceable; 
+enforce appointment capacity and change rules; present progress and notifications; support assisted walk-
+in services; and give administrators and the director operational oversight. The implementation connects 
+these goals through one database and controlled status changes. 
+Users and stakeholders 
+User or stakeholder Purpose and access 
+Citizen Applies, corrects evidence, pays, books, tracks and chooses delivery or collection.  
+NIC and passport officers Review their assigned document type, manage appointment slots, check in citizens 
+and record biometric completion. 
+CSR and walk-in visitor CSR handles support, assisted visits and collection. A visitor uses the walk -in route 
+with mobile verification. 
+Director and administrator Director handles referrals, reports and issuance registers. Administrator manages 
+accounts, centres, fees, notices and maintenance. 
+Scope and boundaries 
+The prototype covers registration through recorded handover for new, renewed and replaced documents. 
+It assumes internet access, an English-language browser interface and configured SQL Server. It does not 
+connect to live government identity records, a certified payment gateway, biometric hardware, courier 
+tracking or physical printing. Uploaded files use local server storage. 
+--- PAGE 5 ---
+Requirements 
+ 
+3 
+ 
+Weerakoon W M Y B 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Requirements 
+Functional requirements for citizen services 
+The team organised requirements around the personas and product backlog in the design document [2]. 
+Each identifier links a user need to a verifiable outcome. The requirements describe the prototype scope 
+rather than statutory government procedures. 
+ID Requirement and acceptance outcome Primary user 
+FR01 Verify email and a Sri Lankan mobile number before account creation. Incorrect, 
+expired or over-attempted codes must be rejected. Citizen 
+FR02 Authenticate users, maintain a session and restrict protected routes by role and 
+ownership. Logout ends access; password recovery uses email. Account users 
+FR03 Create, save, reopen, edit or discard a draft NIC/passport application. Submission 
+validates required fields and produces an application reference. Citizen 
+FR04 Upload supporting evidence, preview authorised files and replace flagged evidence. 
+The application service rejects files larger than 5 MB. Citizen 
+FR05 Display status, history and the next action. A correction request identifies what must 
+change before resubmission. Citizen 
+FR06 Link an identity record in the prototype database and create eligible NIC/passport 
+renewal or lost-document replacement requests. Citizen 
+FR07 Show application and optional delivery fees. Validate simulated card input and record 
+a payment outcome and transaction reference. Citizen 
+FR08 Book a published biometric slot after workflow prerequisites are met. Confirmation 
+must not exceed capacity and must produce a QR pass. Citizen 
+FR09 Cancel or reschedule an eligible booking. Confirmed biometric bookings can change 
+at least 72 hours before the visit; missed bookings can be rescheduled after their date. Citizen 
+FR10 Select home delivery or centre collection, view delivery stages and confirm receipt or 
+staff-assisted collection. Citizen / CSR 
+Citizen service flow 
+The normal path is registration, validated submission, officer review, approval, simulated payment, 
+appointment booking, centre check-in, recorded biometric completion and issuance/handover. Correction 
+returns the application to the citizen; rejection records a reason. Downstream actions check prerequisites 
+so a page link cannot bypass the workflow. 
+--- PAGE 6 ---
+Requirements 
+ 
+4 
+ 
+Weerakoon W M Y B 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+Functional requirements for staff and supporting services 
+ID Requirement and acceptance outcome Primary user 
+FR11 Keep NIC/passport review queues separate. Officers inspect details and evidence, 
+approve, reject with a reason, request correction or refer a case to the director. 
+NIC/passport 
+officer 
+FR12 Publish and maintain centre/date/time slots with capacity. Exclude closed/full slots 
+and prevent concurrent requests taking the same final place. Officer 
+FR13 Locate an appointment by webcam QR scan or reference. Permit check -in on the 
+booked date; record attendance and simulated biometric completion with staff identity.  Officer 
+FR14 Verify a visitor mobile by SMS, book an assisted walk-in visit, make a simulated visit 
+payment, recover a pass and record the CSR outcome. Visitor / CSR 
+FR15 Create a support request or complaint. CSR inspects the queue, responds and updates 
+resolution; citizens view their own requests. Citizen / CSR 
+FR16 Review dashboards/performance and referred cases. Process biometric -complete 
+applications as an issuance batch and export the register to CSV. Director 
+FR17 Create, edit and deactivate staff; maintain citizen accounts, service centres and fees 
+through authorised administration routes. Administrator 
+FR18 Publish announcements/maintenance notices, and store in-app notifications for 
+relevant application, payment, booking and staff events. Admin / users 
+FR19 Provide public guidance and a landing-page assistant. Public scope excludes private 
+account access and state-changing actions. Public visitor 
+Supporting requirements and data rules 
+Email/SMS delivery, password recovery, file preview, QR generation, notification read state and shared 
+navigation support the major functions. Common work was shared across the group. References, 
+ownership links and workflow status must remain consistent between screens and persisted records. 
+Appointments identify their service type and centre. Active booking counts include confirmed, checked-in 
+and completed bookings; cancellation releases capacity. The server checks ownership and current state 
+when a citizen changes a booking. Stale confirmations are rejected instead of overwriting a newer 
+booking. 
+Priority and completion boundaries 
+The design backlog contains 31 stories: 20 high, 10 medium and one low priority [2]. Core portal 
+workflows are implemented. Activity monitoring is represented by domain audit records and operational 
+views; a general log browser is outside the delivered interface. These boundaries appear again in the 
+implementation and future-work sections. 
+--- PAGE 7 ---
+Requirements 
+ 
+5 
+ 
+Weerakoon W M Y B 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+Nonfunctional requirements and constraints 
+Quality Required behaviour and implementation evidence Verification boundary 
+Security 
+Use BCrypt password hashes [3]. Validate verification 
+codes, role/owner access and tokens on protected state-
+changing forms. 
+Role/token tests exist; security 
+certification is not claimed. 
+Privacy 
+Restrict evidence access. Keep QR payloads to the 
+appointment reference; avoid raw biometric captures and 
+card credential storage. 
+Retention and deployment 
+policies require further work. 
+Integrity 
+Enforce keys, relationships and valid states. Use 
+transactions/row locks for booking capacity and reject stale 
+versions. 
+Check normal, full-slot, 
+duplicate and stale-request 
+paths. 
+Usability 
+Use consistent navigation, labelled fields, inline feedback, a 
+progress timeline and printable passes. Provide assisted 
+visits. 
+Screens illustrate the UI; a 
+formal user study is outstanding. 
+Accessibility Aim for keyboard access, clear labels, readable contrast and 
+responsive layouts using WCAG 2.2 [4]. 
+Conformance requires an 
+accessibility audit. 
+Reliability Keep related writes transactional, explain failures and 
+display maintenance notices when required. 
+Selected integration tests exist; 
+uptime is unmeasured. 
+Performance Use server-rendered views and database lookups suitable for 
+the classroom prototype. 
+Response-time, throughput and 
+concurrency need load testing. 
+Maintainability Separate controller, service, repository, model and DTO 
+work; use constructor injection and a Maven build. 
+Module tests and shared policies 
+support regression checks. 
+Constraints and assumptions 
+The application is Java-based and developed within a semester [1]. The build declares Spring Boot 4.1.0 
+and Java 17; SQL Server and its schema must be configured before startup. Hibernate validates the 
+schema rather than creating production tables automatically. Version-specific setup must be checked 
+before demonstration. 
+Email verification needs configured SMTP credentials and network access. SMS uses an HTTP phone 
+gateway whose availability depends on the local network/device. Webcam scanning needs camera 
+permission and a suitable browser origin. Credentials belong in environment configuration and must not 
+appear in report screenshots. 
+Appointment policies use Sri Lanka time. The simulated payment/capture stages demonstrate business 
+flows but do not establish banking settlement, legal identity verification or actual biometric collection. An 
+approved prototype application is not an official identity document. 
+--- PAGE 8 ---
+Design 
+ 
+6 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+Design 
+Use cases for citizens and application officers 
+Figures 1 and 2 refine interactions from the design document [2] to cover the final prototype. UML actors 
+remain outside the system boundary and ovals represent user goals [5]. Authentication is a precondition 
+for protected goals; registration and public walk-in services use their own verification steps. 
+ 
+Figure 1. Final citizen and application-officer use cases 
+Citizens manage their own requests. NIC and passport officers use review and appointment operations within 
+the document type permitted by their session. Approval enables the payment/appointment stages; corrections 
+return responsibility to the applicant. 
+
+--- PAGE 9 ---
+Design 
+ 
+7 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+ 
+Use cases for assisted service and administration 
+The visitor route supports people who need an assisted visit. CSR, director and administrator 
+responsibilities are separate: organisational seniority does not imply unrestricted technical access. The 
+director also has CSR support access; administrator pages remain a separate authorised area. 
+ 
+Figure 2. Public visitor, CSR, director and administrator use cases 
+Notifications support workflow events. The public assistant provides guidance without submitting applications 
+or exposing accounts. Director printing records issuance and exports a register; it does not operate a physical 
+printer. 
+
+--- PAGE 10 ---
+Design 
+ 
+8 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+ 
+Database design for accounts and applications 
+SQL Server stores the relational domain, while JPA maps entities/repositories to it [6]. Figure 3 presents 
+the core account, identity and application structure. Shared keys separate common account/application 
+data from citizen, staff, NIC and passport details. 
+ 
+Figure 3. Account, application, evidence, review and delivery relationships 
+Relationship Meaning and cardinality 
+UserAccount to CitizenAccount / 
+StaffAccount Each specialised row shares its user key; common login data is stored once. 
+CitizenAccount to Application One citizen can have many applications; each application belongs to one 
+citizen. 
+Application to NICApplication / 
+PassportApplication 
+Document-specific detail uses the application key instead of duplicating the 
+whole application. 
+Application to documents, reviews and 
+updates 
+An application retains multiple evidence files, review records and status 
+changes. 
+
+--- PAGE 11 ---
+Design 
+ 
+9 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+ 
+Database design for appointments and supporting records 
+Figure 4 presents the appointment/support domain. Repeated account/application entities connect it to 
+Figure 3. Primary keys identify records; foreign keys enforce ownership and dependencies. Operational 
+settings for fees, announcements and maintenance complement this core model. 
+ 
+Figure 4. Appointment, slot, payment, support and notification relationships 
+A centre owns many published slots and appointments. An appointment can link to its application, citizen and 
+biometric slot; guest walk-ins use a separate service path. Check-in records identify the appointment and staff 
+member. UserNotification joins users to notifications with per-user read state. Booking transactions lock 
+relevant rows before checking capacity. 
+
+--- PAGE 12 ---
+Design 
+ 
+10 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+ 
+Interface design for account access and progress 
+The portal uses a shared government-style theme, consistent navigation and role-specific workbenches. 
+These are sample-data prototype screenshots retained from the team draft; they demonstrate interface 
+behaviour rather than live government operations. 
+ 
+Figure 5. Unified citizen and staff login portal 
+Login provides role selection and recovery navigation. Registration separates email verification, mobile 
+verification and password creation so the next task is visible. The server validates the sequence and submitted 
+values. 
+ 
+Figure 6. Citizen application timeline and next action 
+Tracking pairs the current state with completed and pending stages. A visible next action leads to payment or 
+booking when eligible. Correction messages return the user to affected fields/evidence instead of requiring an 
+unrelated new application. 
+
+--- PAGE 13 ---
+Design 
+ 
+11 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+ 
+Interface design for booking and appointment passes 
+ 
+Figure 7. Centre, date and time selection for biometric appointments 
+Booking begins with the relevant application and centre. The calendar highlights available dates; published 
+times expose the remaining choices. Server-side capacity checks remain authoritative when concurrent 
+requests arrive. 
+ 
+Figure 8. Confirmed appointment and printable QR pass 
+The pass gives the visit information and appointment reference. Its QR carries the reference for authorised 
+lookup; manual reference entry provides a centre fallback. Changes, printing and camera-based check-in have 
+separate state/date checks. 
+
+--- PAGE 14 ---
+Implementation 
+ 
+12 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Jeniviya G A 
+Implementation 
+Tools and technologies 
+Technology Use in the prototype and selection rationale 
+Java 17 / Spring Boot 4.1.0 [7] Typed domain/service code, dependency injection, request routing and transactions 
+in one application. 
+Thymeleaf [8], 
+HTML/CSS/JavaScript 
+Server-rendered forms/workbenches, client feedback, calendar interaction and 
+responsive navigation. 
+Tailwind CSS [9] / shared theme Utility styling with consistent portal colours, spacing and components. 
+Spring Data JPA / Hibernate [10] Repositories and entity mapping; schema validation exposes mismatches at startup. 
+SQL Server / Microsoft JDBC [6] Relational constraints, persistent workflow records, transactions and booking locks. 
+Security Crypto / Bean Validation BCrypt and validated forms; controller/session checks govern access. 
+Spring Mail / HTTP SMS adapter Email/mobile verification through configurable delivery services. 
+ZXing 3.5.4 [11] / jsQR 1.4.0 [12] QR pass generation and browser webcam scanning. 
+Maven [13], JUnit 5 [14], 
+MockMvc, Mockito [15] Dependencies/builds and unit, controller and database-backed checks. 
+Git / GitHub [16] Member branches, integrated changes and shared source history. 
+Architecture and design patterns 
+LankaID is a layered monolith. A browser request reaches a Spring MVC controller, which checks 
+session/role context and calls a service. Services hold business rules/transaction boundaries; repositories 
+persist entities to SQL Server. Thymeleaf renders the model. OTP adapters, local file storage, QR 
+generation and notification publishing connect to this flow. 
+Pattern or separation Example and benefit 
+MVC / service layer AppointmentController delegates to AppointmentService, separating presentation and 
+business decisions. 
+Repository AppointmentRepository defines persistent lookup and locking without database access in 
+templates. 
+Observer NotificationPublisher sends an event to InAppNotificationObserver, reducing 
+module/storage coupling. 
+Adapter / policy object SmsSender isolates delivery; BookingChangePolicy centralises time/status rules for pages 
+and server checks. 
+--- PAGE 15 ---
+Implementation 
+ 
+13 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Jeniviya G A 
+ 
+Implemented review and decision workflow 
+The main modules cover applications, verification, appointments, renewal/replacement/delivery and 
+support. User, OTP, payment, notification and administration services connect them. The screens below 
+illustrate how requirements become a connected workflow. 
+ 
+Figure 9. NIC officer queue with submitted sample applications 
+The queue presents applications relevant to the officer role. Review loads details and authorised evidence 
+previews. Approval allows progression, correction returns work to the citizen, and rejection retains a reason. 
+Director referral provides a recorded path for cases needing further review. 
+ 
+Figure 10. Supporting evidence and officer decision controls 
+The decision service records review details and updates the state. Notifications communicate the outcome; the 
+tracking view exposes the next action. Reasons, current-state validation and ownership checks reduce 
+ambiguous/repeated decisions. Automated tests exercise transitions and access rules. 
+
+--- PAGE 16 ---
+Implementation 
+ 
+14 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Jeniviya G A 
+ 
+Implemented appointment and issuance workflow 
+ 
+Figure 11. Schedule with booked counts and slot-capacity controls 
+Officers publish capacity-limited slots. Booking/changes use transactional row locking and a booking version 
+for consistent capacity and stale-request checks. BookingChangePolicy enforces the biometric 72-hour change 
+window, missed-booking rules and check-in on the booked date. 
+ 
+Figure 12. Biometric desk with QR scan and reference-number fallback 
+After check-in, the officer records simulated biometric completion. The director selects biometric-complete 
+applications, processes an issuance batch and exports the CSV register. PrintingExportService checks current 
+state and calls the delivery service after issuance. Delivery/collection records the final handover; device 
+capture and physical printing are outside the prototype. 
+
+--- PAGE 17 ---
+Implementation 
+ 
+15 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Jeniviya G A 
+ 
+Testing evidence and implementation boundaries 
+Tests use JUnit, MockMvc controller checks, mocked dependencies and transaction-backed integration 
+workflows [14], [15]. The project includes tests for account/OTP rules, drafts/submission, decisions, 
+payments, appointments, walk-ins and delivery. These checks demonstrate selected behaviour, not a 
+measured percentage of code coverage. 
+Area Example automated evidence Behaviour checked 
+Applications CitizenApplicationWorkflowIntegrationTests Draft, evidence and submission transitions. 
+Review VerificationDecisionWorkflowIntegrationTests Approval, rejection, correction and 
+decisions. 
+Bookings BookingChangePolicyTests; 
+BookingChangeWorkflowIntegrationTests 
+Time/status eligibility, stale changes and 
+workflow. 
+Payment PaymentBiometricWorkflowIntegrationTests Payment prerequisites and appointment 
+progression. 
+Walk-in / OTP WalkInAppointmentWorkflowIntegrationTests; 
+SmsOtpServiceTests 
+Verified booking, expiry and attempt 
+rules. 
+Routes / schema UiRouteSmokeTests; UiAndSchemaConsistencyTests Role-sensitive routes and view/schema 
+consistency. 
+Recorded results and remaining findings 
+Stored Surefire XML reports contain 295 executed cases across 63 report files: 293 passed, two failed, 
+zero errors and zero skipped. These historical files can span different runs; they do not establish a fresh 
+full-suite result against the final submission. 
+Both failures are in MarickarVerificationTestCases. One expects HTTP 403 for an unauthorised CSR 
+request but records HTTP 404; the other expects an official-notification email call that was not observed. 
+Expected behaviour must be reconciled with current routes/notification integration, followed by a clean 
+regression run before claiming that every test passes. 
+Ethical and operational considerations 
+Identity evidence is sensitive. Access checks, limited QR payloads, hashes and traceable decisions 
+support privacy/accountability. A human officer makes decisions; the assistant provides public guidance. 
+Assisted visits reduce exclusion. Deployment needs a retention policy, encrypted storage and formal 
+security/accessibility/performance checks. OWASP ASVS provides a security-review reference [17]. 
+--- PAGE 18 ---
+Project Management 
+ 
+16 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Dharshan S 
+Project Management 
+Agile approach and sprint summary 
+The design document uses a Scrum-oriented backlog and five planned sprints [2], [18]. It identifies 
+product-owner/Scrum-master responsibilities conceptually as the Identity Service Director and IT project 
+lead. These are planning roles, not evidence that a government director joined the student project. 
+Development, interface review and testing were shared by five students. 
+Sprint plan Goal and planned stories Evidence in the final prototype 
+1 / weeks 1-3 / 81 h Accounts, administration, roles, OTP and 
+activity monitoring. 
+Registration/login, administration and 
+domain audit records; no general log 
+browser. 
+2 / weeks 4-6 / 51 h NIC/passport applications, uploads and 
+payment. 
+Drafts, forms, evidence and simulated 
+payment. 
+3 / weeks 7-9 / 103 h Officer review, verify, approve/reject and 
+notify. 
+Separate queues, recorded reviews, 
+correction/referral and notifications. 
+4 / weeks 10-12 / 33 
+h 
+Capacity slots, booking, QR passes and 
+check-in. 
+Slot/calendar functions, QR/manual check-
+in and simulated completion. 
+5 / weeks 13-15 / 110 
+h 
+Tracking, support, maintenance, renewals, 
+replacement, delivery and booking 
+changes. 
+Tracking, assisted visits, support, 
+renewal/replacement, handover and 
+changes. 
+The 378 hours are estimates from the design plan, not measured effort. That plan puts Sprint 5 in weeks 
+13-15, while final evaluation is scheduled in week 13 [1]. Implementation therefore overlaps the original 
+sequence; dated milestones on the next page provide the more reliable picture of completed development. 
+Coordination and integration 
+Each primary function had an owner; common services required cross-module coordination. Member 
+branches/merges maintained shared source history. DTOs, status rules, navigation and a common theme 
+aligned citizen/staff workflows. Database scripts addressed changes that otherwise prevented teammates 
+running the same version. 
+A practical completion criterion is a working user flow with server validation, persisted state, 
+understandable feedback and regression checks. Recording review/retrospective outcomes alongside the 
+backlog and requiring a clean shared build before merging would strengthen this approach. 
+--- PAGE 19 ---
+Project Management 
+ 
+17 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Dharshan S 
+ 
+Task distribution and development milestones 
+Member and ID Primary responsibility Connected/shared contribution 
+Weerakoon W M Y B 
+IT25100565 
+Biometric/appointment 
+management. 
+Slots, changes, QR passes/check-in, officer 
+administration and shared theme. 
+Dharshan S 
+IT25100604 
+Citizen support/service 
+management. 
+Walk-ins, mobile verification, CSR queue and 
+assisted service/handover. 
+Jeniviya G A 
+IT25100689 Citizen application management. NIC/passport forms, drafts, uploads, 
+corrections and tracking. 
+Rithika R K 
+IT25100885 Renewal/replacement/delivery. Existing-document requests, 
+delivery/collection and receipt/handover. 
+Marickar A A A 
+IT25101235 
+User management and 
+review/approval. 
+Accounts, OTP/payment integration, officer 
+queues and integration support. 
+The assignment describes six-member groups; the supplied cover/design list five students. The report retains 
+those five and records shared tasks. Primary ownership does not imply that every file in a module was written 
+by one person. 
+Dated milestones 
+Period in 2026 Development focus 
+10-18 August Repository foundations, initial templates/tests and module structure. 
+20 August-10 
+September Applications, uploads/drafts, review queues, payment and initial renewal/walk -in flows. 
+14-19 September Email/SMS, delivery/collection, booking changes, staff views and schema work. 
+27 September Dated design document: sprints, UML diagrams and ethics [2]. 
+5-10 October UI integration, guidance, notices, maintenance, booking safeguards, tests and 
+documentation. 
+Milestones summarise dated source history and the design-document date. They are development phases, 
+not meeting minutes or a claim that sprint weeks were followed exactly. Regression evidence, repository 
+access and report review form part of submission preparation. 
+--- PAGE 20 ---
+Conclusion and Future Work 
+ 
+18 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Weerakoon W M Y B 
+Conclusion and Future Work 
+Summary of achievements 
+LankaID connects the main stages of an identity-service request in one academic prototype. Citizens have 
+verified registration, drafts/evidence, tracked reviews, simulated payment, appointment passes and 
+delivery/collection records. Officers have document-specific queues and centre operations; CSR provides 
+assisted service; the director manages referrals/issuance records; the administrator maintains operating 
+settings. 
+The main outcome is a connected workflow with explicit responsibilities and controlled states. UML, 
+relational design, layered Java code and automated checks link software-engineering activities to 
+delivered screens. Live payments, government-data integration, biometric devices and physical 
+production remain outside the prototype scope. 
+Challenges and responses 
+Challenge Response and remaining lesson 
+Database drift Schema validation exposed mismatches. Shared schema/migration scripts improved 
+setup; versioned migrations would improve upgrades. 
+Concurrent/stale booking Row locks, booking versions and a shared policy protect capacity/changes. Boundary 
+cases must stay in regression checks. 
+Module integration Shared statuses, navigation and theme connected independently developed screens. 
+Earlier contracts would reduce rework. 
+External dependencies Gateway interfaces and mocks limit coupling. Demonstration still requires verified 
+SMTP/SMS configuration. 
+Regression evidence Historical results record two failed assertions. A clean dated rerun is needed before 
+claiming a fully passing final suite. 
+Prioritised future work 
+First, resolve regression findings, standardise migrations and complete a security review with framework-
+level CSRF protection and encrypted evidence storage. Document retention/consent procedures and verify 
+every role/owner boundary before deployment. 
+Next, integrate certified payment, authorised government-data interfaces, biometric devices and 
+delivery/printing services with recovery/audit checks. Then add Sinhala/Tamil, perform 
+accessibility/usability studies, introduce reminders and load-test paginated staff lists. Measured outcomes 
+should guide scaling decisions. 
+--- PAGE 21 ---
+Individual Contribution, Teamwork and Lessons Learned 
+ 
+19 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+Individual Contribution Teamwork and Lessons Learned 
+The table summarises each member’s primary work and the engineering lessons associated with the 
+implemented modules. Shared responsibilities include integration, interface consistency and regression 
+checking. 
+Member Role and contribution Challenge and response Lessons and reflection 
+Weerakoon W 
+M Y B 
+IT25100565 
+Biometrics/appointments: 
+slot publication, booking 
+calendar, QR passes, check-
+in and change policy. Also 
+officer administration and 
+shared interface styling. 
+Avoiding double booking and 
+outdated changes required row 
+locks, a booking version and shared 
+date/status rules. Workflow tests 
+exercise the checks; schema/setup 
+guidance helps align environments. 
+Concurrency/time rules need 
+explicit tests and one 
+authoritative definition. A 
+consistent UI helped 
+integration. Earlier migrations 
+and boundary tests would 
+reduce late hardening. 
+Dharshan S 
+IT25100604 
+Citizen support and assisted 
+service: walk-ins, mobile 
+verification, CSR 
+queues/responses and 
+service/handover assistance. 
+Guest visits require verified contact 
+without assuming a citizen account. 
+The flow separates OTP, 
+booking/pass recovery and CSR 
+check-in. Gateway delivery is 
+isolated for mocked testing. 
+Assisted users need recovery 
+as well as a successful 
+booking. Separate 
+guest/account ownership 
+makes the flow clearer. Earlier 
+handover checks would reduce 
+integration surprises. 
+Jeniviya G A 
+IT25100689 
+Citizen applications: 
+NIC/passport forms, drafts, 
+evidence, 
+correction/resubmission and 
+progress views. 
+Multi-step requests must keep draft 
+data/files consistent and prevent 
+invalid submission. Service 
+validation, ownership, file-size 
+limits and explicit 
+correction/submission states address 
+this. 
+Client feedback helps, but 
+server validation remains 
+authoritative. Full-journey 
+tests expose issues that 
+isolated forms miss. Earlier 
+shared statuses/evidence rules 
+would reduce rework. 
+--- PAGE 22 ---
+Individual Contribution, Teamwork and Lessons Learned 
+ 
+20 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Marickar A A A 
+ 
+Individual reflections and team learning 
+Member Role and contribution Challenge and response Lessons and reflection 
+Rithika R K 
+IT25100885 
+Renewal/replacement/deliver
+y: existing-document 
+requests, evidence, 
+delivery/collection choice 
+and receipt/handover. 
+The module depends on 
+application/payment/issuance states 
+from other modules. Identity linking 
+and eligibility separate renewal 
+from new requests. Updates after 
+printing connect delivery to the 
+same application. 
+Clear inputs/transitions are 
+essential before integration. 
+Delivery belongs to the same 
+lifecycle. Earlier approval-to-
+collection tests would improve 
+confidence. 
+Marickar A A A 
+IT25101235 
+User access and 
+review/approval: 
+registration/login, contact 
+verification, restricted 
+queues, evidence and 
+decisions. Supported 
+OTP/payment and 
+integration. 
+Sensitive routes require role checks 
+and predictable outcomes. Sessions, 
+BCrypt and recorded reasons 
+support this. Historical tests reveal 
+access-response and email 
+expectations requiring 
+reconciliation. 
+Authentication and 
+authorisation need separate 
+evaluation. A decision screen 
+does not prove side 
+effects/forbidden paths. 
+Earlier role and notification 
+tests would improve 
+integration. 
+Teamwork and improvement 
+The strongest shared result was the module connection: citizen submission feeds review, approval feeds 
+payment/booking, biometric completion feeds issuance, and issuance feeds delivery. Agreement on 
+records, status names and transition ownership made those handoffs possible. Shared navigation/theme 
+made them easier to follow. 
+Coordination can improve through versioned migrations, common response/notification contracts and 
+regression results regenerated for the exact submission. Planned effort should remain separate from 
+completion dates so schedule problems stay visible. 
+Future work should pair a named feature owner with an agreed acceptance flow and another member 
+checking the handoff. Regular integration checks are easier to diagnose than a late combined failure. 
+Personal module knowledge and understanding of the full lifecycle are both necessary for the 
+demonstration and viva. 
+--- PAGE 23 ---
+References 
+ 
+21 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Rithika R K 
+References 
+IEEE reference numbers follow first use. Online resources were accessed on 13 October 2026. 
+Course/design documents and the repository provide project evidence; external documentation supports 
+modelling and implementation techniques. 
+[1] Sri Lanka Institute of Information Technology, “SE2030 Software Engineering Group Assignment 
+Specification,” Faculty of Computing, 2026, unpublished course document. 
+[2] Group 2026-Y2-S1-MTR-02, “Web Based Identity Issuing Service Continuous Assessment Design 
+Document,” Faculty of Computing, SLIIT, Sep. 27, 2026, unpublished project document. 
+[3] Spring Security, “Password Storage,” Spring Security Reference. Accessed: Oct. 13, 2026. [Online]. 
+Available: https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html 
+[4] World Wide Web Consortium, “Web Content Accessibility Guidelines (WCAG) 2.2,” W3C 
+Recommendation. Accessed: Oct. 13, 2026. [Online]. Available: https://www.w3.org/TR/WCAG22/ 
+[5] Object Management Group, “Unified Modeling Language Specification,” ver. 2.5.1, Dec. 2017. Accessed: 
+Oct. 13, 2026. [Online]. Available: https://www.omg.org/spec/UML/2.5.1/ 
+[6] Microsoft, “SQL Server Technical Documentation,” Microsoft Learn. Accessed: Oct. 13, 2026. [Online]. 
+Available: https://learn.microsoft.com/en-us/sql/sql-server/ 
+[7] Spring, “Spring Boot Reference Documentation.” Accessed: Oct. 13, 2026. [Online]. Available: 
+https://docs.spring.io/spring-boot/index.html 
+[8] The Thymeleaf Team, “Thymeleaf Documentation.” Accessed: Oct. 13, 2026. [Online]. Available: 
+https://www.thymeleaf.org/documentation.html 
+[9] Tailwind Labs, “Tailwind CSS Documentation.” Accessed: Oct. 13, 2026. [Online]. Available: 
+https://tailwindcss.com/docs 
+--- PAGE 24 ---
+References 
+ 
+22 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Rithika R K 
+ 
+References continued 
+[10] Hibernate, “Hibernate ORM Documentation.” Accessed: Oct. 13, 2026. [Online]. Available: 
+https://hibernate.org/orm/documentation/ 
+[11] ZXing Contributors, “ZXing Barcode Scanning Library,” GitHub. Accessed: Oct. 13, 2026. [Online]. 
+Available: https://github.com/zxing/zxing 
+[12] jsQR Contributors, “jsQR JavaScript QR Code Reading Library,” GitHub. Accessed: Oct. 13, 2026. 
+[Online]. Available: https://github.com/cozmo/jsQR 
+[13] Apache Software Foundation, “Apache Maven.” Accessed: Oct. 13, 2026. [Online]. Available: 
+https://maven.apache.org/ 
+[14] JUnit Team, “JUnit 5 User Guide,” ver. 5.14.0. Accessed: Oct. 13, 2026. [Online]. Available: 
+https://docs.junit.org/5.14.0/user-guide/ 
+[15] Mockito Contributors, “Mockito Framework.” Accessed: Oct. 13, 2026. [Online]. Available: 
+https://site.mockito.org/ 
+[16] Group 2026-Y2-S1-MTR-02, “LankaID Identity Issuing Web Service Application,” source repository. 
+Accessed locally: Oct. 13, 2026. [Online]. Available: https://github.com/IT25101235/LankaID 
+[17] OWASP Foundation, “Application Security Verification Standard.” Accessed: Oct. 13, 2026. [Online]. 
+Available: https://owasp.org/projects/asvs 
+[18] K. Schwaber and J. Sutherland, “The Scrum Guide,” Nov. 2020. Accessed: Oct. 13, 2026. [Online]. 
+Available: https://scrumguides.org/scrum-guide.html 
+--- PAGE 25 ---
+Appendix 
+ 
+23 
+ 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Jeniviya G A 
+Appendix 
+Source and reproducibility 
+Source, database scripts and setup guidance are at https://github.com/IT25101235/LankaID [16]. 
+Configure SQL Server, apply the schema/migrations and keep mail/SMS credentials outside source. The 
+Maven wrapper builds/runs the application and generates Surefire results. Demonstrate with sample 
+records and confirm evaluator repository access. 
+Requirements to evidence map 
+Requirement group Implementation evidence Report evidence 
+FR01-FR02 / accounts User_Mgmt; OTP_Mgmt; 
+registration/session tests. 
+Account screen, constraints and 
+testing. 
+FR03-FR06 / 
+applications 
+CitizenApplicationService; identity linking; 
+renewal/replacement module. 
+Use cases, ER model, tracking and 
+application tests. 
+FR07-FR10 / payment, 
+booking, handover 
+PaymentService; AppointmentService; 
+BookingChangePolicy; 
+DocumentDeliveryService. 
+Booking/pass views, operations and 
+simulations. 
+FR11-FR13 / review and 
+centre work 
+VerificationReviewService; 
+BiometricScheduleService; 
+BiometricService. 
+Queue, decisions, schedule and check-
+in images. 
+FR14-FR15 / assisted 
+service 
+WalkInAppointmentService; 
+CitizenSupportService. 
+Public/CSR use cases and walk-
+in/OTP tests. 
+FR16-FR19 / operations PrintingExportService; Admin_Mgmt; 
+Notification_Mgmt; Chatbot_Mgmt. 
+Role model, issuance, oversight and 
+public scope. 
+Traceability of project evidence 
+Requirements express the final prototype scope. Sprint goals/effort estimates originate in the dated design 
+[2]; milestones summarise development history. UI/ER assets come from the team draft. Stored XML 
+supports recorded test results; the submission version should be rerun to replace historical evidence. 

@@ -1,0 +1,278 @@
+P0 [Normal] 
+P1 [Normal] Web Based Identity Issuing Service
+P2 [Normal] SE2030: Software Engineering – 2026 Year 2 Semester 1
+P3 [Normal] Continuous Assessment- Final Report
+P4 [Normal] Group ID: 2026-Y2-S1-MTR-02
+P5 [Normal] B.Sc. (Hons) Information Technology
+P6 [Normal] Faculty of Computing
+P7 [Normal] Sri Lanka Institute of Information Technology
+P8 [Normal] 10/10/2026
+P9 [Normal] Table of Contents
+P10 [Normal] 
+P11 [Heading 1] Introduction
+P12 [Heading 2] Project Overview
+P13 [Normal] Web Based Identity Issuing Service (branded LankaID) is a Java web application that brings the issuing of Sri Lankan National Identity Cards (NIC) and passports online. A citizen registers, applies for a new document or asks for a renewal or lost-document replacement, uploads supporting evidence, pays the fee, books a biometric appointment at a service centre, tracks progress and finally receives the document by home delivery or collects it from a centre. Officers review each application, record the biometric visit, and the Identity Service Director issues approved documents in printing batches. Customer service representatives help visitors who cannot use the portal, and a system administrator maintains staff accounts, service centres and system settings.
+P14 [Normal] The system was built by a five-member group for the SE2030 Software Engineering module [1] using Spring Boot, Thymeleaf and Microsoft SQL Server. It is an academic prototype: card payments, biometric hardware capture and card production are simulated, while registration, verification, scheduling, notifications and reporting are fully working.
+P15 [Heading 2] Problem Background
+P16 [Normal] Obtaining or renewing an identity document normally means several visits to a government office, paper forms and photocopies, long queues and weeks of waiting without any information about progress. Paper files can be lost or altered, and each office keeps its own records. LankaID replaces this with one portal in which every step is recorded, every decision has an author and a time, and the only mandatory physical visit is the biometric appointment.
+P17 [Heading 2] Objectives
+P18 [List Paragraph] Let citizens apply for, renew or replace an NIC or passport online, with saved drafts, document uploads and a visible status timeline.
+P19 [List Paragraph] Give NIC and passport officers separate, role-restricted queues in which they can approve, reject with a reason, or request corrections.
+P20 [List Paragraph] Manage biometric capacity fairly: officers publish capacity-limited slots, citizens book them, and the system prevents double booking and enforces a 72-hour change rule.
+P21 [List Paragraph] Replace manual counters with QR appointment passes and a webcam check-in desk.
+P22 [List Paragraph] Support citizens without accounts or computer skills through SMS-verified walk-in booking and a support desk.
+P23 [List Paragraph] Provide the director and administrator with oversight: dashboards, printing registers, staff and centre management.
+P24 [List Paragraph] Protect personal data through verified accounts, hashed passwords, role-based access, audit records and data minimisation.
+P25 [Heading 2] Target Users and Stakeholders
+P26 [Normal] 
+P27 [Heading 2] Scope and Limitations
+P28 [Normal] In scope: the complete citizen journey from registration to document handover for NIC and passport applications (new, renewal and replacement), officer verification, biometric scheduling and check-in, walk-in and support services, notifications, administration and printing export.
+P29 [Normal] Out of scope: a live payment gateway, fingerprint, photograph and signature capture hardware, real card or passport printing, native mobile applications and multi-language screens. Payments and biometric capture are simulated, and uploaded documents are stored on the server’s local disk.
+P30 [Heading 1] Requirements
+P31 [Heading 2] Functional Requirements
+P32 [Normal] The requirements below were gathered from the assignment brief [1] and refined across five sprints. Each row names the main user of the function.
+P33 [Normal] 
+P34 [Heading 2] Non-Functional Requirements
+P35 [Normal] 
+P36 [Heading 2] Constraints and Assumptions
+P37 [List Paragraph] The brief requires a Java web application built by the group within one semester; the system runs on JDK 17 or later with Microsoft SQL Server.
+P38 [List Paragraph] Email codes use Gmail SMTP with an app password; SMS codes use an HTTP gateway on a team phone on the local network.
+P39 [List Paragraph] Users need a modern browser; the QR scanner needs camera permission and works on localhost or HTTPS.
+P40 [List Paragraph] Payments and biometric capture are simulated; mobile numbers use the Sri Lankan format and the interface is in English.
+P41 [List Paragraph] Times use Sri Lanka time (Asia/Colombo); booking is open up to 90 days ahead and slots run from 8:00 AM to 6:00 PM.
+P42 [Heading 1] Design
+P43 [Heading 2] Use Case Diagram
+P44 [Normal] The use case diagrams follow UML 2.5.1 [6] and were produced for the group’s Design Document [7]. Figure 1 shows the citizen, walk-in and officer use cases; Figure 2 shows the service representative, director and administrator: the director inherits the service representative’s use cases and the administrator inherits the director’s. Logging in is included by every protected use case.
+P45 [Normal] 
+P46 [Normal] Figure 1: Use case diagram: citizens and application officers
+P47 [Normal] 
+P48 [Normal] Figure 2: Use case diagram: CSR, director and system administrator
+P49 [Heading 2] Database Design and ER Diagram
+P50 [Normal] The database identity_issuance_service on Microsoft SQL Server [8] has 25 tables and 33 foreign keys. Figures 3 and 4 were generated from the live schema; each box lists the primary key, foreign keys and the main columns. Three design decisions shape the model:
+P51 [List Paragraph] Specialisation by shared primary key. CitizenAccount and StaffAccount extend UserAccount, and NICApplication and PassportApplication extend Application, so common data is stored once.
+P52 [List Paragraph] Constraints in the database. Reference numbers, emails, phone numbers and slot positions (centre, service, date, time) are unique, and status columns have check constraints.
+P53 [List Paragraph] Audit tables. ApplicationReview, AppointmentCheckIn, BiometricCollection, Payment and DirectorReviewReferral keep who did what and when.
+P54 [Normal] 
+P55 [Normal] Figure 3: ER diagram: accounts, applications, documents, reviews and delivery
+P56 [Normal] 
+P57 [Normal] Figure 4: ER diagram: appointments, slots, payments, support and notifications (grey dashed boxes are tables shown in the previous figure)
+P58 [Heading 2] User Interface Design and Screenshots
+P59 [Normal] The interface uses one government-style theme: maroon for primary actions, gold accents and a teal secondary colour, with the Public Sans typeface and Material icons. Citizens use a header navigation with a notification bell; officers use dark role-specific workbenches with a side menu. Every screen below is the real interface rendered with sample data.
+P60 [Normal] 
+P61 [Normal] Figure 5: Landing page: services, QR pass recovery and the Ask LankaID assistant
+P62 [Normal] 
+P63 [Normal] Figure 12: Biometric booking: centre, available dates and time slots
+P64 [Heading 1] Implementation
+P65 [Heading 2] Tools and Technologies Used
+P66 [Normal] 
+P67 [Heading 2] System Architecture
+P68 [Normal] LankaID is a layered monolith. Browsers request server-rendered pages from Spring MVC controllers; controllers check the session role and call transactional services; services use repositories to reach SQL Server and call outside systems when needed. The code is organised in eleven module packages, each with its own controller, service, model, repository and DTO folders.
+P69 [Normal] 
+P70 [Normal] Figure 13: System architecture
+P71 [Heading 2] Design Patterns Applied
+P72 [Normal] 
+P73 [Heading 2] Key Features Developed
+P74 [Normal] 
+P75 [Heading 2] Testing
+P76 [Normal] The project has 324 automated test methods in 64 test classes using JUnit 5 and Spring Test [16]. Controller tests use MockMvc with mocked services; integration tests run real services against SQL Server inside transactions that roll back. They cover registration and OTP rules, the application workflow, officer decisions, payments, walk-in booking, booking changes and role access. The 85 biometric, booking, walk-in, payment and route tests were re-run after the latest hardening and all passed.
+P77 [Heading 2] Screenshots of Core Functions
+P78 [Normal] The screens below show the officer-side functions that carry an application through verification, the biometric visit and issuing.
+P79 [Normal] 
+P80 [Normal] Figure 14: NIC verification queue listing submitted applications
+P81 [Normal] 
+P82 [Normal] Figure 15: Application review: submitted documents and the officer decision (approve, request correction or reject)
+P83 [Normal] 
+P84 [Normal] Figure 16: Schedule settings: monthly calendar with booked counts and per-slot capacity
+P85 [Normal] 
+P86 [Normal] Figure 17: Biometric desk: webcam QR scan or reference number, then check in the citizen
+P87 [Normal] 
+P88 [Normal] Figure 18: Director printing queue: biometric-complete applications ready for the printing batch and CSV register
+P89 [Heading 1] Project Management
+P90 [Heading 2] Agile Approach and Sprint Summary
+P91 [Normal] The team used Scrum [21] with a product backlog of 31 user stories (20 high, 10 medium and 1 low priority) written for five personas. The Identity Service Director acted as product owner and the IT project lead as Scrum master; the five developers formed the development team. Sprints followed the priority order, so every high-priority story was planned before any medium-priority story [7].
+P92 [Normal] 
+P93 [Normal] All sprint goals are met in the delivered prototype. Story PBI-14 (monitor system activity) is covered through audit records of reviews, check-ins and collections and through the director’s officer-performance and tracking views; a separate log browser was not built. The team also added items beyond the backlog during integration: director referrals, public announcements, the landing-page assistant and a citizen notification dropdown.
+P94 [Heading 2] Task Distribution Among Team Members
+P95 [Normal] *Commit counts combine each member’s git identities (240 commits in total at the time of writing) and are only a rough indicator of activity. Admin, notification, OTP, payment and user-management work was shared by the whole team. User-interface design and testing were shared rather than assigned to specialists because the group has five members, not six.
+P96 [Heading 2] Development Phases and Milestones
+P97 [Heading 1] Conclusion and Future Work
+P98 [Heading 2] Summary of Achievements
+P99 [Normal] LankaID delivers the full identity-issuing journey in one portal. Citizens register with two verified channels, apply, upload evidence, pay, book a biometric slot and receive a QR pass; officers verify applications and run a webcam check-in desk; the director issues approved documents through a printing register; walk-in visitors and the support desk cover people who cannot use the portal; and the administrator controls staff, centres, fees and announcements. The prototype covers the product backlog, runs on 11 module packages with about 18,800 lines of Java and 6,100 lines of templates, and is protected by an automated test suite.
+P100 [Heading 2] Challenges Faced
+P101 [List Paragraph] Database drift. Hibernate validates the schema at start-up, so each member’s local database had to match the code. The team wrote migration scripts, a schema snapshot and a setup guide so teammates could bring databases up to date.
+P102 [List Paragraph] Concurrent bookings. Two citizens could take the last slot place, or a slot could be closed during a booking. Row locking, version numbers and friendly conflict messages were added and tested.
+P103 [List Paragraph] Parallel development. Five members worked on separate branches (240 commits, 37 merges), which caused merge conflicts and inconsistent interfaces until a shared theme and shared form-token and navigation components were adopted.
+P104 [List Paragraph] External services. Email codes need a Gmail app password and SMS codes depend on a phone gateway on the local network, so these were hidden behind interfaces and replaced by mocks in tests.
+P105 [List Paragraph] Time rules. Booking windows, the 72-hour rule and check-in dates depend on the server clock, so the application now fixes its time zone to Sri Lanka time.
+P106 [Heading 2] Suggestions for Improvement
+P107 [List Paragraph] Replace the simulated payment with a certified gateway and move uploaded documents to encrypted object storage.
+P108 [List Paragraph] Integrate certified biometric capture devices and add automatic extraction of data from scanned certificates.
+P109 [List Paragraph] Adopt a migration tool such as Flyway and add full framework-level CSRF protection.
+P110 [List Paragraph] Page and index the officer history lists and run load tests before real use.
+P111 [List Paragraph] Offer Sinhala and Tamil interfaces, an accessibility audit and a mobile application with digital credentials.
+P112 [List Paragraph] Add threaded replies for support requests and email or SMS reminders before appointments.
+P113 [Heading 1] Individual Contribution, Teamwork and Lessons Learned
+P114 [Normal] Each member completes their own row. The first row is drafted from the repository history; the other members must replace the marked cells with their own reflections.
+P115 [Heading 1] References
+P116 [Normal] 
+P117 [Normal] [1] Sri Lanka Institute of Information Technology, “SE2030 Software Engineering Group Assignment Specification,” Faculty of Computing, 2026, unpublished course document.
+P118 [Normal] [2] Spring Security, “Password Storage,” Spring Security Reference. [Online]. Available: https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html
+P119 [Normal] [3] OWASP Foundation, OWASP Application Security Verification Standard, Version 5.0.0. [Online]. Available: https://owasp.org/www-project-application-security-verification-standard/
+P120 [Normal] [4] Parliament of Sri Lanka, Personal Data Protection Act, No. 9 of 2022, Mar. 19, 2022. [Online]. Available: https://www.parliament.lk
+P121 [Normal] [5] World Wide Web Consortium, Web Content Accessibility Guidelines (WCAG) 2.2, W3C Recommendation, Dec. 12, 2024. [Online]. Available: https://www.w3.org/TR/WCAG22/
+P122 [Normal] [6] Object Management Group, OMG Unified Modeling Language, Version 2.5.1, Dec. 2017. [Online]. Available: https://www.omg.org/spec/UML/2.5.1/
+P123 [Normal] [7] Group 2026-Y2-S1-MTR-02, Web Based Identity Issuing Service: Continuous Assessment Design Document, Faculty of Computing, SLIIT, Sep. 2026, unpublished course document.
+P124 [Normal] [8] Microsoft, SQL Server Documentation. [Online]. Available: https://learn.microsoft.com/en-us/sql/sql-server/
+P125 [Normal] [9] Spring, Spring Boot Reference Documentation. [Online]. Available: https://docs.spring.io/spring-boot/
+P126 [Normal] [10] The Thymeleaf Team, Thymeleaf Documentation. [Online]. Available: https://www.thymeleaf.org/documentation.html
+P127 [Normal] [11] Tailwind Labs, Tailwind CSS Documentation. [Online]. Available: https://tailwindcss.com/docs
+P128 [Normal] [12] Red Hat, Hibernate ORM Documentation. [Online]. Available: https://hibernate.org/orm/documentation/
+P129 [Normal] [13] ZXing Project, ZXing (“Zebra Crossing”) Barcode Scanning Library, GitHub. [Online]. Available: https://github.com/zxing/zxing
+P130 [Normal] [14] cozmo, jsQR: A Pure JavaScript QR Code Reading Library, GitHub. [Online]. Available: https://github.com/cozmo/jsQR
+P131 [Normal] [15] Apache Software Foundation, Apache Maven Project. [Online]. Available: https://maven.apache.org/
+P132 [Normal] [16] JUnit Team, JUnit 5 User Guide. [Online]. Available: https://junit.org/junit5/docs/current/user-guide/
+P133 [Normal] [17] Mockito Contributors, Mockito Framework Site. [Online]. Available: https://site.mockito.org/
+P134 [Normal] [18] Group 2026-Y2-S1-MTR-02, LankaID: Identity Issuing Web Service Application, GitHub repository. [Online]. Available: https://github.com/IT25101235/LankaID
+P135 [Normal] [19] M. Fowler, Patterns of Enterprise Application Architecture. Boston, MA, USA: Addison-Wesley, 2002.
+P136 [Normal] [20] E. Gamma, R. Helm, R. Johnson, and J. Vlissides, Design Patterns: Elements of Reusable Object-Oriented Software. Reading, MA, USA: Addison-Wesley, 1994.
+P137 [Normal] [21] K. Schwaber and J. Sutherland, The Scrum Guide: The Definitive Guide to Scrum, Nov. 2020. [Online]. Available: https://scrumguides.org/scrum-guide.html
+P138 [Heading 1] Appendix
+P139 [Heading 2] A. Source Code Repository
+P140 [Normal] The complete source code, database scripts and documentation are in the GitHub repository [18], with one branch per member and the integrated version on the main branch.
+P141 [Heading 2] B. Class Diagram
+P142 [Normal] The class diagram from the group’s Design Document [7] shows the core classes, attributes, operations and relationships.
+P143 [Normal] 
+P144 [Normal] Figure 19: Class diagram of the core domain model
+P145 [Heading 2] C. Project Statistics
+P146 [Normal] 
+TABLE 0
+Student ID | Student Name
+IT25100565 | Weerakoon W M Y B
+IT25100604 | Dharshan S
+IT25100689 | Jeniviya G A
+IT25100885 | Rithika R K
+IT25101235 | Marickar A A A
+TABLE 1
+User role | Description and main tasks
+Citizen | Registers, applies for NIC or passport documents, uploads evidence, pays fees, books and manages biometric appointments, tracks status, raises support requests.
+NIC application officer | Reviews NIC applications and documents, decides, runs the NIC biometric desk and sets NIC appointment capacity.
+Passport verification officer | Does the same for passport applications and the passport biometric desk.
+Citizen service representative (CSR) | Runs walk-in appointments, answers support requests and complaints, verifies identity links, records document collections.
+Identity service director | Monitors throughput and officer performance, handles referred cases, processes printing batches and exports the CSV register.
+System administrator | Creates and deactivates staff accounts, manages service centres, fees, announcements and maintenance mode.
+Walk-in visitor | A member of the public who books assisted with help using only a verified mobile number.
+TABLE 2
+ID | Requirement | Main user
+FR-01 | Register with a verified email address (one-time code) and a verified Sri Lankan mobile number (SMS code), then set a password that meets the password rules. | Citizen
+FR-02 | Log in and out with role-based access for citizens, NIC officers, passport officers, CSRs, the director and the administrator; reset a forgotten password by email. | All users
+FR-03 | Create, save, reopen, edit and discard draft NIC and passport applications; link an existing government identity record for renewals and replacements. | Citizen
+FR-04 | Upload supporting documents (up to 5 MB each), preview them and replace flagged ones; review a summary and submit. | Citizen
+FR-05 | Track application status and history; correct flagged fields or documents and resubmit after a correction request. | Citizen
+FR-06 | Request an NIC or passport renewal or lost-document replacement with the required evidence. | Citizen
+FR-07 | Work from separate NIC and passport queues; inspect details and documents; approve, reject with a recorded reason, or request correction; refer difficult cases to the director. | Officer
+FR-08 | Pay the application fee (and optional home-delivery fee) by simulated card payment with card validation and a transaction reference. | Citizen
+FR-09 | Publish 30-minute biometric slots with a capacity for a centre and date range; close, edit or delete slots. | Officer
+FR-10 | Book a centre, date and time after payment without exceeding capacity; view, download or print a QR appointment pass. | Citizen
+FR-11 | Cancel or reschedule a booking at least 72 hours ahead, and rebook after a cancellation without paying again. | Citizen
+FR-12 | Check a citizen in by webcam QR scan or reference number on the booked date; move a missed booking; record biometric collection. | Officer
+FR-13 | Book a walk-in appointment verified by SMS code, receive a pass, recover a lost pass, and be checked in by a CSR. | Visitor, CSR
+FR-14 | Raise support requests and complaints; respond, update and close them. | Citizen, CSR
+FR-15 | Choose home delivery or centre collection; track delivery; confirm receipt or record handover at the centre. | Citizen, CSR
+FR-16 | View dashboard statistics and officer performance; select biometric-complete applications, process a printing batch and export a CSV register. | Director
+FR-17 | Create, edit and deactivate officer accounts; manage service centres, application fees, public announcements and maintenance mode. | Administrator
+FR-18 | Receive in-app notifications for key events (submission, decision, payment, booking, cancellation, check-in); administrators can broadcast notices. | All users
+FR-19 | Ask general questions through a landing-page assistant that has no access to accounts or actions. | Public
+TABLE 3
+Quality | How the system addresses it
+Security | Passwords are salted with BCrypt [2] (8–72 characters with upper case, lower case, digit and symbol). Every request checks the session role; state-changing forms carry session-bound tokens and booking changes use one-time confirmation tokens. OTP codes expire (email 10 min, SMS 3 min) with 5 attempts and a 60-second resend delay, following OWASP ASVS guidance [3].
+Privacy | Only needed data is collected. No raw biometric data and no card numbers are stored, and QR passes hold only the appointment reference. Handling is aligned with the Personal Data Protection Act [4].
+Data integrity and audit | Slot rows are locked while booking so the last place cannot be taken twice; bookings carry a version number; the schema has 33 foreign keys plus unique and check constraints. Review decisions, check-ins, biometric collections, referrals and payments store the staff identifier and a timestamp.
+Reliability and performance | Business operations are transactional. Conflicting saves show a friendly “reload and try again” message, and maintenance mode can pause the portal with a public notice. Pages are server-rendered with indexed lookups; no formal load testing was carried out.
+Usability and accessibility | Responsive layout, one consistent theme, inline validation messages, printable passes, a mobile menu and a status timeline; readable type, contrast, labelled controls and visible focus states aim at WCAG 2.2 [5]. The walk-in service covers citizens who cannot use the portal.
+Maintainability | Layered packages per module (controller, service, repository, model, DTO), constructor injection, a Maven build, and 324 automated tests across 64 test classes.
+TABLE 4
+
+Figure 6: Login portal for citizens and staff | 
+Figure 7: Registration with email and SMS verification
+
+Figure 8: NIC application form with validation | 
+Figure 9: Fee summary and simulated card payment
+
+Figure 10: Application tracking with progress stages | 
+Figure 11: QR appointment pass
+TABLE 5
+Screen | Design notes
+Landing page | Explains the two services, offers walk-in booking and QR pass recovery, and links to the process, FAQ and chatbot.
+Login and registration | One portal for citizens and staff. Registration unlocks one step at a time: email code, mobile code, then a password with live rule checks.
+Form and payment | Grouped sections with inline errors; payment shows the fee, delivery choice and card fields with a simulation notice.
+Tracking, booking and pass | A seven-stage timeline shows progress. Booking lists the published dates of the chosen centre; green days have free places. The pass can be downloaded or printed.
+TABLE 6
+Area | Technology | Purpose
+Language and framework | Java (JDK 17+), Spring Boot 4.1.0, Spring Web MVC [9] | Application platform, request mapping, dependency injection, transactions.
+Views | Thymeleaf [10], Tailwind CSS [11], custom government-theme.css, JavaScript | Server-rendered pages, responsive styling, interactive forms, calendar and notifications.
+Data access | Spring Data JPA, Hibernate [12], Microsoft JDBC driver | Object-relational mapping with 28 repositories; schema validated at start-up.
+Database | Microsoft SQL Server | Relational storage, constraints and row locking.
+Security | Spring Security Crypto (BCrypt), Bean Validation | Password hashing and input validation.
+Messaging | Spring Mail (Gmail SMTP), HTTP SMS gateway client | Email and SMS one-time codes and notices.
+QR codes | ZXing [13] (generate), jsQR [14] (webcam scan) | Appointment passes and check-in.
+Build and test | Maven [15], JUnit 5 [16], Spring Test with MockMvc, Mockito [17] | Build automation; unit, controller and integration tests.
+Collaboration | Git and GitHub [18], one branch per member | Version control, merging and review.
+TABLE 7
+Pattern | Where it is used | Benefit
+Model–View–Controller | Controllers map URLs to workflows; Thymeleaf templates render models. | Separates routing, rendering and logic.
+Repository [19] | 28 Spring Data JPA repositories, such as AppointmentRepository. | Keeps SQL out of business code and eases testing.
+Service layer | 41 @Service classes with @Transactional boundaries. | One place for rules and rollbacks.
+Observer [20] | NotificationPublisher announces an InAppNotificationEvent; InAppNotificationObserver stores it. | Modules request notifications without knowing how they are stored.
+Adapter | SmsSender interface with PhoneSmsSender; LlmClient interface with ChatCompletionsLlmClient. | Gateways can be replaced or mocked.
+Policy object | BookingChangePolicy holds the 72-hour and missed-appointment rules used by pages and server checks. | One definition of each rule.
+DTO and controller advice | Form and view records; advices supply form tokens, session identity and navigation data. | Prevents over-posting and repeated code.
+TABLE 8
+Module | Key features | Led by
+User management | Registration with email and SMS verification, login for all roles, BCrypt hashing, password reset, session identity. | Marickar
+Citizen applications | NIC and passport forms, drafts, uploads, identity linking, tracking timeline, correction and resubmission. | Jeniviya
+Verification and approval | Separate queues, document preview, approve, reject, correction, director referral, reviewed-application history. | Marickar
+Biometrics and appointments | Slot publishing, booking calendar, QR pass, webcam check-in, biometric record, booking change rules, row locking. | Weerakoon
+Renewal, replacement and delivery | Renewal and lost-document requests, delivery or collection choice, tracking, CSR handover. | Rithika
+Support and walk-in | SMS-verified walk-in booking and recovery, CSR walk-in desk, support requests and complaints. | Dharshan
+Payments, OTP, notifications, administration | Card validation, fees, receipts; email and SMS codes; in-app notifications and broadcasts; staff, centre and fee management; director dashboard and CSV export; maintenance mode and announcements; landing chatbot. | Shared
+TABLE 9
+Sprint | Weeks | Goal | Main stories | Planned effort
+1 | 1–3 | Citizen accounts and system administration | Registration and login, user accounts, roles, activity monitoring, OTP | 81 h
+2 | 4–6 | Citizen applications and documents | Apply for NIC or passport, upload documents, payment | 51 h
+3 | 7–9 | Application processing | Review, verify, approve and reject NIC and passport applications, notify citizens | 103 h
+4 | 10–12 | Biometrics and appointments | Publish slots, book with QR pass, check in and record collection | 33 h
+5 | 13–15 | Tracking, renewal, support and changes | Status tracking, maintenance, inquiries, complaints, tickets, renewals, replacement, delivery, booking changes | 110 h
+TABLE 10
+Member | Student ID | Major function | Repository commits*
+Weerakoon W M Y B | IT25100565 | Biometric and appointment management; administrator officer management; portal theme | 43
+Dharshan S | IT25100604 | Citizen support and service management (walk-in, support requests) | 30
+Jeniviya G A | IT25100689 | Citizen application management | 54
+Rithika R K | IT25100885 | Document renewal, replacement and delivery management | 41
+Marickar A A A | IT25101235 | User management; verification and approval management | 72
+TABLE 11
+Phase | Dates (2026) | Key milestones
+Set-up and foundations | 10–18 Aug | Repository created; first templates and tests; module packages for users, administration, applications, biometrics, walk-in and notifications.
+Core workflows | 20 Aug – 10 Sep | Payment module; NIC and passport verification queues; application drafts, uploads and tracking; renewal and replacement; first walk-in OTP booking.
+Extended services | 14–19 Sep | OTP module for email and SMS; delivery and collection; booking changes and walk-in services; officer and director screens; database schema snapshot.
+Design Document | 27 Sep | Group Design Document with use case, class and activity diagrams and ethical considerations submitted [7].
+Integration and hardening | 5–10 Oct | Landing-page assistant; government theme and landing redesign; maintenance mode and announcements; form tokens, locking and friendly conflict handling; wider test suite; final documentation.
+TABLE 12
+Member | Role and contribution | Challenges and how they were overcome | Lessons learned and reflection
+Weerakoon W M Y B
+IT25100565 | Major function: biometric and appointment management. Built slot publishing, the booking calendar, QR passes, the check-in and biometric desk and the booking-change rules. Also administrator officer management, the shared portal theme, the landing page redesign and the notification dropdown. Hardened the module with form tokens, row locking, tests and clearer officer screens. | Preventing double booking when requests arrive together: used row locks and version numbers and wrote tests for them. Local databases drifting from the code under schema validation: wrote migration scripts and a setup guide for teammates. Test runs failing because of environment settings: found the cause and ran tests through the IDE or PowerShell. | Concurrency rules need tests, not just code. Review your own module end to end before presenting it. Short, plain instructions help teammates upgrade safely. Went well: a complete, tested booking flow. Could improve: start tests earlier and agree one migration approach from the first sprint.
+Dharshan S
+IT25100604 | Major function: citizen support and service management (walk-in booking, support requests, CSR desk). | To be written by the student. | To be written by the student.
+Jeniviya G A
+IT25100689 | Major function: citizen application management (NIC and passport forms, drafts, uploads, tracking). | To be written by the student. | To be written by the student.
+Rithika R K
+IT25100885 | Major function: document renewal, replacement and delivery management. | To be written by the student. | To be written by the student.
+Marickar A A A
+IT25101235 | Major function: user management, verification and approval; OTP, payment and integration support. | To be written by the student. | To be written by the student.
+TABLE 13
+Item | Value
+Java source (main) | 199 files, about 18,800 lines
+HTML templates | 45 files, about 6,100 lines
+Controllers, services, repositories, entities | 33, 41, 28 and 26
+Database | 25 tables, 33 foreign keys (SQL Server)
+Automated tests | 324 test methods in 64 test classes
+Commits and merges | 240 commits, 37 merges (10 Aug – 10 Oct 2026)

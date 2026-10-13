@@ -1,0 +1,2699 @@
+
+--- PAGE 1 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+SE2030 : Software Engineering 
+ 
+Year 2 Semester 1 2026 
+ 
+ 
+BSc (Hons) in Information Technology 
+Assignment Title Group Assignment 
+Learning outcomes covered  LO 2 - 4 
+Assignment Mode Project 
+Maximum Marks 100 marks 
+Contribution to the Final 
+Grade 
+20% 
+Date published 3rd Week 
+Deadline for submissions 3rd Week, 10th Week, 13th Week 
+Mode of Submission Group Presentation and Report 
+ 
+Assignment Description 
+Overview 
+This assignment is designed to help you apply software engineering principles, including 
+SDLC stages, Agile practices, UML modeling, and design patterns, in a practical team -
+based project. You will work in pre -assigned groups to design and develop a real -world 
+system using Java. Over the course of the semester, your team will go through multiple 
+development phases, create a functional prototype, apply Agile (Scrum), demonstrate 
+your progress, and submit a final working system along with the required documentation. 
+ 
+- Groups: Already formed (6 members each) 
+- Platform: Java-based web application 
+- Assignment Weight: 20% of final module grade 
+Note: In this assignment, students will be assessed both individually and as part of a team 
+across all evaluation components. 
+ 
+Deliverables & Timeline 
+Phase Week Deliverables Marks Weightage 
+Proposal 
+Evaluation 
+Week 3 Proposal Presentation 70 marks 20% 
+Report  30 marks 
+Progress 
+Evaluation 
+Week 10 Progress Presentation 50 marks 30% 
+Design Document  50 marks 
+Final Evaluation 
+and Viva 
+Week 13 Final Presentation and 
+Viva 
+70 marks 50% 
+Final Report  30 marks 
+
+--- PAGE 2 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+Project Life Cycle and Deliverables 
+ 
+Phase 1: Project Proposal 
+• Week: 3 
+• Weight: 20% of the total project mark 
+• Components: Presentation and Proposal Report 
+ 
+Proposal Presentation Instructions 
+• Duration: 10 minutes presentation and 5 minutes Q&A 
+• Participation: All group members must actively participate. Each member must 
+present at least their assigned major function. 
+ 
+Proposal Presentation Content 
+ 
+Your presentation should clearly and concisely cover the following: 
+ 
+Presentation Section Details 
+1. Project Title and Group 
+Members’ Names 
+Mention the system name and list all group 
+members. 
+2. Introduction Brief overview of the project - Objectives and 
+purpose 
+3. System Overview Diagram A visual showing the overall system flow 
+4. Functional Requirements Key features and functionalities of the system 
+5. Non-Functional 
+Requirements 
+Qualities like performance, usability, security, etc. 
+6. Major Stakeholders / Users Who will use or benefit from the system 
+7. Six Major Functions (one 
+per member) 
+Identify the user of each function - Explain the main 
+tasks involved in each function 
+8. Minor Functions Supporting features such as login, logout, etc. 
+9. System Limitations / 
+Constraints 
+Any known assumptions, technical boundaries, or 
+restrictions 
+10. Project Timeline Weekly plan from Week 3 to Week 14 (include key 
+expected activities) 
+11. Conclusion Final remarks on the importance, feasibility, and 
+value of the proposed system 
+ 
+ 
+
+--- PAGE 3 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+Proposal Report Instructions 
+• Submission Format: Submit the report as a soft copy (PDF format) through the 
+designated platform. 
+• Length: Maximum 12–15 pages 
+• Submission: One report per group. Submit soft copy through the course 
+platform 
+• Purpose: This report is a formal document that supports your proposal 
+presentation. It should clearly outline your system idea, user needs, and project 
+plan. 
+Proposal Report Structure 
+Section (with Suggested Page 
+Count) 
+Details 
+1. Cover Page (1 page) Include:  
+• Project Title  
+• Group Members’ Names and Student IDs  
+• Module Name and Code (e.g., SE2030 – 
+Software Engineering)  
+• Submission Date 
+2. Introduction (1–2 pages) Provide a clear overview of the project. 
+Include: • What is the project about?  
+• Objectives or goals  
+• Target users or stakeholders  
+• Scope and limitations 
+3. System Overview Diagram (0.5–1 
+page) 
+Add a high-level diagram showing how your 
+system will work. It can be a simple block or 
+flow diagram. 
+4. Functional Requirements (1 page) Clearly list the main functions your system 
+must support. (e.g., user registration, 
+booking, notifications) 
+5. Non-Functional Requirements 
+(0.5–1 page) 
+Define quality aspects such as 
+performance, security, usability, or 
+scalability. 
+6. Major Stakeholders / Users (0.5–1 
+page) 
+Identify user roles like admin, customer, 
+staff, suppliers, etc. 
+7. Six Major Functions (2 pages) Assign one function to each group member. 
+For each, describe:  
+
+--- PAGE 4 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+• Who will use it  
+• What it does  
+• Expected outcome 
+8. Minor Functions (0.5 - 1 page) Mention common supportive functions 
+(e.g., login, password reset). 
+9. System Limitations / Constraints 
+(0.5 – 1 page) 
+Mention known constraints such as 
+platform limitations, expected device type, 
+or assumptions. 
+10. Simple Timeline (0.5–1 page) Create a basic timeline table from Week 3 to 
+Week 14.  
+For each key week, include what your group 
+plans to complete during that time.  
+11. Conclusion (0.5–1 page) Summarize your project idea and 
+emphasize why it's worth implementing.  
+Mention how your team plans to 
+successfully complete it. 
+ 
+ 
+Phase 2: Progress Presentation and Design Document 
+• Week: 10 
+• Weight: 30% of the total project mark (30 Marks) 
+• Components: System demonstration and Design Document 
+• Duration: 15 minutes System Demonstration and 5 minutes Q&A 
+• 75% of the project should be complete at this level.  
+• Participation: All group members must contribute and explain their progress, 
+especially on their assigned major function. 
+• Refer to the marking rubric to understand what will be evaluated during the 
+progress presentation, under both the system demonstration and the design 
+document sections. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 5 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+Design Document Preparation and Submission Instructions 
+• Submission Format: Submit the document as a soft copy (PDF format) through 
+the course web links. 
+• Length: Maximum 12–15 pages 
+• Submission: One report per group. Submit soft copy through the course 
+platform 
+• File name: <<Group ID>>.pdf 
+Design Document Structure 
+Component Details 
+1. Agile Sprint 
+Summaries 
+• Provide a summary of sprints completed so far 
+• Provide summaries of sprints to be completed 
+(Mention key deliverables and activities per sprint) 
+2. Final Use Case 
+Diagram 
+• Reflect Users and corresponding functions 
+3. Class Diagram • Show object-oriented structure and key relationships 
+4. Activity Diagrams • One Activity Diagram for each major function 
+5. Ethical Considerations • Describe any ethical concerns and how they are 
+addressed  
+• Example: data privacy, user consent, accessibility 
+ 
+ 
+Phase 3 - Final Presentation  
+• Week: 13 
+• Duration: 20 minutes System demonstration and 10 minutes Q&A 
+• Type: Team-based presentation and demonstration 
+• Expectations: 
+o Demonstrate a fully working system 
+o Each team member should present part of the system, especially their 
+assigned major function 
+o Explain how the system meets the defined requirements and objectives 
+o Highlight key features, technologies used, and any improvements made 
+based on earlier feedback 
+• Refer to the marking rubric to understand what will be evaluated during the final 
+presentation, under both the system demonstration and the final report 
+sections. 
+ 
+
+--- PAGE 6 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+ 
+Final Report Instructions 
+• File Type: PDF 
+• Length: Maximum 25 pages 
+• Submission Mode: One report per group. Submit soft copy through the course 
+platform 
+ 
+ 
+ 
+Final Report Structure 
+ 
+Section Details 
+1. Cover Page (1 page) Include the following details on the first page of your 
+report: 
+• Project Title 
+• Group Members’ Names and Student IDs 
+• Module Name and Code (e.g., SE2030 – 
+Software Engineering) 
+• Submission Date 
+2. Introduction (~1-2  
+pages) 
+Provide a clear overview of the project. 
+Include the following: 
+• Project Overview: Briefly describe what your 
+project is about. 
+• Objectives: State the main goals you aim to 
+achieve through the system. 
+• Target Users or Stakeholders: Identify who will 
+use the system or who is affected by it. 
+• Scope and Limitations: Clearly define what 
+the system will include and what is out of 
+scope. 
+3. Requirements (~2-3 
+pages) 
+Present the gathered requirements for the system in a 
+structured format. 
+Include: 
+• Functional Requirements: What the system 
+must do (e.g., user login, search functionality). 
+• Non-functional Requirements: Quality 
+aspects such as performance, usability, and 
+security. 
+
+--- PAGE 7 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+• Constraints or Assumptions: Any limitations 
+or assumptions made (e.g., must run on 
+Android, assumes users have internet access). 
+4. Design (~4 - 6 pages) Describe how the system is planned and structured 
+before coding begins. 
+Include: 
+• Use Case Diagram: A visual representation of 
+user interactions with the system. 
+• Database Design / ER Diagram: Show how 
+data is structured and related. 
+• UI Sketches/Screenshots and Descriptions: 
+Provide screenshots, wireframes, or written 
+descriptions of the user interface. 
+5. Implementation (~2 - 3 
+pages) 
+Explain how the system was built. 
+Include: 
+• Tools and Technologies Used: Mention 
+programming languages, IDEs, libraries, 
+frameworks, etc. 
+• Key Features Developed: List core features 
+that were implemented. 
+• Screenshots of Core Functions: Add images 
+showing working parts of your system. 
+6. Project Management 
+(~1–2 pages) 
+Describe how the team organized the development 
+process. 
+Include: 
+• Agile Approach and Sprint Summary: Show 
+how sprints were planned and executed. 
+• Task Distribution Among Team Members: 
+Explain who did what. 
+• Development Phases or Timeline: Provide a 
+summary of key milestones and their timelines. 
+7. Conclusion & Future 
+Work (~1- 2 pages) 
+Summarize the project outcome and reflect on future 
+improvements. 
+Include: 
+• Summary of Achievements: What was 
+completed successfully. 
+• Challenges Faced: Key difficulties or blockers 
+during the project. 
+
+--- PAGE 8 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+• Suggestions for Improvement or Extension: 
+What could be done better or added if more 
+time/resources were available. 
+8. Individual Contribution, 
+Teamwork & Lessons 
+Learned (~1- 2 pages) 
+In this section, each student should reflect on their 
+personal involvement and team experience during 
+the project. Please include the following: 
+• Your specific role in the project: What tasks or 
+responsibilities did you handle? 
+• Challenges you faced: Describe any 
+difficulties you encountered during the project. 
+• How you overcame those challenges: Explain 
+the steps you took to solve the problems. 
+• Key lessons learned: What did you learn from 
+working on this project? (about teamwork, 
+tools, time management, etc.) 
+• Reflection on the project: What aspects of the 
+project went well? What could have been 
+improved? 
+Note:  
+• Use a table where each row represents a group 
+member's reflection. 
+• Each student in the group must complete one 
+row, explaining their own role and experience in 
+the project. 
+9. References (~1- 2 pages) List all the external resources you referred to in your 
+project. 
+Include: 
+• Books, websites, tools, APIs, and libraries. 
+• Follow the IEEE referencing style strictly. 
+10. Appendix (optional) – 
+Max 2 pages 
+Include any supplementary materials. 
+You may attach: 
+• GitHub or repository link to your source code 
+• Additional diagrams 
+• Meeting minutes, sprint logs, or planning 
+documents 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 9 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+Marking Rubrics 
+Project Proposal Presentation and Report - Marking Rubric 
+Total: 100 Marks (Presentation: 70 | Report: 30) 
+Proposal Presentation (70 marks) 
+Criteria 
+(Total Marks) 
+Excellent Good  Satisfactory  Needs 
+Improvem
+ent  
+Poor 
+Problem 
+Analysis 
+(8 marks) 
+Clear, 
+concise 
+explanation 
+of problem, 
+purpose, 
+goals, and 
+background 
+(6–8 marks) 
+Clear 
+explanatio
+n with 
+minor 
+omissions 
+(5–6 
+marks) 
+Covers basic 
+context, 
+lacks clarity 
+in purpose 
+(3–5 marks) 
+Lacks 
+detail and 
+clarity (2–3 
+marks) 
+Not 
+understanda
+ble or 
+irrelevant (0–
+2 marks) 
+System 
+Overview 
+Diagram  
+(8 marks) 
+Well-
+structured, 
+easy-to-
+understand 
+diagram 
+showing 
+component
+s and 
+relationshi
+ps (6–8 
+marks) 
+Mostly 
+clear 
+diagram 
+with minor 
+issues (5–
+6 marks) 
+Diagram 
+exists but 
+lacks clarity 
+or 
+completenes
+s (3–5 marks) 
+Poorly 
+presented 
+diagram (2–
+3 marks) 
+No 
+meaningful 
+diagram (0–2 
+marks) 
+Functional 
+Requirement
+s 
+ (10 marks) 
+All major 
+functions 
+well 
+defined, 
+relevant, 
+and clearly 
+explained 
+(8–10 
+marks) 
+Most 
+functions 
+defined 
+with minor 
+gaps (6–8 
+marks) 
+Basic 
+functions 
+mentioned 
+but not 
+clearly 
+elaborated 
+(4–6 marks) 
+Few 
+unclear or 
+irrelevant 
+functions 
+(2–4 marks) 
+Requirement
+s missing or 
+incorrect (0–
+2 marks) 
+Non-
+Functional 
+Requirement
+s  
+(7 marks) 
+Quality 
+attributes 
+like 
+usability, 
+performanc
+e, and 
+security 
+Mostly 
+relevant 
+quality 
+aspects 
+included 
+(4–6 
+marks) 
+Some quality 
+attributes 
+covered (3–4 
+marks) 
+Limited or 
+unclear 
+attributes 
+(1–3 marks) 
+Missing or 
+incorrect 
+content (0–1 
+marks) 
+
+--- PAGE 10 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+clearly 
+presented 
+(6–7 marks) 
+Stakeholder 
+Identification 
+(7 marks) 
+All relevant 
+stakeholder
+s identified 
+and roles 
+explained 
+(6–7 marks) 
+Most 
+stakehold
+ers 
+identified 
+(4–6 
+marks) 
+Basic 
+stakeholder 
+list with 
+limited role 
+explanation 
+(3–4 marks) 
+Vague or 
+incomplete 
+stakeholde
+r info (1–3 
+marks) 
+No 
+stakeholder 
+information 
+(0–1 marks) 
+Assigned 
+Functions (6 
+Major + 
+Minor) (10 
+marks) 
+ 
+6 major 
+functions 
+mapped to 
+users and 
+tasks + 
+minor 
+functions 
+explained 
+(8–10 
+marks) 
+Functions 
+assigned 
+with minor 
+gaps (6–8 
+marks) 
+Most 
+functions 
+assigned but 
+roles not 
+clearly 
+defined (4–6 
+marks) 
+Few 
+functions 
+assigned, 
+unclear 
+ownership 
+(2–4 marks) 
+No 
+functional 
+mapping (0–
+2 marks) 
+System 
+Limitations / 
+Constraints 
+(7 marks) 
+Realistic, 
+clearly 
+explained 
+limitations 
+and 
+constraints 
+(6–7 marks) 
+Reasonabl
+e 
+limitations 
+included 
+(4–6 
+marks) 
+Basic 
+limitations 
+mentioned 
+but not 
+discussed 
+(3–4 marks) 
+Vague or 
+incomplete 
+constraints 
+(1–3 marks) 
+No mention 
+of limitations 
+(0–1 marks) 
+Team 
+Coordination 
+& Delivery  
+(7 marks) 
+Smooth 
+transitions, 
+equal 
+participatio
+n, well-
+managed 
+time (6–7 
+marks) 
+Minor 
+issues in 
+time or 
+transitions 
+(4–6 
+marks) 
+Unequal 
+participation 
+or 
+unbalanced 
+timing (3–4 
+marks) 
+Poor 
+coordinatio
+n, evident 
+confusion 
+(1–3 marks) 
+No 
+coordination 
+or 
+disorganized 
+(0–1 marks) 
+Communicat
+ion Skills 
+ (6 marks) 
+Clear, 
+confident 
+speaking; 
+professiona
+l language 
+and 
+effective 
+visuals (5–6 
+marks) 
+Mostly 
+clear with 
+minor 
+errors (4–5 
+marks) 
+Adequate 
+presentation
+; some 
+language/cla
+rity issues 
+(2–4 marks) 
+Unclear or 
+unconfiden
+t delivery 
+(1–2 marks) 
+Difficult to 
+understand 
+(0–1 marks) 
+Report (30 marks) 
+
+--- PAGE 11 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+Criteria 
+(Total Marks) 
+Excellent Good  Satisfactory  Needs 
+Improvem
+ent  
+Poor 
+Introduction 
+(4 marks) 
+Clear and 
+detailed 
+project 
+overview. 
+Objectives, 
+users, 
+scope, and 
+limitations 
+are well-
+defined and 
+easy to 
+understand
+. (4 marks) 
+Mostly 
+clear with 
+minor 
+missing 
+details. 
+(3–3.5 
+marks) 
+Basic 
+overview, 
+lacks depth 
+in objectives 
+or scope. (2–
+2.5 marks) 
+Weak 
+explanation
+, vague or 
+unclear in 
+several 
+parts. (1.5–
+2 marks) 
+Very 
+minimal, 
+unclear, or 
+irrelevant 
+introduction. 
+(1 mark) 
+System 
+Overview 
+Diagram (3 
+marks) 
+Clear and 
+relevant 
+diagram 
+showing 
+high-level 
+system 
+workflow, 
+visually 
+easy to 
+follow. (3 
+marks) 
+Mostly 
+clear 
+diagram, 
+minor 
+missing 
+labels or 
+details. 
+(2.5 
+marks) 
+Basic 
+diagram 
+present but 
+lacks clarity 
+or detail. (2 
+marks) 
+Poorly 
+structured 
+or 
+incomplete 
+diagram. 
+(1.5 marks) 
+Very 
+minimal, 
+unclear, or 
+irrelevant 
+diagram. (1 
+mark) 
+Functional 
+Requirement
+s (3 marks) 
+Well-
+structured, 
+complete 
+list of main 
+functions 
+with clear 
+description
+s of 
+purpose. (3 
+marks) 
+Mostly 
+clear, 
+some 
+functions 
+lack 
+detail. (2.5 
+marks) 
+Basic list, 
+unclear or 
+incomplete 
+functions. (2 
+marks) 
+Limited or 
+vague 
+listing, 
+lacks 
+explanation
+. (1.5 
+marks) 
+Very minimal 
+or irrelevant 
+functions 
+listed. (1 
+mark) 
+Non-
+Functional 
+Requirement
+s (3 marks) 
+Clearly 
+defined 
+quality 
+aspects 
+(performan
+ce, 
+usability, 
+Mostly 
+clear, 
+minor 
+missing 
+attributes. 
+(2.5 
+marks) 
+Basic non-
+functional 
+points listed, 
+lacks clarity. 
+(2 marks) 
+Limited or 
+vague non-
+functional 
+requiremen
+ts. (1.5 
+marks) 
+Very minimal 
+or unclear 
+statements. 
+(1 mark) 
+
+--- PAGE 12 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+security, 
+etc.) 
+relevant to 
+the system. 
+(3 marks) 
+Stakeholders 
+/ Users (3 
+marks) 
+All major 
+user roles 
+identified 
+and 
+described 
+with their 
+expected 
+interaction
+s with the 
+system. (3 
+marks) 
+Mostly 
+clear, 
+minor 
+missing 
+roles. (2.5 
+marks) 
+Basic user 
+roles listed 
+with little 
+description. 
+(2 marks) 
+Limited or 
+unclear list 
+of 
+stakeholde
+rs. (1.5 
+marks) 
+Minimal or 
+irrelevant 
+information 
+given. (1 
+mark) 
+Major 
+Functions (5 
+marks) 
+Six major 
+functions 
+described 
+in detail: 
+who uses 
+it, what it 
+does, 
+expected 
+outcome 
+clearly 
+stated for 
+each. (5 
+marks) 
+Mostly 
+complete 
+with small 
+gaps in 
+some 
+functions. 
+(4–4.5 
+marks) 
+Basic 
+descriptions 
+provided, 
+several 
+missing 
+details. (3–
+3.5 marks) 
+Limited or 
+vague 
+functions 
+with poor 
+explanation
+. (2–2.5 
+marks) 
+Very minimal 
+or unclear 
+descriptions. 
+(1 mark) 
+System 
+Limitations / 
+Constraints 
+(3 marks) 
+Clear and 
+realistic 
+constraints 
+or 
+assumption
+s identified, 
+relevant to 
+the system 
+design. (3 
+marks) 
+Mostly 
+clear, 
+minor 
+missing 
+details. 
+(2.5 
+marks) 
+Basic points 
+mentioned, 
+not fully 
+explained. (2 
+marks) 
+Limited or 
+vague 
+constraints 
+listed. (1.5 
+marks) 
+Very minimal 
+or unclear 
+statements. 
+(1 mark) 
+Timeline & 
+Conclusion 
+(3 marks) 
+Well-
+structured 
+timeline 
+table with 
+weekly 
+Mostly 
+clear, 
+minor 
+missing 
+details in 
+Basic 
+timeline and 
+conclusion, 
+lacks depth 
+Limited or 
+vague 
+timeline 
+and 
+unclear 
+Very minimal 
+or poorly 
+written 
+timeline and 
+
+--- PAGE 13 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+milestones, 
+clear 
+summary 
+highlighting 
+importance 
+of project 
+and team’s 
+completion 
+approach. 
+(3 marks) 
+timeline or 
+conclusio
+n. (2.5 
+marks) 
+or clarity. (2 
+marks) 
+conclusion. 
+(1.5 marks) 
+conclusion. 
+(1 mark) 
+Written 
+Communicat
+ion (3 marks) 
+Well-
+written 
+report with 
+logical flow, 
+no 
+grammar 
+errors, and 
+proper 
+formatting 
+throughout. 
+(3 marks) 
+Mostly 
+well-
+written, 
+minor 
+grammar 
+or 
+formatting 
+issues. 
+(2.5 
+marks) 
+Mostly well-
+written, 
+minor 
+grammar or 
+formatting 
+issues. (2.5 
+marks) 
+Weak 
+writing 
+skills, 
+frequent 
+errors, 
+unclear 
+sentences. 
+(1.5 marks) 
+Very minimal 
+writing 
+quality, hard 
+to read or 
+poorly 
+structured. 
+(1 mark)  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 14 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+Progress Presentation - Marking Rubric 
+Total: 100 Marks (System Demonstration: 50 | Design Document: 50) 
+System Demonstration (50 marks) 
+Criteria Excellent  Good  Satisfactor
+y  
+Needs 
+Improvemen
+t  
+Poor  
+UI Design 
+(10 marks) 
+Most 
+planned 
+screens 
+are 
+completed 
+with a 
+clean, 
+consistent, 
+and 
+profession
+al design. 
+Navigation 
+is smooth, 
+visually 
+appealing, 
+and user-
+friendly. (9–
+10 marks) 
+UI mostly 
+complete 
+and easy to 
+navigate, 
+minor layout 
+or visual 
+issues 
+present. (7–8 
+marks) 
+Basic 
+screens 
+available 
+but 
+incomplete 
+or 
+inconsistent
+, reducing 
+usability. (5–
+6 marks) 
+UI partially 
+developed 
+with poor 
+layout, 
+unclear 
+navigation, 
+or missing 
+screens. (3–4 
+marks) 
+Very 
+minimal UI 
+progress, 
+most 
+screens 
+missing or 
+not 
+functional 
+enough to 
+navigate. 
+(1–2 
+marks) 
+CRUD 
+Operations 
+(15 marks) 
+CRUD 
+features 
+(Create, 
+Read, 
+Update, 
+Delete) 
+working 
+correctly 
+for most 
+modules, 
+smooth 
+data 
+handling 
+Most CRUD 
+operations 
+functional, 
+minor bugs 
+or 
+incomplete 
+features. 
+(10–12 
+marks) 
+Basic CRUD 
+operations 
+work only for 
+some 
+modules, 
+inconsistent 
+results. (7–9 
+marks) 
+CRUD 
+operations 
+partially 
+working, 
+frequent 
+errors, 
+missing main 
+features. (4–
+6 marks) 
+Very 
+minimal 
+CRUD 
+functionali
+ty, most 
+operations 
+fail or are 
+not 
+implement
+ed. (1–3 
+marks) 
+
+--- PAGE 15 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+with no 
+major 
+errors. (13–
+15 marks) 
+Database 
+Connection 
+(10 marks) 
+Stable DB 
+connection 
+establishe
+d, data 
+stored and 
+retrieved 
+correctly in 
+all tested 
+cases. (9–
+10 marks) 
+Connection 
+works with 
+rare issues 
+or 
+occasional 
+delays. (7–8 
+marks) 
+Basic 
+connection 
+functional 
+but 
+sometimes 
+fails or 
+incomplete 
+queries. (5–
+6 marks) 
+Unstable 
+connection, 
+frequent 
+errors in 
+storing/retrie
+ving data. (3–
+4 marks) 
+Very weak 
+or non-
+functional 
+connectio
+n, 
+store/retri
+eve mostly 
+fails. (1–2 
+marks) 
+Validations 
+(5 marks) 
+All 
+important 
+input fields 
+validated, 
+preventing 
+empty or 
+incorrect 
+data 
+entries, 
+improving 
+data 
+quality. (5 
+marks) 
+Most key 
+fields 
+validated, 
+minor gaps 
+in coverage. 
+(4 marks) 
+Basic 
+validations 
+implemente
+d, some 
+inputs 
+unchecked, 
+allowing 
+errors. (3 
+marks) 
+Few 
+validations 
+applied, 
+most inputs 
+not 
+validated, 
+frequent 
+invalid data. 
+(2 marks) 
+Very 
+minimal or 
+no 
+validations 
+visible 
+during 
+demo. (1 -
+0 marks) 
+Teamwork (5 
+marks) 
+All 
+members 
+work well 
+together, 
+share 
+equal 
+responsibil
+ity, and 
+support 
+each other 
+Good 
+teamwork, 
+minor gaps 
+in 
+contribution 
+balance or 
+transitions. 
+(4 marks) 
+Basic 
+teamwork, 
+some 
+members 
+dominate, 
+uneven 
+involvement
+. (3 marks) 
+Limited 
+collaboration
+, roles 
+unclear, poor 
+coordination 
+in demo. (2 
+marks) 
+Very 
+minimal 
+teamwork, 
+one or two 
+members 
+present 
+almost 
+everything, 
+others 
+
+--- PAGE 16 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+during the 
+demo. 
+Smooth 
+handovers 
+between 
+presenters. 
+(5 marks) 
+inactive. (1 
+mark) 
+Oral 
+Communica
+tion Skills (5 
+marks) 
+All 
+members 
+speak 
+clearly, 
+confidently
+, and 
+profession
+ally, use 
+correct 
+technical 
+terms, and 
+answer 
+questions 
+directly. (5 
+marks) 
+Mostly clear 
+communicat
+ion, minor 
+hesitation or 
+wording 
+issues. (4 
+marks) 
+Understand
+able but 
+lacking 
+detail or 
+confidence, 
+occasional 
+unclear 
+points. (3 
+marks) 
+Often 
+unclear, 
+hesitant, or 
+struggle to 
+explain 
+features 
+well. (2 
+marks) 
+Explanatio
+ns very 
+minimal, 
+unclear, or 
+incorrect, 
+hard for 
+audience 
+to follow. 
+(1 mark) 
+Criteria Excellent  Good  Satisfactor
+y  
+Needs 
+Improvemen
+t  
+Poor  
+Agile Sprint 
+Summary (10 
+marks) 
+Detailed 
+summary of 
+sprints with 
+clear task 
+allocation, 
+completed 
+tasks, 
+backlog 
+tracking, 
+and 
+progress 
+Mostly 
+clear, 
+minor 
+omissions 
+in task 
+tracking 
+or backlog 
+details. 
+(7–8) 
+Basic sprint 
+summary, 
+lacks 
+detailed 
+task 
+allocation 
+or progress 
+explanation
+. (5–6) 
+Limited or 
+vague sprint 
+documentati
+on, unclear 
+task 
+distribution. 
+(3–4) 
+Very minimal 
+or unclear 
+sprint 
+summary 
+provided. (1–
+2) 
+Design Document (50 marks) 
+
+--- PAGE 17 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+clearly 
+documente
+d. (9–10) 
+Use Case 
+Diagram (10 
+marks) 
+Accurate 
+and 
+complete 
+diagram 
+with all 
+actors, use 
+cases, 
+relationship
+s, and 
+proper 
+labeling. 
+(9–10) 
+Mostly 
+correct 
+with 
+minor 
+errors or 
+missing 
+use 
+cases. (7–
+8) 
+Basic 
+diagram 
+with some 
+missing 
+elements or 
+unclear 
+relationship
+s. (5–6) 
+Poorly 
+structured, 
+several 
+inaccuracies, 
+confusing 
+relationships. 
+(3–4) 
+Very minimal 
+or irrelevant 
+diagram 
+provided. (1–
+2) 
+Class 
+Diagram (10 
+marks) 
+Well-
+structured 
+diagram 
+showing 
+key 
+classes, 
+attributes, 
+methods, 
+and 
+relationship
+s clearly 
+and 
+accurately. 
+(9–10) 
+Mostly 
+correct 
+diagram 
+with few 
+relationsh
+ip or 
+naming 
+errors. (7–
+8) 
+Basic class 
+diagram 
+present, 
+lacks 
+details or 
+some 
+errors. (5–6) 
+Poorly 
+designed, 
+unclear or 
+incomplete 
+relationships. 
+(3–4) 
+Very minimal 
+or unclear 
+diagram. (1–
+2) 
+Activity 
+Diagrams (10 
+marks) 
+Clear and 
+logical 
+flows for 
+each major 
+function, 
+with well-
+labeled 
+steps and 
+Mostly 
+correct 
+diagrams 
+with 
+minor 
+missing 
+flows or 
+Basic 
+activity 
+diagrams, 
+lacking 
+clarity or 
+depth in 
+Limited or 
+unclear 
+diagrams with 
+incomplete 
+flows. (3–4) 
+Very minimal 
+or irrelevant 
+activity 
+diagrams. 
+(1–2) 
+
+--- PAGE 18 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+decisions, 
+showing 
+correct 
+process 
+logic. (9–10) 
+details. 
+(7–8) 
+several 
+areas. (5–6) 
+Ethical 
+Consideratio
+ns (10 
+marks) 
+Detailed 
+discussion 
+on data 
+privacy, 
+accessibilit
+y, fairness, 
+security, 
+with 
+solutions or 
+mitigation 
+approaches 
+clearly 
+proposed. 
+(9–10) 
+Most 
+important 
+ethical 
+issues 
+identified, 
+some 
+lacking 
+depth. (7–
+8) 
+Basic 
+mention of 
+ethical 
+points, 
+lacks 
+explanation 
+or 
+solutions. 
+(5–6) 
+Few unclear 
+ethical 
+points, vague 
+or generic 
+discussion. 
+(3–4) 
+Very minimal 
+or no 
+meaningful 
+ethical 
+consideratio
+ns included. 
+(1–2) 
+ 
+Final Presentation and Final Report - Marking Rubric 
+Total: 100 Marks (System Demonstration and Viva: 70 | Final Report: 30) 
+System Demonstration and Viva (70 marks) 
+Criteria Excellent  Good  Satisfactor
+y  
+Needs 
+Improveme
+nt  
+Poor  
+User 
+Interface 
+Design & 
+Usability(10 
+marks) 
+Clean and 
+professional 
+design. All 
+screens 
+complete 
+with 
+consistent 
+layout, 
+colors, and 
+navigation 
+flow. User-
+friendly and 
+Well-
+designed 
+screens 
+with good 
+layout and 
+navigation. 
+Minor 
+inconsisten
+cies or 
+small visual 
+issues but 
+overall 
+Basic 
+screen 
+design 
+present 
+with some 
+alignment 
+or flow 
+issues. 
+Limited 
+visual 
+appeal and 
+Incomplete 
+screens 
+with poor 
+layout and 
+unclear 
+navigation. 
+Design 
+looks 
+unpolished 
+and not 
+user-
+Very 
+minimal or 
+unclear UI. 
+Screens 
+missing, 
+broken 
+navigation, 
+or poor 
+visual 
+presentatio
+n.(0–2) 
+
+--- PAGE 19 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+visually 
+appealing 
+interface 
+that meets 
+requirement
+s perfectly. 
+(8–10) 
+user-
+friendly.(6–
+8) 
+usability.(4–
+6) 
+friendly.(2–
+4) 
+CRUD 
+Operations & 
+Input 
+Validation(12 
+marks) 
+All CRUD 
+operations 
+(create, 
+read, 
+update, 
+delete) work 
+flawlessly 
+across all 
+modules. 
+Data is 
+stored and 
+retrieved 
+accurately in 
+real time. 
+Strong input 
+validations 
+implemente
+d on all 
+relevant 
+fields, 
+preventing 
+invalid or 
+harmful 
+data 
+entries.(10–
+12) 
+Most CRUD 
+operations 
+functional 
+with only 
+minor 
+errors. 
+Input 
+validations 
+applied to 
+most fields 
+with few 
+gaps or 
+inconsisten
+cies. 
+Overall 
+reliable 
+functionalit
+y.(8–10) 
+Basic 
+CRUD 
+operations 
+working for 
+some 
+modules, 
+but several 
+incomplete 
+or partially 
+working. 
+Limited 
+validation 
+checks; 
+some 
+invalid data 
+accepted.(6
+–8) 
+CRUD 
+functions 
+often fail or 
+are 
+unreliable. 
+Minimal 
+validation 
+on forms, 
+allowing 
+frequent 
+incorrect 
+data entry. 
+User 
+experience 
+disrupted 
+by 
+errors.(3–6) 
+Very 
+minimal 
+CRUD 
+implementa
+tion, most 
+operations 
+fail or are 
+missing. 
+Little to no 
+validation, 
+leading to 
+frequent 
+data errors 
+or broken 
+application 
+flow.(0–3) 
+DB 
+Connectivity 
+(5 marks) 
+Connects 
+reliably to 
+the 
+database; 
+store and 
+retrieve 
+work 
+smoothly 
+through the 
+UI with no 
+Stable 
+connection; 
+store/retrie
+ve work 
+with only 
+minor, 
+infrequent 
+issues.(4) 
+Connection 
+works but 
+inconsisten
+t; 
+occasional 
+failures or 
+retries 
+needed for 
+store/retriev
+e.(3) 
+Unstable 
+connection; 
+frequent 
+errors when 
+trying to 
+store or 
+retrieve 
+data via the 
+UI.(2) 
+Connection 
+is very 
+weak; 
+store/retriev
+e mostly fail 
+or require 
+manual 
+workaround
+s (but some 
+minimal 
+connectivity 
+
+--- PAGE 20 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+errors during 
+the demo.(5) 
+is shown) 
+OR No DB 
+connection 
+(0–1) 
+Integration & 
+Stability (10 
+marks) 
+All 
+modules/scr
+eens are 
+seamlessly 
+integrated. 
+Navigation 
+is smooth, 
+data flows 
+correctly 
+between 
+features. 
+The system 
+runs without 
+errors or 
+crashes 
+during the 
+entire 
+demo.(8–10) 
+Modules 
+mostly 
+integrated 
+with minor 
+linking or 
+data flow 
+issues. The 
+system is 
+stable with 
+only 
+occasional, 
+small 
+errors.(6–8) 
+Some 
+modules 
+are partially 
+connected, 
+causing 
+inconsisten
+t navigation 
+or data 
+flow. A few 
+noticeable 
+errors occur 
+during the 
+demo.(4–6) 
+Many 
+modules 
+are not 
+well-
+integrated, 
+broken links 
+or repeated 
+crashes 
+disrupt 
+workflow. 
+System 
+stability is 
+low. (2–4) 
+Very 
+minimal 
+integration; 
+modules 
+appear 
+isolated 
+with 
+frequent 
+crashes or 
+severe 
+errors 
+making the 
+system hard 
+to use. OR 
+No 
+integration 
+(0–2) 
+Application 
+of Minimum 
+1 Design 
+Patterns (5 
+marks) 
+At least 2 
+relevant 
+patterns are 
+implemente
+d correctly, 
+well-integrat
+ed across 
+modules, 
+and clearly 
+justified with 
+code 
+references 
+(where/why 
+used and 
+benefits).(5) 
+patterns 
+applied and 
+generally 
+correct, but 
+with minor 
+implement
+ation gaps 
+or brief 
+justification
+. Integration 
+is mostly 
+consistent.(
+4) 
+At least 1 
+pattern is 
+applied 
+correctly; 
+the second 
+is 
+partial/wea
+k or not 
+clearly 
+integrated. 
+Justification 
+is basic.(3) 
+Patterns are 
+attempted 
+but 
+misapplied 
+or not 
+relevant to 
+the 
+problem. 
+Justification 
+is unclear 
+and 
+integration 
+is poor.(2) 
+Minimal 
+evidence of 
+pattern use 
+(e.g., 
+mentioned 
+but not 
+implemente
+d, or 
+superficial 
+usage). 
+Justification 
+missing or 
+very weak. 
+OR No 
+patterns 
+used (0 -1) 
+Teamwork & 
+Demo 
+Delivery (8 
+marks) 
+Demo flows 
+smoothly 
+with clear 
+handovers 
+between 
+team 
+Well-
+coordinate
+d demo 
+with minor 
+timing or 
+transition 
+Basic 
+coordinatio
+n; some 
+uneven 
+participatio
+n or 
+Poor 
+coordinatio
+n, unclear 
+role 
+distribution. 
+Frequent 
+One or two 
+members 
+present 
+most of the 
+demo while 
+others are 
+
+--- PAGE 21 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+members. 
+Everyone 
+knows their 
+role, 
+contributes 
+equally, and 
+delivers 
+confidently 
+within the 
+allocated 
+time. (7–8) 
+issues. 
+Most 
+members 
+actively 
+contribute 
+and show 
+good 
+preparation
+.(5–6) 
+awkward 
+transitions. 
+Presentatio
+n runs but 
+lacks 
+smooth 
+flow.(3–4) 
+pauses, 
+confusion, 
+or repeated 
+attempts 
+during the 
+demo. (1–2) 
+passive. 
+Flow is very 
+disorganize
+d or 
+incomplete. 
+OR No 
+teamwork 
+evident (0 -
+1) 
+Individual 
+Contribution 
+& Code 
+Understandi
+ng(15 marks) 
+Excellent 
+explanation
+s. Can 
+answer any 
+question 
+directly. 
+Know the 
+code fully. 
+Answer 
+questions 
+confidently 
+(9–10) 
+Good 
+explanation
+s. Can 
+answer 
+most 
+questions 
+clearly. 
+Understand
+s the code 
+well. 
+Responds 
+with minor 
+hesitation.(
+7–8) 
+Basic 
+explanation
+s. Answers 
+some 
+questions 
+but lacks 
+detail. 
+Understand
+s only parts 
+of the code. 
+Shows 
+some 
+uncertainty 
+when 
+responding.
+(5–6) 
+Limited 
+explanation
+s. Struggles 
+to answer 
+several 
+questions. 
+Partial 
+understandi
+ng of the 
+code. 
+Responses 
+are unclear 
+or 
+hesitant.(3–
+4) 
+Very 
+minimal 
+explanation
+s. Cannot 
+answer 
+most 
+questions. 
+Shows little 
+understandi
+ng of the 
+code. 
+Responses 
+are 
+incomplete 
+or 
+incorrect. 
+(0–2) 
+Oral 
+Communicat
+ion Skills (5 
+marks) 
+Speaks 
+clearly, 
+confidently, 
+and 
+professional
+ly. Uses 
+appropriate 
+tone and 
+technical 
+vocabulary. 
+Maintains 
+good pace, 
+engages the 
+audience, 
+and delivers 
+without 
+Speech is 
+mostly 
+clear with 
+minor 
+hesitation 
+or filler 
+words. 
+Uses 
+technical 
+terms 
+appropriate
+ly. Pace and 
+tone are 
+generally 
+good.(4) 
+Speech is 
+understand
+able but 
+sometimes 
+unclear, 
+hesitant, or 
+monotone. 
+Limited use 
+of technical 
+vocabulary. 
+(3) 
+Speech is 
+often 
+unclear, too 
+fast or too 
+slow, with 
+frequent 
+pauses or 
+poor word 
+choice. 
+Hard for the 
+audience to 
+stay 
+engaged.(2) 
+Speech is 
+very 
+unclear, 
+disorganize
+d, or lacking 
+confidence. 
+Audience 
+finds it 
+difficult to 
+follow or 
+understand 
+the 
+message.(0
+–1) 
+
+--- PAGE 22 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+hesitation. 
+(5) 
+Final Report (30 marks) 
+Criteria Excellent  Good  Satisfactor
+y  
+Needs 
+Improveme
+nt  
+Poor  
+Introduction 
+(4 marks) 
+Clear and 
+detailed 
+project 
+overview. 
+Objectives, 
+users, 
+scope, and 
+limitations 
+are well-
+defined and 
+easy to 
+understand. 
+(4) 
+Mostly 
+clear with 
+minor 
+omissions. 
+(3–3.5) 
+Basic 
+overview, 
+lacks depth 
+or misses 
+key 
+elements. 
+(2–2.5) 
+Weak and 
+unclear 
+introductio
+n with 
+limited 
+relevance. 
+(1.5–2) 
+Very 
+minimal or 
+unclear 
+introductio
+n. (1) 
+Requirement
+s (4 marks) 
+Functional, 
+non-
+functional, 
+and 
+constraints 
+well-defined 
+and 
+structured. 
+(4) 
+Mostly 
+clear, few 
+missing 
+elements. 
+(3–3.5) 
+Basic list of 
+requiremen
+ts, lacks 
+clarity. (2–
+2.5) 
+Limited or 
+vague 
+description 
+of 
+requiremen
+ts. (1.5–2) 
+Very 
+minimal or 
+unclear 
+requiremen
+ts. (1) 
+Design (6 
+marks) 
+Accurate 
+and 
+complete 
+Use Case, 
+ER diagram, 
+and UI 
+sketches, 
+clearly 
+explained. 
+(5–6) 
+Mostly 
+correct with 
+minor 
+errors. (4–5) 
+Basic 
+diagrams, 
+missing 
+depth or 
+relationship
+s. (3–4) 
+Poorly 
+structured 
+or unclear 
+diagrams. 
+(1.5–2) 
+Very 
+minimal or 
+hard-to-
+understand 
+design. (1) 
+Implementat
+ion (4 marks) 
+Clear 
+explanation 
+of tools, 
+features, 
+and 
+screenshots 
+Mostly 
+described, 
+few missing 
+details. (3–
+3.5) 
+Basic 
+information 
+provided 
+only. (2–2.5) 
+Limited or 
+unclear 
+description 
+of 
+implementa
+tion. (1.5–2) 
+Very 
+minimal or 
+unclear 
+explanation
+. (1) 
+
+--- PAGE 23 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+of key 
+functions. 
+(4) 
+Project 
+Management 
+(3 marks) 
+Agile 
+approach, 
+sprint 
+summaries, 
+and task 
+distribution 
+clearly 
+explained 
+with a 
+timeline of 
+milestones. 
+(3) 
+Mostly 
+clear with 
+minor 
+omissions. 
+(2.5) 
+Basic 
+timeline or 
+tasks listed. 
+(2) 
+Limited or 
+unclear 
+planning 
+details. 
+(1.5) 
+Very 
+minimal or 
+no evidence 
+of project 
+manageme
+nt. (1) 
+Conclusion 
+& Future 
+Work (3 
+marks) 
+Strong 
+summary, 
+key 
+challenges 
+addressed, 
+and realistic 
+suggestions 
+for 
+improvemen
+t. (3) 
+Mostly 
+clear with 
+minor gaps. 
+(2.5) 
+Basic 
+summary 
+with limited 
+depth. (2) 
+Limited or 
+vague 
+conclusion. 
+(1.5) 
+Very 
+minimal or 
+unclear 
+closing 
+statements. 
+(1) 
+Contribution 
+& Lessons 
+Learned (3 
+marks) 
+Meaningful, 
+realistic 
+reflections 
+on 
+contribution
+s, 
+challenges, 
+solutions, 
+and lessons 
+learned. (3) 
+Reflections 
+mostly 
+complete 
+with minor 
+gaps. (2.5) 
+Basic 
+reflections, 
+lacks depth 
+or clarity. 
+(2) 
+Limited or 
+vague 
+contributio
+ns and 
+learnings. 
+(1.5) 
+Very 
+minimal or 
+unclear 
+reflections 
+provided. 
+(1) 
+Written 
+Communicat
+ion (3 marks) 
+Report is 
+well-written, 
+logically 
+structured, 
+free of major 
+grammar 
+errors, and 
+formatted 
+properly. (3) 
+Mostly well-
+written with 
+minor 
+grammar or 
+formatting 
+issues. (2.5) 
+Understand
+able but 
+frequent 
+grammar 
+issues or 
+poor flow. 
+(2) 
+Weak 
+writing 
+skills, 
+unclear 
+sentences, 
+many 
+errors. (1.5) 
+Very 
+minimal 
+writing 
+quality, 
+hard to 
+read. (1) 
+
+--- PAGE 24 ---
+ASSIGNMENT  
+ 
+ 
+   
+ 
+ 
+Submission Format 
+- All reports must be in PDF format. 
+- All source code should be submitted via GitHub with access granted. 
+- One group member will submit the documents on behalf of the team. 
+- Deadlines will be published on Course Web. 
+Important Notes 
+- Late submissions will incur penalties. 
+- All students must contribute equally. 
+- Ethical risks must be identified early (e.g., data privacy, AI misuse). 
+- You may apply the knowledge gained from the OOP module, along with your own self-
+study, to develop the web-based application. 
+ 
+Special Note: Use of AI Tools 
+• AI tools may be used as a learning and support resource throughout this 
+project. Students may use AI tools for requirements gathering, brainstorming 
+ideas, exploring solution alternatives, understanding technologies, 
+improving documentation, generating pro totypes, debugging, and learning 
+programming concepts. 
+• However, AI tools must not replace the student's own understanding and 
+contribution. All students are expected to fully understand, explain, and 
+defend their individual work, including requirements, design decisions, 
+implementation, testing, and documentat ion, during project evaluations, 
+presentations, and viva examinations. 
+• Students must ensure that all submitted work is reviewed, validated, and 
+appropriately modified based on their own understanding. Any work that 
+cannot be adequately explained by the student will be treated as 
+unauthorised assistance. Plagiarism, academic m isconduct, or excessive 
+reliance on AI -generated content may result in zero marks and disciplinary 
+action in accordance with university regulations. 
+ 
+---------------------------------- End of the Assignment Specification--------------------------- 
+ 

@@ -1,0 +1,919 @@
+
+--- PAGE 1 ---
+   
+ 
+   
+ 
+ 
+ 
+ Web Based Identity Issuing Service 
+SE2030: Software Engineering – 2026 Year 2 Semester 1 
+Continuous Assessment- Design Document  
+Group ID: 2026-Y2-S1-MTR-02 
+  
+  
+  
+Student ID Student Name 
+IT25100565 Weerakoon W M Y B 
+IT25100604 Dharshan S 
+IT25100689 Jeniviya G A 
+IT25100885  Rithika R K  
+IT25101235 Marickar A A A  
+ 
+  
+ B.Sc. (Hons) Information Technology 
+Faculty of Computing 
+Sri Lanka Institute of Information Technology 
+27/09/2026
+
+
+--- PAGE 2 ---
+   
+ 
+ 
+Web-based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Table of Contents 
+ 
+Agile Sprint Summaries .................................................................................................................. 1 
+Use Case Diagram......................................................................................................................... 18 
+Class Diagram ............................................................................................................................... 20 
+Activity Diagram .......................................................................................................................... 21 
+Ethical Considerations .................................................................................................................. 26 
+References ..................................................................................................................................... 29 
+ 
+ 
+ 
+ 
+
+--- PAGE 3 ---
+Agile Sprint Summaries 
+ 
+1 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Agile Sprint Summaries 
+ 
+Persona and User Stories 
+Persona 1: Citizen 
+The primary user of the system who applies for NICs and Passports, uploads required 
+documents, books biometric appointments, and tracks application progress. Citizens can also 
+request renewals, replacements, and support services. 
+• As a Citizen, I want to  register and log into the system so that I can securely  access 
+identity services online. 
+• As a Citizen, I want to apply for a new NIC or passport so that I do not have to submit a 
+paper application in person.  
+• As a Citizen, I want to upload supporting documents so that officers can verify my 
+application remotely. 
+• As a Citizen, I want to track the real-time status of my application so that I know how it 
+is progressing. 
+ 
+Persona 2: NIC Application Officer 
+Responsible for reviewing and verifying NIC applications submitted by citizens. The officer 
+validates documents, verifies applicant information, and approves or rejects NIC - related 
+requests. 
+• As a NIC Application Officer, I want to review submitted NIC applications so that I can 
+check applicant information for accuracy. 
+• As an NIC Application Officer, I want to verify uploaded supporting documents so that 
+fraudulent or incomplete applications are identified. 
+• As an NIC Application Officer, I want to approve valid NIC applications so that citizens 
+can proceed to document issuance. 
+• As an NIC Application Officer, I want to reject invalid applications with a recorded 
+reason so that citizens know what needs correcting. 
+ 
+Persona 3: Passport Verification Officer 
+Responsible for processing and verifying Passport applications and supporting documents. The 
+officer reviews applications and makes approval or rejection decisions based on verification 
+results. 
+
+--- PAGE 4 ---
+Agile Sprint Summaries 
+ 
+2 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+• As a Passport Verification Officer, I want to review submitted passport applications so 
+that I can confirm applicants’ details. 
+• As a Passport Verification Officer, I want to verify supporting documents, so that only 
+valid applications proceed further. 
+• As a Passport Verification Officer, I want to approve valid passport applications so that 
+passports can be issued. 
+• As a Passport Verification Officer, I want to reject invalid passport applications so that 
+incorrect requests are not processed further. 
+ 
+Persona 4: Citizen Service Representative 
+Helps and support to citizens throughout the service process. The representative handles 
+complaints, responds to inquiries, and assists with support requests. 
+ 
+• As a Citizen Service Representative, I want to respond to citizen inquiries so that users 
+receive timely assistance. 
+• As a Citizen Service Representative, I want to manage citizen complaints so that issues 
+are tracked down and resolved. 
+• As a Citizen Service Representative, I want to manage support tickets so that citizens 
+receive updates until resolution. 
+• As a Citizen Service Representative, I want to schedule walk-in appointments so that 
+citizens who need in-person help can be accommodated. 
+ 
+Persona 5: System Administrator 
+Responsible for managing user accounts, roles, permissions, and system configurations. The 
+administrator ensures the system operates securely and maintains overall system functionality. 
+ 
+• As a System Administrator, I want to manage user accounts so that only authorized users 
+can access the system. 
+• As a System Administrator, I want to assign and manage user roles so that permissions are 
+correctly controlled. 
+• As a System Administrator, I want to monitor system activity logs so that security and 
+accountability are maintained. 
+• As a System Administrator, I want to perform routine system maintenance so that the 
+service remains available and reliable. 
+
+--- PAGE 5 ---
+Agile Sprint Summaries 
+ 
+3 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Scrum Roles 
+ 
+Product Owner 
+• Identity Service Director (or a senior representative from the Identity Issuing Department) 
+• Prioritizes features based on the needs of citizens, verification officers, and service 
+management. 
+• Maintains and refines the product backlog. 
+Scrum Master 
+IT Project Lead  
+• Facilitate Scrum events and protect the development team from external interference and 
+delays. 
+Development Team 
+• Jeniviya G A — Citizen Application Management 
+• Marickar A A A — Verification and Approval Management 
+• Rithika R K — Document Renewal, Replacement and Delivery Management 
+• Weerakoon W M Y B — Biometric and Appointment Management 
+• Dharshan S — Citizen Support and Service Management 
+• Admin, Notification, OTP, Payment and User Management are shared by Everyone. 
+ 
+UI/UX and QA testing responsibilities are shared across the team rather than assigned to 
+dedicated specialists, since the group has 5 members instead of 6. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 6 ---
+Agile Sprint Summaries 
+ 
+4 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Product Backlog 
+ 
+ID User Story Priority 
+PBI-01 As a Citizen, I want to register and log into the system so that I can 
+securely access identity services online. High 
+PBI-02 As a Citizen, I want to apply for a new NIC or passport so that I do not 
+have to submit a paper application in person. High 
+PBI-03 As a Citizen, I want to upload supporting documents so that officers 
+can verify my application remotely. High 
+PBI-04 As a System Administrator, I want to manage user accounts so that 
+only authorized users can access the system. High 
+PBI-05 As an NIC Application Officer, I want to review submitted NIC 
+applications so that I can check applicant information for accuracy. High 
+PBI-06 As an NIC Application Officer, I want to verify uploaded supporting 
+documents so that fraudulent or incomplete applications are identified. High 
+PBI-07 As an NIC Application Officer, I want to approve valid NIC 
+applications so that citizens can proceed to document issuance. High 
+PBI-08 As an NIC Application Officer, I want to reject invalid applications 
+with a recorded reason so that citizens know what needs correcting. High 
+PBI-09 As a Passport Verification Officer, I want to review submitted passport 
+applications so that I can confirm applicant details. High 
+PBI-10 As a Passport Verification Officer, I want to verify supporting 
+documents, so that only valid applications proceed further. High 
+PBI-11 As a Passport Verification Officer, I want to approve valid passport 
+applications so that passports can be issued. High 
+PBI-12 As a Passport Verification Officer, I want to reject invalid passport 
+applications so that incorrect requests are not processed further. High 
+PBI-13 As a System Administrator, I want to assign and manage user roles so 
+that permissions are correctly controlled. High 
+PBI-14 As a System Administrator, I want to monitor system activity logs so 
+that security and accountability are maintained. High 
+
+--- PAGE 7 ---
+Agile Sprint Summaries 
+ 
+5 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+PBI-15 As a Centre officer, I want to publish biometric appointment slots with 
+capacity limits so that citizens can book available times. High 
+PBI-16 As a citizen, I want to book a biometric appointment and receive a QR 
+pass so that I can attend the Centre. High 
+PBI-17 As a biometric officer, I want to check in citizens and record biometric 
+completion so that attendance is documented. High 
+PBI-18 As a citizen, I want OTP verification during registration so that my 
+account can be verified securely. High 
+PBI-19 As a citizen, I want to pay the application fee so that I can proceed to 
+biometric booking. High 
+PBI-20 As an officer, I want decisions to trigger citizen notifications so that 
+applicants receive updates. High 
+PBI-21 As a Citizen, I want to track the real-time status of my application so 
+that I know how it is progressing. Medium 
+PBI-22 As a System Administrator, I want to perform routine system 
+maintenance so that the service remains available and reliable. Medium 
+PBI-23 As a Citizen Service Representative, I want to respond to citizen 
+inquiries so that users receive timely assistance. Medium 
+PBI-24 As a Citizen Service Representative, I want to manage citizen 
+complaints so that issues are tracked and resolved. Medium 
+PBI-25 As a Citizen Service Representative, I want to manage support tickets 
+so that citizens receive updates until resolution. Medium 
+PBI-26 As a citizen, I want to renew my NIC so that I can request a new valid 
+card. Medium 
+PBI-27 As a citizen, I want to renew my passport so that I can request a new 
+valid passport. Medium 
+PBI-28 As a citizen, I want to replace a lost NIC or passport and upload 
+evidence so that the replacement can be reviewed. Medium 
+PBI-29 As a citizen, I want to select delivery or collection so that I can receive 
+my issued document. Medium 
+
+--- PAGE 8 ---
+Agile Sprint Summaries 
+ 
+6 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+PBI-30 As a citizen, I want to reschedule or cancel a biometric appointment so 
+that I can manage a booking change. Medium 
+PBI-31 
+As a Citizen Service Representative, I want to schedule walk-in 
+appointments so that citizens who need in-person help can be 
+accommodated. 
+Low 
+ 
+ 
+Sprint Planning 
+ 
+Sprint 1 – Citizen Account and System Administration 
+ 
+Duration: Weeks 1–3 
+Sprint Goal: Implement secure citizen access and the essential administrative functions required 
+to manage authorized users, roles, and system activity. 
+Selected User Stories (High Priority) 
+Sprint 
+ID User Story Priority 
+SP1-01 Citizen registration and secure login High 
+SP1-02 Manage user accounts High 
+SP1-03 Assign and manage user roles High 
+SP1-04 Monitor system activity logs High 
+SP1-05 Verify citizen registration with OTP (PBI-18) High 
+ 
+ 
+Sprint Backlog 
+SP1-01: Citizen registration and secure login 
+Task 
+ID Task Owner Est. 
+Hours 
+T-01.1 Design and build the registration and login pages Everyone 7 
+T-01.2 Set up authentication with password hashing Everyone 6 
+
+--- PAGE 9 ---
+Agile Sprint Summaries 
+ 
+7 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+T-01.3 Handle duplicate accounts and basic input 
+checks Everyone 4 
+T-01.4 Run through login/signup test cases Everyone 3 
+ 
+SP1-02: Manage user accounts 
+Task 
+ID Task Owner Est. 
+Hours 
+T-02.1 Create the account management screen Everyone 6 
+T-02.2 Wire up create/edit/deactivate logic Everyone 5 
+T-02.3 Add search and filter options for admins Everyone 3 
+T-02.4 Test account CRUD operations Everyone 2 
+ 
+SP1-03: Assign and manage user roles 
+Task 
+ID Task Owner Est. 
+Hours 
+T-03.1 Build the role assignment UI Everyone 6 
+T-03.2 Map roles to their permission sets Everyone 5 
+T-03.3 Write out access rules for each role Everyone 4 
+T-03.4 Verify access control using test accounts Everyone 3 
+ 
+SP1-04: Monitor system activity logs 
+Task 
+ID Task Owner Est. 
+Hours 
+T-04.1 Build the activity log dashboard Everyone 6 
+T-04.2 Add audit logging across modules Everyone 5 
+T-04.3 Let logs be filtered by user, date, and action Everyone 3 
+T-04.4 Check log entries for accuracy and completeness Everyone 2 
+ 
+
+--- PAGE 10 ---
+Agile Sprint Summaries 
+ 
+8 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+SP1-05: Verify registration with OTP 
+Task 
+ID Task Owner Est. 
+Hours 
+T-05.1 Generate and send registration OTP Everyone 5 
+T-05.2 Validate OTP and expiry before activation Everyone 4 
+T-05.3 Test accepted, expired and invalid codes Everyone 2 
+ 
+Sprint 1 Total Estimated Effort (High-Priority Stories): 81 h 
+ 
+ 
+Sprint 2 – Citizen Application and Document Management 
+ 
+Duration: Weeks 4–6 
+Sprint Goal: Enable citizens to submit NIC and passport applications and upload supporting 
+documents. 
+Selected User Stories (High Priority) 
+Sprint 
+ID User Story (Summary) Priority 
+SP2-01 Apply for a new NIC or passport High 
+SP2-02 Upload supporting documents High 
+SP2-03 Process application payment (PBI-19) High 
+ 
+Sprint Backlog 
+SP2-01: Apply for a new NIC or passport 
+Task 
+ID Task Owner Est. 
+Hours 
+T-01.1 Build the application form for NIC and passport Jeniviya G A 8 
+T-01.2 Save submissions to the database Jeniviya G A 6 
+T-01.3 Add validation on the required fields Jeniviya G A 4 
+
+--- PAGE 11 ---
+Agile Sprint Summaries 
+ 
+9 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+T-01.4 Test the full submission flow end to end Jeniviya G A 3 
+ 
+SP2-02: Upload supporting documents 
+Task 
+ID Task Owner Est. 
+Hours 
+T-02.1 Build the document upload screen Jeniviya G A 7 
+T-02.2 Handle file storage and format checks Jeniviya G A 5 
+T-02.3 Link uploaded files back to the application Jeniviya G A 4 
+T-02.4 Test uploads with a few different file types Jeniviya G A 3 
+ 
+SP2-03: Process application payment 
+Task 
+ID Task Owner Est. 
+Hours 
+T-03.1 Build payment and fee summary page Everyone 5 
+T-03.2 Validate payment and save its status Everyone 4 
+T-03.3 Test successful and failed payment flow Everyone 2 
+ 
+Sprint 2 Total Estimated Effort (High-Priority Stories): 51 h 
+ 
+Sprint 3 — NIC and Passport Application Processing 
+Duration: Weeks 7–9 
+Sprint Goal: Enable NIC Application Officers and Passport Verification Officers to review, 
+verify, approve, and reject applications. 
+Selected User Stories (High Priority) 
+Sprint 
+ID User Story (Summary) Priority 
+SP3-01 Review submitted NIC applications High 
+SP3-02 Verify NIC supporting documents High 
+SP3-03 Approve valid NIC applications High 
+
+--- PAGE 12 ---
+Agile Sprint Summaries 
+ 
+10 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+SP3-04 Reject invalid NIC applications with reason High 
+SP3-05 Review submitted passport applications High 
+SP3-06 Verify passport supporting documents High 
+SP3-07 Approving valid passport applications High 
+SP3-08 Reject invalid passport applications High 
+SP3-09 Notify citizens of verification decisions (PBI-20) High 
+ 
+Sprint Backlog  
+SP3-01: Review submitted NIC applications 
+Task 
+ID Task Owner Est. 
+Hours 
+T-01.1 Build the NIC review screen for officers Marickar A A A  6 
+T-01.2 Pull application details into the review view Marickar A A A  4 
+T-01.3 Test with a batch of sample applications Marickar A A A  2 
+ 
+SP3-02: Verify NIC supporting documents 
+Task 
+ID Task Owner Est. 
+Hours 
+T-02.1 Add a document verification screen Marickar A A A  6 
+T-02.2 Check documents against validity rules Marickar A A A  4 
+T-02.3 Test a few verification scenarios Marickar A A A  2 
+ 
+SP3-03: Approve valid NIC applications 
+Task 
+ID Task Owner Est. 
+Hours 
+T-03.1 Add an approve action for officers Marickar A A A  5 
+T-03.2 Update status and trigger a notification Marickar A A A  4 
+T-03.3 Test the approval flow Marickar A A A  2 
+ 
+
+--- PAGE 13 ---
+Agile Sprint Summaries 
+ 
+11 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+SP3-04: Reject invalid NIC applications with reason 
+Task 
+ID Task Owner Est. 
+Hours 
+T-04.1 Add a rejection with a reason field Marickar A A A  5 
+T-04.2 Store the reason and notify the citizen Marickar A A A  4 
+T-04.3 Test rejection with a recorded reason Marickar A A A  2 
+ 
+SP3-05: Review submitted passport applications 
+Task 
+ID Task Owner Est. 
+Hours 
+T-05.1 Build the passport review screen Marickar A A A  6 
+T-05.2 Pull application details into the review view Marickar A A A  4 
+T-05.3 Test with a batch of sample applications Marickar A A A  2 
+ 
+SP3-06: Verify passport supporting documents 
+Task 
+ID Task Owner Est. 
+Hours 
+T-06.1 Add a passport document verification screen Marickar A A A  6 
+T-06.2 Check documents against validity rules Marickar A A A  4 
+T-06.3 Test a few verification scenarios Marickar A A A  2 
+ 
+SP3-07: Approve valid passport applications 
+Task 
+ID Task Owner Est. 
+Hours 
+T-07.1 Add an approve action for officers Marickar A A A  5 
+T-07.2 Update status and trigger a notification Marickar A A A  4 
+T-07.3 Test the approval flow Marickar A A A  2 
+ 
+
+--- PAGE 14 ---
+Agile Sprint Summaries 
+ 
+12 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+SP3-08: Reject invalid passport applications 
+Task 
+ID Task Owner Est. 
+Hours 
+T-08.1 Add a rejection with a reason field Marickar A A A  5 
+T-08.2 Store the reason and notify the citizen Marickar A A A  4 
+T-08.3 Test rejection with a recorded reason Marickar A A A  2 
+ 
+SP3-09: Notify citizens of verification decisions 
+Task 
+ID Task Owner Est. 
+Hours 
+T-09.1 Create decision notification templates Everyone 5 
+T-09.2 Publish notifications after review actions Everyone 4 
+T-09.3 Test citizen delivery and read status Everyone 2 
+ 
+ 
+Sprint 3 Total Estimated Effort (High-Priority Stories): 103 h 
+ 
+Sprint 4 — Biometric and Appointment Management 
+Duration: Weeks 10–12 
+Sprint Goal: Finish the remaining high-priority biometric scheduling, booking and check-in work 
+before medium-priority work begins. 
+Selected User Stories (High Priority) 
+Sprint 
+ID User Story (Summary) Priority 
+SP4-01 Publish capacity-managed biometric slots (PBI-15) High 
+SP4-02 Book biometric appointment and receive QR pass (PBI-16) High 
+SP4-03 Check in and record biometric completion (PBI-17) High 
+ 
+
+--- PAGE 15 ---
+Agile Sprint Summaries 
+ 
+13 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Sprint Backlog  
+SP4-01: Publish capacity-managed biometric slots 
+Task 
+ID Task Owner Est. 
+Hours 
+T-01.1 Build officer schedule and slot publishing 
+screens 
+Weerakoon W M Y 
+B 5 
+T-01.2 Enforce centre and slot capacity rules Weerakoon W M Y 
+B 4 
+T-01.3 Test slot publication and availability Weerakoon W M Y 
+B 2 
+ 
+SP4-02: Book biometric appointment and receive QR pass 
+Task 
+ID Task Owner Est. 
+Hours 
+T-02.1 Build citizen centre and time selection Weerakoon W M Y 
+B 5 
+T-02.2 Save booking and generate QR appointment pass Weerakoon W M Y 
+B 4 
+T-02.3 Test booking capacity and pass download Weerakoon W M Y 
+B 2 
+ 
+SP4-03: Check in and record biometric completion 
+Task 
+ID Task Owner Est. 
+Hours 
+T-03.1 Create QR and manual check-in flow Weerakoon W M Y 
+B 5 
+T-03.2 Record biometric collection completion Weerakoon W M Y 
+B 4 
+T-03.3 Test check-in and completion states Weerakoon W M Y 
+B 2 
+ 
+Sprint 4 Total Estimated Effort (High-Priority Stories): 33 h 
+  
+
+--- PAGE 16 ---
+Agile Sprint Summaries 
+ 
+14 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Sprint 5 — Tracking Renewal Support and Booking Changes 
+Duration: Weeks 13–15 
+Sprint Goal: After the high-priority stories are complete, implement every medium-priority 
+backlog item. 
+Selected User Stories (Medium Priority) 
+Sprint 
+ID User Story (Summary) Priority 
+SP5-01 Track application status (PBI-21) Medium 
+SP5-02 Perform routine system maintenance (PBI-22) Medium 
+SP5-03 Respond to citizen inquiries (PBI-23) Medium 
+SP5-04 Manage citizen complaints (PBI-24) Medium 
+SP5-05 Manage support tickets (PBI-25) Medium 
+SP5-06 Renew NIC (PBI-26) Medium 
+SP5-07 Renew passport (PBI-27) Medium 
+SP5-08 Replace a lost NIC or passport (PBI-28) Medium 
+SP5-09 Choose delivery or collection (PBI-29) Medium 
+SP5-10 Change or cancel a biometric booking (PBI-30) Medium 
+ 
+Sprint Backlog  
+SP5-01: Track application status 
+Task 
+ID Task Owner Est. 
+Hours 
+T-01.1 Display application status and history Jeniviya G A 5 
+T-01.2 Retrieve status updates for each citizen Jeniviya G A 4 
+T-01.3 Test tracking from the citizen account Jeniviya G A 2 
+ 
+SP5-02: Perform routine system maintenance 
+Task 
+ID Task Owner Est. 
+Hours 
+
+--- PAGE 17 ---
+Agile Sprint Summaries 
+ 
+15 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+T-02.1 Review administrator settings and service health Everyone 5 
+T-02.2 Check account and centre configuration Everyone 4 
+T-02.3 Run maintenance regression checks Everyone 2 
+ 
+SP5-03: Respond to citizen inquiries 
+Task 
+ID Task Owner Est. 
+Hours 
+T-03.1 Build citizen inquiry submission and response Dharshan S 5 
+T-03.2 Route inquiries to the CSR queue Dharshan S 4 
+T-03.3 Test inquiry response workflow Dharshan S 2 
+ 
+SP5-04: Manage citizen complaints 
+Task 
+ID Task Owner Est. 
+Hours 
+T-04.1 Build the complaint submission and view screens Dharshan S 5 
+T-04.2 Track complaint status and responses Dharshan S 4 
+T-04.3 Test complaint resolution Dharshan S 2 
+ 
+SP5-05: Manage support tickets 
+Task 
+ID Task Owner Est. 
+Hours 
+T-05.1 Build the CSR support request queue Dharshan S 5 
+T-05.2 Add response and resolution actions Dharshan S 4 
+T-05.3 Test ticket creation and closure Dharshan S 2 
+ 
+SP5-06: Renew NIC 
+Task 
+ID Task Owner Est. 
+Hours 
+T-06.1 Build NIC renewal form and eligibility checks Rithika R K 5 
+T-06.2 Save renewal request and required evidence Rithika R K 4 
+
+--- PAGE 18 ---
+Agile Sprint Summaries 
+ 
+16 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+T-06.3 Test NIC renewal submission Rithika R K 2 
+ 
+SP5-07: Renew passport 
+Task 
+ID Task Owner Est. 
+Hours 
+T-07.1 Build passport renewal form and eligibility 
+checks Rithika R K 5 
+T-07.2 Save renewal request and required evidence Rithika R K 4 
+T-07.3 Test passport renewal submission Rithika R K 2 
+ 
+SP5-08: Replace a lost NIC or passport 
+Task 
+ID Task Owner Est. 
+Hours 
+T-08.1 Build lost replacement request flows Rithika R K 5 
+T-08.2 Accept required supporting evidence Rithika R K 4 
+T-08.3 Test both replacement paths Rithika R K 2 
+ 
+SP5-09: Choose delivery or collection 
+Task 
+ID Task Owner Est. 
+Hours 
+T-09.1 Build delivery and collection choices Rithika R K 5 
+T-09.2 Store address or collection centre details Rithika R K 4 
+T-09.3 Test confirmation and handover Rithika R K 2 
+ 
+SP5-10: Change or cancel a biometric booking 
+Task 
+ID Task Owner Est. 
+Hours 
+T-10.1 Build booking change and cancellation screens Weerakoon W M Y 
+B 5 
+T-10.2 Apply change policy and update availability Weerakoon W M Y 
+B 4 
+
+--- PAGE 19 ---
+Agile Sprint Summaries 
+ 
+17 
+ 
+Rithika R K 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+T-10.3 Test rescheduling and cancellation Weerakoon W M Y 
+B 2 
+ 
+Sprint 5 Total Estimated Effort (Medium-Priority Stories): 110 h 
+
+--- PAGE 20 ---
+Use Case Diagram 
+ 
+18 
+ 
+Marickar A A A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Use Case Diagram 
+ 
+ 
+
+
+--- PAGE 21 ---
+Use Case Diagram 
+ 
+19 
+ 
+Marickar A A A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+
+
+--- PAGE 22 ---
+Class Diagram 
+ 
+20 
+ 
+Weerakoon W M Y B 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Class Diagram 
+ 
+
+
+--- PAGE 23 ---
+Activity Diagram 
+ 
+21 
+ 
+Jeniviya G A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Activity Diagram 
+ 
+
+
+--- PAGE 24 ---
+Activity Diagram 
+ 
+22 
+ 
+Jeniviya G A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+ 
+
+
+--- PAGE 25 ---
+Activity Diagram 
+ 
+23 
+ 
+Jeniviya G A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+ 
+
+
+--- PAGE 26 ---
+Activity Diagram 
+ 
+24 
+ 
+Jeniviya G A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+
+
+--- PAGE 27 ---
+Activity Diagram 
+ 
+25 
+ 
+Jeniviya G A 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+ 
+
+
+--- PAGE 28 ---
+Ethical Considerations 
+ 
+26 
+ 
+Dharshan S 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Ethical Considerations 
+Since LankaID handles sensitive information related to NIC and passport applications, ethical 
+issues must be considered carefully. The system stores personal details, supporting documents, 
+appointment information, and application decisions. If this information is misused or accessed by 
+the wrong person, it could seriously affect a citizen. The following concerns were considered 
+when designing the system. 
+ 
+ 
+Data Privacy 
+Citizens provide sensitive information such as their NIC or passport details, contact information, 
+addresses, and supporting documents. Collecting this information is necessary for processing an 
+application, but it also creates a privacy risk. 
+To reduce this risk, LankaID collects only the information needed to complete the identity-
+issuance process. Personal information and uploaded documents are available only to authorized 
+users. For example, NIC officers handle NIC applications, while passport officers handle 
+passport applications. 
+The current system does not store raw fingerprint or facial images. It records only whether 
+biometric collection has been completed. The payment module also stores the payment reference, 
+amount, status, and date instead of saving complete card details. During testing and 
+demonstrations, the team should use fictional information rather than real citizen records. In a 
+real deployment, the database, uploaded documents, and backups should also be encrypted. 
+ 
+ 
+User Consent and Transparency  
+Citizens should know why their information is being collected and how it will be used. They 
+should not be expected to provide personal information without a clear explanation. 
+LankaID requires citizens to accept a declaration before submitting an application. This confirms 
+that the information they have provided is true and accurate. However, the system should also 
+display a separate privacy notice explaining what information is collected, why it is required, 
+which officers can access it, and how long it will be kept. 
+Citizens can track their application status and receive notifications when an application is 
+approved, rejected, or returned for correction. When an application cannot proceed, the officer 
+
+--- PAGE 29 ---
+Ethical Considerations 
+ 
+27 
+ 
+Dharshan S 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+should provide a clear reason. This makes the process more transparent and helps citizens 
+understand what is happening with their application. 
+ 
+Security and Confidentiality 
+Because LankaID contains identity-related information, unauthorized access could lead to 
+identity theft, fraud, or improper approval of applications. 
+The system uses password hashing so that user passwords are not stored as readable text. OTP 
+verification is used during important registration and identity-verification activities. LankaID 
+also uses role-based access control. Citizens, NIC officers, passport officers, Citizen Service 
+Representatives, directors, and system administrators have different levels of access. 
+Important decisions are recorded with the officer’s ID and the date and time of the action. This 
+creates an audit trail and makes officers accountable for their decisions. For an actual 
+government deployment, the system should also use HTTPS, encrypted document storage, login-
+attempt limits, secure backups, regular security updates, and a proper procedure for responding 
+to data breaches. 
+ 
+Accessibility and Digital Inclusion 
+Not every citizen has the same level of computer knowledge, internet access, or ability to use an 
+online system. Some citizens may also have visual, physical, or other disabilities. Since an NIC 
+or passport is an essential document, these citizens should not be excluded from the service. 
+The LankaID interface uses readable text, clear labels, visible error messages, suitable colour 
+contrast, and responsive layouts that can work on different screen sizes. Important images and 
+controls also include accessibility descriptions where possible. 
+Citizens who cannot complete the online process independently can use the walk-in appointment 
+service and receive assistance from a Citizen Service Representative. In the future, the system 
+should also provide Sinhala and Tamil language options, full keyboard navigation, screen-reader 
+support, adjustable text sizes, and pages that work properly with slow internet connections. 
+
+--- PAGE 30 ---
+Ethical Considerations 
+ 
+28 
+ 
+Dharshan S 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+Data Retention and User Control 
+Keeping personal information for an unlimited period creates an unnecessary privacy risk. At the 
+same time, some application and issuance records may need to be preserved for accountability and 
+to prevent fraud. 
+LankaID should therefore keep information only for a clearly defined period. When a citizen 
+account is removed, unnecessary contact information should be deleted or replaced with non -
+identifying values. However, important application and issuance records may need  to remain in 
+the system with restricted access. 
+Citizens should be allowed to report incorrect information through the support and complaint -
+management process. Before the system is used in a real environment, a data -retention policy 
+should explain what information is kept, why it is kept, who can acces s it, and when it will be 
+securely deleted. 
+Fairness and Accountability 
+All citizens should be treated equally during the application and verification process. Decisions 
+should not be influenced by personal characteristics, social background, or an officer’s opinion. 
+LankaID applies the same verification requirements to all applicants, while final approvals and 
+rejections remain under the control of authorized human officers. The system does not use AI to 
+make final decisions about a citizen’s eligibility. Officers must record reasons for rejections and 
+correction requests, and citizens can use the complaint or support process if they believe that a 
+decision is incorrect. Recording officer actions also allows unfair or suspicious decisions to be 
+reviewed.
+
+--- PAGE 31 ---
+References 
+ 
+29 
+ 
+Marickar A A A & All 
+Web Based Identity Issuing Service 2026-Y2-S1-MTR-02 
+References  
+ 
+[1] K. Schwaber and J. Sutherland, The Scrum Guide: The Definitive Guide to Scrum, Nov. 
+2020. [Online]. Available: Scrum Guides. 
+[2] Object Management Group, OMG Unified Modeling Language, Version 2.5.1, Dec. 2017. 
+[Online]. Available: OMG UML Specification. 
+[3] Parliament of Sri Lanka, Personal Data Protection Act, No. 9 of 2022, Mar. 19, 2022. 
+[Online]. Available: Parliament of Sri Lanka.  
+[4] Data Protection Authority of Sri Lanka, “Personal Data Protection (Amendment) Act, No. 22 
+of 2025,” 2025. [Online]. Available: Data Protection Authority of Sri Lanka.  
+[5] World Wide Web Consortium, Web Content Accessibility Guidelines WCAG 2.2, W3C 
+Recommendation, Dec. 12, 2024. [Online]. Available: W3C WCAG 2.2.  
+[6] OWASP Foundation, OWASP Application Security Verification Standard, Version 5.0.0. 
+[Online]. Available: OWASP ASVS.  
+[7] Spring Security, “Password Storage,” Spring Security Reference Documentation. [Online]. 
+Available: Spring Security Password Storage. 
+[8] Sri Lanka Institute of Information Technology, “SE2030 Software Engineering Group 
+Assignment Specification,” Faculty of Computing, 2026, unpublished course document. 
+ 

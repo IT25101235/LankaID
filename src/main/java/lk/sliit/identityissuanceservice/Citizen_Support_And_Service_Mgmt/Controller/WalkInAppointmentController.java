@@ -10,6 +10,8 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.Wal
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInPassService;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.WalkInPaymentService;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.CardPaymentValidation;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,6 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.Map;
 
 /** Serves the citizen booking journey and the CSR walk-in management workbench. */
 @Controller
@@ -47,6 +50,11 @@ public class WalkInAppointmentController {
     @ModelAttribute("walkInFee")
     public java.math.BigDecimal walkInFee() {
         return WalkInPaymentService.WALK_IN_FEE;
+    }
+
+    @ModelAttribute("cardForm")
+    public CardPaymentForm cardForm() {
+        return new CardPaymentForm();
     }
 
     @GetMapping({"/walk-in", "/citizen/appointments/walk-in"})
@@ -157,10 +165,30 @@ public class WalkInAppointmentController {
     }
 
     @PostMapping("/walk-in/payment")
-    public String payForWalkIn(@RequestParam String token, HttpSession session,
-                              RedirectAttributes redirectAttributes) {
+    public String payForWalkIn(
+            @RequestParam String token,
+            @ModelAttribute("cardForm") CardPaymentForm cardForm,
+            HttpSession session,
+            Model model,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes
+    ) {
+        response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+        Map<String, String> cardErrors = CardPaymentValidation.errors(cardForm);
+        if (!cardErrors.isEmpty()) {
+            try {
+                model.addAttribute("paymentDetails", walkInService.getPaymentDetails(session));
+                model.addAttribute("step", "PAYMENT");
+                model.addAttribute("cardErrors", cardErrors);
+                model.addAttribute("walkInError", "Please correct the card details below.");
+                return "citizen_frontends/walkin_appointment_booking";
+            } catch (IllegalArgumentException exception) {
+                redirectAttributes.addFlashAttribute("walkInError", exception.getMessage());
+                return "redirect:/walk-in/book";
+            }
+        }
         try {
-            WalkInAppointmentView created = walkInService.payAndBook(token, session);
+            WalkInAppointmentView created = walkInService.payAndBook(token, cardForm, session);
             redirectAttributes.addFlashAttribute("walkInMessage", "Payment recorded. Your walk-in appointment is confirmed.");
             return "redirect:/walk-in/pass/" + created.appointment().getReferenceNo();
         } catch (IllegalArgumentException exception) {
