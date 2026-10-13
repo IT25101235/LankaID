@@ -1,0 +1,133 @@
+{
+  "sha256": "38d106265310c52e50532c460cbe0a89b24e142a1c6bb6d94cd3871191a5fc04",
+  "sections": [
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "width": 8.5,
+      "height": 11.0,
+      "margins": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "styles": {
+    "Normal": {
+      "font": "Times New Roman",
+      "size": null
+    },
+    "Heading 1": {
+      "font": null,
+      "size": 16.0
+    },
+    "Heading 2": {
+      "font": null,
+      "size": 14.0
+    },
+    "Heading 3": {
+      "font": null,
+      "size": null
+    }
+  }
+}

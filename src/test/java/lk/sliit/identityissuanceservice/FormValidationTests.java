@@ -143,6 +143,23 @@ class FormValidationTests {
         assertTrue(CardPaymentValidation.errors(form).containsKey("cardholderName"));
     }
 
+    @Test
+    void cardValidationChecksBrandAndLuhnChecksum() {
+        CardPaymentForm form = validCard();
+        form.setCardNumber("4111 1111 1111 1112");
+        assertEquals("Enter a valid card number.",
+                CardPaymentValidation.errors(form).get("cardNumber"));
+
+        form.setCardNumber("6011 1111 1111 1117");
+        assertEquals("Enter a supported Visa or Mastercard number.",
+                CardPaymentValidation.errors(form).get("cardNumber"));
+
+        form.setCardNumber("5555 5555 5555 4444");
+        assertTrue(CardPaymentValidation.errors(form).isEmpty());
+        assertEquals("MASTERCARD", CardPaymentValidation.cardBrand(form));
+        assertEquals("4444", CardPaymentValidation.lastFour(form));
+    }
+
     static CardPaymentForm validCard() {
         CardPaymentForm form = new CardPaymentForm();
         form.setCardholderName("Test Citizen");

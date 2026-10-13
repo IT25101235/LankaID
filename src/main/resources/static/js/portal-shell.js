@@ -242,6 +242,7 @@
         home: '/officer/director', eyebrow: 'Officer portal', roleName: 'Identity Service Director',
         items: [
           item('/officer/director', 'space_dashboard', 'Executive overview', ['/officer/director']),
+          item('/officer/director/referrals', 'policy', 'Officer referrals', ['/officer/director/referrals*']),
           item('/officer/director/printing', 'print', 'Printing and export', ['/officer/director/printing*']),
           item('/officer/application-tracking', 'timeline', 'Application tracking', ['/officer/application-tracking*']),
           item('/officer/notifications', 'notifications', 'Notifications', ['/officer/notifications*'])

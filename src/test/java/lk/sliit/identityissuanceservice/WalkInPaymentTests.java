@@ -13,6 +13,7 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service
 import lk.sliit.identityissuanceservice.OTP_Mgmt.Otp.SmsOtpService;
 import lk.sliit.identityissuanceservice.OTP_Mgmt.Sms.SmsSender;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.WalkInPaymentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,10 +107,11 @@ class WalkInPaymentTests {
         mvc.perform(post("/walk-in/payment").session(session).param("token", "fake"))
                 .andExpect(flash().attributeExists("walkInError"));
         verifyPhone();
-        assertThrows(IllegalArgumentException.class, () -> service.payAndBook("fake", session));
+        assertThrows(IllegalArgumentException.class, () -> service.payAndBook("fake", validCard(), session));
         service.preparePayment("NIC_APPLICATION_HELP", 1, session);
         String token = service.getPaymentDetails(session).token();
-        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(token, new MockHttpSession()));
+        assertThrows(IllegalArgumentException.class,
+                () -> service.payAndBook(token, validCard(), new MockHttpSession()));
         verifyNoInteractions(payments);
         assertNull(savedAppointment.get());
     }
@@ -119,9 +121,9 @@ class WalkInPaymentTests {
         String oldToken = service.getPaymentDetails(session).token();
         service.preparePayment("PASSPORT_APPLICATION_HELP", 1, session);
         String currentToken = service.getPaymentDetails(session).token();
-        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(oldToken, session));
+        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(oldToken, validCard(), session));
         when(clock.instant()).thenReturn(start.plusSeconds(900));
-        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(currentToken, session));
+        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(currentToken, validCard(), session));
         verifyNoInteractions(payments);
         assertNull(savedAppointment.get());
     }
@@ -130,11 +132,11 @@ class WalkInPaymentTests {
         select("NIC_APPLICATION_HELP");
         String token = service.getPaymentDetails(session).token();
         slot.setIsAvailable("N");
-        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(token, session));
+        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(token, validCard(), session));
         slot.setIsAvailable("Y");
         when(appointments.countByAppointmentTypeAndCentreIdAndScheduledAtAndAppointmentStatusIn(
                 anyString(), anyInt(), any(), any())).thenReturn(1L);
-        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(token, session));
+        assertThrows(IllegalArgumentException.class, () -> service.payAndBook(token, validCard(), session));
         verifyNoInteractions(payments);
         assertNull(savedAppointment.get());
     }
@@ -143,7 +145,10 @@ class WalkInPaymentTests {
         select("NIC_APPLICATION_HELP");
         String token = service.getPaymentDetails(session).token();
         doThrow(new DataIntegrityViolationException("Database failure")).when(payments).saveAndFlush(any());
-        mvc.perform(post("/walk-in/payment").session(session).param("token", token))
+        mvc.perform(post("/walk-in/payment").session(session).param("token", token)
+                        .param("cardholderName", "Test Visitor")
+                        .param("cardNumber", "4111 1111 1111 1111")
+                        .param("expiry", "12/99").param("cvv", "123"))
                 .andExpect(redirectedUrl("/walk-in/payment"))
                 .andExpect(flash().attribute("walkInError", "Payment could not be saved. Please try again."));
         assertEquals("PENDING_PAYMENT", savedAppointment.get().getAppointmentStatus());
@@ -152,15 +157,37 @@ class WalkInPaymentTests {
         assertTrue(service.isPhoneVerified(session));
     }
 
+    @Test void invalidCardDoesNotCreateAppointmentOrPayment() throws Exception {
+        select("NIC_APPLICATION_HELP");
+        String token = service.getPaymentDetails(session).token();
+        mvc.perform(post("/walk-in/payment").session(session).param("token", token)
+                        .param("cardholderName", "Test Visitor")
+                        .param("cardNumber", "4111 1111 1111 1112")
+                        .param("expiry", "12/99").param("cvv", "123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("citizen_frontends/walkin_appointment_booking"))
+                .andExpect(model().attributeExists("cardErrors", "walkInError"));
+        assertNull(savedAppointment.get());
+        verifyNoInteractions(payments);
+    }
+
     private void assertPaidBooking(String visitorService) throws Exception {
         select(visitorService);
         String token = service.getPaymentDetails(session).token();
         mvc.perform(post("/walk-in/payment").session(session).param("token", token)
-                        .param("amount", "1.00").param("slotId", "999"))
+                        .param("amount", "1.00").param("slotId", "999")
+                        .param("cardholderName", "Test Visitor")
+                        .param("cardNumber", "4111 1111 1111 1111")
+                        .param("expiry", "12/99").param("cvv", "123"))
                 .andExpect(redirectedUrlPattern("/walk-in/pass/*"));
         assertEquals(new BigDecimal("1500.00"), savedPayment.get().getAmount());
         assertEquals("PAID", savedPayment.get().getPaymentStatus());
         assertEquals(10, savedPayment.get().getAppointmentId());
+        assertEquals("CARD", savedPayment.get().getPaymentMethod());
+        assertEquals("VISA", savedPayment.get().getCardBrand());
+        assertEquals("1111", savedPayment.get().getCardLastFour());
+        assertEquals("Test Visitor", savedPayment.get().getCardholderName());
+        assertEquals("12/99", savedPayment.get().getCardExpiry());
         assertNotNull(savedPayment.get().getPaidAt());
         assertEquals("CONFIRMED", savedAppointment.get().getAppointmentStatus());
         assertEquals(visitorService, savedAppointment.get().getVisitorService());
@@ -180,5 +207,14 @@ class WalkInPaymentTests {
     private void verifyPhone() {
         service.startPhoneVerification("Test visitor", "771234567", session);
         service.verifyPhone(code.get(), session);
+    }
+
+    private CardPaymentForm validCard() {
+        CardPaymentForm card = new CardPaymentForm();
+        card.setCardholderName("Test Visitor");
+        card.setCardNumber("4111 1111 1111 1111");
+        card.setExpiry("12/99");
+        card.setCvv("123");
+        return card;
     }
 }

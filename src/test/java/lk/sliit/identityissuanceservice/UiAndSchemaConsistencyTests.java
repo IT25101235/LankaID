@@ -111,6 +111,10 @@ class UiAndSchemaConsistencyTests {
                 TEMPLATE_ROOT.resolve("officers_frontends/csr_complaints_detail.html"));
         String director = Files.readString(
                 TEMPLATE_ROOT.resolve("officers_frontends/director_dashboard.html"));
+        String directorReferrals = Files.readString(
+                TEMPLATE_ROOT.resolve("officers_frontends/director_referrals.html"));
+        String applicationReview = Files.readString(
+                TEMPLATE_ROOT.resolve("officers_frontends/application_review.html"));
         String governmentTheme = Files.readString(Path.of(
                 "src", "main", "resources", "static", "css", "government-theme.css"));
         String portalShell = Files.readString(Path.of(
@@ -120,6 +124,12 @@ class UiAndSchemaConsistencyTests {
         assertTrue(supportReview.contains("Back to support queue"));
         assertTrue(governmentTheme.contains(".metric-card {"));
         assertTrue(director.contains("legend:{labels:{color:'#334155'}}"));
+        assertTrue(portalShell.contains(
+                "item('/officer/director/referrals', 'policy', 'Officer referrals'"),
+                "The shared Director sidebar must expose the referral queue");
+        assertFalse(Pattern.compile("violet|purple|indigo", Pattern.CASE_INSENSITIVE)
+                        .matcher(director + directorReferrals + applicationReview).find(),
+                "Director referrals and NIC/passport review pages must use the government palette");
         assertTrue(portalShell.contains("/officer/admin?section=centres"));
     }
 

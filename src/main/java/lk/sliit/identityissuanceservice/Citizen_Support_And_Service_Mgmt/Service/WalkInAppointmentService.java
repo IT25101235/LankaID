@@ -14,6 +14,7 @@ import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.Wal
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInPaymentDetails;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Service.WalkInPaymentService;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Model.Payment;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Model.WalkInSlot;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInAppointmentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInSlotRepository;
@@ -159,14 +160,14 @@ public class WalkInAppointmentService {
     }
 
     @Transactional
-    public WalkInAppointmentView payAndBook(String token, HttpSession session) {
+    public WalkInAppointmentView payAndBook(String token, CardPaymentForm cardForm, HttpSession session) {
         synchronized (session) {
             PendingBooking pending = requirePendingBooking(session);
             // Reject a stale payment tab if the citizen changed the selected booking details.
             if (!pending.token().equals(token)) {
                 throw new IllegalArgumentException("The selection changed. Review the appointment before paying.");
             }
-            return bookPaidVisitor(pending, session);
+            return bookPaidVisitor(pending, cardForm, session);
         }
     }
 
@@ -181,7 +182,11 @@ public class WalkInAppointmentService {
         return pending;
     }
 
-    private WalkInAppointmentView bookPaidVisitor(PendingBooking pending, HttpSession session) {
+    private WalkInAppointmentView bookPaidVisitor(
+            PendingBooking pending,
+            CardPaymentForm cardForm,
+            HttpSession session
+    ) {
         // Recheck and lock the slot: viewing the payment page does not reserve it.
         WalkInSlot slot = slotRepository.findByIdForBooking(pending.slotId())
                 .orElseThrow(() -> new IllegalArgumentException("Select an available appointment slot."));
@@ -201,7 +206,7 @@ public class WalkInAppointmentService {
         appointment.setVisitorService(pending.service());
         appointment = appointmentRepository.save(appointment);
         // Payment and confirmation share this transaction, avoiding a confirmed booking without payment.
-        paymentService.pay(appointment);
+        paymentService.pay(appointment, cardForm);
         appointment.setAppointmentStatus("CONFIRMED");
         appointment = appointmentRepository.save(appointment);
         // The booking OTP authorizes only this newly created pass after it is consumed.

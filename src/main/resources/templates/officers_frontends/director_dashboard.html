@@ -44,7 +44,7 @@
     <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
       <article class="metric-card p-5"><span class="material-symbols-outlined text-sky-600">assignment</span><p class="text-3xl text-slate-900 font-bold mt-3" th:text="${stats.totalApplications}">0</p><p class="text-xs text-slate-600 mt-1">Total applications</p></article>
       <article class="metric-card p-5"><span class="material-symbols-outlined text-emerald-600">verified</span><p class="text-3xl text-slate-900 font-bold mt-3" th:text="${stats.approvedApplications}">0</p><p class="text-xs text-slate-600 mt-1">Approved or later</p></article>
-      <article class="metric-card p-5"><span class="material-symbols-outlined text-purple-600">print</span><p class="text-3xl text-slate-900 font-bold mt-3" th:text="${stats.readyForPrinting}">0</p><p class="text-xs text-slate-600 mt-1">Ready for printing</p></article>
+      <article class="metric-card p-5"><span class="material-symbols-outlined text-sky-700">print</span><p class="text-3xl text-slate-900 font-bold mt-3" th:text="${stats.readyForPrinting}">0</p><p class="text-xs text-slate-600 mt-1">Ready for printing</p></article>
       <article class="metric-card p-5"><span class="material-symbols-outlined text-cyan-700">id_card</span><p class="text-3xl text-slate-900 font-bold mt-3" th:text="${stats.printedDocuments}">0</p><p class="text-xs text-slate-600 mt-1">Printed documents</p></article>
     </div>
 
@@ -117,6 +117,6 @@ function showSection(section) {
   document.getElementById('pageTitle').textContent = titles[section];
 }
 </script>
-<script src="/js/portal-shell.js?v=20261007-ui"></script>
+<script src="/js/portal-shell.js?v=20261010-director-referrals"></script>
 </body>
 </html>

@@ -40,6 +40,7 @@
           <p class="text-xs text-slate-400">Payment received</p>
           <p class="font-bold text-emerald-700" th:text="${'LKR ' + #numbers.formatDecimal(walkInPayment.amount, 1, 'COMMA', 2, 'POINT')}">LKR 1,500.00</p>
           <p class="text-xs text-slate-500 break-all" th:text="${walkInPayment.transactionReference}">Payment reference</p>
+          <p th:if="${walkInPayment.cardLastFour != null}" class="text-xs text-slate-500" th:text="${walkInPayment.cardBrand + ' •••• ' + walkInPayment.cardLastFour}">VISA •••• 1111</p>
         </div>
         <a th:href="@{/walk-in/pass/{reference}/download(reference=${walkIn.appointment.referenceNo})}" class="inline-flex items-center gap-2 rounded-xl bg-cyan-600 text-white px-5 py-3 font-bold"><span class="material-symbols-outlined">download</span>Download pass</a>
       </div>

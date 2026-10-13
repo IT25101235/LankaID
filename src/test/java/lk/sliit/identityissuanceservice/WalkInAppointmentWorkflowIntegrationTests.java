@@ -9,6 +9,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repositor
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInAppointmentView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInSlotView;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Dto.WalkInPaymentDetails;
+import lk.sliit.identityissuanceservice.Payment_Mgmt.Dto.CardPaymentForm;
 import lk.sliit.identityissuanceservice.Payment_Mgmt.Repository.PaymentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Repository.WalkInAppointmentRepository;
 import lk.sliit.identityissuanceservice.Citizen_Support_And_Service_Mgmt.Service.WalkInAppointmentService;
@@ -114,7 +115,10 @@ class WalkInAppointmentWorkflowIntegrationTests {
         WalkInPaymentDetails paymentDetails = (WalkInPaymentDetails) paymentPage.getModelAndView()
                 .getModel().get("paymentDetails");
         mockMvc.perform(post("/walk-in/payment").session(visitorSession)
-                        .param("token", paymentDetails.token()).param("amount", "1"))
+                        .param("token", paymentDetails.token()).param("amount", "1")
+                        .param("cardholderName", "Walk In Visitor")
+                        .param("cardNumber", "4111 1111 1111 1111")
+                        .param("expiry", "12/99").param("cvv", "123"))
                 .andExpect(status().is3xxRedirection());
 
         Appointment appointment = appointmentRepository
@@ -331,7 +335,16 @@ class WalkInAppointmentWorkflowIntegrationTests {
 
     private WalkInAppointmentView payAndBook(String service, Integer slotId, MockHttpSession session) {
         walkInService.preparePayment(service, slotId, session);
-        return walkInService.payAndBook(walkInService.getPaymentDetails(session).token(), session);
+        return walkInService.payAndBook(walkInService.getPaymentDetails(session).token(), validCard(), session);
+    }
+
+    private CardPaymentForm validCard() {
+        CardPaymentForm card = new CardPaymentForm();
+        card.setCardholderName("Test Visitor");
+        card.setCardNumber("4111 1111 1111 1111");
+        card.setExpiry("12/99");
+        card.setCvv("123");
+        return card;
     }
 
     private MockHttpSession csrSession(Integer csrId) {
