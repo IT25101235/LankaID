@@ -110,6 +110,7 @@ public class AppointmentService {
             Integer applicationId,
             Integer slotId
     ) {
+        scheduleService.lockSlotBeforeAppointment(slotId);
         CitizenApplication application = findOwnedApplication(citizenId, applicationId);
         if (!paymentService.hasPaid(applicationId)) {
             throw new IllegalArgumentException("Complete the required payment before booking biometrics.");
@@ -276,16 +277,14 @@ public class AppointmentService {
     ) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
-        Appointment appointment = lockAppointment(details.appointment().getAppointmentId());
-        BookingChangePolicy.requireMissedAppointment(appointment);
-        if (checkInRepository.existsById(appointment.getAppointmentId())) {
-            throw new IllegalArgumentException("A checked-in appointment cannot be rescheduled.");
-        }
+        // Checked once before locking, for a clear error, and again under the locks. The slot is locked
+        // before the appointment, the same order as closing a slot, so the two cannot deadlock.
+        requireReschedulableMissed(details.appointment());
 
-        CitizenApplication application = applicationRepository.findById(appointment.getApplicationId())
+        CitizenApplication application = applicationRepository.findById(details.appointment().getApplicationId())
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
         BiometricSlotView nextSlot = scheduleService.getSchedule(
-                        serviceType, appointment.getCentreId(), LocalDate.now(), LocalDate.now().plusDays(90))
+                        serviceType, details.appointment().getCentreId(), LocalDate.now(), LocalDate.now().plusDays(90))
                 .stream()
                 .filter(slot -> slot.available() && slot.remainingPlaces() > 0
                         && slot.slotDate().atTime(slot.slotTime()).isAfter(LocalDateTime.now()))
@@ -293,7 +292,9 @@ public class AppointmentService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No future slots are available at this centre. The citizen can choose another centre from Manage booking."));
         var slot = scheduleService.lockBookableSlot(
-                nextSlot.slotId(), serviceType, appointment.getAppointmentId());
+                nextSlot.slotId(), serviceType, details.appointment().getAppointmentId());
+        Appointment appointment = lockAppointment(details.appointment().getAppointmentId());
+        requireReschedulableMissed(appointment);
         LocalDateTime newTime = slot.getSlotDate().atTime(slot.getSlotTime());
         appointment.setBiometricSlotId(slot.getSlotId());
         appointment.setScheduledAt(newTime);
@@ -308,6 +309,13 @@ public class AppointmentService {
                         + " was moved to " + newTime + ". The same QR pass remains valid."
         );
         return findForOfficer(reference, serviceType);
+    }
+
+    private void requireReschedulableMissed(Appointment appointment) {
+        BookingChangePolicy.requireMissedAppointment(appointment);
+        if (checkInRepository.existsById(appointment.getAppointmentId())) {
+            throw new IllegalArgumentException("A checked-in appointment cannot be rescheduled.");
+        }
     }
 
     /**

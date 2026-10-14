@@ -218,6 +218,16 @@ public class BiometricScheduleService {
     }
 
     /**
+     * Takes the slot's row lock before any appointment lock. Closing a slot locks the slot and then its
+     * appointments, so booking paths must use the same order or the two can deadlock. A missing slot is
+     * ignored here; lockBookableSlot reports it later.
+     */
+    @Transactional
+    public void lockSlotBeforeAppointment(Integer slotId) {
+        if (slotId != null) slots.findByIdForBooking(slotId);
+    }
+
+    /**
      * Locks the slot row, then checks it is open, has space and is inside the booking window. Stops
      * double booking.
      */

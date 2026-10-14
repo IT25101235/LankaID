@@ -57,6 +57,7 @@ public class BiometricBookingChangeService {
     /** UPDATE: lock the new slot and move the booking to it (also used to rebook after a cancel). */
     @Transactional
     public Appointment changeBooking(Integer citizenId, BookingChangeRequest request, Integer slotId) {
+        schedules.lockSlotBeforeAppointment(slotId);
         Appointment appointment = ownedBooking(citizenId, request);
         var application = applications.findById(appointment.getApplicationId()).orElseThrow();
         boolean rebooking = "CANCELLED".equals(appointment.getAppointmentStatus());
