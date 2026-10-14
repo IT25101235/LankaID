@@ -193,6 +193,9 @@ public class BiometricController {
     }
 
     private String serviceType(String service) {
-        return "passport".equalsIgnoreCase(service) ? "PASSPORT" : "NIC";
+        if ("nic".equalsIgnoreCase(service)) return "NIC";
+        if ("passport".equalsIgnoreCase(service)) return "PASSPORT";
+        throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Unknown biometric service.");
     }
 }
