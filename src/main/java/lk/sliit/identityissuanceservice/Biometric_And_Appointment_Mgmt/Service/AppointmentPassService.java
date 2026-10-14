@@ -26,6 +26,7 @@ public class AppointmentPassService {
 
     private static final DateTimeFormatter APPOINTMENT_FORMAT =
             DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
+    // Same maroon and gold as the portal theme.
     private static final Color MAROON = new Color(104, 16, 66);
     private static final Color MAROON_DARK = new Color(75, 11, 47);
     private static final Color NAVY = new Color(23, 53, 79);
@@ -35,10 +36,6 @@ public class AppointmentPassService {
     private static final Color CREAM = new Color(251, 248, 241);
     private static final Color BORDER = new Color(229, 222, 209);
     private static final Color TEXT = new Color(31, 41, 55);
-
-    // Same maroon and gold as the portal theme.
-    private static final Color MAROON = new Color(104, 16, 66);
-    private static final Color GOLD = new Color(212, 167, 44);
 
     private static final String THREE_LANGUAGE_LINE = "ශ්‍රී ලංකා රජය · இலங்கை அரசு · Government of Sri Lanka";
     private static final String ENGLISH_LINE = "Government of Sri Lanka";
