@@ -326,7 +326,11 @@ public class BiometricScheduleService {
         return clean;
     }
 
-    /** Input validation: start from today, end after start, at most 63 days. */
+    /**
+     * Input validation: start from today, end after start, at most 63 days. Today is allowed on purpose,
+     * even for times that have passed, so a demo can show check-in and missed appointments the same day.
+     * Booking still rejects past slots.
+     */
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null || startDate.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Biometric schedules must start from today or a future date.");
