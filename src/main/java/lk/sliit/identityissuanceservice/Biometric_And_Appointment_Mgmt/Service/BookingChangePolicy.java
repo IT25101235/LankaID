@@ -25,7 +25,10 @@ public final class BookingChangePolicy {
         return canCancel(appointment, now);
     }
 
-    /** Policy rules: a biometric booking can be cancelled up to 72 hours before it. */
+    /**
+     * Policy rules: a biometric booking can be cancelled up to 72 hours before it, and a walk-in booking
+     * until it starts.
+     */
     // OOP - Polymorphism (method overloading): canCancel(a) uses the current time, canCancel(a, now) takes
     // a given time.
     public static boolean canCancel(Appointment appointment) {

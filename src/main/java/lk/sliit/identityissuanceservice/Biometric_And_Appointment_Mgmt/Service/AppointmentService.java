@@ -448,7 +448,7 @@ public class AppointmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
     }
 
-    /** READ: slots with places left, delegated to the schedule service. */
+    /** READ: slots in a date range with their booked and remaining places, delegated to the schedule service. */
     @Transactional(readOnly = true)
     public List<BiometricSlotView> getAvailableSchedule(
             String serviceType, Integer centreId, LocalDate startDate, LocalDate endDate) {

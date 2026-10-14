@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller: officer biometric desk. Find the appointment, check the citizen in, then complete
- * collection.
+ * collection. A missed booking is moved to a new slot that the officer chooses.
  * <p>
  * Design Pattern - MVC and Post/Redirect/Get: the page is the View, and every POST redirects back to it.<br>
  * Exception handling: IllegalArgumentException (a broken rule) and DataAccessException (a database

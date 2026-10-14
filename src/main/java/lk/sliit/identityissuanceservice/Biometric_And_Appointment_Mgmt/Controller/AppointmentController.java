@@ -168,7 +168,7 @@ public class AppointmentController {
         }
     }
 
-    /** READ: show the appointment pass (only its owner can open it). */
+    /** READ: show the appointment pass (only its owner can open it). An expired booking shows a notice. */
     @GetMapping("/citizen/appointments/{reference}/pass")
     public String appointmentPass(
             @PathVariable String reference,

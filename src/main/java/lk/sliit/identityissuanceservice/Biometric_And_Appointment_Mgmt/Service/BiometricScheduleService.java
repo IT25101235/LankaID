@@ -157,7 +157,7 @@ public class BiometricScheduleService {
         }
     }
 
-    /** UPDATE: close every slot in the range and cancel its bookings. */
+    /** UPDATE: close every slot in the range and cancel its confirmed bookings (checked-in ones are kept). */
     @Transactional
     public int closeDateRange(String serviceType, Integer centreId, LocalDate startDate, LocalDate endDate) {
         String service = requireServiceType(serviceType);

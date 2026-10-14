@@ -68,7 +68,7 @@ public class AppointmentPassService {
         }
     }
 
-    /** Draws the full pass image: logo, QR code, citizen, centre, date and status. */
+    /** Draws the full pass image: logo, QR code, citizen, centre, date and status (EXPIRED once the date has passed). */
     public byte[] createDownloadablePass(OfficerBiometricDetails details) {
         BufferedImage pass = new BufferedImage(900, 1200, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = pass.createGraphics();
