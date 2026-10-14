@@ -22,6 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -35,6 +38,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Officer biometric workflow against the real services and database (rolled back after each test):
@@ -42,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * which slots may still be deleted.
  */
 @SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
 class BiometricOfficerWorkflowIntegrationTests {
 
@@ -55,6 +65,7 @@ class BiometricOfficerWorkflowIntegrationTests {
     @Autowired UserAccountRepository users;
     @Autowired CitizenAccountRepository citizens;
     @Autowired StaffAccountRepository staff;
+    @Autowired MockMvc mvc;
 
     private Integer officerId;
     private Centre centre;
@@ -115,27 +126,76 @@ class BiometricOfficerWorkflowIntegrationTests {
     // ---- Moving a missed booking ----
 
     @Test
-    void aMissedBookingMovesToTheNextFutureSlotAtTheSameCentre() {
+    void expiredCitizenPassShowsAWarningUntilRescheduled() throws Exception {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        publish(tomorrow);
+        var missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), null);
+        var session = new MockHttpSession();
+        session.setAttribute("loggedInUserId", missed.getCitizenId());
+        session.setAttribute("loggedInUserRole", "CITIZEN");
+        String passUrl = "/citizen/appointments/" + missed.getReferenceNo() + "/pass";
+
+        mvc.perform(get(passUrl).session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("appointmentExpired", true))
+                .andExpect(content().string(containsString("Appointment expired — missed booking")))
+                .andExpect(content().string(containsString("Reschedule expired appointment")));
+
+        appointmentService.rescheduleMissed(missed.getReferenceNo(), "NIC", officerId,
+                slotAt(tomorrow, 14, 0).getSlotId());
+
+        mvc.perform(get(passUrl).session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("appointmentExpired", false))
+                .andExpect(content().string(not(containsString("Appointment expired — missed booking"))));
+    }
+
+    @Test
+    void scanningAMissedAppointmentShowsDateAndTimeChoicesWithoutMovingIt() throws Exception {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        publish(tomorrow);
+        LocalDateTime oldTime = LocalDate.now().minusDays(1).atTime(9, 0);
+        var missed = booking("CONFIRMED", oldTime, null);
+        var session = new MockHttpSession();
+        session.setAttribute("loggedInOfficerId", officerId);
+        session.setAttribute("loggedInOfficerRole", "NIC_OFFICER");
+
+        mvc.perform(get("/officer/nic/biometrics").session(session)
+                        .param("reference", missed.getReferenceNo()).param("checkInMethod", "QR"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("EXPIRED (MISSED)")))
+                .andExpect(content().string(containsString("New appointment date")))
+                .andExpect(content().string(containsString("Available time")))
+                .andExpect(content().string(containsString("Confirm reschedule")))
+                .andExpect(content().string(not(containsString("Check in citizen"))));
+        assertEquals(oldTime, appointments.findById(missed.getAppointmentId()).orElseThrow().getScheduledAt());
+    }
+
+    @Test
+    void aMissedBookingMovesToTheOfficersChosenSlotAndKeepsItsQr() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         schedules.publishDateRange("NIC", centre.getCentreId(), tomorrow, tomorrow,
                 LocalTime.of(9, 0), LocalTime.of(16, 30), 1, officerId);
         Appointment missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), null);
 
-        appointmentService.rescheduleMissed(missed.getReferenceNo(), "NIC", officerId);
+        var selectedSlot = slotAt(tomorrow, 14, 0);
+        appointmentService.rescheduleMissed(missed.getReferenceNo(), "NIC", officerId, selectedSlot.getSlotId());
 
         Appointment moved = appointments.findById(missed.getAppointmentId()).orElseThrow();
-        assertEquals(tomorrow.atTime(9, 0), moved.getScheduledAt());
+        assertEquals(tomorrow.atTime(14, 0), moved.getScheduledAt());
         assertEquals("CONFIRMED", moved.getAppointmentStatus());
+        assertEquals(selectedSlot.getSlotId(), moved.getBiometricSlotId());
+        assertEquals(missed.getReferenceNo(), moved.getQrCode());
         assertEquals(1, schedules.bookedCount(moved.getBiometricSlotId(), null));
     }
 
     @Test
-    void aMissedBookingCannotMoveWhenNoFutureSlotIsPublished() {
+    void aMissedBookingNeedsAnExplicitSlotSelection() {
         Appointment missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), null);
 
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.rescheduleMissed(missed.getReferenceNo(), "NIC", officerId));
-        assertTrue(error.getMessage().contains("No future slots"));
+                () -> appointmentService.rescheduleMissed(missed.getReferenceNo(), "NIC", officerId, null));
+        assertTrue(error.getMessage().contains("Select an available date and time"));
     }
 
     @Test
@@ -143,8 +203,63 @@ class BiometricOfficerWorkflowIntegrationTests {
         Appointment upcoming = booking("CONFIRMED", LocalDate.now().plusDays(3).atTime(9, 0), null);
 
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.rescheduleMissed(upcoming.getReferenceNo(), "NIC", officerId));
+                () -> appointmentService.rescheduleMissed(upcoming.getReferenceNo(), "NIC", officerId, null));
         assertTrue(error.getMessage().contains("earlier date"));
+    }
+
+    @Test
+    void aMissedBookingCannotUseAFullSlot() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        publish(tomorrow);
+        var fullSlot = slotAt(tomorrow, 9, 0);
+        booking("CONFIRMED", tomorrow.atTime(9, 0), fullSlot.getSlotId());
+        var missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), null);
+
+        assertThrows(IllegalArgumentException.class, () -> appointmentService.rescheduleMissed(
+                missed.getReferenceNo(), "NIC", officerId, fullSlot.getSlotId()));
+    }
+
+    @Test
+    void aMissedBookingCannotUseAPastSlot() {
+        var past = pastSlot(LocalDate.now().minusDays(1));
+        var missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), past.getSlotId());
+
+        assertThrows(IllegalArgumentException.class, () -> appointmentService.rescheduleMissed(
+                missed.getReferenceNo(), "NIC", officerId, past.getSlotId()));
+    }
+
+    @Test
+    void aMissedNicBookingCannotUseAPassportSlot() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        schedules.publishDateRange("PASSPORT", centre.getCentreId(), tomorrow, tomorrow,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 1, officerId);
+        var wrongServiceSlot = slotRepository.findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
+                centre.getCentreId(), "PASSPORT", tomorrow, LocalTime.of(9, 0)).orElseThrow();
+        var missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), null);
+
+        assertThrows(IllegalArgumentException.class, () -> appointmentService.rescheduleMissed(
+                missed.getReferenceNo(), "NIC", officerId, wrongServiceSlot.getSlotId()));
+    }
+
+    @Test
+    void aMissedBookingCannotUseAnotherCentresSlot() {
+        var otherCentre = new Centre();
+        otherCentre.setCentreName("Other centre " + unique());
+        otherCentre.setCity("Colombo");
+        otherCentre.setDistrict("Colombo");
+        otherCentre.setDailyCapacity(1);
+        otherCentre = centres.saveAndFlush(otherCentre);
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        schedules.publishDateRange("NIC", otherCentre.getCentreId(), tomorrow, tomorrow,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 1, officerId);
+        var wrongCentreSlot = slotRepository.findByCentreIdAndServiceTypeAndSlotDateAndSlotTime(
+                otherCentre.getCentreId(), "NIC", tomorrow, LocalTime.of(9, 0)).orElseThrow();
+        var missed = booking("CONFIRMED", LocalDate.now().minusDays(1).atTime(9, 0), null);
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> appointmentService.rescheduleMissed(missed.getReferenceNo(), "NIC", officerId,
+                        wrongCentreSlot.getSlotId()));
+        assertTrue(error.getMessage().contains("this appointment's service centre"));
     }
 
     // ---- Closing and republishing a day ----

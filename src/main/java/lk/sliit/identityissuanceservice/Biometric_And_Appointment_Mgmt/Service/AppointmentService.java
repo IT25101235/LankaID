@@ -277,12 +277,27 @@ public class AppointmentService {
         return findForOfficer(reference, serviceType);
     }
 
-    /** UPDATE: moves a missed booking to the first available future slot at the same centre. */
+    /** READ: published future slots an officer can choose for this missed booking. */
+    @Transactional(readOnly = true)
+    public List<BiometricSlotView> getMissedRescheduleSlots(String reference, String serviceType) {
+        var appointment = findForOfficer(reference, serviceType).appointment();
+        requireReschedulableMissed(appointment);
+        LocalDateTime now = LocalDateTime.now();
+        return scheduleService.getSchedule(serviceType, appointment.getCentreId(),
+                        now.toLocalDate(), now.toLocalDate().plusDays(90))
+                .stream()
+                .filter(slot -> slot.available() && slot.remainingPlaces() > 0
+                        && slot.slotDate().atTime(slot.slotTime()).isAfter(now))
+                .toList();
+    }
+
+    /** UPDATE: moves a missed booking to the officer's selected slot at the same centre. */
     @Transactional
     public OfficerBiometricDetails rescheduleMissed(
             String reference,
             String serviceType,
-            Integer staffId
+            Integer staffId,
+            Integer slotId
     ) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = findForOfficer(reference, serviceType);
@@ -292,18 +307,14 @@ public class AppointmentService {
 
         CitizenApplication application = applicationRepository.findById(details.appointment().getApplicationId())
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
-        BiometricSlotView nextSlot = scheduleService.getSchedule(
-                        serviceType, details.appointment().getCentreId(), LocalDate.now(), LocalDate.now().plusDays(90))
-                .stream()
-                .filter(slot -> slot.available() && slot.remainingPlaces() > 0
-                        && slot.slotDate().atTime(slot.slotTime()).isAfter(LocalDateTime.now()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No future slots are available at this centre. The citizen can choose another centre from Manage booking."));
+        if (slotId == null) throw new IllegalArgumentException("Select an available date and time.");
         var slot = scheduleService.lockBookableSlot(
-                nextSlot.slotId(), serviceType, details.appointment().getAppointmentId());
+                slotId, serviceType, details.appointment().getAppointmentId());
         Appointment appointment = lockAppointment(details.appointment().getAppointmentId());
         requireReschedulableMissed(appointment);
+        if (!appointment.getCentreId().equals(slot.getCentreId())) {
+            throw new IllegalArgumentException("Select a slot at this appointment's service centre.");
+        }
         LocalDateTime newTime = slot.getSlotDate().atTime(slot.getSlotTime());
         appointment.setBiometricSlotId(slot.getSlotId());
         appointment.setScheduledAt(newTime);

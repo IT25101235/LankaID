@@ -72,21 +72,21 @@ class BiometricOfficerControllerTests {
         mvc.perform(post("/officer/nic/biometrics/BIO-1/reschedule-missed")
                         .session(officer(OfficerAccountService.NIC_OFFICER)))
                 .andExpect(flash().attribute("biometricError", RELOAD));
-        verify(appointmentService, never()).rescheduleMissed(any(), any(), any());
+        verify(appointmentService, never()).rescheduleMissed(any(), any(), any(), any());
     }
 
     @Test
     void rescheduleMissedMovesTheAppointmentAndEncodesTheReference() throws Exception {
         Appointment moved = new Appointment();
         moved.setScheduledAt(LocalDateTime.of(2030, 1, 15, 9, 0));
-        when(appointmentService.rescheduleMissed("BIO 2026", "NIC", 70))
+        when(appointmentService.rescheduleMissed("BIO 2026", "NIC", 70, 42))
                 .thenReturn(new OfficerBiometricDetails(moved, null, null, null, "Citizen", false, false));
 
-        mvc.perform(withToken(post("/officer/{service}/biometrics/{reference}/reschedule-missed", "nic", "BIO 2026"),
+        mvc.perform(withToken(post("/officer/{service}/biometrics/{reference}/reschedule-missed", "nic", "BIO 2026").param("slotId", "42"),
                         OfficerAccountService.NIC_OFFICER))
                 .andExpect(redirectedUrl("/officer/nic/biometrics?reference=BIO+2026"))
                 .andExpect(flash().attribute("biometricMessage", containsString("moved to")));
-        verify(appointmentService).rescheduleMissed("BIO 2026", "NIC", 70);
+        verify(appointmentService).rescheduleMissed("BIO 2026", "NIC", 70, 42);
     }
 
     @Test
@@ -117,7 +117,7 @@ class BiometricOfficerControllerTests {
                     .andExpect(redirectedUrl("/login"));
         }
         verify(appointmentService, never()).checkIn(any(), any(), any(), any());
-        verify(appointmentService, never()).rescheduleMissed(any(), any(), any());
+        verify(appointmentService, never()).rescheduleMissed(any(), any(), any(), any());
         verify(biometricService, never()).completeCollection(any(), any(), any());
     }
 
@@ -125,7 +125,7 @@ class BiometricOfficerControllerTests {
     void aDatabaseConflictShowsAFriendlyMessageOnTheBiometricDesk() throws Exception {
         when(appointmentService.checkIn(any(), any(), any(), any()))
                 .thenThrow(new OptimisticLockingFailureException("conflict"));
-        when(appointmentService.rescheduleMissed(any(), any(), any()))
+        when(appointmentService.rescheduleMissed(any(), any(), any(), any()))
                 .thenThrow(new OptimisticLockingFailureException("conflict"));
         doThrow(new OptimisticLockingFailureException("conflict"))
                 .when(biometricService).completeCollection(any(), any(), any());

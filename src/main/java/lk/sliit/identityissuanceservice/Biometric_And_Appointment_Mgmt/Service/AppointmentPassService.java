@@ -120,13 +120,16 @@ public class AppointmentPassService {
         drawFittedText(graphics, service + " BIOMETRIC COLLECTION", 90, 231, 570, 23);
         graphics.setColor(new Color(245, 233, 214));
         graphics.setFont(new Font("SansSerif", Font.PLAIN, 17));
-        graphics.drawString("Present this pass at your biometric appointment.", 90, 260);
+        boolean expired = BookingChangePolicy.isMissed(details.appointment());
+        graphics.drawString(expired ? "Appointment expired. Reschedule before check-in."
+                : "Present this pass at your biometric appointment.", 90, 260);
 
         graphics.setColor(GOLD);
         graphics.fillRoundRect(680, 192, 120, 38, 19, 19);
         graphics.setColor(MAROON_DARK);
         graphics.setFont(new Font("SansSerif", Font.BOLD, 13));
-        drawCenteredInBox(graphics, statusLabel(details.appointment().getAppointmentStatus()), 680, 192, 120, 38);
+        drawCenteredInBox(graphics, expired ? "EXPIRED"
+                : statusLabel(details.appointment().getAppointmentStatus()), 680, 192, 120, 38);
     }
 
     private void drawQrPanel(Graphics2D graphics, BufferedImage qr, String reference) {

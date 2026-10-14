@@ -139,14 +139,31 @@ This account is already prepared. Do not create another application for it.
 |---|---|
 | Citizen | Aakil Ahamed |
 | Application | LK-NIC-2026-AAKIL01 |
-| Appointment reference | BIO-2026-AAKIL01 |
+| Appointment reference | BIO-2026-A4C1A105 |
 | Original appointment | 2026-10-08 at 09:00 |
 | Appointment type | Biometric |
 | Status | Confirmed but missed |
 | Payment | Paid, LKR 2,000 |
-| Available reschedule slot | First available future NIC slot at Colombo Demo Service Centre |
+| Viva date | 2026-10-15 |
+| Available reschedule slots | 2026-10-15, every 30 minutes from 08:00 to 17:30 at Colombo Demo Service Centre |
 
-Use `LankaID-aakil-missed-biometric-QR.png` when demonstrating the officer QR scan. To demonstrate both sides with one appointment, first show the citizen's reschedule option without submitting it. Then scan the QR as the NIC officer and select **Move to next available slot**. The booking becomes Confirmed and keeps the same QR reference.
+Use `LankaID-aakil-missed-biometric-QR.png` when demonstrating the officer QR scan. To demonstrate both sides with one appointment, first show the citizen's reschedule option without submitting it. Then scan the QR as the NIC officer, choose an available date and time, and press **Confirm reschedule**. The booking becomes Confirmed and keeps the same QR reference.
+
+### October 15 viva sequence
+
+1. Sign in as Aakil and open the appointment pass. The original October 8 appointment date is still in the past, so the pass displays **EXPIRED** and a missed-booking warning beside the same QR.
+2. Open **Cancel or reschedule booking** to show the citizen's available options. Leave the booking unchanged so the officer can demonstrate rescheduling the same missed appointment.
+3. Sign in as the NIC officer in a separate browser profile or private window and scan the same QR. The expired/missed warning blocks check-in and offers date and time selectors. Scanning does not reschedule the booking.
+4. During the October 15 demonstration, select October 15 and a time that has not yet passed, then press **Confirm reschedule**. The officer chooses the slot; it is no longer chosen automatically. The reference remains `BIO-2026-A4C1A105`.
+5. Refresh Aakil's pass to show the new appointment date and time, then continue officer check-in and biometric collection. Check-in requires the booked date to be October 15; it does not require waiting until the exact booked time.
+
+Do not submit a reschedule during rehearsal on October 14 if you want the booking to remain missed for the viva. Tomorrow's slots run only until 17:30, so demonstrate rescheduling before that time. Slots whose start time has already passed cannot be selected. Completing either citizen or officer rescheduling updates the same booking, so show both options before submitting one.
+
+Preparation on October 14: added 39 missing biometric slot records (19 NIC and 20 passport), resulting in 20 slots per service, each with capacity 10. The original October 8 appointment, payment, application, and QR reference were preserved. The database keeps the workflow status `CONFIRMED`; the past date identifies the booking as missed and blocks check-in until rescheduled.
+
+The saved QR PNG contained the obsolete `BIO-2026-AAKIL01` value. It was replaced with a verified image for the existing `BIO-2026-A4C1A105` database reference, matching the citizen pass. Use this updated file rather than an older downloaded copy.
+
+After the rescheduling rehearsal, Aakil's booking was restored from October 15 at 08:00 to its original October 8 at 09:00 slot. Payment, application status, and QR were retained. Restart the application to load the new expired-pass display and officer-selected rescheduling form.
 
 ## Demo upload checklist
 

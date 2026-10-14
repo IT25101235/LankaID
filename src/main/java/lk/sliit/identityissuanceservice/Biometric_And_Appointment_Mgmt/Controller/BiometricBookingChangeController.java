@@ -51,6 +51,7 @@ public class BiometricBookingChangeController {
             model.addAttribute("appointment", appointment);
             model.addAttribute("biometric", true);
             model.addAttribute("rebooking", rebooking);
+            model.addAttribute("appointmentExpired", BookingChangePolicy.isMissed(appointment));
             model.addAttribute("canChange", BookingChangePolicy.canCancel(appointment));
             model.addAttribute("canBook", rebooking || BookingChangePolicy.canReschedule(appointment));
             model.addAttribute("centres", details.centres());

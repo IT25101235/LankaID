@@ -18,11 +18,12 @@
       <p class="biometric-pass-eyebrow">Official appointment pass</p>
       <div class="flex flex-wrap items-end justify-between gap-3 mt-2">
         <div><h1 class="text-2xl sm:text-3xl font-extrabold" th:text="|${pass.application.serviceType} Biometric Collection|">NIC Biometric Collection</h1><p class="biometric-pass-subtitle mt-1">Present this pass at your biometric appointment.</p></div>
-        <span class="biometric-pass-status" th:text="${#strings.replace(pass.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</span>
+        <span class="biometric-pass-status" th:text="${appointmentExpired ? 'EXPIRED' : #strings.replace(pass.appointment.appointmentStatus, '_', ' ')}">CONFIRMED</span>
       </div>
     </div>
     <div class="p-5 sm:p-8 grid md:grid-cols-[minmax(352px,1.05fr)_minmax(0,.95fr)] gap-7 items-center">
       <div class="biometric-pass-qr-panel text-center">
+        <div th:if="${appointmentExpired}" role="alert" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"><p class="font-bold">Appointment expired — missed booking</p><p class="mt-1">Reschedule before check-in. Keep this QR; it will work for the new appointment.</p></div>
         <img th:src="@{/citizen/appointments/{reference}/qr(reference=${pass.appointment.referenceNo})}" alt="Appointment QR code" class="biometric-pass-qr"/>
         <p class="biometric-pass-qr-label">Appointment reference</p>
         <p class="font-mono font-extrabold text-xl mt-1 break-all" th:text="${pass.appointment.referenceNo}">BIO-REFERENCE</p>
@@ -35,7 +36,7 @@
     </div>
     <div class="biometric-pass-footer">Present this pass on your phone or as a printed copy. An officer can scan the QR or type the same reference manually.</div>
   </section>
-  <div class="no-print mt-5 text-center"><a th:href="@{/citizen/appointments/{reference}/manage(reference=${pass.appointment.referenceNo})}" class="gov-button-secondary inline-block px-5 py-3 text-sm">Cancel or reschedule booking</a><p class="text-xs text-slate-600 mt-2">Changes require at least 72 hours' notice. Your original payment is retained, so biometric rescheduling or rebooking does not require another payment.</p></div>
+  <div class="no-print mt-5 text-center"><a th:href="@{/citizen/appointments/{reference}/manage(reference=${pass.appointment.referenceNo})}" class="gov-button-secondary inline-block px-5 py-3 text-sm" th:text="${appointmentExpired ? 'Reschedule expired appointment' : 'Cancel or reschedule booking'}">Cancel or reschedule booking</a><p class="text-xs text-slate-600 mt-2">Reschedule at least 72 hours before your appointment, or after its date has passed. Your original payment is retained; no additional payment is required.</p></div>
   <div class="no-print mt-5 flex flex-wrap justify-center gap-3"><a th:href="@{/citizen/appointments/{reference}/pass/download(reference=${pass.appointment.referenceNo})}" class="gov-button-primary px-5 py-3 text-sm flex items-center gap-2"><span class="material-symbols-outlined">download</span>Download PNG pass</a><button onclick="window.print()" class="gov-button-secondary px-5 py-3 text-sm flex items-center gap-2"><span class="material-symbols-outlined">print</span>Print / save PDF</button></div>
 </main>
 <script src="/js/portal-shell.js?v=20261010-notify"></script>

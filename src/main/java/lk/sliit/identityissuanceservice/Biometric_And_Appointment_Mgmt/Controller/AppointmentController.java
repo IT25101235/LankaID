@@ -7,6 +7,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.Offic
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentPassService;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.AppointmentService;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Service.BookingChangePolicy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -178,7 +179,9 @@ public class AppointmentController {
         Integer citizenId = loggedInCitizenId(session);
         if (citizenId == null) return "redirect:/login";
         try {
-            model.addAttribute("pass", appointmentService.getCitizenPassDetails(citizenId, reference));
+            var pass = appointmentService.getCitizenPassDetails(citizenId, reference);
+            model.addAttribute("pass", pass);
+            model.addAttribute("appointmentExpired", BookingChangePolicy.isMissed(pass.appointment()));
             return "citizen_frontends/biometric_appointment_pass";
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("applicationError", exception.getMessage());

@@ -87,11 +87,12 @@ public class BiometricController {
                 + java.net.URLEncoder.encode(reference, java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    /** UPDATE: move a missed booking to the next free slot. Role and form token are checked first. */
+    /** UPDATE: move a missed booking to the selected slot. Role and form token are checked first. */
     @PostMapping("/officer/{service}/biometrics/{reference}/reschedule-missed")
     public String rescheduleMissed(
             @PathVariable String service,
             @PathVariable String reference,
+            @RequestParam(required = false) Integer slotId,
             @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
@@ -102,7 +103,7 @@ public class BiometricController {
         try {
             BiometricFormToken.check(formToken, session);
             var details = appointmentService.rescheduleMissed(
-                    reference, serviceType, officerId(session));
+                    reference, serviceType, officerId(session), slotId);
             redirectAttributes.addFlashAttribute(
                     "biometricMessage",
                     "Missed appointment moved to " + details.appointment().getScheduledAt()
@@ -167,6 +168,13 @@ public class BiometricController {
                 model.addAttribute("selectedAppointment", selected);
                 model.addAttribute("selectedAppointmentToday", BookingChangePolicy.isToday(selected.appointment()));
                 model.addAttribute("selectedAppointmentMissed", BookingChangePolicy.isMissed(selected.appointment()));
+                if (BookingChangePolicy.isMissed(selected.appointment()) && !selected.checkedIn()
+                        && !selected.biometricCollected()) {
+                    var slots = appointmentService.getMissedRescheduleSlots(reference, serviceType);
+                    model.addAttribute("rescheduleSlots", slots);
+                    model.addAttribute("rescheduleDates", slots.stream()
+                            .map(slot -> slot.slotDate()).distinct().toList());
+                }
             } catch (IllegalArgumentException exception) {
                 redirectAttributes.addFlashAttribute("biometricError", exception.getMessage());
                 return "redirect:/officer/" + serviceType.toLowerCase() + "/biometrics";
