@@ -27,13 +27,21 @@ import java.util.LinkedHashMap;
 /**
  * Controller (MVC): citizen booking and appointment pass, plus the officer appointment history. It
  * checks the session and calls AppointmentService.
+ * <p>
+ * Design Pattern - MVC: this class is the Controller, the services are the Model side and the Thymeleaf
+ * pages are the View.<br>
+ * Design Pattern - Post/Redirect/Get: every POST ends in a redirect, so refreshing the page never repeats
+ * a booking.<br>
+ * Exception handling: a service throws IllegalArgumentException for a broken rule (shown to the citizen as
+ * a message) and Spring throws DataAccessException for a database problem (shown as a safe generic message,
+ * never a stack trace).
  */
 @Controller
 public class AppointmentController {
 
-    // OOP - Composition and Encapsulation: the service is a private final field handed in through the
-    // constructor (dependency injection), so this class is loosely coupled and the object is never created
-    // here.
+    // OOP - Composition and Encapsulation: the services are private final fields handed in through the
+    // constructor (Design Pattern - Dependency Injection), so this class is loosely coupled and the objects
+    // are never created here.
     private final AppointmentService appointmentService;
     private final AppointmentPassService passService;
 
@@ -87,6 +95,7 @@ public class AppointmentController {
         if (citizenId == null) return "redirect:/login";
 
         Integer selectedApplicationId = null;
+        // Input validation: the form token, application id and slot id are all checked before booking.
         try {
             BiometricFormToken.check(formToken, session);
             selectedApplicationId = readInteger(applicationId, "Application details are missing. Please try again.");
@@ -107,7 +116,11 @@ public class AppointmentController {
         }
     }
 
-    /** READ (JSON): free future slots grouped by date for the calendar, within the booking window. */
+    /**
+     * READ (JSON): free future slots grouped by date for the calendar, within the booking window. Called by
+     * booking-availability.js (AJAX).
+     * Exception handling: bad input returns HTTP 400 with a message, and no login returns HTTP 401.
+     */
     @GetMapping("/citizen/appointments/biometric/availability")
     public ResponseEntity<?> availability(
             @RequestParam Integer applicationId,
@@ -173,7 +186,7 @@ public class AppointmentController {
         }
     }
 
-    /** Returns the QR code image. */
+    /** READ: returns the QR code image. Exception handling: not found or not the owner returns HTTP 404. */
     @GetMapping("/citizen/appointments/{reference}/qr")
     public ResponseEntity<byte[]> appointmentQrCode(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);
@@ -188,7 +201,7 @@ public class AppointmentController {
         }
     }
 
-    /** Returns the pass as a PNG download. */
+    /** READ: returns the pass as a PNG download. Exception handling: not found or not the owner returns HTTP 404. */
     @GetMapping("/citizen/appointments/{reference}/pass/download")
     public ResponseEntity<byte[]> downloadAppointmentPass(@PathVariable String reference, HttpSession session) {
         Integer citizenId = loggedInCitizenId(session);

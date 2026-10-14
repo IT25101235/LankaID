@@ -8,7 +8,15 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.UUID;
 
-/** Require biometric and appointment forms to come from the browser session that displayed them. */
+/**
+ * Require biometric and appointment forms to come from the browser session that displayed them.
+ * <p>
+ * Design Pattern - Synchronizer Token: the page carries a secret token and every POST must send it back.<br>
+ * Design Pattern - Advice (cross-cutting): @ControllerAdvice adds the token to every page of the listed
+ * controllers, so no controller repeats this code.<br>
+ * Exception handling: a missing or wrong token throws IllegalArgumentException, which the controller shows
+ * as "Reload the page and try again."
+ */
 @ControllerAdvice(assignableTypes = {AppointmentController.class, BiometricController.class,
         BiometricScheduleController.class})
 public class BiometricFormToken {

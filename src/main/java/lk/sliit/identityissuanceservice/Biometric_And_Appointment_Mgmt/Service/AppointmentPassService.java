@@ -20,7 +20,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 
-/** Builds the QR code and the downloadable PNG pass (ZXing library and Java 2D). */
+/**
+ * Builds the QR code and the downloadable PNG pass (ZXing library and Java 2D).
+ * <p>
+ * Libraries used (no web API is called): ZXing makes the QR code and Java 2D draws the pass image.<br>
+ * Design Pattern - Service Layer: controllers just ask for the bytes and never see the drawing code.<br>
+ * Exception handling: the library's checked exceptions (WriterException, IOException) are turned into an
+ * IllegalArgumentException with a friendly message.<br>
+ * Privacy: the QR holds only the appointment reference number, no personal data.
+ */
 @Service
 public class AppointmentPassService {
 

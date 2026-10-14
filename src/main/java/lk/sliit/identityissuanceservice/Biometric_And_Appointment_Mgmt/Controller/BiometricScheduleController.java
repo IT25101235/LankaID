@@ -18,13 +18,19 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 
-/** Controller: officers manage the biometric calendar (publish, close, edit and delete slots). */
+/**
+ * Controller: officers manage the biometric calendar (publish, close, edit and delete slots).
+ * <p>
+ * Design Pattern - MVC and Post/Redirect/Get: the page is the View, and every POST redirects back to it.<br>
+ * Exception handling: IllegalArgumentException (a broken rule) and DataAccessException (a database
+ * problem) are caught and shown as a message. Deleting needs a second token, so one click cannot delete.
+ */
 @Controller
 public class BiometricScheduleController {
 
     // OOP - Composition and Encapsulation: the service is a private final field handed in through the
-    // constructor (dependency injection), so this class is loosely coupled and the object is never created
-    // here.
+    // constructor (Design Pattern - Dependency Injection), so this class is loosely coupled and the object
+    // is never created here.
     private final BiometricScheduleService schedules;
 
     public BiometricScheduleController(BiometricScheduleService schedules) {
@@ -202,6 +208,7 @@ public class BiometricScheduleController {
         return session.getAttribute("loggedInOfficerId") instanceof Integer id ? id : null;
     }
 
+    /** Input validation: only nic or passport is accepted. Exception handling: anything else is HTTP 404. */
     private String serviceType(String service) {
         if ("nic".equalsIgnoreCase(service)) return "NIC";
         if ("passport".equalsIgnoreCase(service)) return "PASSPORT";

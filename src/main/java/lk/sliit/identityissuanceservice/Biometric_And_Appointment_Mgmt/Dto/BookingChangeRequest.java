@@ -7,7 +7,15 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-/** Session-bound confirmation protects against stale forms and repeated payments. */
+/**
+ * Session-bound confirmation protects against stale forms and repeated payments.
+ * <p>
+ * Design Pattern - Synchronizer Token: prepare() makes a one-time token when the page opens and require()
+ * checks it on submit.<br>
+ * Design idea - Memento: it remembers the booking's status, time and version when the page opened, and the
+ * policy compares them on submit.<br>
+ * Exception handling: an unknown or expired token throws IllegalArgumentException ("Reload the booking").
+ */
 // OOP - Immutability and Interface: an unchangeable record that implements Serializable so it can be
 // stored in the session.
 public record BookingChangeRequest(Integer appointmentId, String status, LocalDateTime scheduledAt, Long version,

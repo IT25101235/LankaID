@@ -4,7 +4,14 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.App
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/** The same rules are used for showing actions and accepting submitted changes. */
+/**
+ * The same rules are used for showing actions and accepting submitted changes.
+ * <p>
+ * Design Pattern - Policy (business rule class): the 72-hour cancel rule, the check-in day rule and the
+ * stale-form rule are written once here, so the page buttons and the server always agree.<br>
+ * Input validation and exception handling: the require... methods throw IllegalArgumentException with a
+ * clear message, and the can... methods return true or false for the page.
+ */
 // OOP - Encapsulation: a final class with a private constructor cannot be extended or instantiated. It
 // only offers static rule methods.
 public final class BookingChangePolicy {

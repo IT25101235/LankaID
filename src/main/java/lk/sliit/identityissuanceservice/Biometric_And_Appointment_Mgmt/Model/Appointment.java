@@ -13,12 +13,18 @@ import java.time.LocalDateTime;
 /**
  * Entity for the Appointment table: one booking. Status flow: PENDING_PAYMENT -> CONFIRMED ->
  * CHECKED_IN -> COMPLETED (or CANCELLED).
+ * <p>
+ * Design Pattern - ORM (Object-Relational Mapping): JPA maps this class to the table, so no SQL is written.<br>
+ * Input validation (database level): nullable = false and length limits on the columns are checked
+ * before saving.
  */
 @Entity
 @Table(name = "Appointment", schema = "dbo")
 public class Appointment {
 
-    // Reject a stale write if another request changed this booking while the form was open.
+    // Optimistic locking: reject a stale write if another request changed this booking while the form was
+    // open. Exception handling: it throws OptimisticLockingFailureException (a DataAccessException), which
+    // the controller shows as "reload and try again".
     @jakarta.persistence.Version
     @Column(name = "booking_version", nullable = false)
     private Long bookingVersion;

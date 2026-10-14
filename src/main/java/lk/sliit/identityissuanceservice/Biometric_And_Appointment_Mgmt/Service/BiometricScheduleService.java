@@ -21,16 +21,24 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Service: slot calendar and capacity. Used by officers to publish slots and by citizens to book them. */
+/**
+ * Service: slot calendar and capacity. Used by officers to publish slots and by citizens to book them.
+ * <p>
+ * Design Pattern - Service Layer, Repository and Dependency Injection (see the field comment below).<br>
+ * Design Pattern - Observer: closing a slot notifies each affected citizen through NotificationPublisher.<br>
+ * Exception handling: every rule below throws IllegalArgumentException with a clear message, and
+ * @Transactional rolls the change back.<br>
+ * Concurrency: slot rows are locked (pessimistic lock) so two citizens cannot take the last place.
+ */
 @Service
 public class BiometricScheduleService {
 
     private static final List<String> OCCUPYING_STATUSES = List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
     private static final List<String> CANCELLABLE_STATUSES = List.of("CONFIRMED");
 
-    // OOP - Composition and Encapsulation: the repositories is a private final field handed in through the
-    // constructor (dependency injection), so this class is loosely coupled and the object is never created
-    // here.
+    // OOP - Composition and Encapsulation: the repositories are private final fields handed in through the
+    // constructor (Design Pattern - Dependency Injection), so this class is loosely coupled and the objects
+    // are never created here.
     private final BiometricAppointmentSlotRepository slots;
     private final AppointmentRepository appointments;
     private final CentreRepository centres;

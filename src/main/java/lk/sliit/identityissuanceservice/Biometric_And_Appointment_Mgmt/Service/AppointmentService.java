@@ -36,6 +36,13 @@ import java.util.function.Function;
 /**
  * Service: core booking logic (book a slot, passes, officer queue, check-in, missed bookings). Sends
  * notifications through NotificationPublisher (Observer pattern).
+ * <p>
+ * Design Pattern - Service Layer: all booking rules live here, so the controllers stay thin.<br>
+ * Design Pattern - Observer: notificationPublisher announces each change and the notification module reacts.<br>
+ * Design Pattern - Repository and Dependency Injection: data access and the other services are handed in.<br>
+ * Exception handling: a broken rule throws IllegalArgumentException with a friendly message, and
+ * @Transactional rolls the whole change back, so a half-finished booking is never saved.<br>
+ * Concurrency: the slot row and then the appointment row are locked while they change.
  */
 @Service
 public class AppointmentService {
@@ -46,9 +53,9 @@ public class AppointmentService {
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
     private static final int LOOKUP_CHUNK_SIZE = 1000;
 
-    // OOP - Composition and Encapsulation: the repositories and other services is a private final field
-    // handed in through the constructor (dependency injection), so this class is loosely coupled and the
-    // object is never created here.
+    // OOP - Composition and Encapsulation: the repositories and other services are private final fields
+    // handed in through the constructor (Design Pattern - Dependency Injection), so this class is loosely
+    // coupled and the objects are never created here.
     private final AppointmentRepository appointmentRepository;
     private final AppointmentCheckInRepository checkInRepository;
     private final BiometricCollectionRepository biometricRepository;
@@ -128,6 +135,7 @@ public class AppointmentService {
                 .findByApplicationIdAndAppointmentType(applicationId, "BIOMETRIC")
                 .orElseThrow(() -> new IllegalArgumentException("Appointment record was not found."));
         appointment = appointmentRepository.findByIdForChange(appointment.getAppointmentId()).orElseThrow();
+        // Input validation: only a paid booking that is still waiting for a slot can be booked.
         if (!"PENDING_PAYMENT".equals(appointment.getAppointmentStatus())
                 || !List.of("APPROVED", "PAYMENT_PENDING").contains(application.getCurrentStatus())) {
             throw new IllegalArgumentException("Use Manage booking to change your confirmed appointment.");
@@ -159,7 +167,7 @@ public class AppointmentService {
         return appointment;
     }
 
-    /** Ownership check: citizens can only open their own bookings. */
+    /** READ: ownership check, so citizens can only open their own bookings. */
     @Transactional(readOnly = true)
     public Appointment getCitizenAppointment(Integer citizenId, String reference) {
         Appointment appointment = appointmentRepository.findByReferenceNoIgnoreCase(reference)
@@ -269,7 +277,7 @@ public class AppointmentService {
         return findForOfficer(reference, serviceType);
     }
 
-    /** Moves a missed booking to the first available future slot at the same centre. */
+    /** UPDATE: moves a missed booking to the first available future slot at the same centre. */
     @Transactional
     public OfficerBiometricDetails rescheduleMissed(
             String reference,

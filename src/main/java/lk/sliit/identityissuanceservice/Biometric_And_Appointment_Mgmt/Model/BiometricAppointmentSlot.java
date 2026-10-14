@@ -16,6 +16,9 @@ import java.time.LocalTime;
 /**
  * Entity: one half-hour slot an officer publishes for a centre and service (NIC or PASSPORT), with a
  * capacity.
+ * <p>
+ * Design Pattern - ORM: JPA maps this class to the table. Input validation (database level): the
+ * nullable = false columns must always have a value.
  */
 @Entity
 @Table(name = "BiometricAppointmentSlot", schema = "dbo")

@@ -17,13 +17,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * Controller: officer biometric desk. Find the appointment, check the citizen in, then complete
  * collection.
+ * <p>
+ * Design Pattern - MVC and Post/Redirect/Get: the page is the View, and every POST redirects back to it.<br>
+ * Exception handling: IllegalArgumentException (a broken rule) and DataAccessException (a database
+ * problem) are caught and shown as a message on the page. An unknown service in the URL returns HTTP 404.
  */
 @Controller
 public class BiometricController {
 
-    // OOP - Composition and Encapsulation: the services is a private final field handed in through the
-    // constructor (dependency injection), so this class is loosely coupled and the object is never created
-    // here.
+    // OOP - Composition and Encapsulation: the services are private final fields handed in through the
+    // constructor (Design Pattern - Dependency Injection), so this class is loosely coupled and the objects
+    // are never created here.
     private final AppointmentService appointmentService;
     private final BiometricService biometricService;
 
@@ -177,7 +181,7 @@ public class BiometricController {
         model.addAttribute("queueRoute", "/officer/" + serviceType.toLowerCase() + "/applications");
     }
 
-    /** Role check: the matching service officer or the director, otherwise back to login. */
+    /** Role check (authorisation): the matching service officer or the director, otherwise back to login. */
     private String checkAccess(HttpSession session, String serviceType) {
         if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         Object role = session.getAttribute("loggedInOfficerRole");
@@ -192,6 +196,7 @@ public class BiometricController {
         return session.getAttribute("loggedInOfficerId") instanceof Integer id ? id : null;
     }
 
+    /** Input validation: only nic or passport is accepted. Exception handling: anything else is HTTP 404. */
     private String serviceType(String service) {
         if ("nic".equalsIgnoreCase(service)) return "NIC";
         if ("passport".equalsIgnoreCase(service)) return "PASSPORT";

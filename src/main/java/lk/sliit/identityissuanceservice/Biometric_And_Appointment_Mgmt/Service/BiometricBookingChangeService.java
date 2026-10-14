@@ -12,12 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Service: cancel or reschedule a confirmed biometric booking. The original payment is kept, so no new
  * payment.
+ * <p>
+ * Design Pattern - Service Layer, Observer (notifications) and Policy (BookingChangePolicy holds the rules).<br>
+ * Exception handling: a broken rule throws IllegalArgumentException, and @Transactional undoes a change
+ * that fails half way. The appointment version check rejects a stale form.
  */
 @Service
 public class BiometricBookingChangeService {
-    // OOP - Composition and Encapsulation: the repositories and services is a private final field handed
-    // in through the constructor (dependency injection), so this class is loosely coupled and the object
-    // is never created here.
+    // OOP - Composition and Encapsulation: the repositories and services are private final fields handed
+    // in through the constructor (Design Pattern - Dependency Injection), so this class is loosely coupled
+    // and the objects are never created here.
     private final AppointmentRepository appointments;
     private final AppointmentCheckInRepository checkIns;
     private final CitizenApplicationRepository applications;
@@ -37,7 +41,10 @@ public class BiometricBookingChangeService {
         this.notificationPublisher = notificationPublisher;
     }
 
-    /** UPDATE: status becomes CANCELLED, the QR is removed and the application goes back to APPROVED. */
+    /**
+     * DELETE (soft delete): status becomes CANCELLED, the QR is removed and the application goes back to
+     * APPROVED. The row stays for history.
+     */
     @Transactional
     public Appointment cancel(Integer citizenId, BookingChangeRequest request) {
         Appointment appointment = ownedBooking(citizenId, request);
@@ -81,7 +88,7 @@ public class BiometricBookingChangeService {
         return appointment;
     }
 
-    /** Safety checks: owner, unchanged since the page opened, not checked in, application paid. */
+    /** Input validation: owner, unchanged since the page opened, not checked in, application paid. */
     private Appointment ownedBooking(Integer citizenId, BookingChangeRequest request) {
         Appointment appointment = appointments.findByIdForChange(request.appointmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Booking was not found."));

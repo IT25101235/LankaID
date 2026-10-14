@@ -1,3 +1,8 @@
+// Booking calendar (browser side). Calls /citizen/appointments/biometric/availability (AJAX, JSON) to show
+// only dates and times that still have places.
+// Input validation (client side): the form cannot be submitted until a date and time are chosen. The server
+// checks everything again, so this is only for a friendlier page.
+// Exception handling: a failed request shows a message instead of breaking the calendar.
 (() => {
   const selection = document.querySelector('[data-biometric-selection]');
   if (!selection) return;

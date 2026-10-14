@@ -13,12 +13,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * Controller: the citizen "Manage booking" page, where a confirmed biometric booking is cancelled or
  * moved.
+ * <p>
+ * Design Pattern - MVC and Post/Redirect/Get: the page is the View, and a successful POST redirects.<br>
+ * Design Pattern - Synchronizer Token: each page gets a one-time token (BookingChangeRequest), so an old
+ * or repeated form cannot change the booking.<br>
+ * Exception handling: IllegalArgumentException (a broken rule) and DataAccessException (a database
+ * problem) are caught and shown as a message on the same page.
  */
 @Controller
 public class BiometricBookingChangeController {
-    // OOP - Composition and Encapsulation: the services is a private final field handed in through the
-    // constructor (dependency injection), so this class is loosely coupled and the object is never created
-    // here.
+    // OOP - Composition and Encapsulation: the services are private final fields handed in through the
+    // constructor (Design Pattern - Dependency Injection), so this class is loosely coupled and the objects
+    // are never created here.
     private final AppointmentService bookings;
     private final BiometricBookingChangeService changes;
 
@@ -60,7 +66,10 @@ public class BiometricBookingChangeController {
         }
     }
 
-    /** UPDATE: cancel the booking. Its status becomes CANCELLED and the payment is kept. */
+    /**
+     * DELETE (soft delete): cancel the booking. Its status becomes CANCELLED and the payment is kept, so the
+     * history is never lost.
+     */
     @PostMapping("/citizen/appointments/{reference}/manage/cancel")
     public String cancel(@PathVariable String reference, @RequestParam(required = false) String token,
                          HttpSession session, RedirectAttributes redirect) {

@@ -11,13 +11,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-/** Service: finishes the biometric step for an application. */
+/**
+ * Service: finishes the biometric step for an application.
+ * <p>
+ * Design Pattern - Service Layer and Observer: the rules live here and the citizen is notified through
+ * NotificationPublisher.<br>
+ * Exception handling: a broken rule throws IllegalArgumentException, and @Transactional saves the
+ * collection, the appointment and the application together or not at all.
+ */
 @Service
 public class BiometricService {
 
-    // OOP - Composition and Encapsulation: the services and repositories is a private final field handed
-    // in through the constructor (dependency injection), so this class is loosely coupled and the object
-    // is never created here.
+    // OOP - Composition and Encapsulation: the services and repositories are private final fields handed
+    // in through the constructor (Design Pattern - Dependency Injection), so this class is loosely coupled
+    // and the objects are never created here.
     private final AppointmentService appointmentService;
     private final AppointmentRepository appointmentRepository;
     private final BiometricCollectionRepository biometricRepository;
@@ -46,6 +53,7 @@ public class BiometricService {
     public void completeCollection(String reference, String serviceType, Integer staffId) {
         if (staffId == null) throw new IllegalArgumentException("Officer session was not found.");
         OfficerBiometricDetails details = appointmentService.findForOfficer(reference, serviceType);
+        // Input validation: the citizen must be checked in first, and biometrics are collected only once.
         if (!details.checkedIn()) {
             throw new IllegalArgumentException("Check in the citizen before collecting biometrics.");
         }
