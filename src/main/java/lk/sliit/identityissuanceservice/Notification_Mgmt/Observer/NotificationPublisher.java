@@ -1,19 +1,40 @@
 package lk.sliit.identityissuanceservice.Notification_Mgmt.Observer;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-/** The Subject in the Observer pattern: announces a notification request to its listeners. */
+/** ConcreteSubject: owns its observer list and calls each observer directly. */
 @Service
-public class NotificationPublisher {
+public class NotificationPublisher implements NotificationSubject {
 
-    private final ApplicationEventPublisher eventPublisher;
+    private final CopyOnWriteArrayList<NotificationObserver> observers = new CopyOnWriteArrayList<>();
 
-    public NotificationPublisher(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
+    public NotificationPublisher(List<NotificationObserver> initialObservers) {
+        initialObservers.forEach(this::addObserver);
+    }
+
+    @Override
+    public void addObserver(NotificationObserver observer) {
+        observers.addIfAbsent(Objects.requireNonNull(observer, "Observer must not be null."));
+    }
+
+    @Override
+    public void removeObserver(NotificationObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers(InAppNotificationEvent event) {
+        Objects.requireNonNull(event, "Notification event must not be null.");
+        // A snapshot permits concurrent publication and registration without duplicate delivery.
+        // Direct calls preserve the caller's thread, transaction, and exception handling.
+        for (NotificationObserver observer : observers) {
+            observer.update(event);
+        }
     }
 
     @Transactional
@@ -26,9 +47,8 @@ public class NotificationPublisher {
                            String message, boolean broadcast) {
         InAppNotificationEvent event = new InAppNotificationEvent(userIds, staffId, type, message, broadcast);
 
-        // Spring calls the registered observer immediately, in this thread and transaction.
-        // The publisher announces the request; it does not save notifications itself.
-        eventPublisher.publishEvent(event);
+        // Keep event data local to this call: simultaneous requests must not share message state.
+        notifyObservers(event);
 
         // The observer records the real count so the admin success message stays the same.
         return event.getDeliveredCount();

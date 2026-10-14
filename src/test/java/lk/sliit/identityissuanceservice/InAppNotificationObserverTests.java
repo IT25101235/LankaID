@@ -3,6 +3,8 @@ package lk.sliit.identityissuanceservice;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Model.Notification;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Model.UserNotification;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.InAppNotificationObserver;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.InAppNotificationEvent;
+import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationObserver;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Observer.NotificationPublisher;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Repository.NotificationRepository;
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Repository.UserNotificationRepository;
@@ -25,6 +27,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -39,7 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-/** Uses real Spring events and transactions, with fake database connections and repositories. */
+/** Tests manual observer dispatch and real transactions, using fake database connections. */
 class InAppNotificationObserverTests {
 
     private AnnotationConfigApplicationContext context;
@@ -154,10 +159,101 @@ class InAppNotificationObserverTests {
 
     @Test
     void missingObserverDoesNotReportASuccessfulDelivery() {
-        NotificationPublisher withoutObserver = new NotificationPublisher(event -> { });
+        NotificationPublisher withoutObserver = new NotificationPublisher(List.of());
 
         assertThrows(IllegalStateException.class,
                 () -> withoutObserver.sendToUsers(List.of(25), 99, "ADMIN_GENERAL", "Message", false));
+    }
+
+    @Test
+    void manualSubjectNotifiesMultipleObserversWithoutSpringEvents() {
+        NotificationObserver first = mock(NotificationObserver.class);
+        NotificationObserver second = mock(NotificationObserver.class);
+        NotificationPublisher subject = new NotificationPublisher(List.of(first, second));
+        InAppNotificationEvent event = new InAppNotificationEvent(List.of(25), null, "TEST", "Message", false);
+
+        subject.notifyObservers(event);
+
+        verify(first).update(event);
+        verify(second).update(event);
+    }
+
+    @Test
+    void removedObserverDoesNotReceiveFurtherUpdates() {
+        NotificationObserver observer = mock(NotificationObserver.class);
+        NotificationPublisher subject = new NotificationPublisher(List.of());
+        InAppNotificationEvent event = new InAppNotificationEvent(List.of(25), null, "TEST", "Message", false);
+        subject.addObserver(observer);
+        subject.notifyObservers(event);
+        subject.removeObserver(observer);
+        subject.notifyObservers(event);
+
+        verify(observer, times(1)).update(event);
+    }
+
+    @Test
+    void registeringTheSameObserverAgainDoesNotDuplicateStorage() {
+        publisher.addObserver(context.getBean(InAppNotificationObserver.class));
+        publisher.addObserver(context.getBean(InAppNotificationObserver.class));
+
+        publisher.sendToCitizen(25, null, "APPLICATION_APPROVED", "Approved");
+
+        verify(notifications, times(1)).save(any(Notification.class));
+        verify(deliveries, times(1)).saveAll(any());
+    }
+
+    @Test
+    void removingTheStorageObserverFailsDeliveryAndRollsBack() throws SQLException {
+        publisher.removeObserver(context.getBean(InAppNotificationObserver.class));
+
+        assertThrows(IllegalStateException.class,
+                () -> publisher.sendToCitizen(25, null, "APPLICATION_APPROVED", "Approved"));
+
+        verifyNoInteractions(notifications, deliveries);
+        verify(connection).rollback();
+        verify(connection, never()).commit();
+    }
+
+    @Test
+    void failureInAnAdditionalObserverRollsBackEarlierStorage() throws SQLException {
+        IllegalStateException failure = new IllegalStateException("Additional observer failed");
+        publisher.addObserver(event -> { throw failure; });
+
+        assertSame(failure, assertThrows(IllegalStateException.class,
+                () -> publisher.sendToCitizen(25, null, "APPLICATION_APPROVED", "Approved")));
+
+        verify(notifications).save(any(Notification.class));
+        verify(deliveries).saveAll(any());
+        verify(connection).rollback();
+        verify(connection, never()).commit();
+    }
+
+    @Test
+    void simultaneousPublicationsKeepTheirMessageAndDeliveryCountSeparate() throws Exception {
+        CountDownLatch bothObserversEntered = new CountDownLatch(2);
+        NotificationPublisher subject = new NotificationPublisher(List.of(event -> {
+            bothObserversEntered.countDown();
+            try {
+                if (!bothObserversEntered.await(5, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("Concurrent publication did not arrive.");
+                }
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(exception);
+            }
+            assertEquals(event.getUserIds().size() == 1 ? "First" : "Second", event.getMessage());
+            event.setDeliveredCount(event.getUserIds().size());
+        }));
+        var executor = Executors.newFixedThreadPool(2);
+        try {
+            var first = executor.submit(() -> subject.sendToUsers(List.of(25), null, "TEST", "First", false));
+            var second = executor.submit(() -> subject.sendToUsers(List.of(26, 27), null, "TEST", "Second", false));
+
+            assertEquals(1, first.get(10, TimeUnit.SECONDS).intValue());
+            assertEquals(2, second.get(10, TimeUnit.SECONDS).intValue());
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     private List<Integer> savedRecipientIds() {
@@ -168,7 +264,7 @@ class InAppNotificationObserverTests {
     }
 
     @TestConfiguration
-    @EnableTransactionManagement
+    @EnableTransactionManagement(proxyTargetClass = true)
     static class ObserverTestConfiguration {
 
         @Bean

@@ -1255,12 +1255,25 @@ flowchart LR
 | **Model-View-Controller (MVC)** | Presentation Tier | Spring `@Controller` classes (`UserController`, `CitizenApplicationController`), Thymeleaf HTML templates, and `org.springframework.ui.Model`. | Complete separation of HTTP routing, UI rendering, and business data. |
 | **Repository Pattern** | Persistence Tier | 23 interfaces extending `JpaRepository<T, ID>` (e.g., `AppointmentRepository`, `CitizenAccountRepository`). | Decouples business logic from low-level SQL/JDBC queries; enables mock testing. |
 | **Service Layer Pattern** | Business Logic Tier | Domain service classes annotated with `@Service` and `@Transactional` (e.g., `CitizenApplicationService`, `PaymentService`). | Centralizes business workflows, coordinates multiple repositories, and manages transaction rollbacks. |
-| **Observer Pattern** | In-app Notifications | `NotificationPublisher` publishes an `InAppNotificationEvent`; the registered `InAppNotificationObserver` calls the existing `NotificationService`. | Separates notification requests from storage while preserving synchronous delivery, transaction rollback, and recipient counts. |
+| **Observer Pattern** | In-app Notifications | Manual implementation: `NotificationSubject` defines registration/removal/notification, `NotificationObserver` defines `update()`, and `NotificationPublisher` owns the observer list and directly calls `InAppNotificationObserver`. | Separates notification requests from storage while preserving synchronous delivery, transaction rollback, and recipient counts. |
 | **Data Transfer Object (DTO)** | Controller & Service boundaries | Form DTOs (`NewNicApplicationForm`, `OfficerRegistrationDto`, `CardPaymentForm`) and view projections (`PaymentSummary`, `VerificationReviewDetails`). | Prevents over-posting attacks, decouples DB entities from UI forms, and encapsulates validation annotations. |
 | **Strategy / Policy Pattern** | Appointment Rescheduling | `BookingChangePolicy.java` defines algorithmic rules for checking if appointments can be modified (`canChange()`, `requireChangeAllowed()`). | Eliminates duplicate branching logic across controllers and services; allows rules to be tested in isolation. |
 | **Adapter Pattern** | SMS Gateway | `SmsSender` interface implemented by `PhoneSmsSender` connecting to external HTTP SMS APIs. | Insulates business logic from vendor-specific SMS gateway formats; allows easy replacement with Twilio or AWS SNS. |
 | **Controller Advice / Interceptor** | Cross-Cutting Concerns | `OfficerSessionIdentityAdvice.java` (`@ControllerAdvice`) injects staff session attributes; `DeletionFormToken.java` guards against CSRF/double-submit. | Eliminates boilerplate code across 21 controllers and standardizes session hydration. |
 | **Singleton Pattern** | Spring IOC Container | All `@Service`, `@Repository`, and `@Component` beans are managed as singletons by Spring's application context. | Optimizes memory consumption and coordinates shared state across concurrent HTTP threads. |
+
+### Manual Observer implementation (lecture mapping)
+
+| Lecture role | Project class | Responsibility |
+| :--- | :--- | :--- |
+| Subject | `NotificationSubject` | Declares `addObserver()`, `removeObserver()`, and `notifyObservers(event)`. |
+| Observer | `NotificationObserver` | Declares `update(event)`. |
+| ConcreteSubject | `NotificationPublisher` | Maintains registered observers, creates notification data, and calls each observer directly. |
+| ConcreteObserver | `InAppNotificationObserver` | Receives the data and calls `NotificationService` to store the notification and recipient rows. |
+
+The observer mechanism uses ordinary Java interfaces and a `CopyOnWriteArrayList`; it does not use `ApplicationEventPublisher` or `@EventListener`. Spring still supplies dependencies and database transactions. The publisher explicitly registers its initial observers through `addObserver()` in its constructor, and duplicate registration of the same observer is ignored.
+
+For example, application approval calls `sendToCitizen()`, which creates an `InAppNotificationEvent`, calls `notifyObservers(event)`, and receives the stored recipient count from the in-app observer. The event is passed as a method argument rather than stored as shared "latest message" state, so concurrent requests keep their notification details separate. Dispatch is synchronous; observer exceptions propagate so the surrounding workflow can roll back. If the storage observer does not handle the request, the publisher throws instead of reporting successful delivery.
 
 ---
 
