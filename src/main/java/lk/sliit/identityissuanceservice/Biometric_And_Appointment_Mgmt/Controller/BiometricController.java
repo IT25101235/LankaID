@@ -92,7 +92,7 @@ public class BiometricController {
     public String rescheduleMissed(
             @PathVariable String service,
             @PathVariable String reference,
-            @RequestParam(required = false) Integer slotId,
+            @RequestParam(required = false) String slotId,
             @RequestParam(required = false) String formToken,
             HttpSession session,
             RedirectAttributes redirectAttributes
@@ -103,7 +103,7 @@ public class BiometricController {
         try {
             BiometricFormToken.check(formToken, session);
             var details = appointmentService.rescheduleMissed(
-                    reference, serviceType, officerId(session), slotId);
+                    reference, serviceType, officerId(session), readSlotId(slotId));
             redirectAttributes.addFlashAttribute(
                     "biometricMessage",
                     "Missed appointment moved to " + details.appointment().getScheduledAt()
@@ -198,6 +198,19 @@ public class BiometricController {
                 : OfficerAccountService.PASSPORT_OFFICER;
         return requiredRole.equals(role) || OfficerAccountService.DIRECTOR.equals(role)
                 ? null : "redirect:/login";
+    }
+
+    /**
+     * Input validation: turns the chosen slot text into a number. A missing value is left for the service
+     * to report, and a value that is not a number gives the same friendly message instead of HTTP 400.
+     */
+    private Integer readSlotId(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return Integer.valueOf(value.trim());
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("Select an available date and time.");
+        }
     }
 
     private Integer officerId(HttpSession session) {

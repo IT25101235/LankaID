@@ -15,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -79,10 +81,15 @@ public class BiometricScheduleService {
         LocalDate from = startDate == null ? LocalDate.now() : startDate;
         LocalDate to = endDate == null ? from.plusMonths(1) : endDate;
         if (to.isBefore(from)) throw new IllegalArgumentException("The end date cannot be before the start date.");
-        return slots.findAllByServiceTypeAndCentreIdAndSlotDateBetweenOrderBySlotDateAscSlotTimeAsc(
-                        service, centreId, from, to)
-                .stream()
-                .map(slot -> toView(slot, centre))
+        List<BiometricAppointmentSlot> found = slots
+                .findAllByServiceTypeAndCentreIdAndSlotDateBetweenOrderBySlotDateAscSlotTimeAsc(
+                        service, centreId, from, to);
+        // One query counts the bookings of every slot, instead of one query per slot.
+        Map<Integer, Long> bookedBySlot = new HashMap<>();
+        appointments.countActiveBookingsBySlot(service, centreId, from, to)
+                .forEach(row -> bookedBySlot.put(row.getSlotId(), row.getBookedCount()));
+        return found.stream()
+                .map(slot -> toView(slot, centre, bookedBySlot.getOrDefault(slot.getSlotId(), 0L)))
                 .toList();
     }
 
@@ -294,14 +301,13 @@ public class BiometricScheduleService {
     }
 
     /** Converts a slot entity into the DTO shown on screen. */
-    // OOP - Polymorphism (method overloading): two toView methods share a name but take different
-    // parameters.
-    private BiometricSlotView toView(BiometricAppointmentSlot slot, Centre centre) {
-        return toView(slot, centre, null);
+    // OOP - Polymorphism (method overloading): the toView methods share a name but take different
+    // parameters. One counts the places of a single slot, the other uses a count that is already known.
+    private BiometricSlotView toView(BiometricAppointmentSlot slot, Centre centre, Integer excludedAppointmentId) {
+        return toView(slot, centre, bookedCount(slot.getSlotId(), excludedAppointmentId));
     }
 
-    private BiometricSlotView toView(BiometricAppointmentSlot slot, Centre centre, Integer excludedAppointmentId) {
-        long booked = bookedCount(slot.getSlotId(), excludedAppointmentId);
+    private BiometricSlotView toView(BiometricAppointmentSlot slot, Centre centre, long booked) {
         int remaining = Math.max(0, slot.getSlotCapacity() - (int) booked);
         boolean available = "Y".equals(slot.getIsAvailable());
         return new BiometricSlotView(

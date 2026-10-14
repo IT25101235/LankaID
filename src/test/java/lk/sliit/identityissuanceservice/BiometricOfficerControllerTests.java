@@ -64,6 +64,15 @@ class BiometricOfficerControllerTests {
     // ---- Reschedule a missed appointment ----
 
     @Test
+    void aSlotIdThatIsNotANumberGetsTheFriendlyMessageInsteadOfAnErrorPage() throws Exception {
+        mvc.perform(withToken(post("/officer/{service}/biometrics/{reference}/reschedule-missed", "nic", "BIO-1")
+                                .param("slotId", "abc"), OfficerAccountService.NIC_OFFICER))
+                .andExpect(redirectedUrl("/officer/nic/biometrics?reference=BIO-1"))
+                .andExpect(flash().attribute("biometricError", "Select an available date and time."));
+        verify(appointmentService, never()).rescheduleMissed(any(), any(), any(), any());
+    }
+
+    @Test
     void rescheduleMissedNeedsTheFormToken() throws Exception {
         mvc.perform(post("/officer/nic/biometrics/BIO-1/reschedule-missed")
                         .session(officer(OfficerAccountService.NIC_OFFICER)).param("formToken", "forged"))

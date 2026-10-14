@@ -4,6 +4,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.App
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +34,29 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
             and a.appointmentId <> :excludedId
             """)
     long countActiveBiometricSlotBookings(Integer slotId, Integer excludedId);
+
+    /** Booked places of one slot, read from {@link #countActiveBookingsBySlot}. */
+    interface SlotBookingCount {
+        Integer getSlotId();
+
+        Long getBookedCount();
+    }
+
+    /**
+     * Booked places for every slot of one centre and service in a date range, in a single query. It uses the
+     * same statuses as countActiveBiometricSlotBookings. Slots with no bookings are simply not returned.
+     */
+    @org.springframework.data.jpa.repository.Query("""
+            select a.biometricSlotId as slotId, count(a) as bookedCount from Appointment a
+            where a.appointmentStatus in ('CONFIRMED', 'CHECKED_IN', 'COMPLETED')
+            and a.biometricSlotId in (
+                select s.slotId from BiometricAppointmentSlot s
+                where s.serviceType = :serviceType and s.centreId = :centreId
+                and s.slotDate between :startDate and :endDate)
+            group by a.biometricSlotId
+            """)
+    List<SlotBookingCount> countActiveBookingsBySlot(
+            String serviceType, Integer centreId, LocalDate startDate, LocalDate endDate);
 
     List<Appointment> findAllByBiometricSlotIdAndAppointmentStatusIn(
             Integer biometricSlotId, Collection<String> statuses);
