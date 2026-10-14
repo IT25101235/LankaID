@@ -35,7 +35,4 @@ public interface BiometricAppointmentSlotRepository extends JpaRepository<Biomet
 
     List<BiometricAppointmentSlot> findAllByServiceTypeAndCentreIdAndSlotDateBetweenOrderBySlotDateAscSlotTimeAsc(
             String serviceType, Integer centreId, LocalDate startDate, LocalDate endDate);
-
-    List<BiometricAppointmentSlot> findAllByServiceTypeAndCentreIdAndSlotDateOrderBySlotTimeAsc(
-            String serviceType, Integer centreId, LocalDate slotDate);
 }
