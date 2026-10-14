@@ -1,12 +1,11 @@
 package lk.sliit.identityissuanceservice.Notification_Mgmt.Observer;
 
 import lk.sliit.identityissuanceservice.Notification_Mgmt.Service.NotificationService;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /** The ConcreteObserver: reacts to a notification request by using the existing service. */
 @Component
-public class InAppNotificationObserver {
+public class InAppNotificationObserver implements NotificationObserver {
 
     private final NotificationService notificationService;
 
@@ -14,10 +13,9 @@ public class InAppNotificationObserver {
         this.notificationService = notificationService;
     }
 
-    @EventListener
+    @Override
     public void update(InAppNotificationEvent event) {
-        // Spring registers this method as an observer. Keep it synchronous (no @Async)
-        // so the business update and notification still commit or roll back together.
+        // The subject calls this directly, so storage joins the business transaction.
         int delivered = notificationService.sendToUsers(
                 event.getUserIds(), event.getStaffId(), event.getType(),
                 event.getMessage(), event.isBroadcast()
