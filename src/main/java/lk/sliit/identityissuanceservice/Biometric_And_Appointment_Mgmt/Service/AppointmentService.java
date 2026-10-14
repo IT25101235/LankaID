@@ -5,6 +5,7 @@ import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.Offic
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Dto.BiometricSlotView;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Appointment;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.AppointmentCheckIn;
+import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.BiometricCollection;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Model.Centre;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentCheckInRepository;
 import lk.sliit.identityissuanceservice.Biometric_And_Appointment_Mgmt.Repository.AppointmentRepository;
@@ -23,7 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Service: core booking logic (book a slot, passes, officer queue, check-in, missed bookings). Sends
@@ -36,6 +44,7 @@ public class AppointmentService {
             List.of("CONFIRMED", "CHECKED_IN");
     private static final List<String> OFFICER_HISTORY_STATUSES =
             List.of("CONFIRMED", "CHECKED_IN", "COMPLETED");
+    private static final int LOOKUP_CHUNK_SIZE = 1000;
 
     // OOP - Composition and Encapsulation: the repositories and other services is a private final field
     // handed in through the constructor (dependency injection), so this class is loosely coupled and the
@@ -176,24 +185,16 @@ public class AppointmentService {
     /** READ: appointments waiting for the officer. */
     @Transactional(readOnly = true)
     public List<OfficerBiometricDetails> getOfficerQueue(String serviceType) {
-        return appointmentRepository
-                .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-                        "BIOMETRIC", OFFICER_ACTIVE_QUEUE_STATUSES)
-                .stream()
-                .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
-                .filter(java.util.Objects::nonNull)
-                .toList();
+        return buildOfficerDetails(appointmentRepository.findAllForServiceType(
+                "BIOMETRIC", OFFICER_ACTIVE_QUEUE_STATUSES, serviceType), serviceType);
     }
 
     /** READ: processed appointments, newest first. */
     @Transactional(readOnly = true)
     public List<OfficerBiometricDetails> getOfficerHistory(String serviceType) {
-        return appointmentRepository
-                .findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-                        "BIOMETRIC", OFFICER_HISTORY_STATUSES)
+        return buildOfficerDetails(appointmentRepository.findAllForServiceType(
+                        "BIOMETRIC", OFFICER_HISTORY_STATUSES, serviceType), serviceType)
                 .stream()
-                .map(appointment -> buildOfficerDetails(appointment, serviceType, false))
-                .filter(java.util.Objects::nonNull)
                 .sorted(java.util.Comparator
                         .comparing(
                                 (OfficerBiometricDetails details) -> details.application().getUpdatedAt(),
@@ -346,9 +347,7 @@ public class AppointmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Citizen details were not found."));
         Centre centre = centreRepository.findById(appointment.getCentreId())
                 .orElseThrow(() -> new IllegalArgumentException("Service centre was not found."));
-        String name = ((citizen.getGivenName() == null ? "" : citizen.getGivenName()) + " "
-                + (citizen.getFamilyName() == null ? "" : citizen.getFamilyName())).trim();
-        if (name.isBlank()) name = "Citizen #" + citizen.getUserId();
+        String name = applicantName(citizen);
 
         return new OfficerBiometricDetails(
                 appointment,
@@ -359,6 +358,69 @@ public class AppointmentService {
                 checkInRepository.existsById(appointment.getAppointmentId()),
                 biometricRepository.existsById(application.getApplicationId())
         );
+    }
+
+    /**
+     * Builds the officer rows for a whole list in a few batched queries, instead of five queries per
+     * appointment. Rows keep the order of the appointments passed in.
+     */
+    private List<OfficerBiometricDetails> buildOfficerDetails(List<Appointment> appointments, String serviceType) {
+        if (appointments.isEmpty()) return List.of();
+        Map<Integer, CitizenApplication> applications = indexById(
+                findAllInChunks(appointments.stream().map(Appointment::getApplicationId).toList(),
+                        applicationRepository::findAllById),
+                CitizenApplication::getApplicationId);
+        Map<Integer, CitizenAccount> citizens = indexById(
+                findAllInChunks(applications.values().stream().map(CitizenApplication::getCitizenId).toList(),
+                        citizenRepository::findAllById),
+                CitizenAccount::getUserId);
+        Map<Integer, Centre> centres = indexById(
+                findAllInChunks(appointments.stream().map(Appointment::getCentreId).toList(),
+                        centreRepository::findAllById),
+                Centre::getCentreId);
+        Set<Integer> checkedInIds = new HashSet<>();
+        findAllInChunks(appointments.stream().map(Appointment::getAppointmentId).toList(),
+                checkInRepository::findAllById).forEach(checkIn -> checkedInIds.add(checkIn.getAppointmentId()));
+        Set<Integer> collectedIds = new HashSet<>();
+        findAllInChunks(applications.keySet(), biometricRepository::findAllById)
+                .forEach(collection -> collectedIds.add(collection.getApplicationId()));
+
+        List<OfficerBiometricDetails> rows = new ArrayList<>();
+        for (Appointment appointment : appointments) {
+            CitizenApplication application = applications.get(appointment.getApplicationId());
+            if (application == null || !serviceType.equals(application.getServiceType())) continue;
+            CitizenAccount citizen = citizens.get(application.getCitizenId());
+            if (citizen == null) throw new IllegalArgumentException("Citizen details were not found.");
+            Centre centre = centres.get(appointment.getCentreId());
+            if (centre == null) throw new IllegalArgumentException("Service centre was not found.");
+            rows.add(new OfficerBiometricDetails(
+                    appointment, application, citizen, centre, applicantName(citizen),
+                    checkedInIds.contains(appointment.getAppointmentId()),
+                    collectedIds.contains(application.getApplicationId())));
+        }
+        return rows;
+    }
+
+    /** Looks ids up in chunks, so a long list stays under SQL Server's limit of about 2,100 parameters. */
+    private static <T> List<T> findAllInChunks(Collection<Integer> ids, Function<List<Integer>, List<T>> finder) {
+        List<Integer> distinct = ids.stream().filter(java.util.Objects::nonNull).distinct().toList();
+        List<T> found = new ArrayList<>();
+        for (int from = 0; from < distinct.size(); from += LOOKUP_CHUNK_SIZE) {
+            found.addAll(finder.apply(distinct.subList(from, Math.min(from + LOOKUP_CHUNK_SIZE, distinct.size()))));
+        }
+        return found;
+    }
+
+    private static <T> Map<Integer, T> indexById(List<T> items, Function<T, Integer> idOf) {
+        Map<Integer, T> byId = new HashMap<>();
+        items.forEach(item -> byId.put(idOf.apply(item), item));
+        return byId;
+    }
+
+    private static String applicantName(CitizenAccount citizen) {
+        String name = ((citizen.getGivenName() == null ? "" : citizen.getGivenName()) + " "
+                + (citizen.getFamilyName() == null ? "" : citizen.getFamilyName())).trim();
+        return name.isBlank() ? "Citizen #" + citizen.getUserId() : name;
     }
 
     /** Ownership check for applications. */

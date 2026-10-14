@@ -51,11 +51,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     boolean existsByReferenceNo(String referenceNo);
 
-    /** Officer queue and history lists. */
-    List<Appointment> findAllByAppointmentTypeAndAppointmentStatusInOrderByScheduledAtAsc(
-            String appointmentType,
-            Collection<String> statuses
-    );
+    /** Officer queue and history lists for one document service, filtered in the database. */
+    @org.springframework.data.jpa.repository.Query("""
+            select a from Appointment a where a.appointmentType = :appointmentType
+            and a.appointmentStatus in :statuses
+            and a.applicationId in (select c.applicationId from CitizenApplication c where c.serviceType = :serviceType)
+            order by a.scheduledAt asc
+            """)
+    List<Appointment> findAllForServiceType(
+            String appointmentType, Collection<String> statuses, String serviceType);
 
     long countByCentreIdAndScheduledAtBetweenAndAppointmentStatusIn(
             Integer centreId,
