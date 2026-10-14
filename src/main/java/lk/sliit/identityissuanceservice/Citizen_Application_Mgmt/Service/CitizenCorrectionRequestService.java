@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
+// Reads the latest officer correction message for citizen applications.
 public class CitizenCorrectionRequestService {
 
     private static final String CORRECTION_REQUIRED = "CORRECTION_REQUIRED";
@@ -18,6 +19,7 @@ public class CitizenCorrectionRequestService {
     private final CitizenApplicationRepository applicationRepository;
     private final ApplicationReviewRepository reviewRepository;
 
+    // Stores the repositories used to find applications and reviews.
     public CitizenCorrectionRequestService(
             CitizenApplicationRepository applicationRepository,
             ApplicationReviewRepository reviewRepository
@@ -27,6 +29,7 @@ public class CitizenCorrectionRequestService {
     }
 
     @Transactional(readOnly = true)
+    // Returns the latest correction message for one citizen-owned application.
     public String getCurrentCorrectionMessage(Integer citizenId, Integer applicationId) {
         return applicationRepository
                 .findByApplicationIdAndCitizenId(applicationId, citizenId)
@@ -35,6 +38,7 @@ public class CitizenCorrectionRequestService {
     }
 
     @Transactional(readOnly = true)
+    // Returns current correction messages indexed by application ID.
     public Map<Integer, String> getCurrentCorrectionMessages(Integer citizenId) {
         Map<Integer, String> messages = new LinkedHashMap<>();
         applicationRepository.findAllByCitizenIdOrderByCreatedAtDesc(citizenId).stream()
@@ -48,6 +52,7 @@ public class CitizenCorrectionRequestService {
         return messages;
     }
 
+    // Extracts a non-empty message from the latest correction review.
     private String currentCorrectionMessage(CitizenApplication application) {
         if (!CORRECTION_REQUIRED.equals(application.getCurrentStatus())) {
             return null;

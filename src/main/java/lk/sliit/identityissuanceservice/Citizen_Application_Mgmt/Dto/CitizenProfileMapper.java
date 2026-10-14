@@ -10,9 +10,11 @@ import java.util.Locale;
 /** Shared mapping for the citizen fields used by both application workflows. */
 public final class CitizenProfileMapper {
 
+    // Prevents construction because this class only contains shared helper methods.
     private CitizenProfileMapper() {
     }
 
+    // Copies stored citizen details into an application form.
     public static void copyToForm(CitizenAccount citizen, CitizenProfileForm form) {
         form.setFamilyName(citizen.getFamilyName());
         form.setGivenName(citizen.getGivenName());
@@ -42,6 +44,7 @@ public final class CitizenProfileMapper {
         form.setCitizenshipIssuedDate(toLocalDate(citizen.getCitizenshipIssuedDate()));
     }
 
+    // Copies cleaned form values back into the citizen profile.
     public static void updateCitizen(CitizenAccount citizen, CitizenProfileForm form) {
         citizen.setFamilyName(clean(form.getFamilyName()));
         citizen.setGivenName(clean(form.getGivenName()));
@@ -84,6 +87,7 @@ public final class CitizenProfileMapper {
         );
     }
 
+    // Validates address and dual-citizenship fields that depend on other choices.
     public static void validateConditionalFields(CitizenProfileForm form) {
         // Validate the posted hierarchy on the server; browser dropdowns are not a trust boundary.
         BirthLocationReference.validate(form);
@@ -109,19 +113,23 @@ public final class CitizenProfileMapper {
         }
     }
 
+    // Returns null for empty text and a trimmed value otherwise.
     public static String blankToNull(String value) {
         String cleaned = clean(value);
         return cleaned == null || cleaned.isEmpty() ? null : cleaned;
     }
 
+    // Converts a date to midnight for database storage.
     public static LocalDateTime atStartOfDay(LocalDate date) {
         return date == null ? null : date.atStartOfDay();
     }
 
+    // Removes outer spaces while preserving null values.
     private static String clean(String value) {
         return value == null ? null : value.trim();
     }
 
+    // Converts a stored date-time value back to a form date.
     private static LocalDate toLocalDate(LocalDateTime dateTime) {
         return dateTime == null ? null : dateTime.toLocalDate();
     }

@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+// Provides standard database operations for NIC-specific application details.
 public interface NicApplicationRepository extends JpaRepository<NicApplication, Integer> {
 }

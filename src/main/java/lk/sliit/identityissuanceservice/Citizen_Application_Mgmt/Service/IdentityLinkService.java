@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Service
+// Links a citizen account to an existing government identity record.
 public class IdentityLinkService {
     public static final String REQUEST_SUBJECT = "Existing document verification";
     private static final String PURPOSE = "IDENTITY_LINK";
@@ -34,6 +35,7 @@ public class IdentityLinkService {
             "CORRECTION_REQUIRED", "RESUBMITTED", "APPROVED", "PAYMENT_PENDING", "APPOINTMENT_BOOKED",
             "BIOMETRIC_COLLECTED", "PROCESSING");
 
+    // Repositories and helpers needed by OTP and officer verification.
     private final CitizenAccountRepository citizens;
     private final UserAccountRepository users;
     private final GovernmentIdentityRecordRepository records;
@@ -43,6 +45,7 @@ public class IdentityLinkService {
     private final SmsOtpService otp;
     private final NotificationPublisher notificationPublisher;
 
+    // Stores the dependencies used by the identity-link workflow.
     public IdentityLinkService(CitizenAccountRepository citizens, UserAccountRepository users,
             GovernmentIdentityRecordRepository records, SupportRequestRepository requests,
             StaffAccountRepository staff, CitizenApplicationRepository applications,
@@ -59,6 +62,7 @@ public class IdentityLinkService {
 
     // Save the claim even if sending the SMS later fails. The citizen can then ask an officer for help.
     @Transactional
+    // Creates a support request for an identity record that needs verification.
     public SupportRequest requestVerification(Integer citizenId, String type, String number, String explanation) {
         requireVerifiedEmail(citizenId);
         CitizenAccount citizen = lockedCitizen(citizenId);
@@ -91,23 +95,27 @@ public class IdentityLinkService {
     }
 
     @Transactional(readOnly = true)
+    // Returns the citizen's most recent identity-verification request.
     public SupportRequest latestRequest(Integer citizenId) {
         return requests.findFirstByCitizenIdAndRequestTypeAndSubjectOrderByRequestIdDesc(
                 citizenId, "CONTACT", REQUEST_SUBJECT).orElse(null);
     }
 
     @Transactional(readOnly = true)
+    // Checks whether the citizen account already has a government record.
     public boolean isLinked(Integer citizenId) {
         return citizens.findById(citizenId).orElseThrow().getGovernmentRecordId() != null;
     }
 
     @Transactional(readOnly = true)
+    // Allows an authorized officer to view a government identity record.
     public GovernmentIdentityRecord reviewRecord(Integer officerId, Integer recordId) {
         requireOfficer(officerId);
         return records.findById(recordId).orElseThrow(() -> new IllegalArgumentException("Government record was not found."));
     }
 
     @Transactional(readOnly = true)
+    // Sends an OTP to the phone stored against the selected government record.
     public void sendCode(Integer citizenId, String type, String number, HttpSession session) {
         requireVerifiedEmail(citizenId);
         synchronized (session) {
@@ -132,6 +140,7 @@ public class IdentityLinkService {
     }
 
     @Transactional
+    // Verifies the OTP and links the pending identity record to the citizen.
     public void verifyCode(Integer citizenId, String code, HttpSession session) {
         requireVerifiedEmail(citizenId);
         synchronized (session) {
@@ -155,6 +164,7 @@ public class IdentityLinkService {
     }
 
     @Transactional
+    // Saves an officer's approval or rejection of an identity request.
     public void review(Integer requestId, Integer officerId, boolean approve, Integer recordId, String notes) {
         requireOfficer(officerId);
         String reason = clean(notes);
@@ -174,16 +184,19 @@ public class IdentityLinkService {
         finishRequest(request, officerId, (approve ? "APPROVED. Government record ID: " + recordId : "NOT APPROVED") + "\n" + reason);
     }
 
+    // Returns a masked version of the phone used by the current OTP request.
     public String maskedPhone(Integer citizenId, HttpSession session) {
         PendingLink pending = pending(citizenId, session);
         return pending == null ? null : "+94 ** *** " + pending.phone().substring(pending.phone().length() - 4);
     }
 
+    // Removes any pending OTP and identity-link data from the session.
     public void cancelCode(HttpSession session) {
         otp.clear(PURPOSE, session);
         session.removeAttribute(SESSION_KEY);
     }
 
+    // Finds an NIC or passport government record from the supplied number.
     private GovernmentIdentityRecord findDocument(String type, String number) {
         String value = clean(number).toUpperCase(Locale.ROOT);
         if (value.isEmpty() || value.length() > 20) throw new IllegalArgumentException("Enter your document number or request officer verification.");
@@ -196,6 +209,7 @@ public class IdentityLinkService {
         return matches.get(0);
     }
 
+    // Ensures the government record is active and not linked to another citizen.
     private void requireAvailableRecord(GovernmentIdentityRecord record, Integer citizenId) {
         if ("CANCELLED".equalsIgnoreCase(record.getIdentityStatus())
                 || (clean(record.getNicNo()).isEmpty() && clean(record.getPassportNo()).isEmpty())
@@ -204,6 +218,7 @@ public class IdentityLinkService {
         }
     }
 
+    // Links the locked citizen and government records and updates related applications.
     private void link(CitizenAccount citizen, GovernmentIdentityRecord record) {
         if (citizen.getGovernmentRecordId() != null) {
             throw new IllegalArgumentException("This account already has a government record. Contact support for corrections.");
@@ -218,6 +233,7 @@ public class IdentityLinkService {
         // Do not overwrite the government contact with the citizen's current login contact.
     }
 
+    // Closes a support request with the officer's response and completion details.
     private void finishRequest(SupportRequest request, Integer officerId, String response) {
         request.setHandledByStaffId(officerId);
         request.setResponse(response);
@@ -228,6 +244,7 @@ public class IdentityLinkService {
                 "Your identity verification request has been updated. View Citizen Support for the decision.");
     }
 
+    // Finds a verification request and ensures it has not already been closed.
     private SupportRequest openRequest(Integer id) {
         SupportRequest request = requests.findById(id).orElseThrow(() -> new IllegalArgumentException("Request was not found."));
         if (!REQUEST_SUBJECT.equals(request.getSubject()) || !"CONTACT".equals(request.getRequestType())
@@ -237,6 +254,7 @@ public class IdentityLinkService {
         return request;
     }
 
+    // Requires the citizen's registered email to be verified before identity linking.
     private void requireVerifiedEmail(Integer citizenId) {
         UserAccount user = users.findById(citizenId).orElseThrow(() -> new IllegalArgumentException("Sign in again."));
         if (!"Y".equals(user.getEmailVerified()) || !"ACTIVE".equals(user.getAccountStatus())) {
@@ -244,6 +262,7 @@ public class IdentityLinkService {
         }
     }
 
+    // Allows only active CSR or director accounts to review identity records.
     private void requireOfficer(Integer officerId) {
         StaffAccount officer = staff.findById(officerId)
                 .orElseThrow(() -> new IllegalArgumentException("Officer account was not found."));
@@ -254,24 +273,30 @@ public class IdentityLinkService {
         }
     }
 
+    // Loads and locks the citizen record for a link update.
     private CitizenAccount lockedCitizen(Integer id) {
         return citizens.findByIdForIdentityLink(id).orElseThrow(() -> new IllegalArgumentException("Citizen account was not found."));
     }
 
+    // Loads and locks the government identity record for a link update.
     private GovernmentIdentityRecord lockedRecord(Integer id) {
         return records.findByIdForIdentityLink(id).orElseThrow(() -> new IllegalArgumentException("Government record was not found."));
     }
 
+    // Reads the pending session link and confirms that it belongs to the citizen.
     private PendingLink pending(Integer citizenId, HttpSession session) {
         Object value = session.getAttribute(SESSION_KEY);
         return value instanceof PendingLink pending && Objects.equals(pending.citizenId(), citizenId) ? pending : null;
     }
 
+    // Converts null input to an empty string and removes outer spaces.
     private String clean(String value) { return value == null ? "" : value.trim(); }
 
+    // Checks whether a support request has reached a final state.
     private boolean isClosed(SupportRequest request) {
         return "RESOLVED".equals(request.getRequestStatus()) || "CLOSED".equals(request.getRequestStatus());
     }
 
+    // Stores the identity details waiting for OTP verification in the session.
     private record PendingLink(Integer citizenId, Integer recordId, Integer requestId, String phone) implements Serializable { }
 }

@@ -11,8 +11,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
+// Holds the citizen details shared by NIC and passport application forms.
 public class CitizenProfileForm {
 
+    // Personal, birth, address, citizenship, and declaration form values.
     @NotBlank(message = "Family name is required.")
     @Size(max = 100, message = "Family name cannot exceed 100 characters.")
     @Pattern(regexp = "[\\p{L}][\\p{L}\\p{M} ]*", message = "Family name must contain only letters and spaces.")
@@ -109,56 +111,108 @@ public class CitizenProfileForm {
     @AssertTrue(message = "You must accept the declaration.")
     private boolean declarationAccepted;
 
+    // Returns the family name.
     public String getFamilyName() { return familyName; }
+    // Sets the family name.
     public void setFamilyName(String familyName) { this.familyName = familyName; }
+    // Returns the given name.
     public String getGivenName() { return givenName; }
+    // Sets the given name.
     public void setGivenName(String givenName) { this.givenName = givenName; }
+    // Returns the surname.
     public String getSurname() { return surname; }
+    // Sets the surname.
     public void setSurname(String surname) { this.surname = surname; }
+    // Returns the selected gender.
     public String getGender() { return gender; }
+    // Sets the selected gender.
     public void setGender(String gender) { this.gender = gender; }
+    // Returns the civil status.
     public String getCivilStatus() { return civilStatus; }
+    // Sets the civil status.
     public void setCivilStatus(String civilStatus) { this.civilStatus = civilStatus; }
+    // Returns the occupation.
     public String getOccupation() { return occupation; }
+    // Sets the occupation.
     public void setOccupation(String occupation) { this.occupation = occupation; }
+    // Returns the date of birth.
     public LocalDate getDateOfBirth() { return dateOfBirth; }
+    // Sets the date of birth.
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    // Returns the birth certificate number.
     public String getBirthCertificateNo() { return birthCertificateNo; }
+    // Sets the birth certificate number.
     public void setBirthCertificateNo(String birthCertificateNo) { this.birthCertificateNo = birthCertificateNo; }
+    // Returns the birth place.
     public String getBirthPlace() { return birthPlace; }
+    // Sets the birth place.
     public void setBirthPlace(String birthPlace) { this.birthPlace = birthPlace; }
+    // Returns the birth division.
     public String getBirthDivision() { return birthDivision; }
+    // Sets the birth division.
     public void setBirthDivision(String birthDivision) { this.birthDivision = birthDivision; }
+    // Returns the birth district.
     public String getBirthDistrict() { return birthDistrict; }
+    // Sets the birth district.
     public void setBirthDistrict(String birthDistrict) { this.birthDistrict = birthDistrict; }
+    // Returns the country of birth.
     public String getCountryOfBirth() { return countryOfBirth; }
+    // Sets the country of birth.
     public void setCountryOfBirth(String countryOfBirth) { this.countryOfBirth = countryOfBirth; }
+    // Returns the birth city.
     public String getBirthCity() { return birthCity; }
+    // Sets the birth city.
     public void setBirthCity(String birthCity) { this.birthCity = birthCity; }
+    // Returns the permanent house number.
     public String getPermanentHouseNo() { return permanentHouseNo; }
+    // Sets the permanent house number.
     public void setPermanentHouseNo(String permanentHouseNo) { this.permanentHouseNo = permanentHouseNo; }
+    // Returns the permanent street.
     public String getPermanentStreet() { return permanentStreet; }
+    // Sets the permanent street.
     public void setPermanentStreet(String permanentStreet) { this.permanentStreet = permanentStreet; }
+    // Returns the permanent city.
     public String getPermanentCity() { return permanentCity; }
+    // Sets the permanent city.
     public void setPermanentCity(String permanentCity) { this.permanentCity = permanentCity; }
+    // Returns the permanent postal code.
     public String getPermanentPostalCode() { return permanentPostalCode; }
+    // Sets the permanent postal code.
     public void setPermanentPostalCode(String permanentPostalCode) { this.permanentPostalCode = permanentPostalCode; }
+    // Returns whether the postal address matches the permanent address.
     public boolean isPostalSameAsPermanent() { return postalSameAsPermanent; }
+    // Sets whether the postal address matches the permanent address.
     public void setPostalSameAsPermanent(boolean postalSameAsPermanent) { this.postalSameAsPermanent = postalSameAsPermanent; }
+    // Returns the postal house number.
     public String getPostalHouseNo() { return postalHouseNo; }
+    // Sets the postal house number.
     public void setPostalHouseNo(String postalHouseNo) { this.postalHouseNo = postalHouseNo; }
+    // Returns the postal street.
     public String getPostalStreet() { return postalStreet; }
+    // Sets the postal street.
     public void setPostalStreet(String postalStreet) { this.postalStreet = postalStreet; }
+    // Returns the postal city.
     public String getPostalCity() { return postalCity; }
+    // Sets the postal city.
     public void setPostalCity(String postalCity) { this.postalCity = postalCity; }
+    // Returns the postal address code.
     public String getPostalPostalCode() { return postalPostalCode; }
+    // Sets the postal address code.
     public void setPostalPostalCode(String postalPostalCode) { this.postalPostalCode = postalPostalCode; }
+    // Returns whether the citizen has dual citizenship.
     public boolean isDualCitizen() { return dualCitizen; }
+    // Sets whether the citizen has dual citizenship.
     public void setDualCitizen(boolean dualCitizen) { this.dualCitizen = dualCitizen; }
+    // Returns the citizenship certificate number.
     public String getCitizenshipCertificateNo() { return citizenshipCertificateNo; }
+    // Sets the citizenship certificate number.
     public void setCitizenshipCertificateNo(String citizenshipCertificateNo) { this.citizenshipCertificateNo = citizenshipCertificateNo; }
+    // Returns the citizenship certificate issue date.
     public LocalDate getCitizenshipIssuedDate() { return citizenshipIssuedDate; }
+    // Sets the citizenship certificate issue date.
     public void setCitizenshipIssuedDate(LocalDate citizenshipIssuedDate) { this.citizenshipIssuedDate = citizenshipIssuedDate; }
+    // Returns whether the declaration was accepted.
     public boolean isDeclarationAccepted() { return declarationAccepted; }
+    // Sets whether the declaration was accepted.
     public void setDeclarationAccepted(boolean declarationAccepted) { this.declarationAccepted = declarationAccepted; }
 }

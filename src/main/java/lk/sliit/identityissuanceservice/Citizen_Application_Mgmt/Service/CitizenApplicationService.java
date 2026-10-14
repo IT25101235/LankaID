@@ -44,16 +44,20 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
+// Handles the business rules for new NIC and passport applications.
 public class CitizenApplicationService {
 
+    // Values used to identify the supported services and application kind.
     public static final String NIC = "NIC";
     public static final String PASSPORT = "PASSPORT";
     public static final String NEW = "NEW";
 
+    // Statuses that mean a citizen already has an application in progress.
     private static final Set<String> ACTIVE_STATUSES = Set.of(
             "DRAFT", "SUBMITTED", "UNDER_REVIEW", "CORRECTION_REQUIRED", "RESUBMITTED",
             "APPROVED", "PAYMENT_PENDING", "APPOINTMENT_BOOKED", "BIOMETRIC_COLLECTED", "PROCESSING"
     );
+    // Document types and file rules accepted by the upload workflow.
     private static final Set<String> ALLOWED_DOCUMENT_TYPES = Set.of(
             "PHOTOGRAPH", "BIRTH_CERTIFICATE", "POLICE_REPORT",
             "NIC_PROOF", "CITIZENSHIP_CERTIFICATE"
@@ -61,6 +65,7 @@ public class CitizenApplicationService {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "jpg", "jpeg", "png");
     private static final long MAX_FILE_SIZE = 5L * 1024L * 1024L;
 
+    // Repositories and collaborators are supplied by Spring through the constructor.
     private final UserAccountRepository userRepository;
     private final CitizenAccountRepository citizenRepository;
     private final GovernmentIdentityRecordRepository governmentRepository;
@@ -71,6 +76,7 @@ public class CitizenApplicationService {
     private final NotificationPublisher notificationPublisher;
     private final Path uploadRoot;
 
+    // Stores the dependencies used by the application workflow.
     public CitizenApplicationService(
             UserAccountRepository userRepository,
             CitizenAccountRepository citizenRepository,
@@ -93,6 +99,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Checks the government registry and returns the citizen's NIC and passport eligibility.
     public CitizenEligibilityDto getEligibility(Integer citizenId) {
         UserAccount user = findUser(citizenId);
         CitizenAccount citizen = findCitizen(citizenId);
@@ -117,6 +124,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Creates a pre-filled form for a first-time NIC application.
     public NewNicApplicationForm prepareNewNicForm(Integer citizenId) {
         checkNewEligibility(getEligibility(citizenId), NIC);
         checkForActiveApplication(citizenId, NIC);
@@ -126,6 +134,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Creates a pre-filled form for a first-time passport application.
     public NewPassportApplicationForm prepareNewPassportForm(Integer citizenId) {
         CitizenEligibilityDto eligibility = getEligibility(citizenId);
         checkNewEligibility(eligibility, PASSPORT);
@@ -139,6 +148,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Loads an NIC application that an officer returned for correction.
     public NewNicApplicationForm prepareNewNicCorrection(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getCorrectionApplication(citizenId, applicationId, NIC);
         if (!NEW.equals(application.getApplicationKind())) {
@@ -151,6 +161,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Loads a saved NIC draft for editing.
     public NewNicApplicationForm prepareNewNicDraftEdit(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getEditableNewApplication(citizenId, applicationId);
         if (!NIC.equals(application.getServiceType()) || !"DRAFT".equals(application.getCurrentStatus())) {
@@ -163,6 +174,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Loads a passport application that an officer returned for correction.
     public NewPassportApplicationForm prepareNewPassportCorrection(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getCorrectionApplication(citizenId, applicationId, PASSPORT);
         if (!NEW.equals(application.getApplicationKind())) {
@@ -181,6 +193,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Loads a saved passport draft for editing.
     public NewPassportApplicationForm prepareNewPassportDraftEdit(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getEditableNewApplication(citizenId, applicationId);
         if (!PASSPORT.equals(application.getServiceType()) || !"DRAFT".equals(application.getCurrentStatus())) {
@@ -199,6 +212,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Validates the form and creates a new NIC application draft.
     public CitizenApplication createNewNicApplication(Integer citizenId, NewNicApplicationForm form) {
         checkNewEligibility(getEligibility(citizenId), NIC);
         validateNicAge(form.getDateOfBirth());
@@ -217,6 +231,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Validates the form and creates a new passport application draft.
     public CitizenApplication createNewPassportApplication(
             Integer citizenId,
             NewPassportApplicationForm form) {
@@ -242,6 +257,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Applies citizen changes to an editable NIC draft or correction.
     public CitizenApplication updateNewNicApplication(
             Integer citizenId,
             Integer applicationId,
@@ -260,6 +276,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Applies citizen and passport changes to an editable passport application.
     public CitizenApplication updateNewPassportApplication(
             Integer citizenId,
             Integer applicationId,
@@ -287,11 +304,13 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Returns all applications owned by the citizen, newest first.
     public List<CitizenApplication> getCitizenApplications(Integer citizenId) {
         return applicationRepository.findAllByCitizenIdOrderByCreatedAtDesc(citizenId);
     }
 
     @Transactional(readOnly = true)
+    // Checks whether the citizen already has an active application for the service.
     public boolean hasActiveApplication(Integer citizenId, String serviceType) {
         return applicationRepository.existsByCitizenIdAndServiceTypeAndCurrentStatusIn(
                 citizenId,
@@ -301,6 +320,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Returns a citizen-owned new application, including submitted applications.
     public CitizenApplication getNewApplication(Integer citizenId, Integer applicationId) {
         CitizenApplication application = findOwnedApplication(citizenId, applicationId);
         if (!NEW.equals(application.getApplicationKind())) {
@@ -310,6 +330,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Returns a citizen-owned new application only when it can still be edited.
     public CitizenApplication getEditableNewApplication(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getNewApplication(citizenId, applicationId);
         requireEditable(application);
@@ -317,16 +338,19 @@ public class CitizenApplicationService {
     }
 
     @Transactional(readOnly = true)
+    // Returns the NIC-specific details when they exist.
     public Optional<NicApplication> getNicApplication(Integer applicationId) {
         return nicRepository.findById(applicationId);
     }
 
     @Transactional(readOnly = true)
+    // Returns the passport-specific details when they exist.
     public Optional<PassportApplication> getPassportApplication(Integer applicationId) {
         return passportRepository.findById(applicationId);
     }
 
     @Transactional(readOnly = true)
+    // Returns the documents belonging to a citizen-owned new application.
     public List<ApplicationDocument> getNewDocuments(Integer citizenId, Integer applicationId) {
         CitizenApplication application = getNewApplication(citizenId, applicationId);
         requireEditable(application);
@@ -334,6 +358,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Deletes a citizen-owned draft and its stored document files.
     public CitizenApplication deleteDraftApplication(Integer citizenId, Integer applicationId) {
         CitizenApplication application = findOwnedApplication(citizenId, applicationId);
         if (!"DRAFT".equals(application.getCurrentStatus())) {
@@ -357,6 +382,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Adds or replaces a valid document in an editable application.
     public void uploadNewDocument(
             Integer citizenId,
             Integer applicationId,
@@ -367,6 +393,7 @@ public class CitizenApplicationService {
     }
 
     @Transactional
+    // Checks the application and documents before moving it into the verification queue.
     public CitizenApplication submitNewApplication(Integer citizenId, Integer applicationId) {
         applicationRepository.findEditableForUpdate(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Only drafts or corrected applications can be submitted."));
@@ -391,6 +418,7 @@ public class CitizenApplicationService {
 
     /** Shared by new applications, renewals and replacements. Submitted evidence is retained. */
     @Transactional
+    // Deletes one unreviewed document from an unsubmitted draft.
     public CitizenApplication deleteDraftDocument(Integer citizenId, Integer applicationId, Integer documentId) {
         CitizenApplication application = applicationRepository.findEditableForUpdate(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Only documents in your unsubmitted draft can be deleted."));
@@ -420,6 +448,7 @@ public class CitizenApplicationService {
         return application;
     }
 
+    // Returns the required evidence list for the application's service type.
     public List<String> requiredNewDocumentTypes(CitizenApplication application) {
         List<String> required = NIC.equals(application.getServiceType())
                 ? List.of("PHOTOGRAPH", "BIRTH_CERTIFICATE")
@@ -476,6 +505,7 @@ public class CitizenApplicationService {
         }
     }
 
+    // Creates and saves the common application record in DRAFT status.
     private CitizenApplication createBaseApplication(Integer citizenId, String serviceType) {
         CitizenApplication application = new CitizenApplication();
         application.setApplicationNo(generateApplicationNo(serviceType));
@@ -487,6 +517,7 @@ public class CitizenApplicationService {
         return applicationRepository.save(application);
     }
 
+    // Rejects a new application when an identity conflict or existing document is found.
     private void checkNewEligibility(CitizenEligibilityDto eligibility, String serviceType) {
         if (eligibility.isIdentityConflict()) {
             throw new IllegalArgumentException(
@@ -501,6 +532,7 @@ public class CitizenApplicationService {
         }
     }
 
+    // Prevents the citizen from starting a duplicate active application.
     private void checkForActiveApplication(Integer citizenId, String serviceType) {
         if (hasActiveApplication(citizenId, serviceType)) {
             throw new IllegalArgumentException(
@@ -510,12 +542,14 @@ public class CitizenApplicationService {
         }
     }
 
+    // Enforces the minimum age for an NIC application.
     private void validateNicAge(LocalDate dateOfBirth) {
         if (dateOfBirth == null || dateOfBirth.isAfter(LocalDate.now().minusYears(15))) {
             throw new IllegalArgumentException("You must be at least 15 years old to apply for an NIC.");
         }
     }
 
+    // Checks whether the correct citizen or parent NIC proof was supplied.
     private void validatePassportProof(
             CitizenEligibilityDto eligibility,
             String nicProofNo,
@@ -544,6 +578,7 @@ public class CitizenApplicationService {
         }
     }
 
+    // Validates, stores, and records an uploaded application document.
     private void saveDocument(
             CitizenApplication application,
             String documentType,
@@ -590,6 +625,7 @@ public class CitizenApplicationService {
         documentRepository.save(document);
     }
 
+    // Rejects changes after submission unless an officer requested a correction.
     private void requireEditable(CitizenApplication application) {
         if (!"DRAFT".equals(application.getCurrentStatus())
                 && !"CORRECTION_REQUIRED".equals(application.getCurrentStatus())) {
@@ -599,6 +635,7 @@ public class CitizenApplicationService {
         }
     }
 
+    // Removes uploaded files that belonged to a deleted draft.
     private void deleteDraftFiles(
             CitizenApplication application,
             List<ApplicationDocument> documents
@@ -625,6 +662,7 @@ public class CitizenApplicationService {
         }
     }
 
+    // Verifies required documents and changes the application to submitted or resubmitted.
     private void submitWhenDocumentsComplete(
             CitizenApplication application,
             List<String> requiredTypes) {
@@ -669,6 +707,7 @@ public class CitizenApplicationService {
                 .toList();
     }
 
+    // Publishes the correct citizen notification after submission.
     private void sendSubmissionNotification(CitizenApplication application) {
         boolean resubmitted = "RESUBMITTED".equals(application.getCurrentStatus());
         notificationPublisher.sendToCitizen(
@@ -682,6 +721,7 @@ public class CitizenApplicationService {
         );
     }
 
+    // Returns an owned application only when it matches the service and needs correction.
     private CitizenApplication getCorrectionApplication(
             Integer citizenId,
             Integer applicationId,
@@ -697,6 +737,7 @@ public class CitizenApplicationService {
         return application;
     }
 
+    // Checks document type, presence, size, and file extension.
     private void validateDocument(String type, MultipartFile file) {
         if (!ALLOWED_DOCUMENT_TYPES.contains(type)) {
             throw new IllegalArgumentException("Select a valid document type.");
@@ -712,6 +753,7 @@ public class CitizenApplicationService {
         }
     }
 
+    // Generates a unique public application number for the selected service.
     private String generateApplicationNo(String serviceType) {
         String applicationNo;
         do {
@@ -721,6 +763,7 @@ public class CitizenApplicationService {
         return applicationNo;
     }
 
+    // Finds a safe government-record match and reports ambiguous or invalid matches.
     private IdentityMatch findGovernmentIdentity(UserAccount user, CitizenAccount citizen) {
         // Keep the established link when a citizen later changes their contact details.
         if (citizen.getGovernmentRecordId() != null) {
@@ -755,26 +798,31 @@ public class CitizenApplicationService {
         return new IdentityMatch(record, false);
     }
 
+    // Finds an application only when it belongs to the given citizen.
     private CitizenApplication findOwnedApplication(Integer citizenId, Integer applicationId) {
         return applicationRepository.findByApplicationIdAndCitizenId(applicationId, citizenId)
                 .orElseThrow(() -> new IllegalArgumentException("Application was not found."));
     }
 
+    // Finds the user account or reports that it is missing.
     private UserAccount findUser(Integer userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Citizen user account was not found."));
     }
 
+    // Finds the citizen profile or reports that it is missing.
     private CitizenAccount findCitizen(Integer userId) {
         return citizenRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Citizen account was not found."));
     }
 
+    // Extracts a lower-case extension from an uploaded filename.
     private String fileExtension(String filename) {
         if (filename == null || !filename.contains(".")) return "";
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
     }
 
+    // Keeps the registry match and conflict result together.
     private record IdentityMatch(GovernmentIdentityRecord record, boolean conflict) {
     }
 }

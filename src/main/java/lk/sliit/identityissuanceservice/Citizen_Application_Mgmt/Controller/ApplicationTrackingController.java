@@ -9,8 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+// Builds the page where a citizen tracks submitted and draft applications.
 public class ApplicationTrackingController {
 
+    // Services used to combine application, correction, and delivery information.
     private final CitizenApplicationService applicationService;
     private final DocumentDeliveryService deliveryService;
     private final CitizenCorrectionRequestService correctionRequestService;

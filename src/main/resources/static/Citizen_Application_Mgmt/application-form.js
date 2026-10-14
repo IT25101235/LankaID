@@ -1,36 +1,44 @@
 // Shared by the NIC and passport forms, including renewals and corrections.
+// Runs once when the form script is loaded.
 (() => {
   const form = document.querySelector('form[data-application-form]');
   if (!form) return;
 
+  // Adds live letter-only validation to each name field.
   ['familyName', 'givenName', 'surname'].forEach(name => {
     const input = form.elements.namedItem(name);
     if (!input) return;
+    // Updates the browser validation message while the citizen types.
     input.addEventListener('input', () => {
       const valid = !input.value || /^\p{L}[\p{L}\p{M} ]*$/u.test(input.value);
       input.setCustomValidity(valid ? '' : 'Enter letters and spaces only; remove numbers and symbols.');
     });
   });
 
+  // Adds five-digit validation to both postal-code fields.
   ['permanentPostalCode', 'postalPostalCode'].forEach(name => {
     const input = form.elements.namedItem(name);
     if (!input) return;
+    // Updates the postal-code validation message while the citizen types.
     input.addEventListener('input', () => {
       input.setCustomValidity(!input.value || /^[0-9]{5}$/.test(input.value)
         ? '' : 'Enter exactly 5 digits for the postal code.');
     });
   });
 
+  // Shows or hides an optional section and updates its input requirements.
   function setSection(id, active) {
     const section = document.getElementById(id);
     if (!section) return;
     section.classList.toggle('hidden', !active);
+    // Applies the enabled and required state to every input in the section.
     section.querySelectorAll('input').forEach(input => {
       input.disabled = !active;
       input.required = active;
     });
   }
 
+  // Refreshes optional sections from the current checkbox choices.
   function updateSections() {
     const samePostal = document.getElementById('samePostal');
     const dualCitizen = document.getElementById('dualCitizen');
@@ -141,7 +149,9 @@
   });
 
   const today = new Date();
+  // Formats a JavaScript date for an HTML date input.
   const localDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  // Prevents form date fields from accepting future dates.
   form.querySelectorAll('input[type="date"]').forEach(input => { input.max = localDate(today); });
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);

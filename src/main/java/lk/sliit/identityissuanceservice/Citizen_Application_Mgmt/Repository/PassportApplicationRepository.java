@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+// Provides standard database operations for passport-specific application details.
 public interface PassportApplicationRepository extends JpaRepository<PassportApplication, Integer> {
 }

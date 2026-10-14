@@ -11,7 +11,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Locale;
 
 @Controller
+// Handles deletion of documents from editable application drafts.
 public class DraftDocumentController {
+    // Application service that checks ownership and performs the deletion.
     private final CitizenApplicationService applications;
 
     /** Receives the application service used to validate and delete draft documents. */

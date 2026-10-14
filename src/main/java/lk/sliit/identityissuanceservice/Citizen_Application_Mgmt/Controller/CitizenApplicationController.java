@@ -21,8 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+// Handles the citizen dashboard and new NIC or passport application pages.
 public class CitizenApplicationController {
 
+    // Services used to manage applications, delivery details, and correction messages.
     private final CitizenApplicationService applicationService;
     private final DocumentDeliveryService deliveryService;
     private final CitizenCorrectionRequestService correctionRequestService;

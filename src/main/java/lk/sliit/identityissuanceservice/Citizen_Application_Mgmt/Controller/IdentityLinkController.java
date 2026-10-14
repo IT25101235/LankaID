@@ -17,7 +17,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.UUID;
 
 @Controller
+// Handles citizen OTP linking and officer review of existing identity records.
 public class IdentityLinkController {
+    // Services used for identity records and related support requests.
     private final IdentityLinkService identityService;
     private final CitizenSupportService supportService;
 
