@@ -41,7 +41,8 @@ public class BiometricScheduleController {
             Model model
     ) {
         String serviceType = serviceType(service);
-        if (!canAccess(session, serviceType)) return "redirect:/login";
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
         YearMonth selectedMonth = readMonth(month);
         var centres = schedules.getCentres();
         Integer selectedCentre = centreId;
@@ -81,7 +82,8 @@ public class BiometricScheduleController {
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
-        if (!canAccess(session, serviceType)) return "redirect:/login";
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
         try {
             BiometricFormToken.check(formToken, session);
             int days = schedules.publishDateRange(serviceType, centreId, startDate, endDate,
@@ -107,7 +109,8 @@ public class BiometricScheduleController {
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
-        if (!canAccess(session, serviceType)) return "redirect:/login";
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
         try {
             BiometricFormToken.check(formToken, session);
             int days = schedules.closeDateRange(serviceType, centreId, startDate, endDate);
@@ -135,7 +138,8 @@ public class BiometricScheduleController {
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
-        if (!canAccess(session, serviceType)) return "redirect:/login";
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
         try {
             BiometricFormToken.check(formToken, session);
             schedules.updateSlot(serviceType, slotId, capacity, available);
@@ -162,7 +166,8 @@ public class BiometricScheduleController {
             RedirectAttributes redirect
     ) {
         String serviceType = serviceType(service);
-        if (!canAccess(session, serviceType)) return "redirect:/login";
+        String accessResult = checkAccess(session, serviceType);
+        if (accessResult != null) return accessResult;
         try {
             DeletionFormToken.check(deleteToken, session);
             schedules.deleteUnusedSlot(serviceType, slotId);
@@ -183,12 +188,14 @@ public class BiometricScheduleController {
         return "redirect:/officer/" + service + "/appointments/schedule";
     }
 
-    /** Role check: the director or the officer for this service. */
-    private boolean canAccess(HttpSession session, String serviceType) {
+    /** Role check: an admin goes to the admin page; only the director or this service's officer may continue. */
+    private String checkAccess(HttpSession session, String serviceType) {
+        if (session.getAttribute("loggedInAdminId") != null) return "redirect:/officer/admin";
         Object role = session.getAttribute("loggedInOfficerRole");
-        return OfficerAccountService.DIRECTOR.equals(role)
+        boolean allowed = OfficerAccountService.DIRECTOR.equals(role)
                 || ("NIC".equals(serviceType) && OfficerAccountService.NIC_OFFICER.equals(role))
                 || ("PASSPORT".equals(serviceType) && OfficerAccountService.PASSPORT_OFFICER.equals(role));
+        return allowed ? null : "redirect:/login";
     }
 
     private Integer officerId(HttpSession session) {
